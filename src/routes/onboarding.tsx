@@ -63,6 +63,7 @@ function Onboarding() {
   const navigate = useNavigate();
   const setProfile = useAppStore((s) => s.setProfile);
   const parseMemoryFn = useServerFn(parseMemory);
+  const apiKey = useAppStore((s) => s.apiKey);
   const suggestFollowUpsFn = useServerFn(suggestFollowUpQuestions);
   const applyFollowUpsFn = useServerFn(applyFollowUpAnswers);
 

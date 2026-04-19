@@ -215,6 +215,7 @@ function TabRail({ activeTab, onTab }: { activeTab: Tab; onTab: (tab: Tab) => vo
 function QuickGenerate() {
   const profile = useAppStore((state) => state.profile)!;
   const addResume = useAppStore((state) => state.addResume);
+  const apiKey = useAppStore((state) => state.apiKey);
   const navigate = useNavigate();
   const generateFn = useServerFn(generateResume);
 
@@ -232,7 +233,7 @@ function QuickGenerate() {
 
     try {
       const { resume } = await generateFn({
-        data: { profile, jobTarget: jobTarget.trim() },
+        data: { apiKey, profile, jobTarget: jobTarget.trim() },
       });
 
       const saved: SavedResume = {
@@ -339,6 +340,7 @@ function QuickGenerate() {
 
 function CareerExplorer() {
   const profile = useAppStore((state) => state.profile)!;
+  const apiKey = useAppStore((state) => state.apiKey);
   const suggestFn = useServerFn(suggestCareerPaths);
   const [paths, setPaths] = useState<CareerPath[] | null>(null);
   const [loading, setLoading] = useState(false);
@@ -346,7 +348,7 @@ function CareerExplorer() {
   const load = async () => {
     setLoading(true);
     try {
-      const { paths } = await suggestFn({ data: { profile } });
+      const { paths } = await suggestFn({ data: { apiKey, profile } });
       setPaths(paths);
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Failed to load career paths.");
@@ -406,6 +408,7 @@ function CareerExplorer() {
 function CareerPathCard({ path, index }: { path: CareerPath; index: number }) {
   const profile = useAppStore((state) => state.profile)!;
   const addResume = useAppStore((state) => state.addResume);
+  const apiKey = useAppStore((state) => state.apiKey);
   const navigate = useNavigate();
   const generateFn = useServerFn(generateResume);
   const [loading, setLoading] = useState(false);
@@ -414,7 +417,7 @@ function CareerPathCard({ path, index }: { path: CareerPath; index: number }) {
     setLoading(true);
     try {
       const { resume } = await generateFn({
-        data: { profile, jobTarget: path.title },
+        data: { apiKey, profile, jobTarget: path.title },
       });
 
       const saved: SavedResume = {

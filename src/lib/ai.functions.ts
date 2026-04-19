@@ -30,21 +30,31 @@ async function callGateway(opts: {
   tools?: ToolDef[];
   toolChoice?: { type: "function"; function: { name: string } };
   model?: string;
+  apiKey?: string;
 }) {
-  const apiKey = process.env.LOVABLE_API_KEY;
-  if (!apiKey) throw new Error("LOVABLE_API_KEY is not configured");
+  let endpoint = GATEWAY_URL;
+  let authKey = process.env.LOVABLE_API_KEY;
+  let modelName = opts.model ?? DEFAULT_MODEL;
+
+  if (opts.apiKey) {
+    endpoint = "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions";
+    authKey = opts.apiKey;
+    modelName = "gemini-3.1-flash-lite-preview"; // Use user model
+  }
+
+  if (!authKey) throw new Error("API Key is not configured");
 
   const body: Record<string, unknown> = {
-    model: opts.model ?? DEFAULT_MODEL,
+    model: modelName,
     messages: opts.messages,
   };
   if (opts.tools) body.tools = opts.tools;
   if (opts.toolChoice) body.tool_choice = opts.toolChoice;
 
-  const res = await fetch(GATEWAY_URL, {
+  const res = await fetch(endpoint, {
     method: "POST",
     headers: {
-      Authorization: `Bearer ${apiKey}`,
+      Authorization: `Bearer ${authKey}`,
       "Content-Type": "application/json",
     },
     body: JSON.stringify(body),
@@ -165,12 +175,12 @@ const profileSchema = {
 
 export const parseMemory = createServerFn({ method: "POST" })
   .inputValidator(
-    z.object({
+    z.object({ apiKey: z.string().optional(), 
       memory: z.string().min(20).max(50000),
     }),
   )
   .handler(async ({ data }): Promise<{ profile: Profile }> => {
-    const json = await callGateway({
+    const json = await callGateway({ apiKey: data.apiKey, 
       messages: [
         {
           role: "system",
@@ -263,13 +273,13 @@ const resumeSchema = {
 
 export const generateResume = createServerFn({ method: "POST" })
   .inputValidator(
-    z.object({
+    z.object({ apiKey: z.string().optional(), 
       profile: z.any(),
       jobTarget: z.string().min(2).max(5000),
     }),
   )
   .handler(async ({ data }): Promise<{ resume: ResumeData }> => {
-    const json = await callGateway({
+    const json = await callGateway({ apiKey: data.apiKey, 
       messages: [
         {
           role: "system",
@@ -331,9 +341,9 @@ const profileWithPhotoSchema = {
 };
 
 export const suggestFollowUpQuestions = createServerFn({ method: "POST" })
-  .inputValidator(z.object({ profile: z.any() }))
+  .inputValidator(z.object({ apiKey: z.string().optional(),  profile: z.any() }))
   .handler(async ({ data }): Promise<{ questions: FollowUpQuestion[] }> => {
-    const json = await callGateway({
+    const json = await callGateway({ apiKey: data.apiKey, 
       messages: [
         {
           role: "system",
@@ -364,10 +374,10 @@ export const suggestFollowUpQuestions = createServerFn({ method: "POST" })
 
 export const applyFollowUpAnswers = createServerFn({ method: "POST" })
   .inputValidator(
-    z.object({
+    z.object({ apiKey: z.string().optional(), 
       profile: z.any(),
       answers: z.array(
-        z.object({
+        z.object({ 
           questionId: z.string(),
           field: z.string(),
           answer: z.string(),
@@ -376,7 +386,7 @@ export const applyFollowUpAnswers = createServerFn({ method: "POST" })
     }),
   )
   .handler(async ({ data }): Promise<{ profile: Profile }> => {
-    const json = await callGateway({
+    const json = await callGateway({ apiKey: data.apiKey, 
       messages: [
         {
           role: "system",
@@ -408,7 +418,7 @@ export const applyFollowUpAnswers = createServerFn({ method: "POST" })
 
 export const improveBullet = createServerFn({ method: "POST" })
   .inputValidator(
-    z.object({
+    z.object({ apiKey: z.string().optional(), 
       bullet: z.string().min(2).max(2000),
       jobTitle: z.string().max(200).optional(),
       mode: z.enum(["impact", "technical", "quantify", "concise"]).default("impact"),
@@ -421,7 +431,7 @@ export const improveBullet = createServerFn({ method: "POST" })
       quantify: "Add plausible metrics if inferable; otherwise sharpen specificity.",
       concise: "Make it more concise — under 18 words.",
     };
-    const json = await callGateway({
+    const json = await callGateway({ apiKey: data.apiKey, 
       messages: [
         {
           role: "system",
@@ -468,9 +478,9 @@ const careerPathsSchema = {
 };
 
 export const suggestCareerPaths = createServerFn({ method: "POST" })
-  .inputValidator(z.object({ profile: z.any() }))
+  .inputValidator(z.object({ apiKey: z.string().optional(),  profile: z.any() }))
   .handler(async ({ data }): Promise<{ paths: CareerPath[] }> => {
-    const json = await callGateway({
+    const json = await callGateway({ apiKey: data.apiKey, 
       messages: [
         {
           role: "system",
@@ -498,13 +508,13 @@ export const suggestCareerPaths = createServerFn({ method: "POST" })
 
 export const tailorToJob = createServerFn({ method: "POST" })
   .inputValidator(
-    z.object({
+    z.object({ apiKey: z.string().optional(), 
       resume: z.any(),
       jobDescription: z.string().min(20).max(10000),
     }),
   )
   .handler(async ({ data }): Promise<{ resume: ResumeData }> => {
-    const json = await callGateway({
+    const json = await callGateway({ apiKey: data.apiKey, 
       messages: [
         {
           role: "system",

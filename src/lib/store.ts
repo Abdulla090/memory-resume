@@ -6,11 +6,13 @@ interface AppState {
   profile: Profile | null;
   resumes: SavedResume[];
   preferences: { defaultTemplate: TemplateId };
+  apiKey?: string;
   setProfile: (profile: Profile | null) => void;
   addResume: (resume: SavedResume) => void;
   updateResume: (id: string, patch: Partial<SavedResume>) => void;
   deleteResume: (id: string) => void;
   setDefaultTemplate: (t: TemplateId) => void;
+  setApiKey: (key: string) => void;
   reset: () => void;
 }
 
@@ -20,6 +22,7 @@ export const useAppStore = create<AppState>()(
       profile: null,
       resumes: [],
       preferences: { defaultTemplate: "minimal" },
+      apiKey: "",
       setProfile: (profile) => set({ profile }),
       addResume: (resume) => set((s) => ({ resumes: [resume, ...s.resumes] })),
       updateResume: (id, patch) =>
@@ -30,6 +33,7 @@ export const useAppStore = create<AppState>()(
         set((s) => ({ resumes: s.resumes.filter((r) => r.id !== id) })),
       setDefaultTemplate: (t) =>
         set((s) => ({ preferences: { ...s.preferences, defaultTemplate: t } })),
+      setApiKey: (key) => set({ apiKey: key }),
       reset: () => set({ profile: null, resumes: [] }),
     }),
     {

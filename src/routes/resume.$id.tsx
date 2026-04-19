@@ -33,6 +33,7 @@ function ResumeEditor() {
   const navigate = useNavigate();
   const resume = useAppStore((state) => state.resumes.find((item) => item.id === id));
   const updateResume = useAppStore((state) => state.updateResume);
+  const apiKey = useAppStore((state) => state.apiKey);
   const improveFn = useServerFn(improveBullet);
   const tailorFn = useServerFn(tailorToJob);
 
@@ -85,7 +86,7 @@ function ResumeEditor() {
 
     try {
       const { bullet } = await improveFn({
-        data: { bullet: original, jobTitle: data.title, mode },
+        data: { apiKey, bullet: original, jobTitle: data.title, mode },
       });
       updateAchievement(experienceIndex, achievementIndex, bullet);
       toast.success("Bullet updated", { id: "improve" });
@@ -103,7 +104,7 @@ function ResumeEditor() {
     setTailoring(true);
     try {
       const { resume: tailored } = await tailorFn({
-        data: { resume: data, jobDescription },
+        data: { apiKey, resume: data, jobDescription },
       });
       updateData(tailored);
       toast.success("Resume tailored to job description");
