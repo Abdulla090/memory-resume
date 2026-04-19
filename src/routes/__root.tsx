@@ -59,7 +59,7 @@ export const Route = createRootRoute({
       },
       {
         rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap",
+        href: "https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;0,9..40,800;1,9..40,400&family=Nunito:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap",
       },
     ],
   }),
@@ -70,7 +70,7 @@ export const Route = createRootRoute({
 
 function RootShell({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className="dark">
+    <html lang="en">
       <head>
         <HeadContent />
       </head>
@@ -87,13 +87,14 @@ function RootComponent() {
     <>
       <Outlet />
       <Toaster
-        theme="dark"
+        theme="light"
         position="bottom-right"
         toastOptions={{
           style: {
-            background: "oklch(0.18 0.028 270)",
-            border: "1px solid oklch(0.26 0.03 270)",
-            color: "oklch(0.98 0.005 270)",
+            background: "oklch(0.985 0.004 95)",
+            border: "1px solid oklch(0.89 0.008 95)",
+            color: "oklch(0.23 0.02 228)",
+            boxShadow: "0 20px 40px -24px rgba(18, 24, 38, 0.18)",
           },
         }}
       />

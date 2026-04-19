@@ -3,6 +3,7 @@ export interface Profile {
   location: string;
   email?: string;
   phone?: string;
+  photoUrl?: string;
   languages: string[];
   summary: string;
   skills: {
@@ -42,21 +43,28 @@ export interface EducationItem {
   year: string;
 }
 
+export interface SkillItem {
+  name: string;
+  level: number;
+}
+
 export interface ResumeData {
   name: string;
   title: string;
   email?: string;
   phone?: string;
+  photoUrl?: string;
   location?: string;
   summary: string;
   experience: ExperienceItem[];
   projects: ProjectItem[];
   education: EducationItem[];
   skills: string[];
+  skillItems?: SkillItem[];
   certifications: string[];
 }
 
-export type TemplateId = "minimal" | "executive";
+export type TemplateId = "minimal" | "executive" | "noir" | "apex" | "slate" | "cipher" | "monolith" | "pinnacle" | "avant" | "vanguard" | "nexus" | "orbit" | "metric" | "prism";
 
 export interface SavedResume {
   id: string;
@@ -74,4 +82,20 @@ export interface CareerPath {
   skillGaps: string[];
   salaryRange: string;
   timeToTransition: string;
+}
+
+export interface FollowUpQuestion {
+  id: string;
+  field: string;
+  question: string;
+  helperText: string;
+  inputType: "text" | "select";
+  options: string[];
+  placeholder?: string;
+}
+
+export interface FollowUpAnswer {
+  questionId: string;
+  field: string;
+  answer: string;
 }

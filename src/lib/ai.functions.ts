@@ -1,9 +1,15 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
-import type { Profile, ResumeData, CareerPath } from "./types";
+import type {
+  CareerPath,
+  FollowUpQuestion,
+  Profile,
+  ResumeData,
+} from "./types";
+import { optimizeResumeForOnePage } from "./resume-utils";
 
 const GATEWAY_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
-const DEFAULT_MODEL = "google/gemini-3-flash-preview";
+const DEFAULT_MODEL = "google/gemini-3.1-flash-lite-preview";
 
 interface GatewayMessage {
   role: "system" | "user" | "assistant";
@@ -82,6 +88,7 @@ const profileSchema = {
     location: { type: "string" },
     email: { type: "string" },
     phone: { type: "string" },
+    photoUrl: { type: "string" },
     languages: { type: "array", items: { type: "string" } },
     summary: { type: "string" },
     skills: {
@@ -197,6 +204,7 @@ const resumeSchema = {
     title: { type: "string" },
     email: { type: "string" },
     phone: { type: "string" },
+    photoUrl: { type: "string" },
     location: { type: "string" },
     summary: { type: "string" },
     experience: {
@@ -286,7 +294,114 @@ export const generateResume = createServerFn({ method: "POST" })
       toolChoice: { type: "function", function: { name: "save_resume" } },
     });
     const resume = extractToolArgs<ResumeData>(json);
-    return { resume };
+    return { resume: optimizeResumeForOnePage(resume) };
+  });
+
+// ───────────────── follow-up questions ─────────────────
+
+const followUpQuestionsSchema = {
+  type: "object",
+  properties: {
+    questions: {
+      type: "array",
+      items: {
+        type: "object",
+        properties: {
+          id: { type: "string" },
+          field: { type: "string" },
+          question: { type: "string" },
+          helperText: { type: "string" },
+          inputType: { type: "string", enum: ["text", "select"] },
+          options: { type: "array", items: { type: "string" } },
+          placeholder: { type: "string" },
+        },
+        required: ["id", "field", "question", "helperText", "inputType", "options"],
+      },
+    },
+  },
+  required: ["questions"],
+};
+
+const profileWithPhotoSchema = {
+  ...profileSchema,
+  properties: {
+    ...profileSchema.properties,
+    photoUrl: { type: "string" },
+  },
+};
+
+export const suggestFollowUpQuestions = createServerFn({ method: "POST" })
+  .inputValidator(z.object({ profile: z.any() }))
+  .handler(async ({ data }): Promise<{ questions: FollowUpQuestion[] }> => {
+    const json = await callGateway({
+      messages: [
+        {
+          role: "system",
+          content:
+            "You are a career intake assistant. Review this extracted profile and identify missing, unclear, or weak resume-critical information. Ask at most 4 short, high-value follow-up questions. Use select inputs when you can offer strong options. Use text input when the answer must be free-form. Do not ask for information already clearly present. Prioritize current title, contact details, location clarity, career target, strongest achievements, portfolio/photo, and missing education or project context.",
+        },
+        {
+          role: "user",
+          content: `Profile:\n${JSON.stringify(data.profile)}`,
+        },
+      ],
+      tools: [
+        {
+          type: "function",
+          function: {
+            name: "save_follow_up_questions",
+            description: "Save the follow-up questions needed to complete the profile.",
+            parameters: followUpQuestionsSchema,
+          },
+        },
+      ],
+      toolChoice: { type: "function", function: { name: "save_follow_up_questions" } },
+    });
+
+    const { questions } = extractToolArgs<{ questions: FollowUpQuestion[] }>(json);
+    return { questions: questions.slice(0, 4) };
+  });
+
+export const applyFollowUpAnswers = createServerFn({ method: "POST" })
+  .inputValidator(
+    z.object({
+      profile: z.any(),
+      answers: z.array(
+        z.object({
+          questionId: z.string(),
+          field: z.string(),
+          answer: z.string(),
+        }),
+      ),
+    }),
+  )
+  .handler(async ({ data }): Promise<{ profile: Profile }> => {
+    const json = await callGateway({
+      messages: [
+        {
+          role: "system",
+          content:
+            "You are a career profile completion assistant. Update the existing profile using the user's follow-up answers. Preserve all confirmed facts, fill missing fields from the answers, and improve the profile summary only when the new information materially helps. Never invent companies, dates, metrics, or credentials. If a photo URL is provided, store it in photoUrl.",
+        },
+        {
+          role: "user",
+          content: `Existing profile:\n${JSON.stringify(data.profile)}\n\nFollow-up answers:\n${JSON.stringify(data.answers)}`,
+        },
+      ],
+      tools: [
+        {
+          type: "function",
+          function: {
+            name: "save_completed_profile",
+            description: "Save the completed profile after applying follow-up answers.",
+            parameters: profileWithPhotoSchema,
+          },
+        },
+      ],
+      toolChoice: { type: "function", function: { name: "save_completed_profile" } },
+    });
+
+    return { profile: extractToolArgs<Profile>(json) };
   });
 
 // ───────────────── improveBullet ─────────────────
@@ -413,5 +528,5 @@ export const tailorToJob = createServerFn({ method: "POST" })
       ],
       toolChoice: { type: "function", function: { name: "save_resume" } },
     });
-    return { resume: extractToolArgs<ResumeData>(json) };
+    return { resume: optimizeResumeForOnePage(extractToolArgs<ResumeData>(json)) };
   });

@@ -1,29 +1,29 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { useServerFn } from "@tanstack/react-start";
 import {
-  Sparkles,
   Briefcase,
   Compass,
-  Files,
-  Wand2,
-  TrendingUp,
-  Trash2,
   ExternalLink,
+  Files,
   Loader2,
   RefreshCw,
+  Sparkles,
+  Target,
+  Trash2,
+  Wand2,
 } from "lucide-react";
 import { toast } from "sonner";
-import { useAppStore } from "@/lib/store";
 import { generateResume, suggestCareerPaths } from "@/lib/ai.functions";
+import { useAppStore } from "@/lib/store";
 import type { CareerPath, SavedResume, TemplateId } from "@/lib/types";
 
 export const Route = createFileRoute("/dashboard")({
   head: () => ({
     meta: [
       { title: "Dashboard — MemoryCV" },
-      { name: "description", content: "Generate, explore, and manage your AI-tailored resumes." },
+      { name: "description", content: "Generate resumes, explore adjacent roles, and manage saved outputs." },
     ],
   }),
   component: Dashboard,
@@ -33,125 +33,208 @@ type Tab = "generate" | "explore" | "resumes";
 
 function Dashboard() {
   const navigate = useNavigate();
-  const profile = useAppStore((s) => s.profile);
+  const profile = useAppStore((state) => state.profile);
+  const resumes = useAppStore((state) => state.resumes);
   const [tab, setTab] = useState<Tab>("generate");
 
   useEffect(() => {
     if (!profile) navigate({ to: "/onboarding" });
-  }, [profile, navigate]);
+  }, [navigate, profile]);
 
   if (!profile) return null;
 
+  const firstName = profile.name.split(" ")[0];
+  const activeSummary =
+    tab === "generate"
+      ? "Generate a role-specific resume from the profile you just built."
+      : tab === "explore"
+        ? "Review adjacent paths and turn any of them into a tailored resume."
+        : "Open, revisit, or delete locally saved resume drafts.";
+
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      <header className="border-b border-border">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-          <Link to="/" className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg gradient-bg">
-              <Sparkles className="h-4 w-4 text-primary-foreground" />
+    <div className="page-shell bg-background text-foreground">
+      <header className="saas-nav">
+        <div className="app-frame px-4 sm:px-6">
+          <div className="flex h-16 items-center justify-between">
+            <Link to="/" className="flex items-center gap-2 cursor-pointer" id="nav-logo">
+              <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center shadow-sm">
+                <Sparkles className="w-4 h-4 text-white" />
+              </div>
+              <span className="text-[1rem] font-bold tracking-tight text-slate-900">MemoryCV</span>
+            </Link>
+
+            <div className="hidden items-center gap-2 md:flex">
+              <Link to="/templates" className="px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 rounded-lg hover:bg-slate-50 transition-colors">
+                Templates
+              </Link>
+              <Link to="/onboarding" className="px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 rounded-lg hover:bg-slate-50 transition-colors">
+                Re-import
+              </Link>
             </div>
-            <span className="font-display text-lg font-semibold">MemoryCV</span>
-          </Link>
-          <Link to="/templates" className="text-sm text-muted-foreground hover:text-foreground">
-            Templates
-          </Link>
+          </div>
         </div>
       </header>
 
-      <div className="mx-auto grid max-w-7xl gap-6 px-6 py-8 lg:grid-cols-[280px_1fr]">
-        <aside className="space-y-4">
-          <ProfileCard />
-          <NavTabs tab={tab} onTab={setTab} />
+      <main className="app-frame grid gap-6 px-4 pb-16 pt-3 sm:px-6 lg:grid-cols-[320px_1fr] lg:px-8">
+        <aside className="grid gap-6 lg:sticky lg:top-6 lg:h-fit">
+          <ProfileRail />
+          <TabRail activeTab={tab} onTab={setTab} />
         </aside>
 
-        <main>
+        <section className="grid gap-6">
+          <div className="surface-panel rounded-[2.25rem] p-6 sm:p-8">
+            <div className="grid gap-6 lg:grid-cols-[0.95fr_1.05fr]">
+              <div>
+                <div className="eyebrow">Workspace overview</div>
+                <h1 className="mt-4 text-4xl font-semibold tracking-tight sm:text-5xl">
+                  {firstName}, keep the resume work sharp and controlled.
+                </h1>
+                <p className="mt-4 max-w-[56ch] text-base leading-7 text-muted-foreground">
+                  {activeSummary}
+                </p>
+              </div>
+
+              <div className="grid gap-4 sm:grid-cols-3">
+                <StatCard label="Profile skills" value={profile.skills.technical.length + profile.skills.tools.length} note="structured inputs" />
+                <StatCard label="Experience items" value={profile.experience.length} note="used for resume generation" />
+                <StatCard label="Saved resumes" value={resumes.length} note="stored locally" />
+              </div>
+            </div>
+          </div>
+
           <AnimatePresence mode="wait">
-            {tab === "generate" && <QuickGenerate key="g" />}
-            {tab === "explore" && <CareerExplorer key="c" />}
-            {tab === "resumes" && <MyResumes key="r" />}
+            {tab === "generate" && <QuickGenerate key="generate" />}
+            {tab === "explore" && <CareerExplorer key="explore" />}
+            {tab === "resumes" && <MyResumes key="resumes" />}
           </AnimatePresence>
-        </main>
-      </div>
+        </section>
+      </main>
     </div>
   );
 }
 
-function ProfileCard() {
-  const profile = useAppStore((s) => s.profile)!;
+function ProfileRail() {
+  const profile = useAppStore((state) => state.profile)!;
+
   return (
-    <div className="rounded-2xl border border-border bg-surface/60 p-5 backdrop-blur">
-      <div className="flex items-center gap-3">
-        <div
-          className="flex h-12 w-12 items-center justify-center rounded-full text-lg font-semibold text-primary-foreground"
-          style={{ background: "var(--gradient-primary)" }}
-        >
-          {profile.name.split(" ").map((n) => n[0]).join("").slice(0, 2)}
+    <div className="surface-panel rounded-[2.25rem] p-6">
+      <div className="flex items-start justify-between gap-4">
+        <div className="flex items-center gap-4">
+          <div className="flex h-14 w-14 items-center justify-center rounded-[1.3rem] bg-foreground text-base font-semibold text-background">
+            {profile.name
+              .split(" ")
+              .map((part) => part[0])
+              .join("")
+              .slice(0, 2)}
+          </div>
+          <div>
+            <div className="text-xl font-semibold tracking-tight">{profile.name}</div>
+            <div className="text-sm text-muted-foreground">{profile.location}</div>
+          </div>
         </div>
-        <div>
-          <div className="font-semibold">{profile.name}</div>
-          <div className="text-xs text-muted-foreground">{profile.location}</div>
+        <div className="rounded-full bg-secondary px-3 py-1 font-mono text-xs text-muted-foreground">
+          profile
         </div>
       </div>
-      <p className="mt-4 line-clamp-3 text-xs text-muted-foreground">{profile.summary}</p>
-      <div className="mt-4 flex flex-wrap gap-1">
-        {profile.skills.technical.slice(0, 6).map((s) => (
-          <span
-            key={s}
-            className="rounded-full border border-border bg-surface px-2 py-0.5 text-[10px]"
-          >
-            {s}
-          </span>
-        ))}
+
+      <p className="mt-5 text-sm leading-6 text-muted-foreground">{profile.summary}</p>
+
+      <div className="hairline-top mt-6 pt-5">
+        <div className="eyebrow">Primary skills</div>
+        <div className="mt-3 flex flex-wrap gap-2">
+          {profile.skills.technical.slice(0, 7).map((skill) => (
+            <span key={skill} className="rounded-full bg-secondary px-3 py-1.5 text-xs text-foreground">
+              {skill}
+            </span>
+          ))}
+        </div>
       </div>
     </div>
   );
 }
 
-function NavTabs({ tab, onTab }: { tab: Tab; onTab: (t: Tab) => void }) {
-  const items: { id: Tab; label: string; icon: typeof Briefcase }[] = [
-    { id: "generate", label: "Quick Generate", icon: Wand2 },
-    { id: "explore", label: "Career Explorer", icon: Compass },
-    { id: "resumes", label: "My Resumes", icon: Files },
+function TabRail({ activeTab, onTab }: { activeTab: Tab; onTab: (tab: Tab) => void }) {
+  const items: { id: Tab; label: string; body: string; icon: typeof Wand2 }[] = [
+    {
+      id: "generate",
+      label: "Quick generate",
+      body: "Paste a job brief and build a role-specific draft.",
+      icon: Wand2,
+    },
+    {
+      id: "explore",
+      label: "Career explorer",
+      body: "Review role adjacency and signal fit before generating.",
+      icon: Compass,
+    },
+    {
+      id: "resumes",
+      label: "Saved resumes",
+      body: "Open previous versions and keep the library tight.",
+      icon: Files,
+    },
   ];
+
   return (
-    <nav className="rounded-2xl border border-border bg-surface/60 p-2 backdrop-blur">
-      {items.map((it) => (
-        <button
-          key={it.id}
-          onClick={() => onTab(it.id)}
-          className={`flex w-full items-center gap-2.5 rounded-xl px-3 py-2.5 text-left text-sm transition-colors ${
-            tab === it.id
-              ? "bg-surface-elevated text-foreground"
-              : "text-muted-foreground hover:bg-surface hover:text-foreground"
-          }`}
-        >
-          <it.icon className="h-4 w-4" />
-          {it.label}
-        </button>
-      ))}
-    </nav>
+    <div className="surface-panel rounded-[2rem] p-4">
+      <div className="eyebrow px-2 pb-3">Workspace modes</div>
+      <div className="grid gap-2">
+        {items.map((item) => {
+          const active = item.id === activeTab;
+          return (
+            <button
+              key={item.id}
+              onClick={() => onTab(item.id)}
+              className={`rounded-[1.4rem] px-4 py-4 text-left transition-colors ${
+                active ? "bg-foreground text-background" : "surface-muted"
+              }`}
+            >
+              <div className="flex items-start gap-3">
+                <div
+                  className={`mt-0.5 flex h-9 w-9 items-center justify-center rounded-full ${
+                    active ? "bg-background/10 text-background" : "bg-background text-foreground"
+                  }`}
+                >
+                  <item.icon className="h-4 w-4" />
+                </div>
+                <div>
+                  <div className="text-sm font-semibold">{item.label}</div>
+                  <p className={`mt-1 text-xs leading-5 ${active ? "text-background/70" : "text-muted-foreground"}`}>
+                    {item.body}
+                  </p>
+                </div>
+              </div>
+            </button>
+          );
+        })}
+      </div>
+    </div>
   );
 }
 
 function QuickGenerate() {
-  const profile = useAppStore((s) => s.profile)!;
-  const addResume = useAppStore((s) => s.addResume);
+  const profile = useAppStore((state) => state.profile)!;
+  const addResume = useAppStore((state) => state.addResume);
   const navigate = useNavigate();
   const generateFn = useServerFn(generateResume);
+
   const [jobTarget, setJobTarget] = useState("");
   const [template, setTemplate] = useState<TemplateId>("minimal");
   const [loading, setLoading] = useState(false);
 
   const handleGenerate = async () => {
     if (jobTarget.trim().length < 2) {
-      toast.error("Add a job title or description.");
+      toast.error("Add a job title or a full job description.");
       return;
     }
+
     setLoading(true);
+
     try {
       const { resume } = await generateFn({
         data: { profile, jobTarget: jobTarget.trim() },
       });
+
       const saved: SavedResume = {
         id: crypto.randomUUID(),
         title: resume.title || jobTarget.slice(0, 60),
@@ -160,11 +243,12 @@ function QuickGenerate() {
         data: resume,
         createdAt: Date.now(),
       };
+
       addResume(saved);
       toast.success("Resume generated");
       navigate({ to: "/resume/$id", params: { id: saved.id } });
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Failed to generate");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Failed to generate resume.");
     } finally {
       setLoading(false);
     }
@@ -175,64 +259,86 @@ function QuickGenerate() {
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0 }}
-      className="rounded-2xl border border-border bg-surface/40 p-8"
+      className="surface-panel rounded-[2.25rem] p-6 sm:p-8"
     >
-      <h2 className="font-display text-2xl font-semibold">Quick Generate</h2>
-      <p className="mt-1 text-sm text-muted-foreground">
-        Drop a job title or paste a job description. We'll tailor a resume around it.
-      </p>
+      <div className="grid gap-8 lg:grid-cols-[0.78fr_1.22fr]">
+        <div>
+          <div className="eyebrow">Generation brief</div>
+          <h2 className="mt-3 text-3xl font-semibold tracking-tight">Build from a role target, not from a blank page.</h2>
+          <p className="mt-4 text-base leading-7 text-muted-foreground">
+            Provide a job title, a hiring brief, or the full job description. The system will
+            rewrite the profile into a more relevant resume draft.
+          </p>
 
-      <textarea
-        value={jobTarget}
-        onChange={(e) => setJobTarget(e.target.value)}
-        placeholder="e.g. Senior Product Manager at Stripe — or paste the full JD"
-        className="mt-6 min-h-[140px] w-full resize-y rounded-xl border border-border bg-surface px-4 py-3 text-sm outline-none focus:border-primary"
-      />
-
-      <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
-        <div className="flex items-center gap-2">
-          <span className="text-xs text-muted-foreground">Template:</span>
-          {(["minimal", "executive"] as TemplateId[]).map((t) => (
-            <button
-              key={t}
-              onClick={() => setTemplate(t)}
-              className={`rounded-full border px-3 py-1 text-xs capitalize transition-colors ${
-                template === t
-                  ? "border-primary bg-primary/10 text-foreground"
-                  : "border-border text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              {t}
-            </button>
-          ))}
+          <div className="mt-8 grid gap-3">
+            {[
+              "Keeps the source profile intact",
+              "Switches template at generation time",
+              "Opens directly into the editor after creation",
+            ].map((item, index) => (
+              <div key={item} className="flex items-center gap-3">
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-secondary font-mono text-xs text-muted-foreground">
+                  0{index + 1}
+                </div>
+                <span className="text-sm text-foreground">{item}</span>
+              </div>
+            ))}
+          </div>
         </div>
-        <button
-          onClick={handleGenerate}
-          disabled={loading}
-          className="inline-flex items-center gap-2 rounded-full gradient-bg px-6 py-2.5 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-50"
-        >
-          {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Wand2 className="h-4 w-4" />}
-          {loading ? "Generating…" : "Generate resume"}
-        </button>
-      </div>
 
-      {loading && (
-        <div className="mt-6 space-y-2">
-          {[0, 1, 2, 3].map((i) => (
-            <div
-              key={i}
-              className="h-3 rounded-full bg-surface shimmer"
-              style={{ width: `${85 - i * 12}%` }}
+        <div className="grid gap-5">
+          <div>
+            <label className="mb-2 block text-sm font-medium text-foreground">Role target</label>
+            <textarea
+              value={jobTarget}
+              onChange={(event) => setJobTarget(event.target.value)}
+              placeholder="Senior product manager, AI platform. Paste the brief or the full job description."
+              className="field-input min-h-[220px] resize-y"
             />
-          ))}
+          </div>
+
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex flex-wrap gap-2">
+              {(["minimal", "executive"] as TemplateId[]).map((item) => (
+                <button
+                  key={item}
+                  onClick={() => setTemplate(item)}
+                  className={`rounded-full px-4 py-2 text-sm capitalize transition-colors ${
+                    template === item ? "bg-foreground text-background" : "surface-muted"
+                  }`}
+                >
+                  {item}
+                </button>
+              ))}
+            </div>
+
+            <button
+              onClick={handleGenerate}
+              disabled={loading}
+              className="primary-button px-6 py-3 text-sm font-medium disabled:opacity-50"
+            >
+              {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Wand2 className="h-4 w-4" />}
+              {loading ? "Generating draft" : "Generate resume"}
+            </button>
+          </div>
+
+          {loading && (
+            <div className="grid gap-3">
+              {[94, 100, 82].map((width, index) => (
+                <div key={width} className="surface-muted rounded-[1.2rem] p-4">
+                  <div className="shimmer h-3 rounded-full bg-foreground/8" style={{ width: `${width}%`, animationDelay: `${index * 120}ms` }} />
+                </div>
+              ))}
+            </div>
+          )}
         </div>
-      )}
+      </div>
     </motion.section>
   );
 }
 
 function CareerExplorer() {
-  const profile = useAppStore((s) => s.profile)!;
+  const profile = useAppStore((state) => state.profile)!;
   const suggestFn = useServerFn(suggestCareerPaths);
   const [paths, setPaths] = useState<CareerPath[] | null>(null);
   const [loading, setLoading] = useState(false);
@@ -242,53 +348,55 @@ function CareerExplorer() {
     try {
       const { paths } = await suggestFn({ data: { profile } });
       setPaths(paths);
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Failed");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Failed to load career paths.");
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    if (!paths && !loading) load();
+    if (!paths && !loading) {
+      void load();
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [loading, paths]);
 
   return (
     <motion.section
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0 }}
+      className="grid gap-5"
     >
-      <div className="mb-5 flex items-center justify-between">
-        <div>
-          <h2 className="font-display text-2xl font-semibold">Career Explorer</h2>
-          <p className="text-sm text-muted-foreground">
-            Six paths the AI thinks fit you best — click any to generate a resume.
-          </p>
+      <div className="surface-panel rounded-[2.25rem] p-6 sm:p-8">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <div className="eyebrow">Role adjacency</div>
+            <h2 className="mt-3 text-3xl font-semibold tracking-tight">Explore where this profile can credibly move next.</h2>
+            <p className="mt-3 text-base leading-7 text-muted-foreground">
+              These paths are generated from the stored profile and can be turned into resume drafts immediately.
+            </p>
+          </div>
+
+          <button onClick={load} disabled={loading} className="ghost-button px-5 py-3 text-sm text-foreground">
+            <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
+            Refresh paths
+          </button>
         </div>
-        <button
-          onClick={load}
-          disabled={loading}
-          className="inline-flex items-center gap-2 rounded-full border border-border px-4 py-2 text-xs hover:bg-surface"
-        >
-          <RefreshCw className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} /> Refresh
-        </button>
       </div>
 
-      {loading && !paths && (
-        <div className="grid gap-4 sm:grid-cols-2">
-          {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="h-44 rounded-2xl border border-border bg-surface shimmer" />
+      {loading && !paths ? (
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          {Array.from({ length: 6 }).map((_, index) => (
+            <div key={index} className="surface-panel h-[240px] rounded-[2rem] p-5">
+              <div className="shimmer mt-14 h-4 w-2/3 rounded-full bg-foreground/8" />
+            </div>
           ))}
         </div>
-      )}
-
-      {paths && (
-        <div className="grid gap-4 sm:grid-cols-2">
-          {paths.map((p, i) => (
-            <CareerPathCard key={i} path={p} index={i} />
-          ))}
+      ) : (
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          {paths?.map((path, index) => <CareerPathCard key={`${path.title}-${index}`} path={path} index={index} />)}
         </div>
       )}
     </motion.section>
@@ -296,8 +404,8 @@ function CareerExplorer() {
 }
 
 function CareerPathCard({ path, index }: { path: CareerPath; index: number }) {
-  const profile = useAppStore((s) => s.profile)!;
-  const addResume = useAppStore((s) => s.addResume);
+  const profile = useAppStore((state) => state.profile)!;
+  const addResume = useAppStore((state) => state.addResume);
   const navigate = useNavigate();
   const generateFn = useServerFn(generateResume);
   const [loading, setLoading] = useState(false);
@@ -308,6 +416,7 @@ function CareerPathCard({ path, index }: { path: CareerPath; index: number }) {
       const { resume } = await generateFn({
         data: { profile, jobTarget: path.title },
       });
+
       const saved: SavedResume = {
         id: crypto.randomUUID(),
         title: path.title,
@@ -316,11 +425,12 @@ function CareerPathCard({ path, index }: { path: CareerPath; index: number }) {
         data: resume,
         createdAt: Date.now(),
       };
+
       addResume(saved);
       toast.success(`Resume for ${path.title} ready`);
       navigate({ to: "/resume/$id", params: { id: saved.id } });
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Failed");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Failed to build resume.");
     } finally {
       setLoading(false);
     }
@@ -328,105 +438,104 @@ function CareerPathCard({ path, index }: { path: CareerPath; index: number }) {
 
   return (
     <motion.button
-      initial={{ opacity: 0, y: 10 }}
+      initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.05 }}
-      whileHover={{ y: -3 }}
+      transition={{ delay: index * 0.05, type: "spring", stiffness: 100, damping: 20 }}
       onClick={handleClick}
       disabled={loading}
-      className="group relative overflow-hidden rounded-2xl border border-border bg-surface/60 p-5 text-left backdrop-blur transition-all hover:border-primary/40"
+      className="surface-panel rounded-[2rem] p-5 text-left transition-transform hover:-translate-y-[1px]"
     >
-      <div className="flex items-start justify-between">
+      <div className="flex items-start justify-between gap-4">
         <div>
-          <div className="font-display text-lg font-semibold">{path.title}</div>
-          <div className="mt-0.5 text-xs text-muted-foreground">{path.salaryRange}</div>
+          <div className="eyebrow">Potential path</div>
+          <div className="mt-3 text-xl font-semibold tracking-tight">{path.title}</div>
+          <div className="mt-1 text-sm text-muted-foreground">{path.salaryRange}</div>
         </div>
-        <div className="flex flex-col items-end">
-          <div className="font-display text-2xl font-semibold gradient-text">
-            {path.matchScore}%
-          </div>
-          <div className="text-[10px] uppercase tracking-wider text-muted-foreground">
-            match
-          </div>
+
+        <div className="rounded-[1.2rem] bg-secondary px-3 py-2">
+          <div className="font-mono text-lg text-foreground">{path.matchScore}%</div>
         </div>
       </div>
-      <p className="mt-3 text-sm text-muted-foreground">{path.whyFit}</p>
-      <div className="mt-3 flex flex-wrap gap-1">
-        {path.skillGaps.slice(0, 3).map((g) => (
-          <span
-            key={g}
-            className="rounded-full bg-warning/15 px-2 py-0.5 text-[10px] text-warning"
-          >
-            gap: {g}
+
+      <p className="mt-4 text-sm leading-6 text-muted-foreground">{path.whyFit}</p>
+
+      <div className="mt-5 flex flex-wrap gap-2">
+        {path.skillGaps.slice(0, 3).map((gap) => (
+          <span key={gap} className="rounded-full bg-background px-3 py-1.5 text-xs text-muted-foreground">
+            gap: {gap}
           </span>
         ))}
       </div>
-      <div className="mt-3 flex items-center gap-1.5 text-xs text-primary opacity-0 transition-opacity group-hover:opacity-100">
-        {loading ? (
-          <Loader2 className="h-3.5 w-3.5 animate-spin" />
-        ) : (
-          <TrendingUp className="h-3.5 w-3.5" />
-        )}
-        {loading ? "Building resume…" : "Generate resume"}
+
+      <div className="mt-6 inline-flex items-center gap-2 text-sm text-foreground">
+        {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Target className="h-4 w-4" />}
+        {loading ? "Generating draft" : "Generate resume for this path"}
       </div>
     </motion.button>
   );
 }
 
 function MyResumes() {
-  const resumes = useAppStore((s) => s.resumes);
-  const deleteResume = useAppStore((s) => s.deleteResume);
+  const resumes = useAppStore((state) => state.resumes);
+  const deleteResume = useAppStore((state) => state.deleteResume);
 
   return (
     <motion.section
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0 }}
+      className="grid gap-5"
     >
-      <h2 className="font-display text-2xl font-semibold">My Resumes</h2>
-      <p className="mt-1 text-sm text-muted-foreground">
-        {resumes.length} saved · all stored locally on your device
-      </p>
+      <div className="surface-panel rounded-[2.25rem] p-6 sm:p-8">
+        <div className="eyebrow">Saved drafts</div>
+        <h2 className="mt-3 text-3xl font-semibold tracking-tight">Keep the best versions. Remove the rest.</h2>
+        <p className="mt-3 text-base leading-7 text-muted-foreground">
+          {resumes.length} resume{resumes.length === 1 ? "" : "s"} stored locally in this workspace.
+        </p>
+      </div>
 
       {resumes.length === 0 ? (
-        <div className="mt-8 rounded-2xl border border-dashed border-border bg-surface/40 p-12 text-center">
+        <div className="surface-panel rounded-[2.25rem] p-10 text-center">
           <Briefcase className="mx-auto h-10 w-10 text-muted-foreground" />
-          <p className="mt-3 text-sm text-muted-foreground">
-            No resumes yet. Head to Quick Generate to create your first.
+          <p className="mt-4 text-sm text-muted-foreground">
+            No resumes saved yet. Generate one from the quick-create workspace first.
           </p>
         </div>
       ) : (
-        <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {resumes.map((r) => (
-            <div
-              key={r.id}
-              className="group relative rounded-2xl border border-border bg-surface/60 p-5 backdrop-blur transition-all hover:border-primary/40"
-            >
-              <div className="text-xs uppercase tracking-wider text-muted-foreground">
-                {r.template}
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          {resumes.map((resume) => (
+            <div key={resume.id} className="surface-panel rounded-[2rem] p-5">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <div className="eyebrow">{resume.template}</div>
+                  <div className="mt-2 text-xl font-semibold tracking-tight">{resume.title}</div>
+                </div>
+                <div className="font-mono text-xs text-muted-foreground">
+                  {new Date(resume.createdAt).toLocaleDateString()}
+                </div>
               </div>
-              <div className="mt-1 line-clamp-2 font-display text-base font-semibold">
-                {r.title}
-              </div>
-              <div className="mt-2 text-xs text-muted-foreground">
-                {new Date(r.createdAt).toLocaleDateString()}
-              </div>
-              <div className="mt-4 flex items-center gap-2">
+
+              <p className="mt-4 line-clamp-3 text-sm leading-6 text-muted-foreground">
+                {resume.jobTarget}
+              </p>
+
+              <div className="mt-6 flex items-center gap-2">
                 <Link
                   to="/resume/$id"
-                  params={{ id: r.id }}
-                  className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-full gradient-bg px-3 py-1.5 text-xs font-medium text-primary-foreground"
+                  params={{ id: resume.id }}
+                  className="primary-button flex-1 px-4 py-3 text-sm font-medium"
                 >
-                  Open <ExternalLink className="h-3 w-3" />
+                  Open editor
+                  <ExternalLink className="h-4 w-4" />
                 </Link>
                 <button
                   onClick={() => {
-                    deleteResume(r.id);
+                    deleteResume(resume.id);
                     toast.success("Deleted");
                   }}
-                  className="rounded-full border border-border p-1.5 text-muted-foreground hover:border-destructive hover:text-destructive"
+                  className="ghost-button h-11 w-11 text-foreground"
                 >
-                  <Trash2 className="h-3.5 w-3.5" />
+                  <Trash2 className="h-4 w-4" />
                 </button>
               </div>
             </div>
@@ -434,5 +543,15 @@ function MyResumes() {
         </div>
       )}
     </motion.section>
+  );
+}
+
+function StatCard({ label, value, note }: { label: string; value: number; note: string }) {
+  return (
+    <div className="surface-muted rounded-[1.6rem] p-4">
+      <div className="eyebrow">{label}</div>
+      <div className="mt-4 text-3xl font-semibold tracking-tight">{value}</div>
+      <div className="mt-2 text-xs text-muted-foreground">{note}</div>
+    </div>
   );
 }
