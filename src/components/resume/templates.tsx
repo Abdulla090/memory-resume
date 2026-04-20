@@ -206,6 +206,21 @@ export function ExecutiveTemplate({ data }: { data: ResumeData }) {
   );
 }
 
+import { 
+  NoirTemplate, 
+  ApexTemplate, 
+  NexusTemplate, 
+  OrbitTemplate, 
+  MetricTemplate, 
+  PrismTemplate, 
+  SlateTemplate, 
+  AvantTemplate, 
+  VanguardTemplate, 
+  MonolithTemplate, 
+  CipherTemplate, 
+  PinnacleTemplate 
+} from "./templates-extra";
+
 export function ResumePreview({
   data,
   template,
@@ -213,6 +228,21 @@ export function ResumePreview({
   data: ResumeData;
   template: TemplateId;
 }) {
-  if (template === "executive") return <ExecutiveTemplate data={data} />;
-  return <MinimalTemplate data={data} />;
+  switch (template) {
+    case "executive": return <ExecutiveTemplate data={data} />;
+    case "noir": return <NoirTemplate data={data} />;
+    case "apex": return <ApexTemplate data={data} />;
+    case "nexus": return <NexusTemplate data={data} />;
+    case "orbit": return <OrbitTemplate data={data} />;
+    case "metric": return <MetricTemplate data={data} />;
+    case "prism": return <PrismTemplate data={data} />;
+    case "slate": return <SlateTemplate data={data} />;
+    case "avant": return <AvantTemplate data={data} />;
+    case "vanguard": return <VanguardTemplate data={data} />;
+    case "monolith": return <MonolithTemplate data={data} />;
+    case "cipher": return <CipherTemplate data={data} />;
+    case "pinnacle": return <PinnacleTemplate data={data} />;
+    case "minimal":
+    default: return <MinimalTemplate data={data} />;
+  }
 }

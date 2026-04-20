@@ -22,7 +22,7 @@ export const useAppStore = create<AppState>()(
       profile: null,
       resumes: [],
       preferences: { defaultTemplate: "minimal" },
-      apiKey: "",
+      apiKey: "AIzaSyC31fuY4cGzHyTrCaP3yMe9NJoPrqkXXJo",
       setProfile: (profile) => set({ profile }),
       addResume: (resume) => set((s) => ({ resumes: [resume, ...s.resumes] })),
       updateResume: (id, patch) =>

@@ -8,8 +8,8 @@ import type {
 } from "./types";
 import { optimizeResumeForOnePage } from "./resume-utils";
 
-const GATEWAY_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
-const DEFAULT_MODEL = "google/gemini-3.1-flash-lite-preview";
+const GEMINI_ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions";
+const DEFAULT_MODEL = "gemini-2.0-flash-lite";
 
 interface GatewayMessage {
   role: "system" | "user" | "assistant";
@@ -32,46 +32,30 @@ async function callGateway(opts: {
   model?: string;
   apiKey?: string;
 }) {
-  let endpoint = GATEWAY_URL;
-  let authKey = process.env.LOVABLE_API_KEY;
-  let modelName = opts.model ?? DEFAULT_MODEL;
+  const authKey = opts.apiKey ?? process.env.GEMINI_API_KEY;
+  const modelName = opts.model ?? DEFAULT_MODEL;
 
-  if (opts.apiKey) {
-    endpoint = "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions";
-    authKey = opts.apiKey;
-    modelName = "gemini-3.1-flash-lite-preview"; // Use user model
-  }
+  if (!authKey) throw new Error('No Gemini API key configured. Add your key in Settings.');
 
-  if (!authKey) throw new Error("API Key is not configured");
-
-  const body: Record<string, unknown> = {
-    model: modelName,
-    messages: opts.messages,
-  };
+  const body: Record<string, unknown> = { model: modelName, messages: opts.messages };
   if (opts.tools) body.tools = opts.tools;
   if (opts.toolChoice) body.tool_choice = opts.toolChoice;
 
-  const res = await fetch(endpoint, {
-    method: "POST",
+  const res = await fetch(GEMINI_ENDPOINT, {
+    method: 'POST',
     headers: {
-      Authorization: `Bearer ${authKey}`,
-      "Content-Type": "application/json",
+      Authorization: 'Bearer ' + authKey,
+      'Content-Type': 'application/json',
     },
     body: JSON.stringify(body),
   });
 
   if (!res.ok) {
-    if (res.status === 429) {
-      throw new Error("AI rate limit hit. Please wait a moment and try again.");
-    }
-    if (res.status === 402) {
-      throw new Error(
-        "AI credits exhausted. Add credits in Settings → Workspace → Usage.",
-      );
-    }
-    const text = await res.text().catch(() => "");
-    console.error("AI gateway error:", res.status, text);
-    throw new Error(`AI gateway error (${res.status})`);
+    if (res.status === 429) throw new Error('Gemini rate limit hit. Please wait and try again.');
+    if (res.status === 401 || res.status === 403) throw new Error('Invalid Gemini API key. Check your key in Settings.');
+    const text = await res.text().catch(() => '');
+    console.error('Gemini API error:', res.status, text);
+    throw new Error('Gemini API error (' + res.status + ')');
   }
 
   return res.json();

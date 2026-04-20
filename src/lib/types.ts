@@ -64,7 +64,7 @@ export interface ResumeData {
   certifications: string[];
 }
 
-export type TemplateId = "minimal" | "executive" | "noir" | "apex" | "slate" | "cipher" | "monolith" | "pinnacle" | "avant" | "vanguard" | "nexus" | "orbit" | "metric" | "prism";
+export type TemplateId = "minimal" | "executive" | "noir" | "apex" | "slate" | "cipher" | "monolith" | "pinnacle" | "avant" | "vanguard" | "nexus" | "orbit" | "metric" | "prism" | "carbon" | "atlas" | "forge" | "zenith" | "vector";
 
 export interface SavedResume {
   id: string;

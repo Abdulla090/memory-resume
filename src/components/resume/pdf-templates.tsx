@@ -676,22 +676,291 @@ function PrismPDF({ data }: { data: ResumeData }) {
   );
 }
 
-export async function exportResumePDF(data: ResumeData, template: TemplateId, filename: string) {
-  let doc = <MinimalPDF data={data} />;
-  if (template === 'executive') doc = <ExecutivePDF data={data} />;
-  if (template === 'noir') doc = <ExecutivePDF data={data} />;
-  if (template === 'apex') doc = <ExecutivePDF data={data} />;
-  if (template === 'slate') doc = <MinimalPDF data={data} />;
-  if (template === 'cipher') doc = <ExecutivePDF data={data} />;
-  if (template === 'monolith') doc = <MinimalPDF data={data} />;
-  if (template === 'pinnacle') doc = <MinimalPDF data={data} />;
-  if (template === 'avant') doc = <MinimalPDF data={data} />;
-  if (template === 'vanguard') doc = <MinimalPDF data={data} />;
-  if (template === 'nexus') doc = <NexusPDF data={data} />;
-  if (template === 'orbit') doc = <OrbitPDF data={data} />;
-  if (template === 'metric') doc = <MetricPDF data={data} />;
-  if (template === 'prism') doc = <PrismPDF data={data} />;
 
+// ─── CARBON ─── Dark charcoal accent bar, stark white body, heavy type weight
+const carbon = StyleSheet.create({
+  page: { fontSize: 9, fontFamily: "Helvetica", color: "#111", flexDirection: "row" },
+  bar: { width: 6, backgroundColor: "#1a1a1a" },
+  side: { width: "30%", backgroundColor: "#f4f4f4", padding: 20 },
+  main: { width: "64%", padding: 22 },
+  photo: { width: 64, height: 64, borderRadius: 6, marginBottom: 12, objectFit: "cover" },
+  name: { fontSize: 20, fontWeight: 700, letterSpacing: 1 },
+  title: { fontSize: 9, color: "#555", marginTop: 2, marginBottom: 14, letterSpacing: 2 },
+  sideSection: { fontSize: 7, fontWeight: 700, color: "#999", letterSpacing: 2, marginTop: 14, marginBottom: 5 },
+  sideText: { fontSize: 8, color: "#333", marginBottom: 3, lineHeight: 1.4 },
+  mainSection: { fontSize: 8, fontWeight: 700, color: "#1a1a1a", letterSpacing: 2, marginTop: 14, marginBottom: 6, borderBottomWidth: 0.5, borderBottomColor: "#1a1a1a", paddingBottom: 3 },
+  expTitle: { fontSize: 10, fontWeight: 700 },
+  expMeta: { fontSize: 8, color: "#777", marginTop: 1, marginBottom: 3 },
+  body: { fontSize: 8.5, lineHeight: 1.5, color: "#333" },
+  bullet: { flexDirection: "row", marginTop: 2, paddingLeft: 8 },
+});
+
+function CarbonPDF({ data }: { data: ResumeData }) {
+  const c = optimizeResumeForOnePage(data);
+  return (
+    <Document>
+      <Page size="A4" style={carbon.page}>
+        <View style={carbon.bar} />
+        <View style={carbon.side}>
+          {c.photoUrl ? <Image src={c.photoUrl} style={carbon.photo} /> : null}
+          <Text style={carbon.name}>{c.name}</Text>
+          <Text style={carbon.title}>{c.title.toUpperCase()}</Text>
+          {c.location ? <Text style={carbon.sideText}>{c.location}</Text> : null}
+          {c.email ? <Text style={carbon.sideText}>{c.email}</Text> : null}
+          {c.phone ? <Text style={carbon.sideText}>{c.phone}</Text> : null}
+          {c.skills.length > 0 && (<><Text style={carbon.sideSection}>SKILLS</Text>{c.skills.map((s, i) => <Text key={i} style={carbon.sideText}>— {s}</Text>)}</>)}
+          {c.education.length > 0 && (<><Text style={carbon.sideSection}>EDUCATION</Text>{c.education.map((e, i) => <View key={i} style={{ marginBottom: 6 }}><Text style={{ ...carbon.sideText, fontWeight: 700 }}>{e.degree}</Text><Text style={carbon.sideText}>{e.institution}</Text><Text style={{ ...carbon.sideText, color: "#999" }}>{e.year}</Text></View>)}</>)}
+          {c.certifications.length > 0 && (<><Text style={carbon.sideSection}>CERTS</Text>{c.certifications.map((cert, i) => <Text key={i} style={carbon.sideText}>{cert}</Text>)}</>)}
+        </View>
+        <View style={carbon.main}>
+          <Text style={carbon.mainSection}>PROFILE</Text>
+          <Text style={carbon.body}>{c.summary}</Text>
+          {c.experience.length > 0 && (<><Text style={carbon.mainSection}>EXPERIENCE</Text>{c.experience.map((e, i) => <View key={i} style={{ marginBottom: 10 }}><Text style={carbon.expTitle}>{e.title}</Text><Text style={carbon.expMeta}>{e.company} · {e.duration}</Text>{e.description ? <Text style={carbon.body}>{e.description}</Text> : null}{e.achievements.map((a, j) => <View key={j} style={carbon.bullet}><Text style={{ width: 8 }}>▪</Text><Text style={{ ...carbon.body, flex: 1, marginTop: 0 }}>{a}</Text></View>)}</View>)}</>)}
+          {c.projects.length > 0 && (<><Text style={carbon.mainSection}>PROJECTS</Text>{c.projects.map((p, i) => <View key={i} style={{ marginBottom: 6 }}><Text style={{ ...carbon.expTitle, fontSize: 9 }}>{p.name}</Text><Text style={carbon.body}>{p.description}</Text>{p.impact ? <Text style={carbon.expMeta}>Impact: {p.impact}</Text> : null}</View>)}</>)}
+        </View>
+      </Page>
+    </Document>
+  );
+}
+
+// ─── ATLAS ─── Wide top header band, clean grid below, corporate authority
+const atlas = StyleSheet.create({
+  page: { fontSize: 9, fontFamily: "Helvetica", color: "#111" },
+  header: { backgroundColor: "#0f1923", padding: 28, flexDirection: "row", alignItems: "flex-start" },
+  photo: { width: 64, height: 64, borderRadius: 4, marginRight: 20, objectFit: "cover" },
+  headerText: { flex: 1 },
+  name: { fontSize: 24, fontWeight: 700, color: "#fff", letterSpacing: 1 },
+  title: { fontSize: 10, color: "#aaa", marginTop: 3, letterSpacing: 1 },
+  contacts: { fontSize: 8, color: "#888", marginTop: 8, flexDirection: "row", flexWrap: "wrap", gap: 12 },
+  body: { padding: 24 },
+  cols: { flexDirection: "row", gap: 20 },
+  mainCol: { flex: 2 },
+  sideCol: { flex: 1 },
+  section: { fontSize: 8, fontWeight: 700, color: "#0f1923", letterSpacing: 2, marginTop: 16, marginBottom: 6, borderBottomWidth: 1, borderBottomColor: "#ddd", paddingBottom: 3 },
+  expTitle: { fontSize: 10, fontWeight: 700 },
+  expMeta: { fontSize: 8, color: "#666", marginTop: 1 },
+  textBody: { fontSize: 8.5, lineHeight: 1.5, color: "#333", marginTop: 3 },
+  bullet: { flexDirection: "row", marginTop: 2 },
+  sideText: { fontSize: 8, color: "#444", marginBottom: 3, lineHeight: 1.4 },
+});
+
+function AtlasPDF({ data }: { data: ResumeData }) {
+  const c = optimizeResumeForOnePage(data);
+  return (
+    <Document>
+      <Page size="A4" style={atlas.page}>
+        <View style={atlas.header}>
+          {c.photoUrl ? <Image src={c.photoUrl} style={atlas.photo} /> : null}
+          <View style={atlas.headerText}>
+            <Text style={atlas.name}>{c.name}</Text>
+            <Text style={atlas.title}>{c.title.toUpperCase()}</Text>
+            <View style={atlas.contacts}>
+              {c.location ? <Text>{c.location}</Text> : null}
+              {c.email ? <Text>{c.email}</Text> : null}
+              {c.phone ? <Text>{c.phone}</Text> : null}
+            </View>
+          </View>
+        </View>
+        <View style={atlas.body}>
+          <Text style={atlas.textBody}>{c.summary}</Text>
+          <View style={atlas.cols}>
+            <View style={atlas.mainCol}>
+              {c.experience.length > 0 && (<><Text style={atlas.section}>EXPERIENCE</Text>{c.experience.map((e, i) => <View key={i} style={{ marginBottom: 10 }}><Text style={atlas.expTitle}>{e.title}</Text><Text style={atlas.expMeta}>{e.company} · {e.duration}</Text>{e.achievements.map((a, j) => <View key={j} style={atlas.bullet}><Text style={{ width: 10, color: "#0f1923" }}>›</Text><Text style={{ ...atlas.textBody, flex: 1, marginTop: 0 }}>{a}</Text></View>)}</View>)}</>)}
+              {c.projects.length > 0 && (<><Text style={atlas.section}>PROJECTS</Text>{c.projects.map((p, i) => <View key={i} style={{ marginBottom: 6 }}><Text style={{ ...atlas.expTitle, fontSize: 9 }}>{p.name}</Text><Text style={atlas.textBody}>{p.description}</Text></View>)}</>)}
+            </View>
+            <View style={atlas.sideCol}>
+              {c.skills.length > 0 && (<><Text style={atlas.section}>SKILLS</Text>{c.skills.map((s, i) => <Text key={i} style={atlas.sideText}>· {s}</Text>)}</>)}
+              {c.education.length > 0 && (<><Text style={atlas.section}>EDUCATION</Text>{c.education.map((e, i) => <View key={i} style={{ marginBottom: 6 }}><Text style={{ ...atlas.sideText, fontWeight: 700 }}>{e.degree}</Text><Text style={atlas.sideText}>{e.institution}, {e.year}</Text></View>)}</>)}
+              {c.certifications.length > 0 && (<><Text style={atlas.section}>CERTS</Text>{c.certifications.map((cert, i) => <Text key={i} style={atlas.sideText}>{cert}</Text>)}</>)}
+            </View>
+          </View>
+        </View>
+      </Page>
+    </Document>
+  );
+}
+
+// ─── FORGE ─── Industrial left-border accent, monospaced role labels, brutalist precision
+const forge = StyleSheet.create({
+  page: { fontSize: 9, fontFamily: "Helvetica", color: "#111", padding: 36 },
+  photo: { width: 56, height: 56, borderRadius: 3, objectFit: "cover", marginBottom: 10 },
+  headerRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "flex-end", borderBottomWidth: 2, borderBottomColor: "#111", paddingBottom: 10, marginBottom: 14 },
+  name: { fontSize: 26, fontWeight: 700, letterSpacing: -0.5 },
+  title: { fontSize: 9, color: "#555", letterSpacing: 2, marginTop: 3 },
+  contactBlock: { alignItems: "flex-end" },
+  contactText: { fontSize: 7.5, color: "#555", marginBottom: 2 },
+  section: { fontSize: 7.5, fontWeight: 700, letterSpacing: 3, color: "#111", marginTop: 16, marginBottom: 6 },
+  expRow: { flexDirection: "row", marginBottom: 10 },
+  expBar: { width: 2, backgroundColor: "#111", marginRight: 10, marginTop: 3 },
+  expContent: { flex: 1 },
+  expTitle: { fontSize: 10, fontWeight: 700 },
+  expMeta: { fontSize: 8, color: "#666", fontFamily: "Courier", marginTop: 1, marginBottom: 3 },
+  body: { fontSize: 8.5, lineHeight: 1.5, color: "#333" },
+  bullet: { flexDirection: "row", marginTop: 1 },
+  skillsRow: { flexDirection: "row", flexWrap: "wrap", gap: 6, marginTop: 4 },
+  skillPill: { borderWidth: 0.5, borderColor: "#333", paddingHorizontal: 6, paddingVertical: 2, fontSize: 7.5 },
+});
+
+function ForgePDF({ data }: { data: ResumeData }) {
+  const c = optimizeResumeForOnePage(data);
+  return (
+    <Document>
+      <Page size="A4" style={forge.page}>
+        <View style={forge.headerRow}>
+          <View>
+            {c.photoUrl ? <Image src={c.photoUrl} style={forge.photo} /> : null}
+            <Text style={forge.name}>{c.name}</Text>
+            <Text style={forge.title}>{c.title.toUpperCase()}</Text>
+          </View>
+          <View style={forge.contactBlock}>
+            {c.location ? <Text style={forge.contactText}>{c.location}</Text> : null}
+            {c.email ? <Text style={forge.contactText}>{c.email}</Text> : null}
+            {c.phone ? <Text style={forge.contactText}>{c.phone}</Text> : null}
+          </View>
+        </View>
+        <Text style={forge.body}>{c.summary}</Text>
+        {c.experience.length > 0 && (<><Text style={forge.section}>EXPERIENCE</Text>{c.experience.map((e, i) => <View key={i} style={forge.expRow}><View style={forge.expBar} /><View style={forge.expContent}><Text style={forge.expTitle}>{e.title}</Text><Text style={forge.expMeta}>{e.company} / {e.duration}</Text>{e.achievements.map((a, j) => <View key={j} style={forge.bullet}><Text style={{ width: 10 }}>—</Text><Text style={{ ...forge.body, flex: 1, marginTop: 0 }}>{a}</Text></View>)}</View></View>)}</>)}
+        {c.skills.length > 0 && (<><Text style={forge.section}>SKILLS</Text><View style={forge.skillsRow}>{c.skills.map((s, i) => <Text key={i} style={forge.skillPill}>{s}</Text>)}</View></>)}
+        {c.education.length > 0 && (<><Text style={forge.section}>EDUCATION</Text>{c.education.map((e, i) => <Text key={i} style={forge.body}>{e.degree} · {e.institution} · {e.year}</Text>)}</>)}
+      </Page>
+    </Document>
+  );
+}
+
+// ─── ZENITH ─── Ultra-premium: photo circle, gold accent rules, wide whitespace
+const zenith = StyleSheet.create({
+  page: { fontSize: 9, fontFamily: "Helvetica", color: "#111", padding: 40 },
+  top: { alignItems: "center", marginBottom: 24 },
+  photo: { width: 72, height: 72, borderRadius: 36, objectFit: "cover", marginBottom: 10 },
+  name: { fontSize: 28, fontWeight: 700, letterSpacing: 2, textAlign: "center" },
+  title: { fontSize: 9, color: "#888", letterSpacing: 3, marginTop: 4, textAlign: "center" },
+  rule: { height: 0.5, backgroundColor: "#c9a84c", marginTop: 6, width: "30%" },
+  contacts: { flexDirection: "row", justifyContent: "center", gap: 18, marginTop: 6 },
+  contactText: { fontSize: 7.5, color: "#666" },
+  section: { fontSize: 7.5, fontWeight: 700, letterSpacing: 3, color: "#c9a84c", marginTop: 18, marginBottom: 8, textAlign: "center" },
+  divider: { height: 0.5, backgroundColor: "#e5e5e5", marginBottom: 10 },
+  expTitle: { fontSize: 10, fontWeight: 700 },
+  expMeta: { fontSize: 8, color: "#888", marginTop: 1, marginBottom: 4 },
+  body: { fontSize: 8.5, lineHeight: 1.6, color: "#333" },
+  bullet: { flexDirection: "row", marginTop: 2 },
+  cols: { flexDirection: "row", gap: 24 },
+  mainCol: { flex: 1.6 },
+  sideCol: { flex: 1 },
+  sideText: { fontSize: 8, color: "#444", marginBottom: 4, lineHeight: 1.4 },
+});
+
+function ZenithPDF({ data }: { data: ResumeData }) {
+  const c = optimizeResumeForOnePage(data);
+  return (
+    <Document>
+      <Page size="A4" style={zenith.page}>
+        <View style={zenith.top}>
+          {c.photoUrl ? <Image src={c.photoUrl} style={zenith.photo} /> : null}
+          <Text style={zenith.name}>{c.name}</Text>
+          <Text style={zenith.title}>{c.title.toUpperCase()}</Text>
+          <View style={zenith.rule} />
+          <View style={zenith.contacts}>
+            {c.location ? <Text style={zenith.contactText}>{c.location}</Text> : null}
+            {c.email ? <Text style={zenith.contactText}>{c.email}</Text> : null}
+            {c.phone ? <Text style={zenith.contactText}>{c.phone}</Text> : null}
+          </View>
+        </View>
+        <Text style={zenith.body}>{c.summary}</Text>
+        <View style={zenith.cols}>
+          <View style={zenith.mainCol}>
+            {c.experience.length > 0 && (<><Text style={zenith.section}>EXPERIENCE</Text><View style={zenith.divider} />{c.experience.map((e, i) => <View key={i} style={{ marginBottom: 12 }}><Text style={zenith.expTitle}>{e.title}</Text><Text style={zenith.expMeta}>{e.company} · {e.duration}</Text>{e.achievements.map((a, j) => <View key={j} style={zenith.bullet}><Text style={{ width: 10, color: "#c9a84c" }}>›</Text><Text style={{ ...zenith.body, flex: 1, marginTop: 0 }}>{a}</Text></View>)}</View>)}</>)}
+          </View>
+          <View style={zenith.sideCol}>
+            {c.skills.length > 0 && (<><Text style={zenith.section}>SKILLS</Text><View style={zenith.divider} />{c.skills.map((s, i) => <Text key={i} style={zenith.sideText}>{s}</Text>)}</>)}
+            {c.education.length > 0 && (<><Text style={zenith.section}>EDUCATION</Text><View style={zenith.divider} />{c.education.map((e, i) => <View key={i} style={{ marginBottom: 6 }}><Text style={{ ...zenith.sideText, fontWeight: 700 }}>{e.degree}</Text><Text style={zenith.sideText}>{e.institution} · {e.year}</Text></View>)}</>)}
+            {c.certifications.length > 0 && (<><Text style={zenith.section}>CERTS</Text><View style={zenith.divider} />{c.certifications.map((cert, i) => <Text key={i} style={zenith.sideText}>{cert}</Text>)}</>)}
+          </View>
+        </View>
+      </Page>
+    </Document>
+  );
+}
+
+// ─── VECTOR ─── Dark mode, neon-blue accent, tech/engineering aesthetic
+const vector = StyleSheet.create({
+  page: { fontSize: 9, fontFamily: "Courier", color: "#e2e8f0", backgroundColor: "#0d1117" },
+  header: { backgroundColor: "#161b22", padding: 24, borderBottomWidth: 1, borderBottomColor: "#30363d" },
+  photo: { width: 56, height: 56, borderRadius: 4, objectFit: "cover", marginBottom: 10 },
+  name: { fontSize: 22, fontWeight: 700, color: "#58a6ff", letterSpacing: 1 },
+  title: { fontSize: 9, color: "#8b949e", marginTop: 3, letterSpacing: 1 },
+  contacts: { flexDirection: "row", gap: 16, marginTop: 8 },
+  contactText: { fontSize: 7.5, color: "#8b949e" },
+  body: { padding: 22 },
+  section: { fontSize: 7.5, fontWeight: 700, letterSpacing: 3, color: "#58a6ff", marginTop: 16, marginBottom: 6, borderBottomWidth: 0.5, borderBottomColor: "#30363d", paddingBottom: 3 },
+  expTitle: { fontSize: 10, fontWeight: 700, color: "#f0f6fc" },
+  expMeta: { fontSize: 8, color: "#8b949e", marginTop: 1, marginBottom: 3 },
+  textBody: { fontSize: 8.5, lineHeight: 1.5, color: "#c9d1d9" },
+  bullet: { flexDirection: "row", marginTop: 2 },
+  skillsRow: { flexDirection: "row", flexWrap: "wrap", gap: 5, marginTop: 4 },
+  skillPill: { backgroundColor: "#21262d", borderWidth: 0.5, borderColor: "#58a6ff", paddingHorizontal: 7, paddingVertical: 2, fontSize: 7.5, color: "#58a6ff" },
+  cols: { flexDirection: "row", gap: 18 },
+});
+
+function VectorPDF({ data }: { data: ResumeData }) {
+  const c = optimizeResumeForOnePage(data);
+  return (
+    <Document>
+      <Page size="A4" style={vector.page}>
+        <View style={vector.header}>
+          {c.photoUrl ? <Image src={c.photoUrl} style={vector.photo} /> : null}
+          <Text style={vector.name}>{c.name}</Text>
+          <Text style={vector.title}>{c.title}</Text>
+          <View style={vector.contacts}>
+            {c.location ? <Text style={vector.contactText}>{c.location}</Text> : null}
+            {c.email ? <Text style={vector.contactText}>{c.email}</Text> : null}
+            {c.phone ? <Text style={vector.contactText}>{c.phone}</Text> : null}
+          </View>
+        </View>
+        <View style={vector.body}>
+          <Text style={vector.textBody}>{c.summary}</Text>
+          <View style={vector.cols}>
+            <View style={{ flex: 1.7 }}>
+              {c.experience.length > 0 && (<><Text style={vector.section}>// EXPERIENCE</Text>{c.experience.map((e, i) => <View key={i} style={{ marginBottom: 10 }}><Text style={vector.expTitle}>{e.title}</Text><Text style={vector.expMeta}>{e.company} · {e.duration}</Text>{e.achievements.map((a, j) => <View key={j} style={vector.bullet}><Text style={{ width: 12, color: "#58a6ff" }}>→</Text><Text style={{ ...vector.textBody, flex: 1, marginTop: 0 }}>{a}</Text></View>)}</View>)}</>)}
+              {c.projects.length > 0 && (<><Text style={vector.section}>// PROJECTS</Text>{c.projects.map((p, i) => <View key={i} style={{ marginBottom: 6 }}><Text style={{ ...vector.expTitle, fontSize: 9 }}>{p.name}</Text><Text style={vector.textBody}>{p.description}</Text></View>)}</>)}
+            </View>
+            <View style={{ flex: 1 }}>
+              {c.skills.length > 0 && (<><Text style={vector.section}>// STACK</Text><View style={vector.skillsRow}>{c.skills.map((s, i) => <Text key={i} style={vector.skillPill}>{s}</Text>)}</View></>)}
+              {c.education.length > 0 && (<><Text style={vector.section}>// EDUCATION</Text>{c.education.map((e, i) => <View key={i} style={{ marginBottom: 6 }}><Text style={{ ...vector.textBody, fontWeight: 700, color: "#f0f6fc" }}>{e.degree}</Text><Text style={vector.expMeta}>{e.institution} · {e.year}</Text></View>)}</>)}
+            </View>
+          </View>
+        </View>
+      </Page>
+    </Document>
+  );
+}
+
+export function GetPDFDocument({ data, template }: { data: ResumeData; template: TemplateId }) {
+  switch (template) {
+    case 'executive': return <ExecutivePDF data={data} />;
+    case 'nexus': return <NexusPDF data={data} />;
+    case 'orbit': return <OrbitPDF data={data} />;
+    case 'metric': return <MetricPDF data={data} />;
+    case 'prism': return <PrismPDF data={data} />;
+    case 'carbon': return <CarbonPDF data={data} />;
+    case 'atlas': return <AtlasPDF data={data} />;
+    case 'forge': return <ForgePDF data={data} />;
+    case 'zenith': return <ZenithPDF data={data} />;
+    case 'vector': return <VectorPDF data={data} />;
+    // Remaining aliases use closest match
+    case 'noir': return <VectorPDF data={data} />;
+    case 'apex': return <AtlasPDF data={data} />;
+    case 'slate': return <ForgePDF data={data} />;
+    case 'cipher': return <VectorPDF data={data} />;
+    case 'monolith': return <CarbonPDF data={data} />;
+    case 'pinnacle': return <ZenithPDF data={data} />;
+    case 'avant': return <ForgePDF data={data} />;
+    case 'vanguard': return <AtlasPDF data={data} />;
+    default: return <MinimalPDF data={data} />;
+  }
+}
+
+export async function exportResumePDF(data: ResumeData, template: TemplateId, filename: string) {
+  const doc = <GetPDFDocument data={data} template={template} />;
   const blob = await pdf(doc).toBlob();
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -702,3 +971,4 @@ export async function exportResumePDF(data: ResumeData, template: TemplateId, fi
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
 }
+
