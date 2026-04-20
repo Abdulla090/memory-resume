@@ -59,17 +59,17 @@
   --primary-foreground:#ffffff;
   --primary-glow:      rgba(37,99,235,0.25);
 
-  --secondary:         #f1f5f9;
-  --secondary-foreground:#334155;
-  --muted:             #f1f5f9;
-  --muted-foreground:  #64748b;
+  --secondary:         #eff6ff;
+  --secondary-foreground:#1e3a8a;
+  --muted:             #eff6ff;
+  --muted-foreground:  #60a5fa;
   --accent:            #eff6ff;
   --accent-foreground: #1e3a8a;
   --destructive:       #ef4444;
   --destructive-foreground:#ffffff;
   --success:           #22c55e;
   --warning:           #f59e0b;
-  --border:            #e2e8f0;
+  --border:            #bfdbfe;
   --input:             #f8fafc;
   --ring:              #2563eb;
 
@@ -184,23 +184,23 @@
   /* ─── Surface / Card ────────────────────────── */
   .surface-panel {
     background: #ffffff;
-    border: 1px solid var(--color-border);
-    box-shadow: var(--shadow-panel);
-    border-radius: 1rem;
+    border: 2px solid #bfdbfe;
+    box-shadow: 0 10px 40px -10px rgba(15,23,42,0.12), 0 4px 12px -4px rgba(15,23,42,0.08);
+    border-radius: 1.25rem;
   }
 
   .surface-muted {
     background: var(--color-surface);
-    border: 1px solid var(--color-border);
-    border-radius: 0.75rem;
+    border: 2px solid #bfdbfe;
+    box-shadow: 0 4px 16px -4px rgba(15,23,42,0.08);
+    border-radius: 1rem;
   }
 
-  /* Dashboard preview card */
   .dashboard-card {
     background: #ffffff;
-    border-radius: 1rem;
-    border: 1px solid #e2e8f0;
-    box-shadow: 0 4px 24px -4px rgba(15,23,42,0.12);
+    border-radius: 1.25rem;
+    border: 2px solid #bfdbfe;
+    box-shadow: 0 10px 40px -10px rgba(15,23,42,0.12);
     padding: 1.25rem;
   }
 
@@ -217,11 +217,10 @@
     flex-shrink: 0;
   }
 
-  /* Stat card */
   .stat-card {
     background: #ffffff;
-    border: 1px solid var(--color-border);
-    border-radius: 1rem;
+    border: 2px solid #bfdbfe;
+    border-radius: 1.25rem;
     box-shadow: var(--shadow-card);
     padding: 1.25rem 1.5rem;
     display: flex;
@@ -236,11 +235,10 @@
     box-shadow: 0 8px 32px -8px rgba(15,23,42,0.14);
   }
 
-  /* Workflow step card */
   .step-card {
     background: #ffffff;
-    border: 1px solid var(--color-border);
-    border-radius: 1rem;
+    border: 2px solid #bfdbfe;
+    border-radius: 1.25rem;
     box-shadow: var(--shadow-card);
     padding: 1.75rem;
     transition: transform 200ms ease, box-shadow 200ms ease;

@@ -15,7 +15,8 @@ import {
   convertInchesToTwip,
   ImageRun,
 } from "docx";
-import { saveAs } from "file-saver";
+import fileSaverPkg from "file-saver";
+const { saveAs } = fileSaverPkg;
 import type { ResumeData } from "@/lib/types";
 
 const ACCENT = "1a56db"; // blue

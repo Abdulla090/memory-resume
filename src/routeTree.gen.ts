@@ -11,9 +11,9 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TemplatesRouteImport } from './routes/templates'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
-import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ResumeIdRouteImport } from './routes/resume.$id'
+import { Route as ResumeRouteImport } from './routes/resume.'
 
 const TemplatesRoute = TemplatesRouteImport.update({
   id: '/templates',
@@ -23,11 +23,6 @@ const TemplatesRoute = TemplatesRouteImport.update({
 const OnboardingRoute = OnboardingRouteImport.update({
   id: '/onboarding',
   path: '/onboarding',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DashboardRoute = DashboardRouteImport.update({
-  id: '/dashboard',
-  path: '/dashboard',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -40,48 +35,53 @@ const ResumeIdRoute = ResumeIdRouteImport.update({
   path: '/resume/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ResumeRoute = ResumeRouteImport.update({
+  id: '/resume/',
+  path: '/resume/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/dashboard': typeof DashboardRoute
   '/onboarding': typeof OnboardingRoute
   '/templates': typeof TemplatesRoute
+  '/resume/': typeof ResumeRoute
   '/resume/$id': typeof ResumeIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/dashboard': typeof DashboardRoute
   '/onboarding': typeof OnboardingRoute
   '/templates': typeof TemplatesRoute
+  '/resume': typeof ResumeRoute
   '/resume/$id': typeof ResumeIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/dashboard': typeof DashboardRoute
   '/onboarding': typeof OnboardingRoute
   '/templates': typeof TemplatesRoute
+  '/resume/': typeof ResumeRoute
   '/resume/$id': typeof ResumeIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/dashboard' | '/onboarding' | '/templates' | '/resume/$id'
+  fullPaths: '/' | '/onboarding' | '/templates' | '/resume/' | '/resume/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/dashboard' | '/onboarding' | '/templates' | '/resume/$id'
+  to: '/' | '/onboarding' | '/templates' | '/resume' | '/resume/$id'
   id:
     | '__root__'
     | '/'
-    | '/dashboard'
     | '/onboarding'
     | '/templates'
+    | '/resume/'
     | '/resume/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  DashboardRoute: typeof DashboardRoute
   OnboardingRoute: typeof OnboardingRoute
   TemplatesRoute: typeof TemplatesRoute
+  ResumeRoute: typeof ResumeRoute
   ResumeIdRoute: typeof ResumeIdRoute
 }
 
@@ -101,13 +101,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OnboardingRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/dashboard': {
-      id: '/dashboard'
-      path: '/dashboard'
-      fullPath: '/dashboard'
-      preLoaderRoute: typeof DashboardRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/': {
       id: '/'
       path: '/'
@@ -122,14 +115,21 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ResumeIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/resume/': {
+      id: '/resume/'
+      path: '/resume'
+      fullPath: '/resume/'
+      preLoaderRoute: typeof ResumeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  DashboardRoute: DashboardRoute,
   OnboardingRoute: OnboardingRoute,
   TemplatesRoute: TemplatesRoute,
+  ResumeRoute: ResumeRoute,
   ResumeIdRoute: ResumeIdRoute,
 }
 export const routeTree = rootRouteImport

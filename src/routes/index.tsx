@@ -61,7 +61,7 @@ function Header() {
             <span className="text-[1rem] font-bold tracking-tight text-slate-900">MemoryCV</span>
           </Link>
           <nav className="hidden md:flex items-center gap-1">
-            {[["Home","/"],["Features","/templates"],["Pricing","/dashboard"],["Contact","/"]].map(([label,path])=>(
+            {[["Home","/"],["Features","/templates"],["Build Resume","/onboarding"],["Contact","/"]].map(([label,path])=>(
               <Link key={label} to={path as any}
                 className="px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 rounded-lg hover:bg-slate-50 transition-colors cursor-pointer"
                 id={`nav-${label.toLowerCase()}`}>{label}</Link>

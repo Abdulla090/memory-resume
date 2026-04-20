@@ -261,7 +261,7 @@ function TemplatesPage() {
 
             <div className="flex items-center gap-3">
               <Link 
-                to="/dashboard" 
+                to="/onboarding" 
                 className="px-4 py-2 text-sm font-medium text-blue-900/70 hover:text-blue-700 bg-white/50 hover:bg-blue-50 border border-transparent hover:border-blue-100 rounded-xl transition-all duration-300 flex items-center gap-2 shadow-sm"
               >
                 <ArrowLeft className="h-4 w-4" />

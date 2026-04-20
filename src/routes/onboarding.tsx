@@ -1,829 +1,603 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useState, useRef } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useState, useRef, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { useServerFn } from "@tanstack/react-start";
+import { parseMemory, generateResume, getFollowUpQuestions, patchProfileWithAnswers } from "@/lib/ai.functions";
+import { useAppStore } from "@/lib/store";
+import type { SavedResume, FollowUpQuestion, FollowUpAnswer } from "@/lib/types";
 import {
-  ArrowLeft,
-  ArrowRight,
-  Check,
-  Loader2,
-  Sparkles,
-  Wand2,
+  FileText, Loader2, ArrowUp, SkipForward, Paperclip, Sparkles, CheckCircle2, ImagePlus
 } from "lucide-react";
 import { toast } from "sonner";
-import { applyFollowUpAnswers, parseMemory, suggestFollowUpQuestions } from "@/lib/ai.functions";
 import { SAMPLE_MEMORIES } from "@/lib/sample-memories";
-import { useAppStore } from "@/lib/store";
-import type { FollowUpAnswer, FollowUpQuestion, Profile } from "@/lib/types";
 
 export const Route = createFileRoute("/onboarding")({
-  head: () => ({
-    meta: [
-      { title: "Import your memory — MemoryCV" },
-      {
-        name: "description",
-        content: "Import memory from ChatGPT, Claude, Gemini, or your own notes to build a reusable career profile.",
-      },
-    ],
-  }),
-  component: Onboarding,
+  head: () => ({ meta: [{ title: "MemoryCV — Builder" }] }),
+  component: ChatOnboarding,
 });
 
-const SOURCES = [
-  {
-    id: "chatgpt",
-    name: "ChatGPT",
-    where: "Settings, Personalization, Memory, then copy the relevant entries.",
-  },
-  {
-    id: "claude",
-    name: "Claude",
-    where: "Profile and personal preference memory entries work best.",
-  },
-  {
-    id: "gemini",
-    name: "Gemini",
-    where: "Saved info and profile facts are enough to build a first pass.",
-  },
-  {
-    id: "manual",
-    name: "Manual notes",
-    where: "A free-form summary works if you do not want to export memory directly.",
-  },
-];
+type Stage = "intake" | "parsing" | "questions" | "patching" | "builder" | "generating";
 
-const LOADING_PHRASES = [
-  "Reading context and identity markers",
-  "Mapping skills, experience, and intent",
-  "Rebuilding a professional profile from memory",
-  "Extracting signals for role targeting",
-];
+interface ChatMessage {
+  id: string;
+  from: "ai" | "user";
+  content: string;
+  question?: FollowUpQuestion;
+}
 
-function Onboarding() {
+function ChatOnboarding() {
   const navigate = useNavigate();
   const setProfile = useAppStore((s) => s.setProfile);
-  const parseMemoryFn = useServerFn(parseMemory);
+  const profile = useAppStore((s) => s.profile);
   const apiKey = useAppStore((s) => s.apiKey);
-  const suggestFollowUpsFn = useServerFn(suggestFollowUpQuestions);
-  const applyFollowUpsFn = useServerFn(applyFollowUpAnswers);
+  const addResume = useAppStore((s) => s.addResume);
 
-  const [step, setStep] = useState(0);
-  const [source, setSource] = useState<string | null>(null);
-  const [memory, setMemory] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [phraseIdx, setPhraseIdx] = useState(0);
-  const [profile, setLocalProfile] = useState<Profile | null>(null);
-  const [questions, setQuestions] = useState<FollowUpQuestion[]>([]);
-  const [answers, setAnswers] = useState<Record<string, string>>({});
-  const [questionIndex, setQuestionIndex] = useState(0);
-  const [questionLoading, setQuestionLoading] = useState(false);
+  const parseMemoryFn   = useServerFn(parseMemory);
+  const generateFn      = useServerFn(generateResume);
+  const getQuestionsFn  = useServerFn(getFollowUpQuestions);
+  const patchProfileFn  = useServerFn(patchProfileWithAnswers);
 
-  const sourceLabel = SOURCES.find((item) => item.id === source)?.name ?? "Source";
+  const [stage, setStage]               = useState<Stage>("intake");
+  const [inputText, setInputText]       = useState("");
+  const [jobTarget, setJobTarget]       = useState("");
+  const [rawMemory, setRawMemory]       = useState("");
+  const [messages, setMessages]         = useState<ChatMessage[]>([]);
+  const [pendingQs, setPendingQs]       = useState<FollowUpQuestion[]>([]);
+  const [qIdx, setQIdx]                 = useState(0);
+  const [answers, setAnswers]           = useState<FollowUpAnswer[]>([]);
+  const [customInput, setCustomInput]   = useState("");
+  const [selectedOpts, setSelectedOpts] = useState<string[]>([]);
+  const [isThinking, setIsThinking]     = useState(false);
+  const [showLoader, setShowLoader]     = useState(false);
+  const [loaderResumeId, setLoaderResumeId] = useState<string | null>(null);
 
-  const loadSample = (id: string) => {
-    const sample = SAMPLE_MEMORIES.find((item) => item.id === id);
-    if (!sample) return;
-    setMemory(sample.text);
-    toast.success(`Loaded ${sample.persona}`);
+  const fileInputRef   = useRef<HTMLInputElement>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const inputRef       = useRef<HTMLTextAreaElement>(null);
+  const chatInputRef   = useRef<HTMLInputElement>(null);
+  const chatPhotoInputRef = useRef<HTMLInputElement>(null);
+
+  const handleChatPhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]; if (!file || !profile) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      setProfile({ ...profile, photoUrl: ev.target?.result as string });
+      toast.success(`Photo attached!`);
+    };
+    reader.readAsDataURL(file);
+    e.target.value = "";
   };
 
+  const inChat   = stage !== "intake";
+  const inQA     = stage === "questions";
+  const inBuild  = stage === "builder";
+  const curQ     = pendingQs[qIdx];
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages, isThinking]);
+
+  useEffect(() => {
+    if (inQA && chatInputRef.current) chatInputRef.current.focus();
+  }, [inQA, qIdx]);
+
+  const addMsg = (msg: Omit<ChatMessage, "id">) =>
+    setMessages((p) => [...p, { id: crypto.randomUUID(), ...msg }]);
+
+  // ── Step 1: extract ──────────────────────────────────────────────────────
   const handleExtract = async () => {
-    if (memory.trim().length < 20) {
-      toast.error("Add more context before extracting the profile.");
+    if (inputText.trim().length < 20) {
+      toast.error("Add a bit more detail about yourself.");
       return;
     }
-
-    setLoading(true);
-    setStep(2);
-    const interval = setInterval(
-      () => setPhraseIdx((current) => (current + 1) % LOADING_PHRASES.length),
-      1800,
-    );
+    const memory = inputText.trim();
+    setRawMemory(memory);
+    setInputText("");
+    setIsThinking(true);
+    setStage("parsing");
+    addMsg({ from: "user", content: memory.slice(0, 240) + (memory.length > 240 ? "…" : "") });
 
     try {
-      const { profile } = await parseMemoryFn({ data: { memory } });
-      setLocalProfile(profile);
-      const { questions } = await suggestFollowUpsFn({ data: { profile } });
-      setQuestions(questions);
-      setAnswers(
-        Object.fromEntries(
-          questions.map((question) => [question.id, ""]),
-        ),
-      );
-      setQuestionIndex(0);
-      setStep(questions.length > 0 ? 3 : 4);
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Failed to extract profile.");
-      setStep(1);
-    } finally {
-      clearInterval(interval);
-      setLoading(false);
-    }
-  };
+      const { profile: parsed } = await parseMemoryFn({ data: { apiKey, memory } });
+      setProfile(parsed);
 
-  const handleConfirm = () => {
-    if (!profile) return;
-    setProfile(profile);
-    toast.success("Profile saved");
-    navigate({ to: "/dashboard" });
-  };
-
-  const handleApplyAnswers = async () => {
-    if (!profile) return;
-
-    const payload: FollowUpAnswer[] = questions
-      .map((question) => ({
-        questionId: question.id,
-        field: question.field,
-        answer: answers[question.id]?.trim() ?? "",
-      }))
-      .filter((item) => item.answer.length > 0);
-
-    if (payload.length === 0) {
-      setStep(4);
-      return;
-    }
-
-    setQuestionLoading(true);
-    try {
-      const { profile: completedProfile } = await applyFollowUpsFn({
-        data: {
-          profile,
-          answers: payload,
-        },
+      const { isComplete, questions } = await getQuestionsFn({
+        data: { apiKey, profile: parsed, rawMemory: memory },
       });
-      setLocalProfile(completedProfile);
-      toast.success("Profile updated with your answers");
-      setStep(4);
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Failed to apply answers.");
-    } finally {
-      setQuestionLoading(false);
+      setIsThinking(false);
+
+      if (isComplete || questions.length === 0) {
+        addMsg({ from: "ai", content: `Profile captured, ${parsed.name || "there"}! What role are you targeting for this resume?` });
+        setStage("builder");
+      } else {
+        addMsg({ from: "ai", content: `Got your profile, ${parsed.name || "there"}! Just a few quick questions to make your resume even stronger.` });
+        setPendingQs(questions);
+        setQIdx(0);
+        setStage("questions");
+        setTimeout(() => addMsg({ from: "ai", content: questions[0].question, question: questions[0] }), 350);
+      }
+    } catch (err) {
+      setIsThinking(false);
+      toast.error(err instanceof Error ? err.message : "Failed to analyze. Try again.");
+      setStage("intake");
     }
   };
 
-  return (
-    <div className="page-shell bg-background text-foreground">
-      <header className="saas-nav">
-        <div className="app-frame px-4 sm:px-6">
-          <div className="flex h-16 items-center justify-between">
-            <Link to="/" className="flex items-center gap-2 cursor-pointer" id="nav-logo">
-              <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center shadow-sm">
-                <Sparkles className="w-4 h-4 text-white" />
-              </div>
-              <span className="text-[1rem] font-bold tracking-tight text-slate-900">MemoryCV</span>
-            </Link>
+  // ── Step 2: answer question ──────────────────────────────────────────────
+  const handleAnswer = (answer: string, idx: number) => {
+    const q = pendingQs[idx];
+    if (!q || !answer.trim()) return;
+    const newAns: FollowUpAnswer = { questionId: q.id, field: q.field, answer };
+    const all = [...answers, newAns];
+    setAnswers(all);
+    addMsg({ from: "user", content: answer });
+    setSelectedOpts([]);
+    setCustomInput("");
 
-            <Stepper step={step} />
-          </div>
+    const next = idx + 1;
+    if (next < pendingQs.length) {
+      setQIdx(next);
+      setTimeout(() => addMsg({ from: "ai", content: pendingQs[next].question, question: pendingQs[next] }), 380);
+    } else {
+      finishQA(all);
+    }
+  };
+
+  const handleSkip = () => {
+    addMsg({ from: "user", content: "Skip" });
+    setSelectedOpts([]);
+    setCustomInput("");
+    const next = qIdx + 1;
+    if (next < pendingQs.length) {
+      setQIdx(next);
+      setTimeout(() => addMsg({ from: "ai", content: pendingQs[next].question, question: pendingQs[next] }), 380);
+    } else {
+      finishQA(answers);
+    }
+  };
+
+  const finishQA = async (all: FollowUpAnswer[]) => {
+    setIsThinking(true);
+    setStage("patching");
+    try {
+      const { profile: patched } = await patchProfileFn({ data: { apiKey, profile, answers: all } });
+      setProfile(patched);
+      setIsThinking(false);
+      addMsg({ from: "ai", content: `All done! Your profile is ready, ${patched.name || "there"}. What role are you targeting?` });
+      setStage("builder");
+    } catch {
+      setIsThinking(false);
+      addMsg({ from: "ai", content: "Profile updated! What role are you targeting?" });
+      setStage("builder");
+    }
+  };
+
+  // ── Step 3: generate ─────────────────────────────────────────────────────
+  const handleBuild = async () => {
+    if (jobTarget.trim().length < 2) { toast.error("Enter a role or job title."); return; }
+    if (!profile) return;
+    addMsg({ from: "user", content: jobTarget });
+    setIsThinking(true);
+    setStage("generating");
+    try {
+      const { resume } = await generateFn({ data: { apiKey, profile, jobTarget: jobTarget.trim() } });
+      const saved: SavedResume = {
+        id: crypto.randomUUID(),
+        title: resume.title || jobTarget.slice(0, 60),
+        jobTarget,
+        template: "executive",
+        data: resume,
+        createdAt: Date.now(),
+      };
+      addResume(saved);
+      // Show sleek loader for 2.2s then navigate so user sees the transition
+      setIsThinking(false);
+      setShowLoader(true);
+      setLoaderResumeId(saved.id);
+    } catch (e) {
+      setIsThinking(false);
+      toast.error(e instanceof Error ? e.message : "Generation failed.");
+      setStage("builder");
+    }
+  };
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]; if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      setInputText((p) => p + (p ? "\n\n" : "") + `[${file.name}]\n` + (ev.target?.result as string));
+      toast.success(`Loaded ${file.name}`);
+    };
+    reader.readAsText(file);
+    e.target.value = "";
+  };
+
+  // ── Render ───────────────────────────────────────────────────────────────
+  return (
+    <div className="min-h-dvh flex flex-col" style={{ background: "linear-gradient(165deg, #b3d9f7 0%, #cce8ff 30%, #ddf0ff 60%, #ecf7ff 100%)" }}>
+
+      {/* ── Full-screen generating loader ── */}
+      {showLoader && loaderResumeId && (
+        <GeneratingLoader onDone={() => navigate({ to: "/resume/$id", params: { id: loaderResumeId } })} />
+      )}
+
+      {/* ── Header ── */}
+      <header className="px-6 py-4 flex items-center gap-2 shrink-0">
+        <div className="w-7 h-7 rounded-full bg-blue-600 flex items-center justify-center shadow-md">
+          <Sparkles className="w-3.5 h-3.5 text-white" />
         </div>
+        <span className="text-[1.05rem] font-semibold text-slate-800 tracking-tight">MemoryCV</span>
       </header>
 
-      <main className="app-frame grid gap-6 px-4 pb-16 pt-3 sm:px-6 lg:grid-cols-[0.42fr_0.58fr] lg:px-8">
-        <IntroRail
-          step={step}
-          sourceLabel={sourceLabel}
-          memoryLength={memory.length}
-          profile={profile}
-          questionCount={questions.length}
-          answeredCount={Object.values(answers).filter(Boolean).length}
-        />
 
-        <section className="surface-panel min-h-[680px] rounded-[2.25rem] p-6 sm:p-8">
-          <AnimatePresence mode="wait">
-            {step === 0 && (
-              <Panel key="sources" title="Choose the memory source" subtitle="Pick the source format that most closely matches what you are about to paste.">
-                <div className="grid gap-4 md:grid-cols-2">
-                  {SOURCES.map((item, index) => (
-                    <motion.button
-                      key={item.id}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: index * 0.06, type: "spring", stiffness: 100, damping: 20 }}
-                      onClick={() => {
-                        setSource(item.id);
-                        setStep(1);
-                      }}
-                      className="surface-muted rounded-[1.6rem] p-5 text-left transition-transform hover:-translate-y-[1px]"
-                    >
-                      <div className="eyebrow">Source 0{index + 1}</div>
-                      <div className="mt-4 text-xl font-semibold tracking-tight">{item.name}</div>
-                      <p className="mt-3 text-sm leading-6 text-muted-foreground">{item.where}</p>
-                    </motion.button>
-                  ))}
-                </div>
-              </Panel>
-            )}
+      {/* ── INTAKE — centered big textarea ── */}
+      {!inChat && (
+        <div className="flex-1 flex flex-col items-center justify-center px-4 pb-8">
+          <motion.h1
+            initial={{ opacity: 0, y: -12 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-3xl font-semibold text-slate-900 tracking-tight mb-2 text-center"
+          >
+            Tell me about yourself.
+          </motion.h1>
+          <p className="text-slate-500 text-sm mb-8 text-center max-w-sm">
+            Paste your resume, LinkedIn bio, career history — or just write freely.
+          </p>
 
-            {step === 1 && (
-              <Panel key="memory" title="Paste the raw memory" subtitle="Do not clean it up. The extraction performs better when the source material stays messy and complete.">
-                <div className="grid gap-6">
-                  <div className="flex flex-wrap gap-2">
-                    {SAMPLE_MEMORIES.map((sample) => (
-                      <button
-                        key={sample.id}
-                        onClick={() => loadSample(sample.id)}
-                        className="ghost-button px-4 py-2 text-sm text-foreground"
-                      >
-                        {sample.persona}
-                      </button>
-                    ))}
-                  </div>
+          {/* Big intake card */}
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="w-full max-w-[44rem] rounded-3xl overflow-hidden shadow-[0_8px_40px_-8px_rgba(0,80,200,0.18)] border border-blue-100/80"
+            style={{ background: "rgba(255,255,255,0.75)", backdropFilter: "blur(20px)" }}
+          >
+            <textarea
+              ref={inputRef}
+              value={inputText}
+              onChange={(e) => setInputText(e.target.value)}
+              placeholder="Paste your resume, LinkedIn summary, career history, or just write about yourself..."
+              className="w-full bg-transparent resize-none outline-none text-slate-800 text-[15.5px] leading-relaxed placeholder:text-slate-400 px-6 pt-6 pb-3"
+              style={{ minHeight: "200px" }}
+              onKeyDown={(e) => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) handleExtract(); }}
+            />
 
-                  <div className="grid gap-4 lg:grid-cols-[1.15fr_0.85fr]">
-                    <div>
-                      <label className="mb-2 block text-sm font-medium text-foreground">Memory input</label>
-                      <textarea
-                        value={memory}
-                        onChange={(event) => setMemory(event.target.value)}
-                        placeholder="Paste memory, profile notes, or a free-form summary here."
-                        className="field-input min-h-[360px] resize-y"
-                      />
-                      <div className="mt-3 flex items-center justify-between text-xs text-muted-foreground">
-                        <span>{memory.length.toLocaleString()} characters</span>
-                        <span>{sourceLabel}</span>
-                      </div>
+            {/* Toolbar */}
+            <div className="flex items-center justify-between px-4 py-3 border-t border-blue-50">
+              <div className="flex items-center gap-2">
+                <input type="file" ref={fileInputRef} onChange={handleFileUpload} className="hidden" accept=".txt,.md,.pdf,.docx,.doc,.rtf" />
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12.5px] font-medium text-slate-600 hover:bg-blue-50 transition-colors border border-slate-200 bg-white/70"
+                >
+                  <Paperclip className="w-3.5 h-3.5" /> Upload
+                </button>
+                {SAMPLE_MEMORIES[0] && (
+                  <button
+                    onClick={() => { setInputText(SAMPLE_MEMORIES[0].text); toast.success("Sample loaded"); }}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12.5px] font-medium text-slate-600 hover:bg-blue-50 transition-colors border border-slate-200 bg-white/70"
+                  >
+                    <FileText className="w-3.5 h-3.5" /> Try Sample
+                  </button>
+                )}
+              </div>
+              <button
+                onClick={handleExtract}
+                disabled={inputText.trim().length < 20}
+                className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white px-5 py-2.5 rounded-full text-[14px] font-semibold shadow-md shadow-blue-200 transition-all active:scale-95"
+              >
+                Analyze Me
+                <ArrowUp className="w-4 h-4" />
+              </button>
+            </div>
+          </motion.div>
+
+          <p className="text-center text-[11.5px] text-slate-400 mt-4">⌘ + Enter to submit</p>
+        </div>
+      )}
+
+      {/* ── CHAT VIEW ── */}
+      {inChat && (
+        <div className="flex-1 flex flex-col min-h-0">
+          {/* Messages — takes all remaining space, scrolls naturally */}
+          <div className="flex-1 overflow-y-auto px-4 pt-2 pb-4" style={{ scrollbarWidth: "none" }}>
+            <div className="max-w-[42rem] mx-auto flex flex-col gap-4">
+              {messages.map((msg) => (
+                <motion.div
+                  key={msg.id}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.22 }}
+                  className={`flex gap-3 ${msg.from === "user" ? "justify-end" : "justify-start"}`}
+                >
+                  {msg.from === "ai" && (
+                    <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center shrink-0 mt-0.5 shadow-md shadow-blue-200">
+                      <Sparkles className="w-3.5 h-3.5 text-white" />
                     </div>
+                  )}
+                  <div
+                    className={`max-w-[75%] rounded-2xl px-4 py-3 text-[14.5px] leading-relaxed shadow-sm ${
+                      msg.from === "user"
+                        ? "bg-blue-600 text-white rounded-br-md shadow-blue-200"
+                        : "bg-white text-slate-800 rounded-bl-md border border-blue-100"
+                    }`}
+                  >
+                    {msg.content}
+                  </div>
+                </motion.div>
+              ))}
 
-                    <div className="surface-muted rounded-[1.6rem] p-5">
-                      <div className="eyebrow">What gets extracted</div>
-                      <div className="mt-4 space-y-4">
-                        {[
-                          "identity and positioning",
-                          "experience chronology",
-                          "technical and soft skill clusters",
-                          "career direction and role fit",
-                        ].map((line, index) => (
-                          <div key={line} className="flex items-center gap-3">
-                            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-background font-mono text-xs text-muted-foreground">
-                              0{index + 1}
-                            </div>
-                            <span className="text-sm text-foreground">{line}</span>
-                          </div>
+              {/* Thinking indicator */}
+              <AnimatePresence>
+                {isThinking && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0 }}
+                    className="flex gap-3"
+                  >
+                    <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center shrink-0 shadow-md shadow-blue-200">
+                      <Sparkles className="w-3.5 h-3.5 text-white" />
+                    </div>
+                    <div className="bg-white border border-blue-100 rounded-2xl rounded-bl-md px-5 py-3.5 flex gap-1.5 items-center shadow-sm">
+                      {[0, 1, 2].map((i) => (
+                        <motion.div
+                          key={i}
+                          className="w-2 h-2 rounded-full bg-blue-400"
+                          animate={{ scale: [1, 1.5, 1], opacity: [0.4, 1, 0.4] }}
+                          transition={{ repeat: Infinity, duration: 1.1, delay: i * 0.18 }}
+                        />
+                      ))}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              <div ref={messagesEndRef} />
+            </div>
+          </div>
+
+          {/* ── Sticky bottom input ── */}
+          <div
+            className="shrink-0 border-t border-blue-100/60 px-4 pt-3 pb-safe-4"
+            style={{ background: "rgba(255,255,255,0.85)", backdropFilter: "blur(24px)", paddingBottom: "max(16px, env(safe-area-inset-bottom))" }}
+          >
+            <div className="max-w-[42rem] mx-auto">
+              {/* Q&A chips — shown above input */}
+              <AnimatePresence mode="wait">
+                {inQA && curQ && (
+                  <motion.div
+                    key={curQ.id}
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -8 }}
+                    className="mb-3"
+                  >
+                    {/* Helper */}
+                    <p className="text-[11.5px] text-slate-400 mb-2 ml-1">{curQ.helperText}</p>
+                    {/* Chips */}
+                    {curQ.options.length > 0 && (
+                      <div className="flex flex-wrap gap-2 mb-3">
+                        {curQ.options.map((opt) => {
+                          const sel = selectedOpts.includes(opt);
+                          return (
+                            <motion.button
+                              key={opt}
+                              whileTap={{ scale: 0.94 }}
+                              onClick={() => {
+                                if (curQ.inputType === "multiselect") {
+                                  setSelectedOpts((p) => p.includes(opt) ? p.filter((o) => o !== opt) : [...p, opt]);
+                                } else {
+                                  handleAnswer(opt, qIdx);
+                                }
+                              }}
+                              className={`px-3.5 py-2 rounded-full text-[13px] font-medium border transition-all ${
+                                sel
+                                  ? "bg-blue-600 text-white border-blue-600 shadow-sm shadow-blue-200"
+                                  : "bg-white/90 text-slate-700 border-slate-200 hover:border-blue-400 hover:bg-blue-50"
+                              }`}
+                            >
+                              {sel && <CheckCircle2 className="w-3.5 h-3.5 inline mr-1.5 -mt-0.5" />}
+                              {opt}
+                            </motion.button>
+                          );
+                        })}
+                      </div>
+                    )}
+                    {/* Confirm multiselect */}
+                    {curQ.inputType === "multiselect" && selectedOpts.length > 0 && (
+                      <button
+                        onClick={() => handleAnswer(selectedOpts.join(", "), qIdx)}
+                        className="mb-2 text-sm font-semibold text-blue-600 hover:text-blue-800 flex items-center gap-1"
+                      >
+                        Confirm <ArrowUp className="w-3.5 h-3.5 rotate-90" />
+                      </button>
+                    )}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              {/* Input row */}
+              <div
+                className="flex items-center gap-3 rounded-2xl px-4 py-3 border border-blue-200 shadow-lg shadow-blue-100/40"
+                style={{ background: "rgba(255,255,255,0.92)" }}
+              >
+                {/* Q&A text input */}
+                {inQA && curQ && (
+                  <input
+                    ref={chatInputRef}
+                    value={customInput}
+                    onChange={(e) => setCustomInput(e.target.value)}
+                    placeholder={curQ.placeholder || "Type your answer or pick above..."}
+                    className="flex-1 bg-transparent outline-none text-slate-800 text-[15px] placeholder:text-slate-400"
+                    onKeyDown={(e) => { if (e.key === "Enter" && customInput.trim()) handleAnswer(customInput.trim(), qIdx); }}
+                  />
+                )}
+
+                {/* Builder target */}
+                {inBuild && (
+                  <input
+                    value={jobTarget}
+                    onChange={(e) => setJobTarget(e.target.value)}
+                    placeholder="What role are you targeting? e.g. Senior PM at a startup..."
+                    className="flex-1 bg-transparent outline-none text-slate-800 text-[15px] placeholder:text-slate-400"
+                    onKeyDown={(e) => { if (e.key === "Enter") handleBuild(); }}
+                    autoFocus
+                  />
+                )}
+
+                {/* Placeholder while AI is thinking */}
+                {!inQA && !inBuild && (
+                  <span className="flex-1 text-slate-400 text-[15px] select-none">
+                    {stage === "generating" ? "Generating your resume..." : "Hang on a second..."}
+                  </span>
+                )}
+
+                {/* Right actions */}
+                <div className="flex items-center gap-2 shrink-0">
+                  <input type="file" ref={chatPhotoInputRef} onChange={handleChatPhotoUpload} className="hidden" accept="image/*" />
+                  {(inQA || inBuild) && (
+                    <button
+                      onClick={() => chatPhotoInputRef.current?.click()}
+                      className={`w-8 h-8 rounded-full flex items-center justify-center transition-all shadow-sm ${profile?.photoUrl ? 'border border-green-200' : 'bg-slate-100 hover:bg-blue-50 text-slate-500 hover:text-blue-600'}`}
+                      title={profile?.photoUrl ? "Photo attached! Click to change." : "Attach a photo (optional)"}
+                    >
+                      {profile?.photoUrl ? <img src={profile.photoUrl} className="w-8 h-8 rounded-full object-cover" alt="Profile" /> : <ImagePlus className="w-4 h-4" />}
+                    </button>
+                  )}
+                  {inQA && (
+                    <>
+                      {/* Progress dots */}
+                      <div className="flex gap-1 mr-1">
+                        {pendingQs.map((_, i) => (
+                          <div
+                            key={i}
+                            className={`h-1.5 rounded-full transition-all duration-300 ${
+                              i < qIdx ? "bg-blue-500 w-1.5" : i === qIdx ? "bg-blue-600 w-4" : "bg-slate-200 w-1.5"
+                            }`}
+                          />
                         ))}
                       </div>
-                    </div>
-                  </div>
-
-                  <div className="flex flex-col justify-between gap-3 sm:flex-row">
-                    <button onClick={() => setStep(0)} className="ghost-button px-5 py-3 text-sm text-foreground">
-                      <ArrowLeft className="h-4 w-4" />
-                      Back
-                    </button>
-                    <button
-                      onClick={handleExtract}
-                      disabled={memory.trim().length < 20 || loading}
-                      className="primary-button px-6 py-3 text-sm font-medium disabled:opacity-50"
-                    >
-                      Extract profile
-                      <ArrowRight className="h-4 w-4" />
-                    </button>
-                  </div>
-                </div>
-              </Panel>
-            )}
-
-            {step === 2 && (
-              <motion.div
-                key="processing"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="flex min-h-[540px] flex-col justify-between"
-              >
-                <div className="max-w-[480px]">
-                  <div className="eyebrow">Extraction running</div>
-                  <h1 className="mt-4 text-4xl font-semibold tracking-tight sm:text-5xl">
-                    Turning memory into a working profile.
-                  </h1>
-                  <p className="mt-4 text-base leading-7 text-muted-foreground">
-                    The system is interpreting narrative fragments, role history, skills, and goals
-                    into a structure the generator can use.
-                  </p>
-                </div>
-
-                <div className="grid gap-6 lg:grid-cols-[0.75fr_1.25fr]">
-                  <div className="surface-muted flex min-h-[220px] flex-col justify-between rounded-[1.8rem] p-6">
-                    <div className="flex h-16 w-16 items-center justify-center rounded-[1.4rem] bg-foreground text-background">
-                      <Wand2 className="h-6 w-6" />
-                    </div>
-                    <div>
-                      <AnimatePresence mode="wait">
-                        <motion.div
-                          key={phraseIdx}
-                          initial={{ opacity: 0, y: 8 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0, y: -8 }}
-                          transition={{ duration: 0.3 }}
-                          className="text-xl font-semibold tracking-tight"
+                      <button
+                        onClick={handleSkip}
+                        className="flex items-center gap-1 text-[12px] font-medium text-slate-400 hover:text-slate-700 transition-colors px-2 py-1 rounded-lg hover:bg-slate-100"
+                      >
+                        <SkipForward className="w-3.5 h-3.5" /> Skip
+                      </button>
+                      {customInput.trim() && (
+                        <button
+                          onClick={() => handleAnswer(customInput.trim(), qIdx)}
+                          className="w-8 h-8 rounded-full bg-blue-600 hover:bg-blue-700 flex items-center justify-center shadow-md shadow-blue-200 transition-all active:scale-95"
                         >
-                          {LOADING_PHRASES[phraseIdx]}
-                        </motion.div>
-                      </AnimatePresence>
-                      <div className="mt-3 flex items-center gap-2 text-sm text-muted-foreground">
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                        AI analysis in progress
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="grid gap-3">
-                    {[88, 100, 76, 92].map((width, index) => (
-                      <div key={width} className="surface-muted rounded-[1.3rem] p-4">
-                        <div
-                          className="shimmer h-3 rounded-full bg-foreground/8"
-                          style={{ width: `${width}%`, animationDelay: `${index * 120}ms` }}
-                        />
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </motion.div>
-            )}
-
-            {step === 3 && profile && questions.length > 0 && (
-              <Panel
-                key="questions"
-                title="Fill the missing details"
-                subtitle="The AI found a few resume-critical gaps. Answer them here and the profile will be updated automatically."
-              >
-                <FollowUpSlides
-                  questions={questions}
-                  answers={answers}
-                  questionIndex={questionIndex}
-                  loading={questionLoading}
-                  onAnswer={(questionId, value) =>
-                    setAnswers((current) => ({ ...current, [questionId]: value }))
-                  }
-                  onBack={() => setQuestionIndex((current) => Math.max(0, current - 1))}
-                  onNext={() =>
-                    setQuestionIndex((current) => Math.min(questions.length - 1, current + 1))
-                  }
-                  onApply={handleApplyAnswers}
-                />
-              </Panel>
-            )}
-
-            {step === 4 && profile && (
-              <Panel key="review" title={`Review ${profile.name.split(" ")[0]}'s profile`} subtitle="Adjust the extracted profile before entering the dashboard.">
-                <ProfileEditor profile={profile} setProfile={setLocalProfile} />
-
-                <div className="mt-8 flex flex-col justify-between gap-3 sm:flex-row">
-                  <button onClick={() => setStep(questions.length > 0 ? 3 : 1)} className="ghost-button px-5 py-3 text-sm text-foreground">
-                    <ArrowLeft className="h-4 w-4" />
-                    {questions.length > 0 ? "Back to questions" : "Re-paste memory"}
-                  </button>
-                  <button onClick={handleConfirm} className="primary-button px-6 py-3 text-sm font-medium">
-                    <Check className="h-4 w-4" />
-                    Continue to dashboard
-                  </button>
-                </div>
-              </Panel>
-            )}
-          </AnimatePresence>
-        </section>
-      </main>
-    </div>
-  );
-}
-
-function IntroRail({
-  step,
-  sourceLabel,
-  memoryLength,
-  profile,
-  questionCount,
-  answeredCount,
-}: {
-  step: number;
-  sourceLabel: string;
-  memoryLength: number;
-  profile: Profile | null;
-  questionCount: number;
-  answeredCount: number;
-}) {
-  const statuses = [
-    "Select source",
-    "Paste memory",
-    "Extract profile",
-    "Fill gaps",
-    "Review output",
-  ];
-
-  return (
-    <aside className="grid gap-6 lg:sticky lg:top-6 lg:h-fit">
-      <div className="surface-panel rounded-[2.25rem] p-6 sm:p-8">
-        <div className="eyebrow">Guided intake</div>
-        <h1 className="mt-4 text-4xl font-semibold tracking-tight sm:text-5xl">
-          Bring your memory in once. Reuse it everywhere after.
-        </h1>
-        <p className="mt-4 max-w-[34ch] text-base leading-7 text-muted-foreground">
-          This flow is designed to turn unstructured memory into a controlled, reusable candidate profile.
-        </p>
-      </div>
-
-      <div className="surface-panel rounded-[2rem] p-6">
-        <div className="eyebrow">Progress</div>
-        <div className="mt-5 space-y-4">
-          {statuses.map((label, index) => {
-            const active = index === step;
-            const complete = index < step;
-
-            return (
-              <div key={label} className="flex items-center gap-3">
-                <div
-                  className={`flex h-10 w-10 items-center justify-center rounded-full text-sm font-medium ${
-                    complete
-                      ? "bg-foreground text-background"
-                      : active
-                        ? "bg-primary text-primary-foreground"
-                        : "bg-secondary text-muted-foreground"
-                  }`}
-                >
-                  {complete ? "✓" : `0${index + 1}`}
-                </div>
-                <div>
-                  <div className="text-sm font-medium text-foreground">{label}</div>
-                  <div className="text-xs text-muted-foreground">
-                    {index === 0
-                      ? sourceLabel
-                      : index === 1
-                        ? `${memoryLength.toLocaleString()} chars loaded`
-                      : index === 3 && questionCount > 0
-                        ? `${answeredCount}/${questionCount} answered`
-                        : index === 4 && profile
-                          ? profile.name
-                          : "Pending"}
-                  </div>
+                          <ArrowUp className="w-4 h-4 text-white" />
+                        </button>
+                      )}
+                    </>
+                  )}
+                  {inBuild && jobTarget.trim().length >= 2 && (
+                    <button
+                      onClick={handleBuild}
+                      className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-full text-[13px] font-semibold shadow-md shadow-blue-200 transition-all active:scale-95"
+                    >
+                      Generate <Sparkles className="w-3.5 h-3.5" />
+                    </button>
+                  )}
                 </div>
               </div>
-            );
-          })}
+            </div>
+          </div>
         </div>
-      </div>
-
-      <div className="surface-panel rounded-[2rem] p-6">
-        <div className="eyebrow">Operator note</div>
-        <p className="mt-4 text-sm leading-6 text-muted-foreground">
-          Cleaner UI does not matter if the intake logic is weak. The goal here is confidence:
-          the user should understand what is happening, what was extracted, and what gets saved.
-        </p>
-      </div>
-    </aside>
-  );
-}
-
-function Stepper({ step }: { step: number }) {
-  return (
-    <div className="hidden items-center gap-2 md:flex">
-      {[0, 1, 2, 3, 4].map((index) => (
-        <div
-          key={index}
-          className={`h-1.5 w-12 rounded-full transition-colors ${
-            index <= step ? "bg-foreground" : "bg-border"
-          }`}
-        />
-      ))}
+      )}
     </div>
   );
 }
 
-function Panel({
-  title,
-  subtitle,
-  children,
-}: {
-  title: string;
-  subtitle: string;
-  children: React.ReactNode;
-}) {
+// ── Sleek generating loader ──────────────────────────────────────────────────
+const STEPS = [
+  "Reading your career story...",
+  "Identifying key strengths...",
+  "Crafting your headline...",
+  "Writing experience bullets...",
+  "Polishing your summary...",
+  "Finalizing your resume...",
+];
+
+function GeneratingLoader({ onDone }: { onDone: () => void }) {
+  const [step, setStep] = useState(0);
+  const [progress, setProgress] = useState(0);
+
+  useEffect(() => {
+    // Advance progress bar smoothly over 2.4s
+    const total = 2400;
+    const interval = 30;
+    let elapsed = 0;
+    const timer = setInterval(() => {
+      elapsed += interval;
+      setProgress(Math.min((elapsed / total) * 100, 100));
+      // Step through messages
+      const stepIdx = Math.floor((elapsed / total) * STEPS.length);
+      setStep(Math.min(stepIdx, STEPS.length - 1));
+      if (elapsed >= total) {
+        clearInterval(timer);
+        onDone();
+      }
+    }, interval);
+    return () => clearInterval(timer);
+  }, [onDone]);
+
   return (
     <motion.div
-      initial={{ opacity: 0, y: 12 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -12 }}
-      transition={{ duration: 0.3 }}
-      className="flex min-h-full flex-col"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      className="fixed inset-0 z-[100] flex flex-col items-center justify-center"
+      style={{ background: "linear-gradient(135deg, #0f172a 0%, #1e3a5f 50%, #0f172a 100%)" }}
     >
-      <div className="max-w-[720px]">
-        <div className="eyebrow">Intake step</div>
-        <h2 className="mt-4 text-3xl font-semibold tracking-tight sm:text-4xl">{title}</h2>
-        <p className="mt-3 text-base leading-7 text-muted-foreground">{subtitle}</p>
+      {/* Animated logo */}
+      <motion.div
+        animate={{ scale: [1, 1.08, 1], rotate: [0, 5, -5, 0] }}
+        transition={{ repeat: Infinity, duration: 2.4, ease: "easeInOut" }}
+        className="w-16 h-16 rounded-2xl bg-blue-500 flex items-center justify-center shadow-2xl shadow-blue-500/40 mb-8"
+      >
+        <Sparkles className="w-8 h-8 text-white" />
+      </motion.div>
+
+      {/* Headline */}
+      <h2 className="text-2xl font-semibold text-white mb-2 tracking-tight">
+        Writing your resume
+      </h2>
+
+      {/* Animated step text */}
+      <motion.p
+        key={step}
+        initial={{ opacity: 0, y: 6 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -6 }}
+        transition={{ duration: 0.3 }}
+        className="text-blue-300 text-sm mb-10"
+      >
+        {STEPS[step]}
+      </motion.p>
+
+      {/* Progress bar */}
+      <div className="w-64 h-1.5 bg-white/10 rounded-full overflow-hidden">
+        <motion.div
+          className="h-full bg-blue-400 rounded-full"
+          style={{ width: `${progress}%` }}
+          transition={{ duration: 0.03 }}
+        />
       </div>
-      <div className="mt-8 flex-1">{children}</div>
-    </motion.div>
-  );
-}
 
-function ProfileEditor({
-  profile,
-  setProfile,
-}: {
-  profile: Profile;
-  setProfile: (profile: Profile) => void;
-}) {
-  const update = <K extends keyof Profile>(key: K, value: Profile[K]) =>
-    setProfile({ ...profile, [key]: value });
-
-  return (
-    <div className="grid gap-6">
-      <div className="grid gap-4 lg:grid-cols-2">
-        <Field label="Name">
-          <input
-            value={profile.name}
-            onChange={(event) => update("name", event.target.value)}
-            className="field-input"
+      {/* Subtle pulsing dots */}
+      <div className="flex gap-2 mt-8">
+        {[0, 1, 2].map((i) => (
+          <motion.div
+            key={i}
+            className="w-1.5 h-1.5 rounded-full bg-blue-400/60"
+            animate={{ opacity: [0.3, 1, 0.3], scale: [0.8, 1.2, 0.8] }}
+            transition={{ repeat: Infinity, duration: 1.2, delay: i * 0.2 }}
           />
-        </Field>
-        <Field label="Location">
-          <input
-            value={profile.location}
-            onChange={(event) => update("location", event.target.value)}
-            className="field-input"
-          />
-        </Field>
-        <Field label="Photo (optional)">
-          <PhotoUploader
-            value={profile.photoUrl ?? ""}
-            onChange={(val) => update("photoUrl", val)}
-          />
-        </Field>
-        <Field label="Email">
-          <input
-            value={profile.email ?? ""}
-            onChange={(event) => update("email", event.target.value)}
-            className="field-input"
-          />
-        </Field>
-      </div>
-
-      <Field label="Summary">
-        <textarea
-          value={profile.summary}
-          onChange={(event) => update("summary", event.target.value)}
-          rows={4}
-          className="field-input resize-y"
-        />
-      </Field>
-
-      <Field label="Career goals">
-        <textarea
-          value={profile.careerGoals}
-          onChange={(event) => update("careerGoals", event.target.value)}
-          rows={3}
-          className="field-input resize-y"
-        />
-      </Field>
-
-      <div className="grid gap-4 lg:grid-cols-2">
-        <Pills
-          label="Technical skills"
-          values={profile.skills.technical}
-          onChange={(values) => update("skills", { ...profile.skills, technical: values })}
-        />
-        <Pills
-          label="Tools"
-          values={profile.skills.tools}
-          onChange={(values) => update("skills", { ...profile.skills, tools: values })}
-        />
-        <Pills
-          label="Soft skills"
-          values={profile.skills.soft}
-          onChange={(values) => update("skills", { ...profile.skills, soft: values })}
-        />
-        <Pills
-          label="Languages"
-          values={profile.skills.languages_spoken}
-          onChange={(values) => update("skills", { ...profile.skills, languages_spoken: values })}
-        />
-      </div>
-
-      <div className="surface-muted rounded-[1.6rem] p-5">
-        <div className="flex items-center justify-between">
-          <div>
-            <div className="eyebrow">Experience review</div>
-            <div className="mt-2 text-xl font-semibold tracking-tight">
-              {profile.experience.length} roles extracted
-            </div>
-          </div>
-          <div className="font-mono text-xs text-muted-foreground">chronology</div>
-        </div>
-
-        <div className="mt-5 space-y-3">
-          {profile.experience.slice(0, 4).map((item, index) => (
-            <div key={`${item.company}-${index}`} className="rounded-[1.2rem] bg-background px-4 py-4">
-              <div className="text-sm font-semibold text-foreground">
-                {item.title} at {item.company}
-              </div>
-              <div className="mt-1 text-xs text-muted-foreground">{item.duration}</div>
-            </div>
-          ))}
-          {profile.experience.length > 4 && (
-            <div className="text-sm text-muted-foreground">
-              + {profile.experience.length - 4} more roles retained in the profile
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function FollowUpSlides({
-  questions,
-  answers,
-  questionIndex,
-  loading,
-  onAnswer,
-  onBack,
-  onNext,
-  onApply,
-}: {
-  questions: FollowUpQuestion[];
-  answers: Record<string, string>;
-  questionIndex: number;
-  loading: boolean;
-  onAnswer: (questionId: string, value: string) => void;
-  onBack: () => void;
-  onNext: () => void;
-  onApply: () => void;
-}) {
-  const question = questions[questionIndex];
-  const currentValue = answers[question.id] ?? "";
-  const isLast = questionIndex === questions.length - 1;
-
-  return (
-    <div className="grid gap-6">
-      <div className="surface-muted rounded-[1.8rem] p-6">
-        <div className="flex items-center justify-between">
-          <div className="eyebrow">Question {questionIndex + 1}</div>
-          <div className="font-mono text-xs text-muted-foreground">
-            {questionIndex + 1}/{questions.length}
-          </div>
-        </div>
-
-        <h3 className="mt-4 text-2xl font-semibold tracking-tight">{question.question}</h3>
-        <p className="mt-3 text-sm leading-6 text-muted-foreground">{question.helperText}</p>
-
-        {question.inputType === "select" && question.options.length > 0 ? (
-          <div className="mt-6 grid gap-3">
-            {question.options.map((option) => {
-              const active = currentValue === option;
-              return (
-                <button
-                  key={option}
-                  onClick={() => onAnswer(question.id, option)}
-                  className={`rounded-[1.2rem] px-4 py-4 text-left text-sm transition-colors ${
-                    active ? "bg-foreground text-background" : "surface-panel"
-                  }`}
-                >
-                  {option}
-                </button>
-              );
-            })}
-          </div>
-        ) : null}
-
-        <div className="mt-4">
-          <textarea
-            value={currentValue}
-            onChange={(event) => onAnswer(question.id, event.target.value)}
-            placeholder={question.placeholder ?? "Type your answer here."}
-            rows={question.inputType === "select" ? 2 : 4}
-            className="field-input resize-y"
-          />
-        </div>
-      </div>
-
-      <div className="flex flex-col justify-between gap-3 sm:flex-row">
-        <button
-          onClick={onBack}
-          disabled={questionIndex === 0}
-          className="ghost-button px-5 py-3 text-sm text-foreground disabled:opacity-50"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Previous
-        </button>
-
-        {isLast ? (
-          <button
-            onClick={onApply}
-            disabled={loading}
-            className="primary-button px-6 py-3 text-sm font-medium disabled:opacity-50"
-          >
-            {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
-            Apply answers
-          </button>
-        ) : (
-          <button onClick={onNext} className="primary-button px-6 py-3 text-sm font-medium">
-            Next question
-            <ArrowRight className="h-4 w-4" />
-          </button>
-        )}
-      </div>
-    </div>
-  );
-}
-
-function PhotoUploader({ value, onChange }: { value: string; onChange: (v: string) => void }) {
-  const fileRef = useRef<HTMLInputElement>(null);
-
-  const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    if (file.size > 2 * 1024 * 1024) {
-      alert("Image must be under 2MB");
-      return;
-    }
-    const reader = new FileReader();
-    reader.onload = () => onChange(reader.result as string);
-    reader.readAsDataURL(file);
-  };
-
-  return (
-    <div className="flex flex-col gap-2">
-      <div className="flex items-center gap-3">
-        {value && (
-          <img src={value} alt="Profile" className="w-14 h-14 rounded-full object-cover border border-border shrink-0" onError={() => onChange("")} />
-        )}
-        <div className="flex flex-col gap-1.5 flex-1">
-          <button
-            type="button"
-            onClick={() => fileRef.current?.click()}
-            className="ghost-button px-4 py-2.5 text-sm font-medium text-foreground w-fit flex items-center gap-2"
-          >
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
-            {value ? "Change photo" : "Upload photo"}
-          </button>
-          <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={handleFile} />
-        </div>
-        {value && (
-          <button type="button" onClick={() => onChange("")} className="text-xs text-muted-foreground hover:text-foreground transition-colors">Remove</button>
-        )}
-      </div>
-      <input
-        value={value.startsWith("data:") ? "" : value}
-        onChange={(e) => onChange(e.target.value)}
-        placeholder="…or paste image URL"
-        className="field-input text-xs"
-      />
-    </div>
-  );
-}
-
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <label className="block">
-      <span className="mb-2 block text-sm font-medium text-foreground">{label}</span>
-      {children}
-    </label>
-  );
-}
-
-function Pills({
-  label,
-  values,
-  onChange,
-}: {
-  label: string;
-  values: string[];
-  onChange: (values: string[]) => void;
-}) {
-  const [input, setInput] = useState("");
-
-  return (
-    <div className="surface-muted rounded-[1.6rem] p-5">
-      <div className="mb-3 text-sm font-medium text-foreground">{label}</div>
-      <div className="flex flex-wrap gap-2">
-        {values.map((value, index) => (
-          <span
-            key={`${value}-${index}`}
-            className="inline-flex items-center gap-2 rounded-full bg-background px-3 py-2 text-xs text-foreground"
-          >
-            {value}
-            <button
-              onClick={() => onChange(values.filter((_, current) => current !== index))}
-              className="text-muted-foreground transition-colors hover:text-foreground"
-            >
-              ×
-            </button>
-          </span>
         ))}
       </div>
-
-      <input
-        value={input}
-        onChange={(event) => setInput(event.target.value)}
-        onKeyDown={(event) => {
-          if (event.key === "Enter" && input.trim()) {
-            event.preventDefault();
-            onChange([...values, input.trim()]);
-            setInput("");
-          }
-        }}
-        placeholder="Add a skill and press Enter"
-        className="field-input mt-3"
-      />
-    </div>
+    </motion.div>
   );
 }

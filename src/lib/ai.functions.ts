@@ -9,7 +9,7 @@ import type {
 import { optimizeResumeForOnePage } from "./resume-utils";
 
 const GEMINI_ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions";
-const DEFAULT_MODEL = "gemini-2.0-flash-lite";
+const DEFAULT_MODEL = "gemini-3.1-flash-lite-preview";
 
 interface GatewayMessage {
   role: "system" | "user" | "assistant";
@@ -189,6 +189,112 @@ export const parseMemory = createServerFn({ method: "POST" })
     return { profile };
   });
 
+// ───────────────── getFollowUpQuestions ─────────────────
+
+export const getFollowUpQuestions = createServerFn({ method: "POST" })
+  .inputValidator(
+    z.object({
+      apiKey: z.string().optional(),
+      profile: z.any(),
+      rawMemory: z.string(),
+    }),
+  )
+  .handler(async ({ data }): Promise<{ questions: import("./types").FollowUpQuestion[]; isComplete: boolean }> => {
+    const profileStr = JSON.stringify(data.profile);
+    const json = await callGateway({
+      apiKey: data.apiKey,
+      messages: [
+        {
+          role: "system",
+          content: `You are a career coach AI helping a user build their resume. You have already extracted a profile from their raw memory, but some fields may be missing or weak. Analyze the profile for gaps and generate smart, friendly follow-up questions to fill those gaps. Focus on the most impactful missing pieces first. Each question must have relevant quick-pick options the user can tap, plus allow custom text input. Return at most 6 questions. If the profile is complete enough (all critical fields filled), return isComplete: true and an empty questions array.
+
+Critical fields: name, email/phone contact, at least 1 experience with achievements, education, skills.
+Good-to-have: location, career goals, certifications, projects.
+
+Important: If the user hasn't provided a profile photo, always include one question asking them if they'd like to upload a professional photo (mention they can use the attachment button next to the input). Make this optional.`,
+        },
+        {
+          role: "user",
+          content: `Raw input:\n${data.rawMemory}\n\nExtracted profile:\n${profileStr}`,
+        },
+      ],
+      tools: [
+        {
+          type: "function",
+          function: {
+            name: "return_questions",
+            description: "Return follow-up questions to fill profile gaps",
+            parameters: {
+              type: "object",
+              properties: {
+                isComplete: { type: "boolean", description: "True if profile has enough info to generate a good resume" },
+                questions: {
+                  type: "array",
+                  items: {
+                    type: "object",
+                    properties: {
+                      id: { type: "string" },
+                      field: { type: "string", description: "Which profile field this fills, e.g. 'email', 'experience[0].achievements'" },
+                      question: { type: "string", description: "The friendly question to ask the user" },
+                      helperText: { type: "string", description: "One sentence explaining why this matters" },
+                      inputType: { type: "string", enum: ["text", "select", "multiselect"] },
+                      options: { type: "array", items: { type: "string" }, description: "Quick-pick options the user can tap. Empty for free text only." },
+                      placeholder: { type: "string" },
+                    },
+                    required: ["id", "field", "question", "helperText", "inputType", "options"],
+                  },
+                },
+              },
+              required: ["isComplete", "questions"],
+            },
+          },
+        },
+      ],
+      toolChoice: { type: "function", function: { name: "return_questions" } },
+    });
+    const result = extractToolArgs<{ isComplete: boolean; questions: import("./types").FollowUpQuestion[] }>(json);
+    return result;
+  });
+
+// ───────────────── patchProfileWithAnswers ─────────────────
+
+export const patchProfileWithAnswers = createServerFn({ method: "POST" })
+  .inputValidator(
+    z.object({
+      apiKey: z.string().optional(),
+      profile: z.any(),
+      answers: z.array(z.object({ questionId: z.string(), field: z.string(), answer: z.string() })),
+    }),
+  )
+  .handler(async ({ data }): Promise<{ profile: import("./types").Profile }> => {
+    const json = await callGateway({
+      apiKey: data.apiKey,
+      messages: [
+        {
+          role: "system",
+          content: "You are a profile merge AI. Given an existing profile JSON and a set of user answers to follow-up questions, merge the answers into the profile and return the updated complete profile JSON. Preserve all existing data; only add/update fields based on the answers.",
+        },
+        {
+          role: "user",
+          content: `Current profile:\n${JSON.stringify(data.profile)}\n\nUser answers:\n${JSON.stringify(data.answers)}`,
+        },
+      ],
+      tools: [
+        {
+          type: "function",
+          function: {
+            name: "save_profile",
+            description: "Save the updated profile with user answers merged in.",
+            parameters: profileSchema,
+          },
+        },
+      ],
+      toolChoice: { type: "function", function: { name: "save_profile" } },
+    });
+    const profile = extractToolArgs<import("./types").Profile>(json);
+    return { profile };
+  });
+
 // ───────────────── generateResume ─────────────────
 
 const resumeSchema = {
@@ -289,6 +395,54 @@ export const generateResume = createServerFn({ method: "POST" })
     });
     const resume = extractToolArgs<ResumeData>(json);
     return { resume: optimizeResumeForOnePage(resume) };
+  });
+
+// ───────────────── chatEditResume ─────────────────
+
+export const chatEditResume = createServerFn({ method: "POST" })
+  .inputValidator(
+    z.object({
+      apiKey: z.string().optional(),
+      resume: z.any(),
+      userMessage: z.string().min(1).max(2000),
+    }),
+  )
+  .handler(async ({ data }): Promise<{ resume: ResumeData; reply: string }> => {
+    const json = await callGateway({
+      apiKey: data.apiKey,
+      messages: [
+        {
+          role: "system",
+          content:
+            "You are an elite resume editor and AI assistant. The user will provide their current resume data (in JSON) and a message detailing what changes they want. You must output the fully updated resume data reflecting these changes using the save_resume tool. You must also provide a brief reply confirming what you changed.",
+        },
+        {
+          role: "user",
+          content: `Current Resume Data:\n${JSON.stringify(data.resume)}\n\nUser Request: ${data.userMessage}`,
+        },
+      ],
+      tools: [
+        {
+          type: "function",
+          function: {
+            name: "save_resume",
+            description: "Save the updated tailored resume data alongside a reply message.",
+            parameters: {
+              type: "object",
+              properties: {
+                resume: resumeSchema,
+                reply: { type: "string", description: "A brief message (1-2 sentences) confirming the changes made to the user." }
+              },
+              required: ["resume", "reply"]
+            },
+          },
+        },
+      ],
+      toolChoice: { type: "function", function: { name: "save_resume" } },
+    });
+    
+    const result = extractToolArgs<{ resume: ResumeData; reply: string }>(json);
+    return { resume: optimizeResumeForOnePage(result.resume), reply: result.reply };
   });
 
 // ───────────────── follow-up questions ─────────────────

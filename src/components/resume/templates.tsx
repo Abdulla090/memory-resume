@@ -2,7 +2,7 @@ import type { ResumeData, TemplateId } from "@/lib/types";
 
 export function MinimalTemplate({ data }: { data: ResumeData }) {
   return (
-    <div className="bg-white p-12 text-[#111] font-sans" style={{ minHeight: "1100px" }}>
+    <div className="bg-white p-12 text-[#111] font-sans" style={{ minHeight: "1122px", width: "100%" }}>
       <header className="border-b border-neutral-300 pb-4">
         <h1 className="text-3xl font-semibold tracking-tight">{data.name}</h1>
         <p className="mt-1 text-base text-neutral-700">{data.title}</p>
@@ -95,16 +95,18 @@ export function ExecutiveTemplate({ data }: { data: ResumeData }) {
   return (
     <div
       className="bg-white text-[#111]"
-      style={{ minHeight: "1100px", fontFamily: "Georgia, serif" }}
+      style={{ minHeight: "1122px", fontFamily: "Georgia, serif", display: "flex", flexDirection: "column", width: "100%" }}
     >
-      <div className="grid grid-cols-3">
+      <div className="grid grid-cols-3" style={{ flex: 1, minHeight: "1122px" }}>
         <aside className="col-span-1 bg-neutral-900 p-8 text-neutral-100">
-          <h1 className="text-2xl font-bold leading-tight">{data.name}</h1>
-          <p className="mt-1 text-sm italic text-neutral-300">{data.title}</p>
-          <div className="mt-6 space-y-1 text-xs text-neutral-300">
-            {data.location && <div>{data.location}</div>}
-            {data.email && <div>{data.email}</div>}
-            {data.phone && <div>{data.phone}</div>}
+          <div>
+            <h1 className="text-2xl font-bold leading-tight">{data.name}</h1>
+            <p className="mt-1 text-sm italic text-neutral-300">{data.title}</p>
+            <div className="mt-6 space-y-1 text-xs text-neutral-300">
+              {data.location && <div>{data.location}</div>}
+              {data.email && <div>{data.email}</div>}
+              {data.phone && <div>{data.phone}</div>}
+            </div>
           </div>
 
           {data.skills.length > 0 && (

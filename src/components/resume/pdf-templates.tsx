@@ -9,6 +9,7 @@ import {
 } from "@react-pdf/renderer";
 import type { ResumeData, TemplateId } from "@/lib/types";
 import { optimizeResumeForOnePage } from "@/lib/resume-utils";
+import { NoirPDF, PrismDarkPDF, PinnaclePDF, CipherPDF, VanguardPDF, SlatePDF, AvantPDF } from "./pdf-templates-extra";
 
 const minimal = StyleSheet.create({
   page: { padding: 34, fontSize: 9, fontFamily: "Helvetica", color: "#111" },
@@ -27,7 +28,7 @@ const minimal = StyleSheet.create({
     letterSpacing: 2,
     fontWeight: 700,
   },
-  itemHeader: { flexDirection: "row", justifyContent: "space-between" },
+  itemHeader: { flexDirection: "row"},
   itemTitle: { fontSize: 9, fontWeight: 700 },
   itemMeta: { fontSize: 8, color: "#777" },
   bullet: { flexDirection: "row", marginTop: 1, paddingLeft: 8 },
@@ -122,8 +123,8 @@ function MinimalPDF({ data }: { data: ResumeData }) {
 
 const exec = StyleSheet.create({
   page: { fontSize: 9, fontFamily: "Times-Roman", color: "#111", flexDirection: "row" },
-  side: { width: "33%", backgroundColor: "#111", color: "#fff", padding: 20 },
-  main: { width: "67%", padding: 22 },
+  side: { width: "33%", backgroundColor: "#111", color: "#fff", padding: 20, height: "100%" },
+  main: { width: "67%", padding: 22, height: "100%" },
   photo: { width: 58, height: 58, borderRadius: 12, marginBottom: 14, objectFit: "cover" },
   name: { fontSize: 18, fontWeight: 700, color: "#fff" },
   role: { fontSize: 9, fontStyle: "italic", color: "#bbb", marginTop: 2 },
@@ -301,7 +302,7 @@ function NexusPDF({ data }: { data: ResumeData }) {
                       <Svg width="8" height="8" viewBox="0 0 12 12" style={{ position: "absolute", left: -4, top: 4 }}>
                         <Circle cx="6" cy="6" r="4" fill="#fff" stroke="#111" strokeWidth="2" />
                       </Svg>
-                      <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+                      <View style={{ flexDirection: "row"}}>
                         <Text style={nexus.expTitle}>{e.title}</Text>
                         <Text style={nexus.expMeta}>{e.duration}</Text>
                       </View>
@@ -480,7 +481,7 @@ function MetricPDF({ data }: { data: ResumeData }) {
       <Page size="A4" style={metric.page}>
         <View style={metric.header}>
           <Text style={metric.name}>{compact.name}</Text>
-          <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+          <View style={{ flexDirection: "row"}}>
             <Text style={metric.title}>{compact.title}</Text>
             <Text style={{ fontSize: 9, color: "#555" }}>
               {[compact.location, compact.email, compact.phone].filter(Boolean).join("  //  ")}
@@ -610,7 +611,7 @@ function PrismPDF({ data }: { data: ResumeData }) {
             </View>
             {compact.experience.map((e, i) => (
               <View key={i} style={{ marginBottom: 16 }}>
-                <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+                <View style={{ flexDirection: "row"}}>
                   <Text style={{ fontSize: 11, fontWeight: 700 }}>{e.title}</Text>
                   <Text style={{ fontSize: 9, color: "#999" }}>{e.duration}</Text>
                 </View>
@@ -680,9 +681,9 @@ function PrismPDF({ data }: { data: ResumeData }) {
 // ─── CARBON ─── Dark charcoal accent bar, stark white body, heavy type weight
 const carbon = StyleSheet.create({
   page: { fontSize: 9, fontFamily: "Helvetica", color: "#111", flexDirection: "row" },
-  bar: { width: 6, backgroundColor: "#1a1a1a" },
-  side: { width: "30%", backgroundColor: "#f4f4f4", padding: 20 },
-  main: { width: "64%", padding: 22 },
+  bar: { width: 6, backgroundColor: "#1a1a1a", height: "100%" },
+  side: { width: "30%", backgroundColor: "#f4f4f4", padding: 20, height: "100%" },
+  main: { width: "64%", padding: 22, height: "100%" },
   photo: { width: 64, height: 64, borderRadius: 6, marginBottom: 12, objectFit: "cover" },
   name: { fontSize: 20, fontWeight: 700, letterSpacing: 1 },
   title: { fontSize: 9, color: "#555", marginTop: 2, marginBottom: 14, letterSpacing: 2 },
@@ -733,7 +734,7 @@ const atlas = StyleSheet.create({
   title: { fontSize: 10, color: "#aaa", marginTop: 3, letterSpacing: 1 },
   contacts: { fontSize: 8, color: "#888", marginTop: 8, flexDirection: "row", flexWrap: "wrap", gap: 12 },
   body: { padding: 24 },
-  cols: { flexDirection: "row", gap: 20 },
+  cols: { flexDirection: "row", gap: 20 , flex: 1 },
   mainCol: { flex: 2 },
   sideCol: { flex: 1 },
   section: { fontSize: 8, fontWeight: 700, color: "#0f1923", letterSpacing: 2, marginTop: 16, marginBottom: 6, borderBottomWidth: 1, borderBottomColor: "#ddd", paddingBottom: 3 },
@@ -843,7 +844,7 @@ const zenith = StyleSheet.create({
   expMeta: { fontSize: 8, color: "#888", marginTop: 1, marginBottom: 4 },
   body: { fontSize: 8.5, lineHeight: 1.6, color: "#333" },
   bullet: { flexDirection: "row", marginTop: 2 },
-  cols: { flexDirection: "row", gap: 24 },
+  cols: { flexDirection: "row", gap: 24 , flex: 1 },
   mainCol: { flex: 1.6 },
   sideCol: { flex: 1 },
   sideText: { fontSize: 8, color: "#444", marginBottom: 4, lineHeight: 1.4 },
@@ -898,7 +899,7 @@ const vector = StyleSheet.create({
   bullet: { flexDirection: "row", marginTop: 2 },
   skillsRow: { flexDirection: "row", flexWrap: "wrap", gap: 5, marginTop: 4 },
   skillPill: { backgroundColor: "#21262d", borderWidth: 0.5, borderColor: "#58a6ff", paddingHorizontal: 7, paddingVertical: 2, fontSize: 7.5, color: "#58a6ff" },
-  cols: { flexDirection: "row", gap: 18 },
+  cols: { flexDirection: "row", gap: 18 , flex: 1 },
 });
 
 function VectorPDF({ data }: { data: ResumeData }) {
@@ -940,21 +941,21 @@ export function GetPDFDocument({ data, template }: { data: ResumeData; template:
     case 'nexus': return <NexusPDF data={data} />;
     case 'orbit': return <OrbitPDF data={data} />;
     case 'metric': return <MetricPDF data={data} />;
-    case 'prism': return <PrismPDF data={data} />;
+    case 'prism': return <PrismDarkPDF data={data} />;
     case 'carbon': return <CarbonPDF data={data} />;
     case 'atlas': return <AtlasPDF data={data} />;
     case 'forge': return <ForgePDF data={data} />;
     case 'zenith': return <ZenithPDF data={data} />;
     case 'vector': return <VectorPDF data={data} />;
-    // Remaining aliases use closest match
-    case 'noir': return <VectorPDF data={data} />;
+    // Dedicated renderers matching live preview designs
+    case 'noir': return <NoirPDF data={data} />;
     case 'apex': return <AtlasPDF data={data} />;
-    case 'slate': return <ForgePDF data={data} />;
-    case 'cipher': return <VectorPDF data={data} />;
+    case 'slate': return <SlatePDF data={data} />;
+    case 'cipher': return <CipherPDF data={data} />;
     case 'monolith': return <CarbonPDF data={data} />;
-    case 'pinnacle': return <ZenithPDF data={data} />;
-    case 'avant': return <ForgePDF data={data} />;
-    case 'vanguard': return <AtlasPDF data={data} />;
+    case 'pinnacle': return <PinnaclePDF data={data} />;
+    case 'avant': return <AvantPDF data={data} />;
+    case 'vanguard': return <VanguardPDF data={data} />;
     default: return <MinimalPDF data={data} />;
   }
 }

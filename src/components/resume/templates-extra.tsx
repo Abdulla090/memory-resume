@@ -2,7 +2,7 @@ import type { ResumeData } from "@/lib/types";
 
 export function NoirTemplate({ data }: { data: ResumeData }) {
   return (
-    <div className="bg-[#0a0a0a] text-neutral-300 p-12 font-sans" style={{ minHeight: "1100px" }}>
+    <div className="bg-[#0a0a0a] text-neutral-300 p-12 font-sans" style={{ minHeight: "1122px", width: "100%", display: "flex", flexDirection: "column" }}>
       <header className="border-b border-neutral-800 pb-6 text-center">
         <h1 className="text-4xl font-light tracking-[0.15em] text-white uppercase">{data.name}</h1>
         <p className="mt-2 text-sm tracking-[0.2em] text-neutral-500 uppercase">{data.title}</p>
@@ -38,7 +38,7 @@ export function NoirTemplate({ data }: { data: ResumeData }) {
           </section>
         )}
 
-        <div className="grid grid-cols-2 gap-8">
+        <div className="grid grid-cols-2 gap-8 flex-1">
           {data.projects.length > 0 && (
             <section>
               <h2 className="mb-4 text-[10px] font-bold uppercase tracking-[0.3em] text-neutral-600 border-b border-neutral-800 pb-2">Projects</h2>
@@ -88,7 +88,7 @@ export function NoirTemplate({ data }: { data: ResumeData }) {
 
 export function ApexTemplate({ data }: { data: ResumeData }) {
   return (
-    <div className="bg-white text-slate-800 font-sans" style={{ minHeight: "1100px" }}>
+    <div className="bg-white text-slate-800 font-sans" style={{ minHeight: "1122px", width: "100%", display: "flex", flexDirection: "column" }}>
       <header className="bg-slate-900 text-white p-12">
         <h1 className="text-4xl font-extrabold tracking-tight">{data.name}</h1>
         <p className="mt-2 text-xl font-medium text-blue-400">{data.title}</p>
@@ -102,7 +102,7 @@ export function ApexTemplate({ data }: { data: ResumeData }) {
           <p className="text-sm leading-relaxed text-slate-600 font-medium">{data.summary}</p>
         </section>
 
-        <div className="grid grid-cols-3 gap-8">
+        <div className="grid grid-cols-3 gap-8 flex-1">
           <div className="col-span-2 space-y-8">
             {data.experience.length > 0 && (
               <section>
@@ -187,7 +187,7 @@ export function ApexTemplate({ data }: { data: ResumeData }) {
 
 export function NexusTemplate({ data }: { data: ResumeData }) {
   return (
-    <div className="bg-white text-slate-800 p-12 font-sans" style={{ minHeight: "1100px" }}>
+    <div className="bg-white text-slate-800 p-12 font-sans" style={{ minHeight: "1122px", width: "100%", display: "flex", flexDirection: "column" }}>
       <header className="flex justify-between items-end border-b-4 border-blue-600 pb-6 mb-8">
         <div>
           <h1 className="text-4xl font-black text-slate-900">{data.name}</h1>
@@ -204,7 +204,7 @@ export function NexusTemplate({ data }: { data: ResumeData }) {
         <p className="text-sm leading-relaxed text-slate-700">{data.summary}</p>
       </section>
 
-      <div className="grid grid-cols-12 gap-8">
+      <div className="grid grid-cols-12 gap-8 flex-1">
         <div className="col-span-8 space-y-8">
           {data.experience.length > 0 && (
             <section>
@@ -289,7 +289,7 @@ export function NexusTemplate({ data }: { data: ResumeData }) {
 
 export function OrbitTemplate({ data }: { data: ResumeData }) {
   return (
-    <div className="bg-[#fafafa] text-neutral-800 p-12 font-sans" style={{ minHeight: "1100px" }}>
+    <div className="bg-[#fafafa] text-neutral-800 p-12 font-sans" style={{ minHeight: "1122px", width: "100%", display: "flex", flexDirection: "column" }}>
       <header className="text-center mb-10 pb-8 border-b border-neutral-200">
         <h1 className="text-5xl font-extralight tracking-widest text-neutral-900 uppercase">{data.name}</h1>
         <p className="mt-3 text-sm font-bold tracking-[0.2em] text-neutral-500 uppercase">{data.title}</p>
@@ -303,7 +303,7 @@ export function OrbitTemplate({ data }: { data: ResumeData }) {
         </div>
       </header>
 
-      <div className="grid grid-cols-12 gap-12">
+      <div className="grid grid-cols-12 gap-12 flex-1">
         <div className="col-span-8 space-y-10">
           {data.experience.length > 0 && (
             <section>
@@ -378,7 +378,7 @@ export function OrbitTemplate({ data }: { data: ResumeData }) {
 
 export function MetricTemplate({ data }: { data: ResumeData }) {
   return (
-    <div className="bg-white text-black p-10 font-sans" style={{ minHeight: "1100px" }}>
+    <div className="bg-white text-black p-10 font-sans" style={{ minHeight: "1122px", width: "100%", display: "flex", flexDirection: "column" }}>
       <header className="border-4 border-black p-8 mb-10">
         <h1 className="text-5xl font-black uppercase tracking-tighter">{data.name}</h1>
         <div className="flex justify-between items-end mt-4">
@@ -389,7 +389,7 @@ export function MetricTemplate({ data }: { data: ResumeData }) {
         </div>
       </header>
 
-      <div className="grid grid-cols-12 gap-10">
+      <div className="grid grid-cols-12 gap-10 flex-1">
         <div className="col-span-4 space-y-10">
           {data.skills.length > 0 && (
             <section>
@@ -467,7 +467,7 @@ export function MetricTemplate({ data }: { data: ResumeData }) {
 
 export function PrismTemplate({ data }: { data: ResumeData }) {
   return (
-    <div className="bg-[#121212] text-gray-300 p-12 font-sans" style={{ minHeight: "1100px" }}>
+    <div className="bg-[#121212] text-gray-300 p-12 font-sans" style={{ minHeight: "1122px", width: "100%", display: "flex", flexDirection: "column" }}>
       <header className="text-center mb-12">
         <div className="flex justify-center mb-4">
            <div className="w-8 h-8 border-2 border-indigo-500 rotate-45 flex items-center justify-center">
@@ -490,7 +490,7 @@ export function PrismTemplate({ data }: { data: ResumeData }) {
         <p className="text-sm leading-relaxed text-gray-400">{data.summary}</p>
       </section>
 
-      <div className="grid grid-cols-12 gap-10">
+      <div className="grid grid-cols-12 gap-10 flex-1">
         <div className="col-span-7 space-y-10">
           {data.experience.length > 0 && (
             <section>
@@ -566,7 +566,7 @@ export function PrismTemplate({ data }: { data: ResumeData }) {
 
 export function SlateTemplate({ data }: { data: ResumeData }) {
   return (
-    <div className="bg-slate-50 text-slate-900 p-12 font-sans" style={{ minHeight: "1100px" }}>
+    <div className="bg-slate-50 text-slate-900 p-12 font-sans" style={{ minHeight: "1122px", width: "100%", display: "flex", flexDirection: "column" }}>
       <header className="border-b border-slate-300 pb-8 mb-8 flex justify-between items-end">
         <div>
           <h1 className="text-4xl font-semibold tracking-tight text-slate-900">{data.name}</h1>
@@ -605,7 +605,7 @@ export function SlateTemplate({ data }: { data: ResumeData }) {
           </section>
         )}
 
-        <div className="grid grid-cols-2 gap-10">
+        <div className="grid grid-cols-2 gap-10 flex-1">
            {data.skills.length > 0 && (
             <section>
               <h2 className="text-sm font-semibold uppercase tracking-wider text-slate-900 mb-4 border-b border-slate-200 pb-2">Skills</h2>
@@ -635,7 +635,7 @@ export function SlateTemplate({ data }: { data: ResumeData }) {
 
 export function AvantTemplate({ data }: { data: ResumeData }) {
   return (
-    <div className="bg-white text-black p-12 font-serif" style={{ minHeight: "1100px" }}>
+    <div className="bg-white text-black p-12 font-serif" style={{ minHeight: "1122px", width: "100%", display: "flex", flexDirection: "column" }}>
       <header className="border-b-4 border-black pb-6 mb-8 text-center">
         <h1 className="text-6xl font-black uppercase tracking-tighter">{data.name}</h1>
         <p className="mt-4 text-xl font-bold uppercase tracking-widest">{data.title}</p>
@@ -654,7 +654,7 @@ export function AvantTemplate({ data }: { data: ResumeData }) {
             <h2 className="text-2xl font-black uppercase tracking-tighter border-b-2 border-black pb-2 mb-6">Experience</h2>
             <div className="space-y-8">
               {data.experience.map((e, i) => (
-                <div key={i} className="grid grid-cols-12 gap-6">
+                <div key={i} className="grid grid-cols-12 gap-6 flex-1">
                   <div className="col-span-3 text-sm font-bold uppercase">
                     {e.duration}
                   </div>
@@ -672,7 +672,7 @@ export function AvantTemplate({ data }: { data: ResumeData }) {
           </section>
         )}
 
-        <div className="grid grid-cols-2 gap-12">
+        <div className="grid grid-cols-2 gap-12 flex-1">
           {data.skills.length > 0 && (
             <section>
               <h2 className="text-2xl font-black uppercase tracking-tighter border-b-2 border-black pb-2 mb-6">Skills</h2>
@@ -706,7 +706,7 @@ export function AvantTemplate({ data }: { data: ResumeData }) {
 
 export function VanguardTemplate({ data }: { data: ResumeData }) {
   return (
-    <div className="bg-white text-neutral-900 p-12 font-sans overflow-hidden" style={{ minHeight: "1100px" }}>
+    <div className="bg-white text-neutral-900 p-12 font-sans overflow-hidden" style={{ minHeight: "1122px", width: "100%", display: "flex", flexDirection: "column" }}>
       <header className="relative mb-16 pt-8">
         <div className="absolute -top-12 -left-4 text-[140px] font-black text-neutral-100 uppercase tracking-tighter opacity-50 z-0 whitespace-nowrap overflow-hidden">
           {data.name.split(' ')[0]}
@@ -722,7 +722,7 @@ export function VanguardTemplate({ data }: { data: ResumeData }) {
         </div>
       </header>
 
-      <div className="grid grid-cols-12 gap-10">
+      <div className="grid grid-cols-12 gap-10 flex-1">
         <div className="col-span-8 space-y-12">
           <section>
             <p className="text-lg font-medium leading-relaxed">{data.summary}</p>
@@ -787,7 +787,7 @@ export function VanguardTemplate({ data }: { data: ResumeData }) {
 
 export function MonolithTemplate({ data }: { data: ResumeData }) {
   return (
-    <div className="bg-neutral-100 p-12 font-sans" style={{ minHeight: "1100px" }}>
+    <div className="bg-neutral-100 p-12 font-sans" style={{ minHeight: "1122px", width: "100%", display: "flex", flexDirection: "column" }}>
       <div className="bg-white border border-neutral-300 shadow-sm p-10 h-full">
         <header className="text-center mb-10">
           <h1 className="text-4xl font-bold tracking-tight text-neutral-900">{data.name}</h1>
@@ -801,7 +801,7 @@ export function MonolithTemplate({ data }: { data: ResumeData }) {
           <p className="text-sm leading-relaxed text-neutral-700">{data.summary}</p>
         </section>
 
-        <div className="grid grid-cols-12 gap-8">
+        <div className="grid grid-cols-12 gap-8 flex-1">
           <div className="col-span-8 space-y-8">
             {data.experience.length > 0 && (
               <section>
@@ -859,7 +859,7 @@ export function MonolithTemplate({ data }: { data: ResumeData }) {
 
 export function CipherTemplate({ data }: { data: ResumeData }) {
   return (
-    <div className="bg-[#050505] text-[#00ff41] p-12 font-mono selection:bg-[#00ff41] selection:text-black" style={{ minHeight: "1100px" }}>
+    <div className="bg-[#050505] text-[#00ff41] p-12 font-mono selection:bg-[#00ff41] selection:text-black" style={{ minHeight: "1122px", width: "100%", display: "flex", flexDirection: "column" }}>
       <header className="mb-10 border-b border-[#00ff41]/30 pb-6">
         <h1 className="text-4xl font-bold tracking-tight">{">"}{data.name}_</h1>
         <p className="mt-2 text-lg text-[#008f11]">{data.title}</p>
@@ -874,7 +874,7 @@ export function CipherTemplate({ data }: { data: ResumeData }) {
         <p className="text-sm leading-relaxed text-[#00ff41]/80">{data.summary}</p>
       </section>
 
-      <div className="grid grid-cols-12 gap-10">
+      <div className="grid grid-cols-12 gap-10 flex-1">
         <div className="col-span-8 space-y-10">
           {data.experience.length > 0 && (
             <section>
@@ -935,7 +935,7 @@ export function CipherTemplate({ data }: { data: ResumeData }) {
 
 export function PinnacleTemplate({ data }: { data: ResumeData }) {
   return (
-    <div className="bg-white text-slate-800 font-sans" style={{ minHeight: "1100px" }}>
+    <div className="bg-white text-slate-800 font-sans" style={{ minHeight: "1122px", width: "100%", display: "flex", flexDirection: "column" }}>
       <header className="bg-indigo-950 text-indigo-50 p-12">
         <div className="max-w-4xl mx-auto">
           <h1 className="text-5xl font-black tracking-tight text-white">{data.name}</h1>
@@ -954,7 +954,7 @@ export function PinnacleTemplate({ data }: { data: ResumeData }) {
           <p className="text-base leading-relaxed text-slate-700">{data.summary}</p>
         </section>
 
-        <div className="grid grid-cols-12 gap-12">
+        <div className="grid grid-cols-12 gap-12 flex-1">
           <div className="col-span-8 space-y-12">
             {data.experience.length > 0 && (
               <section>

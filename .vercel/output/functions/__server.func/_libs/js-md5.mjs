@@ -1,6 +1,6 @@
 import { c as commonjsGlobal, g as getDefaultExportFromCjs } from "./react.mjs";
-import require$$1$1 from "crypto";
-import require$$1 from "buffer";
+import require$$1 from "crypto";
+import require$$0 from "buffer";
 var md5$1 = { exports: {} };
 var hasRequiredMd5;
 function requireMd5() {
@@ -86,8 +86,8 @@ function requireMd5() {
         return method;
       };
       var nodeWrap = function(method) {
-        var crypto = require$$1$1;
-        var Buffer = require$$1.Buffer;
+        var crypto = require$$1;
+        var Buffer = require$$0.Buffer;
         var bufferFrom;
         if (Buffer.from && !root.JS_MD5_NO_BUFFER_FROM) {
           bufferFrom = Buffer.from;
