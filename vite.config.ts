@@ -3,7 +3,8 @@ import { tanstackStart } from "@tanstack/react-start/plugin/vite";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import tsconfigPaths from "vite-tsconfig-paths";
-import { loadEnv, mergeConfig } from "vite";
+import { loadEnv } from "vite";
+import { nitro } from "nitro/vite";
 
 export default defineConfig(async ({ command, mode }) => {
   const envDefine: Record<string, string> = {};
@@ -29,6 +30,9 @@ export default defineConfig(async ({ command, mode }) => {
     },
     plugins: [
       tanstackStart(),
+      nitro({
+        preset: "vercel",
+      }),
       react(),
       tailwindcss(),
       tsconfigPaths({ projects: ["./tsconfig.json"] }),
