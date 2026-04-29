@@ -16,15 +16,15 @@ function DashboardIndex() {
         {/* Hero Banner */}
         <div className="lg:col-span-2 rounded-[2rem] bg-gradient-to-br from-[#e6f2ff] to-[#f0f7ff] p-6 sm:p-10 relative overflow-hidden border border-white shadow-sm flex flex-col justify-center min-h-[280px] sm:min-h-[300px]">
           {/* Background Decorations */}
-          <div className="absolute right-10 top-10 w-40 h-20 bg-white/40 blur-3xl rounded-full pointer-events-none" />
-          <div className="absolute right-[15%] bottom-[-30%] w-[300px] h-[200px] bg-blue-200/20 blur-[80px] rounded-full pointer-events-none" />
+          <div className="absolute right-10 top-10 w-40 h-20 bg-white/40 blur-2xl rounded-full pointer-events-none" />
+          <div className="absolute right-[15%] bottom-[-30%] w-[300px] h-[200px] bg-blue-200/20 blur-3xl rounded-full pointer-events-none" />
           
           {/* Two Sleek Resume Mockups */}
           <div className="absolute right-6 lg:right-12 top-1/2 -translate-y-1/2 w-[220px] sm:w-[280px] h-[260px] sm:h-[320px] pointer-events-none select-none hidden sm:block">
             
             {/* Back Resume — rotated right, shifted up */}
             <div 
-              className="absolute top-0 right-0 w-[180px] origin-center drop-shadow-2xl"
+              className="absolute top-0 right-0 w-[180px] origin-center shadow-[0_20px_40px_rgba(0,0,0,0.15)] rounded-2xl"
               style={{ transform: 'rotate(8deg) translateX(10px) translateY(-10px)' }}
             >
               <LeftCardSVG />
@@ -32,7 +32,7 @@ function DashboardIndex() {
 
             {/* Front Resume — rotated left, shifted down & over */}
             <div 
-              className="absolute bottom-0 left-0 w-[190px] origin-center z-10 drop-shadow-[0_25px_35px_rgba(37,99,235,0.15)]"
+              className="absolute bottom-0 left-0 w-[190px] origin-center z-10 shadow-[0_25px_35px_rgba(37,99,235,0.15)] rounded-lg"
               style={{ transform: 'rotate(-6deg) translateX(-10px) translateY(5px)' }}
             >
               <CenterCardSVG />

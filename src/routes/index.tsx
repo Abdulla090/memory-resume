@@ -99,7 +99,7 @@ function Header() {
 
 
 export const LeftCardSVG = () => (
-  <svg viewBox="0 0 240 320" className="w-full h-auto drop-shadow-2xl" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <svg viewBox="0 0 240 320" className="w-full h-auto" fill="none" xmlns="http://www.w3.org/2000/svg">
     <defs>
       <linearGradient id="left-header-gradient" x1="0" y1="0" x2="240" y2="80" gradientUnits="userSpaceOnUse">
         <stop stopColor="#2563eb" />
@@ -156,7 +156,7 @@ export const LeftCardSVG = () => (
 );
 
 export const CenterCardSVG = () => (
-  <svg viewBox="0 0 280 400" className="w-full h-auto drop-shadow-2xl" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <svg viewBox="0 0 280 400" className="w-full h-auto" fill="none" xmlns="http://www.w3.org/2000/svg">
     <rect width="280" height="400" rx="8" fill="#ffffff" />
     <rect x="0.5" y="0.5" width="279" height="399" rx="7.5" fill="none" stroke="#e2e8f0" />
     
@@ -211,7 +211,7 @@ export const CenterCardSVG = () => (
 );
 
 export const RightCardSVG = () => (
-  <svg viewBox="0 0 240 320" className="w-full h-auto drop-shadow-2xl" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <svg viewBox="0 0 240 320" className="w-full h-auto" fill="none" xmlns="http://www.w3.org/2000/svg">
     <defs>
       <linearGradient id="right-header-gradient" x1="0" y1="0" x2="240" y2="100" gradientUnits="userSpaceOnUse">
         <stop stopColor="#1e3a8a" />
@@ -261,12 +261,12 @@ function HeroCards() {
   
   // Smooth fan-out animation linked to the scroll position relative to the element
   // Opens entirely when the center of the cards reaches the center of the viewport
-  const leftX = useTransform(scrollYProgress, [0, 1], [0, -220]);
-  const leftY = useTransform(scrollYProgress, [0, 1], [0, 40]);
+  const leftX = useTransform(scrollYProgress, [0, 1], ["0%", "-110%"]);
+  const leftY = useTransform(scrollYProgress, [0, 1], ["0%", "15%"]);
   const leftRotate = useTransform(scrollYProgress, [0, 1], [0, -12]);
 
-  const rightX = useTransform(scrollYProgress, [0, 1], [0, 220]);
-  const rightY = useTransform(scrollYProgress, [0, 1], [0, 40]);
+  const rightX = useTransform(scrollYProgress, [0, 1], ["0%", "110%"]);
+  const rightY = useTransform(scrollYProgress, [0, 1], ["0%", "15%"]);
   const rightRotate = useTransform(scrollYProgress, [0, 1], [0, 12]);
 
   // Center card slightly moves up for a subtle parallax feel
@@ -276,21 +276,21 @@ function HeroCards() {
     <div ref={ref} className="relative w-full flex items-center justify-center origin-top" style={{ height: "clamp(240px,50vw,400px)" }}>
 
       {/* LEFT */}
-      <motion.div className="absolute" style={{ width: "clamp(120px,20vw,220px)", zIndex: 10, x: leftX, y: leftY, rotate: leftRotate }}
+      <motion.div className="absolute shadow-[0_20px_40px_rgba(0,0,0,0.15)] rounded-2xl" style={{ width: "clamp(120px,20vw,220px)", zIndex: 10, x: leftX, y: leftY, rotate: leftRotate }}
         initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}
         transition={{ delay: 0.4, type: "spring", stiffness: 70 }} id="hero-card-profile">
         <LeftCardSVG />
       </motion.div>
 
       {/* RIGHT */}
-      <motion.div className="absolute" style={{ width: "clamp(120px,20vw,220px)", zIndex: 10, x: rightX, y: rightY, rotate: rightRotate }}
+      <motion.div className="absolute shadow-[0_20px_40px_rgba(0,0,0,0.15)] rounded-2xl" style={{ width: "clamp(120px,20vw,220px)", zIndex: 10, x: rightX, y: rightY, rotate: rightRotate }}
         initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}
         transition={{ delay: 0.5, type: "spring", stiffness: 70 }} id="hero-card-match">
         <RightCardSVG />
       </motion.div>
 
       {/* CENTER */}
-      <motion.div className="absolute" style={{ width: "clamp(150px,26vw,280px)", zIndex: 20, y: centerY }}
+      <motion.div className="absolute shadow-[0_25px_50px_rgba(37,99,235,0.25)] rounded-lg" style={{ width: "clamp(150px,26vw,280px)", zIndex: 20, y: centerY }}
         initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}
         transition={{ delay: 0.3, type: "spring", stiffness: 70 }} id="hero-card-resume">
         <CenterCardSVG />
@@ -363,8 +363,8 @@ function StatsSection() {
   return (
     <section className="app-frame px-4 sm:px-6 pb-16 sm:pb-24 relative" style={{ paddingTop: "clamp(80px,14vw,140px)" }}>
       {/* Background Subtle Glows */}
-      <div className="absolute top-20 left-10 w-96 h-96 bg-blue-100/40 blur-[80px] rounded-full pointer-events-none -z-10" />
-      <div className="absolute bottom-10 right-10 w-80 h-80 bg-sky-100/40 blur-[70px] rounded-full pointer-events-none -z-10" />
+      <div className="absolute top-20 left-10 w-96 h-96 bg-blue-100/40 blur-3xl rounded-full pointer-events-none -z-10" />
+      <div className="absolute bottom-10 right-10 w-80 h-80 bg-sky-100/40 blur-3xl rounded-full pointer-events-none -z-10" />
 
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 mb-10 sm:mb-16">
         <motion.h2
@@ -429,8 +429,8 @@ const BentoHeroCard = () => {
       {/* Background clouds and airplane */}
       <div className="absolute inset-0 z-0 pointer-events-none">
         {/* Soft bottom clouds */}
-        <div className="absolute bottom-[-10%] left-[10%] w-[400px] h-[200px] bg-white/60 blur-3xl rounded-full" />
-        <div className="absolute bottom-[-20%] right-[-10%] w-[600px] h-[300px] bg-white/80 blur-[80px] rounded-full" />
+        <div className="absolute bottom-[-10%] left-[10%] w-[400px] h-[200px] bg-white/60 blur-2xl rounded-full" />
+        <div className="absolute bottom-[-20%] right-[-10%] w-[600px] h-[300px] bg-white/80 blur-3xl rounded-full" />
         
         {/* Airplane trailing line SVG */}
         <svg className="absolute top-[20%] left-[45%] w-[150px] h-[150px] overflow-visible" fill="none">
@@ -477,15 +477,15 @@ const BentoHeroCard = () => {
         <div className="w-full md:w-1/2 relative h-[300px] sm:h-[380px] md:h-[450px] flex justify-center items-center pointer-events-none">
           
           {/* Cloudy Background Glows */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] bg-gradient-to-tr from-blue-300/30 via-white/50 to-blue-200/30 blur-[60px] rounded-full pointer-events-none" />
-          <div className="absolute top-[10%] right-[5%] w-[200px] h-[150px] bg-white/70 blur-[40px] rounded-full pointer-events-none" />
-          <div className="absolute bottom-[5%] left-[5%] w-[250px] h-[180px] bg-[#e0f2fe]/60 blur-[50px] rounded-full pointer-events-none" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] bg-gradient-to-tr from-blue-300/30 via-white/50 to-blue-200/30 blur-3xl rounded-full pointer-events-none" />
+          <div className="absolute top-[10%] right-[5%] w-[200px] h-[150px] bg-white/70 blur-2xl rounded-full pointer-events-none" />
+          <div className="absolute bottom-[5%] left-[5%] w-[250px] h-[180px] bg-[#e0f2fe]/60 blur-3xl rounded-full pointer-events-none" />
 
           <div className="relative w-[260px] sm:w-[320px] md:w-[340px] h-[320px] sm:h-[380px] md:h-[400px] pointer-events-none select-none flex items-center justify-center">
             
             {/* Back Resume — rotated right, shifted up & scaled up */}
             <div 
-              className="absolute top-[2%] right-[2%] w-[160px] sm:w-[200px] md:w-[220px] origin-center drop-shadow-2xl transition-transform duration-700 hover:scale-105"
+              className="absolute top-[2%] right-[2%] w-[160px] sm:w-[200px] md:w-[220px] origin-center shadow-[0_20px_40px_rgba(0,0,0,0.15)] rounded-2xl transition-transform duration-700 hover:scale-105"
               style={{ transform: 'rotate(10deg) translateX(15px) translateY(-15px)' }}
             >
               <LeftCardSVG />
@@ -493,14 +493,14 @@ const BentoHeroCard = () => {
 
             {/* Front Resume — rotated left, shifted down & scaled up */}
             <div 
-              className="absolute bottom-[2%] left-[2%] w-[180px] sm:w-[220px] md:w-[250px] origin-center z-10 drop-shadow-[0_25px_35px_rgba(37,99,235,0.15)] transition-transform duration-700 hover:scale-105"
+              className="absolute bottom-[2%] left-[2%] w-[180px] sm:w-[220px] md:w-[250px] origin-center z-10 shadow-[0_25px_35px_rgba(37,99,235,0.15)] rounded-lg transition-transform duration-700 hover:scale-105"
               style={{ transform: 'rotate(-8deg) translateX(-15px) translateY(10px)' }}
             >
               <CenterCardSVG />
             </div>
 
             {/* Foreground subtle cloud overlay for depth */}
-            <div className="absolute -bottom-10 -left-10 w-[200px] h-[150px] bg-white/30 blur-[30px] rounded-full z-20 pointer-events-none" />
+            <div className="absolute -bottom-10 -left-10 w-[200px] h-[150px] bg-white/30 blur-2xl rounded-full z-20 pointer-events-none" />
           </div>
         </div>
       </div>
@@ -625,8 +625,8 @@ const BentoCreateWinCard = () => {
 function BentoGridSection() {
   return (
     <section className="px-4 sm:px-6 pt-16 sm:pt-28 md:pt-40 pb-16 sm:pb-24 bg-[#f4f9ff] relative overflow-hidden">
-      <div className="absolute top-0 left-1/4 w-[800px] h-[600px] bg-blue-100/40 rounded-full blur-[100px] opacity-70 pointer-events-none -translate-y-1/2" />
-      <div className="absolute top-1/4 right-0 w-[600px] h-[500px] bg-sky-100/40 rounded-full blur-[100px] opacity-60 pointer-events-none" />
+      <div className="absolute top-0 left-1/4 w-[800px] h-[600px] bg-blue-100/40 rounded-full blur-3xl opacity-70 pointer-events-none -translate-y-1/2" />
+      <div className="absolute top-1/4 right-0 w-[600px] h-[500px] bg-sky-100/40 rounded-full blur-3xl opacity-60 pointer-events-none" />
       
       <div className="max-w-6xl mx-auto space-y-6">
         <BentoHeroCard />

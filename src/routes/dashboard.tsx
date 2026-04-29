@@ -23,7 +23,7 @@ function DashboardLayout() {
   ];
 
   return (
-    <div className="flex h-screen bg-[#f0f7ff] font-sans text-slate-800 overflow-hidden" style={{ zoom: 0.9 }}>
+    <div className="flex h-screen bg-[#f0f7ff] font-sans text-slate-800 overflow-hidden">
 
       {/* Mobile overlay */}
       {isSidebarOpen && (
