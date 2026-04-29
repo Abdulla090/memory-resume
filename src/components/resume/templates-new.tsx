@@ -219,7 +219,7 @@ export function NewProfessionalTemplate({ data }: { data: ResumeData }) {
   return (
     <div dir={rtl ? "rtl" : "ltr"} className="bg-[#fbfcfd] p-8 font-sans text-slate-950" style={{ minHeight: "1122px", width: "100%" }}>
       <div className="grid min-h-[1058px] grid-cols-[230px_1fr] overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-[0_20px_70px_-45px_rgba(15,23,42,0.55)] rtl:grid-cols-[1fr_230px]">
-        <aside className="bg-slate-950 p-7 text-white">
+        <aside className="bg-slate-950 p-7 text-white rtl:col-start-2 rtl:row-start-1">
           <PhotoBlock data={c} shape="circle" />
           <h1 className="mt-7 text-3xl font-black leading-[1] tracking-tight rtl:tracking-normal">{c.name}</h1>
           <p className="mt-3 text-[11px] font-black uppercase leading-5 tracking-[0.2em] rtl:tracking-normal text-cyan-200">{c.title}</p>
@@ -241,7 +241,7 @@ export function NewProfessionalTemplate({ data }: { data: ResumeData }) {
           )}
         </aside>
 
-        <main className="space-y-7 p-9">
+        <main className="space-y-7 p-9 rtl:col-start-1 rtl:row-start-1">
           <section className="rounded-3xl border border-slate-200 bg-slate-50 p-6">
             <h2 className="mb-3 text-[10px] font-black uppercase tracking-[0.22em] rtl:tracking-normal text-cyan-700">{l.profile}</h2>
             <p className="text-[13px] leading-7 text-slate-700">{c.summary}</p>
@@ -380,7 +380,7 @@ export function RefTorresTemplate({ data }: { data: ResumeData }) {
         <div className="h-full w-full opacity-20" style={{ backgroundImage: "linear-gradient(135deg, transparent 0 46%, rgba(255,255,255,.35) 46% 47%, transparent 47% 100%)", backgroundSize: "28px 28px" }} />
       </div>
       <div className="grid grid-cols-[308px_1fr] rtl:grid-cols-[1fr_308px]">
-        <aside className="relative min-h-[954px] bg-[#f3f3f3] px-12 pb-10 pt-32">
+        <aside className="relative min-h-[954px] bg-[#f3f3f3] px-12 pb-10 pt-32 rtl:col-start-2 rtl:row-start-1">
           <div className="absolute -top-[105px] left-1/2 h-[220px] w-[220px] -translate-x-1/2 overflow-hidden rounded-full border-[5px] border-[#d8e2e9] bg-slate-200">
             {c.photoUrl ? <img src={c.photoUrl} alt={c.name} className="h-full w-full object-cover" /> : <div className="flex h-full w-full items-center justify-center text-5xl font-black text-slate-500">{initials(c.name)}</div>}
           </div>
@@ -416,7 +416,7 @@ export function RefTorresTemplate({ data }: { data: ResumeData }) {
           )}
         </aside>
 
-        <main className="px-11 pb-10 pt-7 text-neutral-800">
+        <main className="px-11 pb-10 pt-7 text-neutral-800 rtl:col-start-1 rtl:row-start-1">
           <Section title={l.profile} accent="border-[#b8c5ce] text-[#1d3f59]">
             <p className="text-[12px] leading-5">{c.summary}</p>
           </Section>
@@ -489,7 +489,7 @@ export function RefSilvaTemplate({ data }: { data: ResumeData }) {
       </header>
 
       <div className="grid grid-cols-[230px_1fr] rtl:grid-cols-[1fr_230px]">
-        <aside className="min-h-[932px] bg-[#fff0e3] px-8 py-9">
+        <aside className="min-h-[932px] bg-[#fff0e3] px-8 py-9 rtl:col-start-2 rtl:row-start-1">
           <Section title={l.contact} accent="border-transparent text-[#1f1b18]">
             <div className="space-y-4 text-[12px] leading-5">
               {[c.phone, c.email, c.location].filter(Boolean).map((item) => <p key={item}>{item}</p>)}
@@ -519,7 +519,7 @@ export function RefSilvaTemplate({ data }: { data: ResumeData }) {
           )}
         </aside>
 
-        <main className="px-8 py-9">
+        <main className="px-8 py-9 rtl:col-start-1 rtl:row-start-1">
           <section>
             <h2 className="mb-5 text-[23px] font-normal">{rtl ? "پوختە" : "Summary"}</h2>
             <ul className="list-disc space-y-1.5 pl-5 text-[12px] leading-5 rtl:pl-0 rtl:pr-5">
@@ -580,7 +580,7 @@ export function RefSchumacherTemplate({ data }: { data: ResumeData }) {
       </header>
 
       <div className="mt-12 grid grid-cols-[230px_1fr] gap-14 rtl:grid-cols-[1fr_230px]">
-        <aside className="space-y-9">
+        <aside className="space-y-9 rtl:col-start-2 rtl:row-start-1">
           <section>
             <h2 className="mb-4 text-[22px] font-black leading-none">{l.profile}</h2>
             <p className="text-[12px] font-semibold leading-[1.15]">{c.summary}</p>
@@ -609,7 +609,7 @@ export function RefSchumacherTemplate({ data }: { data: ResumeData }) {
           )}
         </aside>
 
-        <main>
+        <main className="rtl:col-start-1 rtl:row-start-1">
           {c.skills.length > 0 && (
             <section>
               <h2 className="mb-5 text-[22px] font-black leading-none">{rtl ? "لێهاتووییە سەرەکییەکان" : "Core Skills"}</h2>
@@ -618,7 +618,7 @@ export function RefSchumacherTemplate({ data }: { data: ResumeData }) {
                   <div key={skill}>
                     <p className="mb-1 text-[13px] font-semibold leading-4">{skill}</p>
                     <div className="h-[18px] bg-neutral-300">
-                      <div className="h-full bg-[#ff8a22]" style={{ width: skillLevel(c, skill, index) }} />
+                      <div className="h-full bg-[#ff8a22] rtl:mr-auto" style={{ width: skillLevel(c, skill, index) }} />
                     </div>
                   </div>
                 ))}
@@ -678,7 +678,7 @@ export function RefPalmerstonTemplate({ data }: { data: ResumeData }) {
       </header>
 
       <div className="grid grid-cols-[285px_1fr] rtl:grid-cols-[1fr_285px]">
-        <aside className="min-h-[796px] bg-[#303b4e] px-12 py-12 text-white">
+        <aside className="min-h-[796px] bg-[#303b4e] px-12 py-12 text-white rtl:col-start-2 rtl:row-start-1">
           {c.education.length > 0 && (
             <section>
               <h2 className="mb-4 border-b border-white/50 pb-2 text-[22px] font-black tracking-[0.12em] rtl:tracking-normal">{l.education}</h2>
@@ -709,7 +709,7 @@ export function RefPalmerstonTemplate({ data }: { data: ResumeData }) {
                   <div key={skill}>
                     <div className="text-[12px] font-bold">{skill}</div>
                     <div className="mt-1 h-[5px] bg-white/25">
-                      <div className="h-full bg-white" style={{ width: skillLevel(c, skill, index) }} />
+                      <div className="h-full bg-white rtl:mr-auto" style={{ width: skillLevel(c, skill, index) }} />
                     </div>
                   </div>
                 ))}
@@ -724,7 +724,7 @@ export function RefPalmerstonTemplate({ data }: { data: ResumeData }) {
           </section>
         </aside>
 
-        <main className="px-10 py-12">
+        <main className="px-10 py-12 rtl:col-start-1 rtl:row-start-1">
           <Section title={rtl ? "دەربارەی من" : "About me"} accent="border-[#9aa3ad] text-[#1f3148]">
             <p className="text-[12px] leading-5">{c.summary}</p>
           </Section>
@@ -791,7 +791,7 @@ export function RefSanchezTemplate({ data }: { data: ResumeData }) {
       </header>
 
       <div className="grid grid-cols-[245px_1fr] rtl:grid-cols-[1fr_245px]">
-        <aside className="min-h-[937px] bg-[#e6e6e6] px-6 pb-9 pt-[120px]">
+        <aside className="min-h-[937px] bg-[#e6e6e6] px-6 pb-9 pt-[120px] rtl:col-start-2 rtl:row-start-1">
           <section>
             <h2 className="mb-4 border-b-2 border-[#8c939a] pb-2 text-[18px] font-black uppercase tracking-[0.15em] rtl:tracking-normal">{l.contact}</h2>
             <div className="space-y-3 text-[12px] leading-5">
@@ -807,7 +807,7 @@ export function RefSanchezTemplate({ data }: { data: ResumeData }) {
                   return (
                     <div key={skill}>
                       <p className="text-[12px] font-semibold">{skill}</p>
-                      <div className="mt-1 flex gap-1.5">
+                      <div className="mt-1 flex gap-1.5 rtl:flex-row-reverse">
                         {Array.from({ length: 5 }).map((_, dot) => (
                           <span key={dot} className={`h-2 w-2 rounded-full ${dot < rating ? "bg-[#303b4e]" : "bg-[#b8bdc3]"}`} />
                         ))}
@@ -833,7 +833,7 @@ export function RefSanchezTemplate({ data }: { data: ResumeData }) {
           )}
         </aside>
 
-        <main className="space-y-9 px-11 py-12">
+        <main className="space-y-9 px-11 py-12 rtl:col-start-1 rtl:row-start-1">
           <TimelineSection title={l.profile} icon="i">
             <p className="text-[12px] leading-5">{c.summary}</p>
           </TimelineSection>

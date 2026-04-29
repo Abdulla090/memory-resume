@@ -32,6 +32,24 @@ import { improveBullet, tailorToJob, chatEditResume } from "@/lib/ai.functions";
 import { useAppStore } from "@/lib/store";
 import type { ExperienceItem, ResumeData, TemplateId } from "@/lib/types";
 
+const rtlTextPattern = /[\u0600-\u06ff\u0750-\u077f\u08a0-\u08ff]/;
+
+function hasRTLText(data: ResumeData) {
+  return rtlTextPattern.test(
+    [
+      data.name,
+      data.title,
+      data.location,
+      data.summary,
+      ...data.skills,
+      ...data.certifications,
+      ...data.experience.flatMap((item) => [item.title, item.company, item.description, ...item.achievements]),
+      ...data.projects.flatMap((item) => [item.name, item.description, item.impact, ...item.tech]),
+      ...data.education.flatMap((item) => [item.degree, item.institution]),
+    ].filter(Boolean).join(" "),
+  );
+}
+
 export const Route = createFileRoute("/resume/$id")({
   head: () => ({
     meta: [
@@ -112,6 +130,7 @@ function ResumeEditor() {
   }
 
   const data = resume.data;
+  const rtlResume = hasRTLText(data);
 
   const updateData = (patch: Partial<ResumeData>) =>
     updateResume(id, { data: { ...data, ...patch } });
@@ -180,6 +199,13 @@ function ResumeEditor() {
     setExportDropdownOpen(false);
     const filename = getFilename();
     try {
+      if (rtlResume && format !== "pdf") {
+        if (previewRef.current) {
+          await exportPreviewAsPDF(previewRef.current, filename);
+          toast.success(isKu ? "PDF پاشەکەوت کرا — ڕێک وەک پێشبینینەکە دەردەکەوێت" : "Canvas PDF saved — matches the preview");
+        }
+        return;
+      }
       if (format === "pdf") {
         // Screenshot-based: captures exactly what you see, full resolution
         if (previewRef.current) {
@@ -334,46 +360,49 @@ function ResumeEditor() {
                     >
                       <FileText className="w-4 h-4 text-blue-500 shrink-0" />
                       <div className="text-left">
-                        <div className="font-medium leading-tight">Best Quality</div>
-                        <div className="text-[10px] text-slate-400 leading-tight">Matches preview exactly</div>
+                        <div className="font-medium leading-tight">{rtlResume ? "Canvas PDF" : "Best Quality"}</div>
+                        <div className="text-[10px] text-slate-400 leading-tight">{rtlResume ? "Best for Kurdish RTL" : "Matches preview exactly"}</div>
                       </div>
                     </button>
-                    <button
-                      onClick={() => handleExport("pdf-standard")}
-                      className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-blue-900 hover:bg-blue-50 transition-colors"
-                    >
-                      <FileText className="w-4 h-4 text-slate-400 shrink-0" />
-                      <div className="text-left">
-                        <div className="font-medium leading-tight">Standard</div>
-                        <div className="text-[10px] text-slate-400 leading-tight">Smaller file, vector text</div>
-                      </div>
-                    </button>
-                    <div className="border-t border-blue-100 mx-2" />
-                    {/* Other formats */}
-                    <div className="px-3 pt-2.5 pb-1">
-                      <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Other formats</span>
-                    </div>
-                    <button
-                      onClick={() => handleExport("docx")}
-                      className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-blue-900 hover:bg-blue-50 transition-colors"
-                    >
-                      <FileType className="w-4 h-4 text-blue-500" />
-                      {isKu ? "بەڵگەنامەی Word" : "Word Document"}
-                    </button>
-                    <button
-                      onClick={() => handleExport("pptx")}
-                      className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-blue-900 hover:bg-blue-50 transition-colors"
-                    >
-                      <Presentation className="w-4 h-4 text-blue-500" />
-                      {isKu ? "پێشکەشکردن" : "Presentation"}
-                    </button>
-                    <button
-                      onClick={() => handleExport("md")}
-                      className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-blue-900 hover:bg-blue-50 transition-colors"
-                    >
-                      <FileCode className="w-4 h-4 text-blue-500" />
-                      {isKu ? "مارکداون" : "Markdown"}
-                    </button>
+                    {!rtlResume && (
+                      <>
+                        <button
+                          onClick={() => handleExport("pdf-standard")}
+                          className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-blue-900 hover:bg-blue-50 transition-colors"
+                        >
+                          <FileText className="w-4 h-4 text-slate-400 shrink-0" />
+                          <div className="text-left">
+                            <div className="font-medium leading-tight">Standard</div>
+                            <div className="text-[10px] text-slate-400 leading-tight">Smaller file, vector text</div>
+                          </div>
+                        </button>
+                        <div className="border-t border-blue-100 mx-2" />
+                        <div className="px-3 pt-2.5 pb-1">
+                          <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Other formats</span>
+                        </div>
+                        <button
+                          onClick={() => handleExport("docx")}
+                          className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-blue-900 hover:bg-blue-50 transition-colors"
+                        >
+                          <FileType className="w-4 h-4 text-blue-500" />
+                          {isKu ? "بەڵگەنامەی Word" : "Word Document"}
+                        </button>
+                        <button
+                          onClick={() => handleExport("pptx")}
+                          className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-blue-900 hover:bg-blue-50 transition-colors"
+                        >
+                          <Presentation className="w-4 h-4 text-blue-500" />
+                          {isKu ? "پێشکەشکردن" : "Presentation"}
+                        </button>
+                        <button
+                          onClick={() => handleExport("md")}
+                          className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-blue-900 hover:bg-blue-50 transition-colors"
+                        >
+                          <FileCode className="w-4 h-4 text-blue-500" />
+                          {isKu ? "مارکداون" : "Markdown"}
+                        </button>
+                      </>
+                    )}
                   </div>
                 )}
               </div>

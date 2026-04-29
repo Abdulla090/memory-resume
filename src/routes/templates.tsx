@@ -1,9 +1,29 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef } from "react";
+import type { RefObject } from "react";
 import { ArrowLeft, Sparkles, LayoutTemplate, CheckCircle2, Languages } from "lucide-react";
 import { ResumePreview } from "@/components/resume/templates";
 import { useAppStore } from "@/lib/store";
 import type { ResumeData, TemplateId } from "@/lib/types";
+import { exportPreviewAsPDF } from "@/lib/pdf-screenshot";
+
+const rtlTextPattern = /[\u0600-\u06ff\u0750-\u077f\u08a0-\u08ff]/;
+
+function hasRTLText(data: ResumeData) {
+  return rtlTextPattern.test(
+    [
+      data.name,
+      data.title,
+      data.location,
+      data.summary,
+      ...data.skills,
+      ...data.certifications,
+      ...data.experience.flatMap((item) => [item.title, item.company, item.description, ...item.achievements]),
+      ...data.projects.flatMap((item) => [item.name, item.description, item.impact, ...item.tech]),
+      ...data.education.flatMap((item) => [item.degree, item.institution]),
+    ].filter(Boolean).join(" "),
+  );
+}
 
 export const Route = createFileRoute("/templates")({
   head: () => ({
@@ -480,6 +500,7 @@ function TemplatesPage() {
   const [filter, setFilter] = useState<Category>("All");
   const [soraniMode, setSoraniMode] = useState(false);
   const previewData = useMemo(() => soraniMode ? toSoraniResume(data) : data, [data, soraniMode]);
+  const previewRef = useRef<HTMLDivElement>(null);
 
   const filteredTemplates = useMemo(() => {
     if (filter === "All") return TEMPLATES;
@@ -624,13 +645,13 @@ function TemplatesPage() {
                   <Languages className="h-3.5 w-3.5" />
                   {soraniMode ? "کوردی" : "Kurdish RTL"}
                 </button>
-                <ExportButtons data={previewData} template={active} name={previewData.name} />
+                <ExportButtons data={previewData} name={previewData.name} previewRef={previewRef} />
               </div>
             </div>
 
             {/* Resume Container with smooth scroll */}
             <div className="flex-1 overflow-hidden rounded-[1rem] shadow-[0_0_0_1px_rgba(0,0,0,0.05),0_30px_60px_-20px_rgba(0,0,0,0.15)] bg-white relative @container">
-              <ClientPDFPreview data={previewData} template={active} />
+              <ClientPDFPreview data={previewData} template={active} previewRef={previewRef} />
             </div>
           </div>
         </section>
@@ -639,18 +660,22 @@ function TemplatesPage() {
   );
 }
 
-import { exportResumePDF } from "@/components/resume/pdf-templates";
 import { exportResumeDocx } from "@/components/resume/docx-templates";
 import { Download, FileText } from "lucide-react";
 
-function ExportButtons({ data, template, name }: { data: ResumeData; template: TemplateId; name: string }) {
+function ExportButtons({ data, name, previewRef }: { data: ResumeData; name: string; previewRef: RefObject<HTMLDivElement | null> }) {
   const [pdfLoading, setPdfLoading] = useState(false);
   const [docxLoading, setDocxLoading] = useState(false);
   const filename = name.replace(/\s+/g, "_") || "resume";
+  const rtlExport = hasRTLText(data);
 
   const handlePDF = async () => {
     setPdfLoading(true);
-    try { await exportResumePDF(data, template, filename); } finally { setPdfLoading(false); }
+    try {
+      if (previewRef.current) {
+        await exportPreviewAsPDF(previewRef.current, filename);
+      }
+    } finally { setPdfLoading(false); }
   };
   const handleDocx = async () => {
     setDocxLoading(true);
@@ -659,21 +684,23 @@ function ExportButtons({ data, template, name }: { data: ResumeData; template: T
 
   return (
     <>
-      <button
-        onClick={handleDocx}
-        disabled={docxLoading}
-        className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/80 backdrop-blur-md border border-white text-xs font-bold tracking-wide text-slate-700 shadow-sm hover:bg-white hover:shadow-md transition-all disabled:opacity-50"
-      >
-        <FileText className="w-3.5 h-3.5" />
-        {docxLoading ? "..." : "DOCX"}
-      </button>
+      {!rtlExport && (
+        <button
+          onClick={handleDocx}
+          disabled={docxLoading}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/80 backdrop-blur-md border border-white text-xs font-bold tracking-wide text-slate-700 shadow-sm hover:bg-white hover:shadow-md transition-all disabled:opacity-50"
+        >
+          <FileText className="w-3.5 h-3.5" />
+          {docxLoading ? "..." : "DOCX"}
+        </button>
+      )}
       <button
         onClick={handlePDF}
         disabled={pdfLoading}
         className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-blue-600 backdrop-blur-md border border-blue-500 text-xs font-bold tracking-wide text-white shadow-sm hover:bg-blue-700 hover:shadow-md transition-all disabled:opacity-50"
       >
         <Download className="w-3.5 h-3.5" />
-        {pdfLoading ? "..." : "PDF"}
+        {pdfLoading ? "..." : rtlExport ? "Canvas PDF" : "PDF"}
       </button>
     </>
   );
@@ -681,10 +708,11 @@ function ExportButtons({ data, template, name }: { data: ResumeData; template: T
 
 
 
-function ClientPDFPreview({ data, template }: { data: ResumeData; template: TemplateId }) {
+function ClientPDFPreview({ data, template, previewRef }: { data: ResumeData; template: TemplateId; previewRef: RefObject<HTMLDivElement | null> }) {
   return (
     <div className="h-full w-full overflow-auto bg-slate-100 p-4">
       <div
+        ref={previewRef}
         className="mx-auto w-[794px] min-w-[794px] origin-top overflow-hidden rounded-sm bg-white shadow-[0_20px_50px_-24px_rgba(15,23,42,0.45)]"
         style={{ zoom: "min(1, calc(100cqw / 794))" }}
       >
