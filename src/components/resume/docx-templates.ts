@@ -332,6 +332,14 @@ const DOCX_BUILDERS: Record<string, (data: ResumeData) => Document> = {
   forge: buildForgeDocx,
   zenith: buildZenithDocx,
   vector: buildForgeDocx,
+  "new-sleek": buildForgeDocx,
+  "new-professional": buildExecutiveDocx,
+  "new-academic": buildZenithDocx,
+  "ref-torres": buildExecutiveDocx,
+  "ref-silva": buildExecutiveDocx,
+  "ref-schumacher": buildForgeDocx,
+  "ref-palmerston": buildExecutiveDocx,
+  "ref-sanchez": buildExecutiveDocx,
 };
 
 export async function exportResumeDocx(data: ResumeData, template: string, filename: string) {

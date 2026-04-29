@@ -249,14 +249,7 @@ const pdf = (initialValue) => {
 const StyleSheet = {
   create: (s) => s
 };
-const throwEnvironmentError = (name) => {
-  throw new Error(`${name} is a web specific API. You're either using this component on Node, or your bundler is not loading react-pdf from the appropriate web build.`);
-};
-const usePDF = () => {
-  throwEnvironmentError("usePDF");
-};
 export {
   StyleSheet as S,
-  pdf as p,
-  usePDF as u
+  pdf as p
 };

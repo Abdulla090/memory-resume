@@ -173,6 +173,14 @@ function RootComponent() {
     }
   }, []);
 
+  const language = useAppStore((state) => state.language);
+  const dir = language === "ku" ? "rtl" : "ltr";
+  
+  useEffect(() => {
+    document.documentElement.lang = language;
+    document.documentElement.dir = dir;
+  }, [language, dir]);
+
   return (
     <>
       <Outlet />
@@ -180,6 +188,7 @@ function RootComponent() {
       <Toaster
         theme="light"
         position="bottom-right"
+        dir={dir}
         toastOptions={{
           style: {
             background: "oklch(0.985 0.004 95)",

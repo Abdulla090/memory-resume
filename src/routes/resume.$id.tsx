@@ -48,6 +48,8 @@ function ResumeEditor() {
   const resume = useAppStore((state) => state.resumes.find((item) => item.id === id));
   const updateResume = useAppStore((state) => state.updateResume);
   const apiKey = useAppStore((state) => state.apiKey);
+  const language = useAppStore((state) => state.language);
+  const isKu = language === "ku";
   
   const improveFn = useServerFn(improveBullet);
   const tailorFn = useServerFn(tailorToJob);
@@ -77,7 +79,7 @@ function ResumeEditor() {
   const [chatInput, setChatInput] = useState("");
   const [chatLoading, setChatLoading] = useState(false);
   const [messages, setMessages] = useState<{role: 'user'|'assistant', content: string, snapshotId?: string}[]>([
-    { role: 'assistant', content: 'Hi! I can help you edit this resume. Tell me what you\'d like to change — or ask me to rewrite any section.' }
+    { role: 'assistant', content: isKu ? "سڵاو! دەتوانم یارمەتیت بدەم لە دەستکاریکردنی ئەم سیڤییە. پێم بڵێ دەتەوێت چی بگۆڕیت — یان داوام لێبکە هەر بەشێک سەرلەنوێ بنووسمەوە." : 'Hi! I can help you edit this resume. Tell me what you\'d like to change — or ask me to rewrite any section.' }
   ]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -100,9 +102,9 @@ function ResumeEditor() {
     return (
       <div className="page-shell flex min-h-[100dvh] items-center justify-center bg-background px-4 text-foreground">
         <div className="surface-panel max-w-md rounded-[2rem] p-8 text-center">
-          <p className="text-muted-foreground">This resume draft could not be found.</p>
+          <p className="text-muted-foreground">{isKu ? "ئەم ڕەشنووسی سیڤییە نەدۆزرایەوە." : "This resume draft could not be found."}</p>
           <button onClick={() => navigate({ to: "/onboarding" })} className="primary-button mt-6 px-5 py-3 text-sm font-medium">
-            Start over
+            {isKu ? "سەرلەنوێ دەستپێبکەرەوە" : "Start over"}
           </button>
         </div>
       </div>
@@ -143,15 +145,15 @@ function ResumeEditor() {
         data: { apiKey, bullet: original, jobTitle: data.title, mode },
       });
       updateAchievement(experienceIndex, achievementIndex, bullet);
-      toast.success("Bullet updated", { id: "improve" });
+      toast.success(isKu ? "خاڵەکە نوێکرایەوە" : "Bullet updated", { id: "improve" });
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Failed to improve bullet.", { id: "improve" });
+      toast.error(error instanceof Error ? error.message : (isKu ? "باشترکردنی خاڵەکە سەرکەوتوو نەبوو." : "Failed to improve bullet."), { id: "improve" });
     }
   };
 
   const handleTailor = async () => {
     if (jobDescription.trim().length < 20) {
-      toast.error("Paste a longer job description.");
+      toast.error(isKu ? "تکایە وەسفێکی درێژتری کارەکە دابنێ." : "Paste a longer job description.");
       return;
     }
 
@@ -161,11 +163,11 @@ function ResumeEditor() {
         data: { apiKey, resume: data, jobDescription },
       });
       updateData(tailored);
-      toast.success("Resume tailored to job description");
+      toast.success(isKu ? "سیڤییەکە گونجێندرا لەگەڵ وەسفی کارەکە" : "Resume tailored to job description");
       setTailorOpen(false);
       setJobDescription("");
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Failed to tailor resume.");
+      toast.error(error instanceof Error ? error.message : (isKu ? "گونجاندنی سیڤییەکە سەرکەوتوو نەبوو." : "Failed to tailor resume."));
     } finally {
       setTailoring(false);
     }
@@ -185,23 +187,23 @@ function ResumeEditor() {
         } else {
           await exportResumePDF(data, resume.template, filename);
         }
-        toast.success("PDF saved — looks exactly like the preview");
+        toast.success(isKu ? "PDF پاشەکەوت کرا — ڕێک وەک پێشبینینەکە دەردەکەوێت" : "PDF saved — looks exactly like the preview");
       } else if (format === "pdf-standard") {
         // Vector-based: smaller file size, crisp at any zoom
         await exportResumePDF(data, resume.template, filename);
-        toast.success("PDF saved");
+        toast.success(isKu ? "PDF پاشەکەوت کرا" : "PDF saved");
       } else if (format === "docx") {
         await exportResumeDocx(data, resume.template, filename);
-        toast.success("Word document saved");
+        toast.success(isKu ? "بەڵگەنامەی Word پاشەکەوت کرا" : "Word document saved");
       } else if (format === "pptx") {
         await exportResumePptx(data, filename);
-        toast.success("Presentation saved");
+        toast.success(isKu ? "پێشکەشکردنەکە پاشەکەوت کرا" : "Presentation saved");
       } else if (format === "md") {
         exportResumeMarkdown(data, filename);
-        toast.success("Markdown saved");
+        toast.success(isKu ? "Markdown پاشەکەوت کرا" : "Markdown saved");
       }
     } catch (error) {
-      toast.error(`Export failed: ${error instanceof Error ? error.message : String(error)}`);
+      toast.error(isKu ? `هەناردەکردن سەرکەوتوو نەبوو: ${error instanceof Error ? error.message : String(error)}` : `Export failed: ${error instanceof Error ? error.message : String(error)}`);
       console.error(error);
     } finally {
       setExporting(false);
@@ -228,12 +230,12 @@ function ResumeEditor() {
       });
       updateData(updatedResume);
       setMessages(prev => [...prev, { role: 'assistant', content: reply, snapshotId }]);
-      toast.success("Resume updated");
+      toast.success(isKu ? "سیڤی نوێکرایەوە" : "Resume updated");
     } catch (error) {
       // Remove the snapshot if edit failed
       setHistory(prev => prev.filter(h => h.id !== snapshotId));
-      toast.error(error instanceof Error ? error.message : "Failed to update resume.");
-      setMessages(prev => [...prev, { role: 'assistant', content: "I ran into an issue. Please try again." }]);
+      toast.error(error instanceof Error ? error.message : (isKu ? "نوێکردنەوەی سیڤی سەرکەوتوو نەبوو." : "Failed to update resume."));
+      setMessages(prev => [...prev, { role: 'assistant', content: isKu ? "کێشەیەکم بۆ دروست بوو. تکایە دووبارە هەوڵ بدەرەوە." : "I ran into an issue. Please try again." }]);
     } finally {
       setChatLoading(false);
     }
@@ -243,7 +245,7 @@ function ResumeEditor() {
     const entry = history.find(h => h.id === snapshotId);
     if (!entry) return;
     updateData(entry.snapshot);
-    toast.success("Reverted to previous version");
+    toast.success(isKu ? "گەڕێندرایەوە بۆ وەشانی پێشووتر" : "Reverted to previous version");
   };
 
   return (
@@ -266,7 +268,7 @@ function ResumeEditor() {
             <div className="flex flex-wrap items-center gap-2">
               <button onClick={() => setVisualEditOpen(true)} className="px-3 py-1.5 text-xs font-medium text-slate-600 hover:text-slate-900 rounded-lg hover:bg-slate-50 transition-colors flex items-center gap-1.5 border border-slate-200">
                 <Edit3 className="h-3.5 w-3.5" />
-                Visual Edit
+                {isKu ? "دەستکاریکردنی بینراو" : "Visual Edit"}
               </button>
               
               <select
@@ -288,11 +290,24 @@ function ResumeEditor() {
                 <option value="orbit">Orbit</option>
                 <option value="metric">Metric</option>
                 <option value="prism">Prism</option>
+                <option value="carbon">Carbon</option>
+                <option value="atlas">Atlas</option>
+                <option value="forge">Forge</option>
+                <option value="zenith">Zenith</option>
+                <option value="vector">Vector</option>
+                <option value="new-sleek">NEW Sleek A4</option>
+                <option value="new-professional">NEW Professional A4</option>
+                <option value="new-academic">NEW Academic A4</option>
+                <option value="ref-torres">NEW Torres Exact</option>
+                <option value="ref-silva">NEW Silva Exact</option>
+                <option value="ref-schumacher">NEW Schumacher Exact</option>
+                <option value="ref-palmerston">NEW Palmerston Exact</option>
+                <option value="ref-sanchez">NEW Sanchez Exact</option>
               </select>
 
               <button onClick={() => setTailorOpen(true)} className="px-3 py-1.5 text-xs font-medium text-blue-600 hover:text-blue-900 rounded-lg hover:bg-blue-50 transition-colors flex items-center gap-1.5">
                 <Target className="h-3.5 w-3.5" />
-                Tailor
+                {isKu ? "گونجاندن" : "Tailor"}
               </button>
 
               {/* Export Dropdown */}
@@ -303,7 +318,7 @@ function ResumeEditor() {
                   className="primary-button px-4 py-2 text-xs font-medium disabled:opacity-50 flex items-center gap-1.5"
                 >
                   {exporting ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Download className="h-3.5 w-3.5" />}
-                  Export
+                  {isKu ? "هەناردەکردن" : "Export"}
                   <ChevronDown className={`h-3 w-3 transition-transform ${exportDropdownOpen ? 'rotate-180' : ''}`} />
                 </button>
 
@@ -343,21 +358,21 @@ function ResumeEditor() {
                       className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-blue-900 hover:bg-blue-50 transition-colors"
                     >
                       <FileType className="w-4 h-4 text-blue-500" />
-                      Word Document
+                      {isKu ? "بەڵگەنامەی Word" : "Word Document"}
                     </button>
                     <button
                       onClick={() => handleExport("pptx")}
                       className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-blue-900 hover:bg-blue-50 transition-colors"
                     >
                       <Presentation className="w-4 h-4 text-blue-500" />
-                      Presentation
+                      {isKu ? "پێشکەشکردن" : "Presentation"}
                     </button>
                     <button
                       onClick={() => handleExport("md")}
                       className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-blue-900 hover:bg-blue-50 transition-colors"
                     >
                       <FileCode className="w-4 h-4 text-blue-500" />
-                      Markdown
+                      {isKu ? "مارکداون" : "Markdown"}
                     </button>
                   </div>
                 )}
@@ -375,9 +390,9 @@ function ResumeEditor() {
             <div>
               <h2 className="text-sm font-semibold tracking-tight flex items-center gap-2">
                 <Bot className="w-4 h-4 text-blue-600" />
-                AI Resume Assistant
+                {isKu ? "یاریدەدەری زیرەکی دەستکرد" : "AI Resume Assistant"}
               </h2>
-              <p className="text-xs text-slate-400 mt-0.5">Ask to change anything, or pick a past version below.</p>
+              <p className="text-xs text-slate-400 mt-0.5">{isKu ? "داوابکە هەر شتێک بگۆڕێت، یان وەشانی پێشوو هەڵبژێرە لە خوارەوە." : "Ask to change anything, or pick a past version below."}</p>
             </div>
             {history.length > 0 && (
               <button
@@ -387,7 +402,7 @@ function ResumeEditor() {
                 }`}
               >
                 <Clock className="w-3 h-3" />
-                {history.length} version{history.length !== 1 ? 's' : ''}
+                {history.length} {isKu ? "وەشان" : `version${history.length !== 1 ? 's' : ''}`}
               </button>
             )}
           </div>
@@ -395,7 +410,7 @@ function ResumeEditor() {
           {/* History panel */}
           {showHistory && history.length > 0 && (
             <div className="border-b border-slate-100 bg-slate-50/80 px-3 py-2 space-y-1 max-h-44 overflow-y-auto">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2 px-1">Saved versions</p>
+              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2 px-1">{isKu ? "وەشانە پاشەکەوتکراوەکان" : "Saved versions"}</p>
               {history.map((h) => (
                 <div key={h.id} className="flex items-center justify-between gap-2 rounded-lg px-2 py-1.5 hover:bg-white transition-colors group">
                   <div className="min-w-0">
@@ -406,7 +421,7 @@ function ResumeEditor() {
                     onClick={() => handleRevert(h.id)}
                     className="shrink-0 flex items-center gap-1 text-[11px] font-semibold text-blue-600 hover:text-blue-800 opacity-0 group-hover:opacity-100 transition-opacity px-2 py-1 rounded-md hover:bg-blue-50"
                   >
-                    <RotateCcw className="w-3 h-3" /> Restore
+                    <RotateCcw className="w-3 h-3" /> {isKu ? "گێڕانەوە" : "Restore"}
                   </button>
                 </div>
               ))}
@@ -436,7 +451,7 @@ function ResumeEditor() {
                       onClick={() => handleRevert(msg.snapshotId!)}
                       className="self-start flex items-center gap-1 text-[10.5px] font-medium text-slate-400 hover:text-blue-600 transition-colors ml-1"
                     >
-                      <RotateCcw className="w-3 h-3" /> Undo this change
+                      <RotateCcw className="w-3 h-3" /> {isKu ? "گەڕانەوە لەم گۆڕانکارییە" : "Undo this change"}
                     </button>
                   )}
                 </div>
@@ -463,7 +478,7 @@ function ResumeEditor() {
               <input
                 value={chatInput}
                 onChange={(e) => setChatInput(e.target.value)}
-                placeholder="Make my summary more executive..."
+                placeholder={isKu ? "پوختەی کارەکەم با بەهێزتر بێت..." : "Make my summary more executive..."}
                 disabled={chatLoading}
                 className="w-full bg-slate-50 border border-slate-200 rounded-full pl-4 pr-12 py-2.5 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 disabled:opacity-50 transition-all"
               />
@@ -521,8 +536,8 @@ function ResumeEditor() {
           <div className="surface-panel w-full max-w-4xl rounded-[2rem] bg-white flex flex-col max-h-full overflow-hidden shadow-2xl">
             <div className="px-6 py-4 flex items-center justify-between border-b border-slate-100">
               <div>
-                <h2 className="text-xl font-bold tracking-tight">Visual Editor</h2>
-                <p className="text-xs text-muted-foreground mt-1">Make direct edits to your resume fields.</p>
+                <h2 className="text-xl font-bold tracking-tight">{isKu ? "دەستکاریکردنی بینراو" : "Visual Editor"}</h2>
+                <p className="text-xs text-muted-foreground mt-1">{isKu ? "گۆڕانکاری ڕاستەوخۆ بکە لە بوارەکانی سیڤییەکەت." : "Make direct edits to your resume fields."}</p>
               </div>
               <button onClick={() => setVisualEditOpen(false)} className="w-8 h-8 rounded-full hover:bg-slate-100 flex items-center justify-center text-slate-500 transition-colors">
                 <X className="w-5 h-5" />
@@ -530,22 +545,22 @@ function ResumeEditor() {
             </div>
             
             <div className="flex-1 overflow-y-auto p-6 grid gap-6">
-              <Card title="Header">
+              <Card title={isKu ? "سەرەوەی سیڤی" : "Header"}>
                 <div className="grid gap-4 sm:grid-cols-2">
-                  <Input label="Name" value={data.name} onChange={(value) => updateData({ name: value })} />
-                  <Input label="Title" value={data.title} onChange={(value) => updateData({ title: value })} />
-                  <Input label="Email" value={data.email ?? ""} onChange={(value) => updateData({ email: value })} />
-                  <Input label="Phone" value={data.phone ?? ""} onChange={(value) => updateData({ phone: value })} />
-                  <Input label="Location" value={data.location ?? ""} onChange={(value) => updateData({ location: value })} />
+                  <Input label={isKu ? "ناو" : "Name"} value={data.name} onChange={(value) => updateData({ name: value })} />
+                  <Input label={isKu ? "ناونیشان/پیشە" : "Title"} value={data.title} onChange={(value) => updateData({ title: value })} />
+                  <Input label={isKu ? "ئیمەیڵ" : "Email"} value={data.email ?? ""} onChange={(value) => updateData({ email: value })} />
+                  <Input label={isKu ? "تەلەفۆن" : "Phone"} value={data.phone ?? ""} onChange={(value) => updateData({ phone: value })} />
+                  <Input label={isKu ? "شوێن" : "Location"} value={data.location ?? ""} onChange={(value) => updateData({ location: value })} />
                   <Input
-                    label="Photo URL (optional)"
+                    label={isKu ? "لینکی وێنە (ئارەزوومەندانە)" : "Photo URL (optional)"}
                     value={data.photoUrl ?? ""}
                     onChange={(value) => updateData({ photoUrl: value })}
                   />
                 </div>
               </Card>
 
-              <Card title="Summary">
+              <Card title={isKu ? "پوختە" : "Summary"}>
                 <textarea
                   value={data.summary}
                   onChange={(event) => updateData({ summary: event.target.value })}
@@ -554,11 +569,11 @@ function ResumeEditor() {
                 />
               </Card>
 
-              <Card title="Skills">
+              <Card title={isKu ? "لێهاتووییەکان" : "Skills"}>
                 <div className="grid gap-3">
                   <div className="flex items-center gap-3 text-xs font-medium text-muted-foreground px-1">
-                    <span className="flex-1">Skill Name</span>
-                    <span className="w-20 text-center" title="Level used for stars/bars (1-5)">Level (1-5)</span>
+                    <span className="flex-1">{isKu ? "ناوی لێهاتوویی" : "Skill Name"}</span>
+                    <span className="w-20 text-center" title="Level used for stars/bars (1-5)">{isKu ? "ئاست (١-٥)" : "Level (1-5)"}</span>
                     <span className="w-8"></span>
                   </div>
                   {data.skills.map((skill, i) => {
@@ -612,23 +627,23 @@ function ResumeEditor() {
                     className="ghost-button mt-2 px-4 py-2 text-sm text-foreground self-start border border-dashed border-slate-300"
                   >
                     <Plus className="h-4 w-4" />
-                    Add Skill
+                    {isKu ? "لێهاتوویی زیاد بکە" : "Add Skill"}
                   </button>
                 </div>
               </Card>
               
-              <Card title="Experience">
+              <Card title={isKu ? "ئەزموون" : "Experience"}>
                 <div className="grid gap-6">
                   {data.experience.map((experience, experienceIndex) => (
                     <div key={`${experience.company}-${experienceIndex}`} className="surface-muted rounded-[1.6rem] p-5 border-2 border-blue-200 bg-blue-50/30">
                       <div className="grid gap-4 sm:grid-cols-2">
                         <Input
-                          label="Role"
+                          label={isKu ? "ڕۆڵ/کار" : "Role"}
                           value={experience.title}
                           onChange={(value) => updateExperience(experienceIndex, { title: value })}
                         />
                         <Input
-                          label="Company"
+                          label={isKu ? "کۆمپانیا" : "Company"}
                           value={experience.company}
                           onChange={(value) => updateExperience(experienceIndex, { company: value })}
                         />
@@ -636,7 +651,7 @@ function ResumeEditor() {
 
                       <div className="mt-4">
                         <Input
-                          label="Duration"
+                          label={isKu ? "ماوە" : "Duration"}
                           value={experience.duration}
                           onChange={(value) => updateExperience(experienceIndex, { duration: value })}
                         />
@@ -678,7 +693,7 @@ function ResumeEditor() {
                                 className="ghost-button px-3 py-2 text-xs text-red-500 hover:bg-red-50"
                               >
                                 <Trash2 className="h-3.5 w-3.5" />
-                                Remove
+                                {isKu ? "سڕینەوە" : "Remove"}
                               </button>
                             </div>
                           </div>
@@ -690,14 +705,14 @@ function ResumeEditor() {
                           const next = [...data.experience];
                           next[experienceIndex] = {
                             ...next[experienceIndex],
-                            achievements: [...next[experienceIndex].achievements, "New achievement"],
+                            achievements: [...next[experienceIndex].achievements, isKu ? "خاڵێکی نوێی ئەزموون" : "New achievement"],
                           };
                           updateData({ experience: next });
                         }}
                         className="ghost-button mt-4 px-4 py-2 text-sm text-foreground bg-white border border-dashed border-slate-300"
                       >
                         <Plus className="h-4 w-4" />
-                        Add bullet
+                        {isKu ? "خاڵ زیاد بکە" : "Add bullet"}
                       </button>
                     </div>
                   ))}
@@ -709,7 +724,7 @@ function ResumeEditor() {
                     className="w-full ghost-button py-4 text-sm text-foreground border-2 border-dashed border-slate-200 hover:border-slate-300 rounded-[1.6rem]"
                   >
                     <Plus className="h-5 w-5 mb-1 mx-auto text-slate-400" />
-                    Add Experience
+                    {isKu ? "ئەزموون زیاد بکە" : "Add Experience"}
                   </button>
                 </div>
               </Card>
@@ -717,7 +732,7 @@ function ResumeEditor() {
             
             <div className="p-4 sm:px-6 py-4 border-t border-slate-100 flex justify-end bg-slate-50">
               <button onClick={() => setVisualEditOpen(false)} className="primary-button px-6 py-2.5 text-sm font-medium">
-                Done
+                {isKu ? "تەواو" : "Done"}
               </button>
             </div>
           </div>
@@ -734,31 +749,31 @@ function ResumeEditor() {
             onClick={(event) => event.stopPropagation()}
           >
             <div className="flex items-center justify-between">
-              <div className="eyebrow">Job tailoring</div>
+              <div className="eyebrow">{isKu ? "گونجاندنی کار" : "Job tailoring"}</div>
               <button onClick={() => setTailorOpen(false)} className="w-8 h-8 rounded-full hover:bg-slate-100 flex items-center justify-center text-slate-500 transition-colors">
                 <X className="w-5 h-5" />
               </button>
             </div>
-            <h2 className="mt-4 text-3xl font-semibold tracking-tight">Paste the hiring brief and rewrite the draft against it.</h2>
+            <h2 className="mt-4 text-3xl font-semibold tracking-tight">{isKu ? "وەسفی کارەکە دابنێ و سیڤییەکەت بە پێی ئەوە بگۆڕە." : "Paste the hiring brief and rewrite the draft against it."}</h2>
             <p className="mt-3 text-sm leading-6 text-muted-foreground">
-              This operation updates the current resume draft, so use it when the target role is clear enough to justify a rewrite.
+              {isKu ? "ئەمە سیڤییەکە نوێ دەکاتەوە، بۆیە کاتێک بەکاری بهێنە کە ڕۆڵەکە ڕوون بێت." : "This operation updates the current resume draft, so use it when the target role is clear enough to justify a rewrite."}
             </p>
 
             <textarea
               value={jobDescription}
               onChange={(event) => setJobDescription(event.target.value)}
-              placeholder="Paste the full job description here."
+              placeholder={isKu ? "وەسفی کارەکە لێرە دابنێ." : "Paste the full job description here."}
               rows={12}
               className="field-input mt-6 resize-y bg-slate-50 focus:bg-white"
             />
 
             <div className="mt-6 flex flex-col justify-end gap-3 sm:flex-row">
               <button onClick={() => setTailorOpen(false)} className="ghost-button px-5 py-3 text-sm text-foreground border border-slate-200">
-                Cancel
+                {isKu ? "پاشگەزبوونەوە" : "Cancel"}
               </button>
               <button onClick={handleTailor} disabled={tailoring} className="primary-button px-6 py-3 text-sm font-medium disabled:opacity-50">
                 {tailoring ? <Loader2 className="h-4 w-4 animate-spin" /> : <Wand2 className="h-4 w-4" />}
-                Tailor resume
+                {isKu ? "گونجاندنی سیڤی" : "Tailor resume"}
               </button>
             </div>
           </div>

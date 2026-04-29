@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState, useMemo } from "react";
-import { ArrowLeft, Sparkles, LayoutTemplate, CheckCircle2 } from "lucide-react";
+import { ArrowLeft, Sparkles, LayoutTemplate, CheckCircle2, Languages } from "lucide-react";
 import { ResumePreview } from "@/components/resume/templates";
 import { useAppStore } from "@/lib/store";
 import type { ResumeData, TemplateId } from "@/lib/types";
@@ -60,7 +60,70 @@ const SAMPLE: ResumeData = {
   certifications: ["AWS Solutions Architect Professional"],
 };
 
-type Category = "All" | "Minimal" | "Professional" | "Creative";
+function toSoraniResume(data: ResumeData): ResumeData {
+  return {
+    ...data,
+    name: "شوان کەمال",
+    title: "ئەندازیاری سینیۆری نەرمەکاڵا",
+    email: data.email ?? "shwan@example.com",
+    phone: data.phone ?? "+964 750 000 0000",
+    location: "هەولێر، کوردستان",
+    summary:
+      "ئەندازیاری نەرمەکاڵا بە ئەزموونی فراوان لە دروستکردنی سیستەمی پەیوەندیدار و خزمەتگوزارییە دیجیتاڵییەکان. پسپۆڕ لە باشترکردنی خێرایی، ڕێکخستنی تیم، و گواستنەوەی بیرۆکە ئاڵۆزەکان بۆ بەرهەمی کاریگەر.",
+    experience: [
+      {
+        title: "ئەندازیاری سینیۆری نەرمەکاڵا",
+        company: "کۆمپانیای تەکنەلۆژی ڕووناک",
+        duration: "٢٠٢٢ — ئێستا",
+        description: "سەرپەرشتیاری بنیاتنانی خزمەتگوزارییە سەرەکییەکان و باشترکردنی ئەدای سیستەم.",
+        achievements: [
+          "خێرایی وەڵامدانەوەی سیستەم بە شێوەیەکی بەرچاو باشترکرا و ئەزموونی بەکارهێنەر ڕوونتر بوو.",
+          "ڕێنمایی چوار تیمی جیاواز کرا بۆ ڕادەستکردنی بەرهەمێکی گرنگ لە کاتی دیاریکراو.",
+          "ڕێکخستنی ڕێبازێکی نوێ بۆ پشکنینی کۆد و کەمکردنەوەی هەڵەکانی بەرهەم.",
+        ],
+      },
+      {
+        title: "ئەندازیاری نەرمەکاڵا",
+        company: "ستۆدیۆی دیجیتاڵی کاروان",
+        duration: "٢٠١٩ — ٢٠٢٢",
+        description: "دروستکردنی داشبۆرد و سیستەمی ناوخۆیی بۆ بەڕێوەبردنی کار.",
+        achievements: [
+          "پرۆسەی ڕاپۆرتکردن بە ئۆتۆماتیکی کرا و کاتی کاری هەفتانە کەمکرایەوە.",
+          "چوارچێوەی هاوبەشی UI دروستکرا بۆ یەکسانکردنی ئەزموونی بەکارهێنەر.",
+        ],
+      },
+    ],
+    projects: [
+      {
+        name: "سیستەمی هەڵسەنگاندنی زیرەک",
+        description: "ئامرازێکی ناوخۆیی بۆ ڕێکخستن و پێوانەکردنی کارایی تیمەکان.",
+        tech: ["TypeScript", "React", "PostgreSQL"],
+        impact: "بەکارهاتووە لەلایەن چەند تیمێکی بەرهەم.",
+      },
+      {
+        name: "داشبۆردی ڕاپۆرت",
+        description: "بینینی خێرای داتای کار و پێوەرە گرنگەکان بۆ بەڕێوەبەران.",
+        tech: ["Node.js", "Charts", "API"],
+        impact: "کاتی ئامادەکردنی ڕاپۆرتی مانگانەی کەمکردەوە.",
+      },
+    ],
+    education: [{ degree: "بەکالۆریۆس لە زانستی کۆمپیوتەر", institution: "زانکۆی سەلاحەدین", year: "٢٠١٦" }],
+    skills: ["TypeScript", "React", "Node.js", "PostgreSQL", "Docker", "AWS", "ڕێبەرایەتی تیم", "چارەسەرکردنی کێشە"],
+    skillItems: [
+      { name: "TypeScript", level: 5 },
+      { name: "React", level: 5 },
+      { name: "Node.js", level: 4 },
+      { name: "PostgreSQL", level: 4 },
+      { name: "Docker", level: 3 },
+      { name: "AWS", level: 4 },
+      { name: "ڕێبەرایەتی تیم", level: 5 },
+      { name: "چارەسەرکردنی کێشە", level: 5 },
+    ],
+    certifications: ["بڕوانامەی پیشەیی AWS", "بڕوانامەی بەڕێوەبردنی پرۆژە"],
+  };
+}
+
+type Category = "All" | "Minimal" | "Professional" | "Academic" | "Creative";
 
 const TEMPLATES: { id: TemplateId; label: string; desc: string; category: Category; isNew?: boolean }[] = [
   { id: "minimal",   label: "Minimal",   desc: "Clean hierarchy", category: "Minimal" },
@@ -73,6 +136,14 @@ const TEMPLATES: { id: TemplateId; label: string; desc: string; category: Catego
   { id: "metric",    label: "Metric",     desc: "Data-driven", category: "Professional" },
   { id: "carbon",    label: "Carbon",     desc: "Charcoal sidebar", category: "Professional", isNew: true },
   { id: "atlas",     label: "Atlas",      desc: "Corporate authority", category: "Professional", isNew: true },
+  { id: "new-sleek", label: "NEW Sleek A4", desc: "Photo-led precision", category: "Professional", isNew: true },
+  { id: "new-professional", label: "NEW Professional A4", desc: "Executive sidebar", category: "Professional", isNew: true },
+  { id: "new-academic", label: "NEW Academic A4", desc: "Research CV layout", category: "Academic", isNew: true },
+  { id: "ref-torres", label: "NEW Torres Exact", desc: "Blue photo sidebar", category: "Professional", isNew: true },
+  { id: "ref-silva", label: "NEW Silva Exact", desc: "Brown account split", category: "Professional", isNew: true },
+  { id: "ref-schumacher", label: "NEW Schumacher Exact", desc: "Orange skill bars", category: "Creative", isNew: true },
+  { id: "ref-palmerston", label: "NEW Palmerston Exact", desc: "Slate graphic designer", category: "Professional", isNew: true },
+  { id: "ref-sanchez", label: "NEW Sanchez Exact", desc: "Timeline manager", category: "Professional", isNew: true },
   { id: "noir",      label: "Noir",       desc: "All-black luxury", category: "Creative" },
   { id: "cipher",    label: "Cipher",     desc: "Dark tech aesthetic", category: "Creative" },
   { id: "pinnacle",  label: "Pinnacle",   desc: "Dark layered layout", category: "Creative" },
@@ -212,6 +283,181 @@ function Thumbnail({ id }: { id: TemplateId }) {
           </div>
         </div>
       );
+    case "new-sleek":
+      return (
+        <div className="w-full h-full bg-white rounded-md p-1.5 flex flex-col gap-1 border border-slate-200">
+          <div className="flex items-start justify-between gap-1 border-b border-slate-200 pb-1">
+            <div className="space-y-0.5">
+              <div className="w-8 h-1.5 bg-slate-900 rounded-sm" />
+              <div className="w-10 h-0.5 bg-slate-300 rounded-sm" />
+            </div>
+            <div className="h-4 w-4 rounded-md bg-slate-200" />
+          </div>
+          <div className="grid grid-cols-[1fr_0.45fr] gap-1 flex-1">
+            <div className="space-y-0.5 pt-1">
+              <div className="w-full h-0.5 bg-slate-200 rounded-sm" />
+              <div className="w-full h-0.5 bg-slate-200 rounded-sm" />
+              <div className="w-4/5 h-0.5 bg-slate-200 rounded-sm" />
+            </div>
+            <div className="space-y-0.5 border-l border-slate-100 pl-1 pt-1">
+              <div className="w-full h-0.5 bg-slate-300 rounded-sm" />
+              <div className="w-3/4 h-0.5 bg-slate-300 rounded-sm" />
+            </div>
+          </div>
+        </div>
+      );
+    case "new-professional":
+      return (
+        <div className="w-full h-full bg-white rounded-md flex overflow-hidden border border-slate-200">
+          <div className="w-1/3 h-full bg-slate-950 p-1">
+            <div className="w-4 h-4 rounded-full bg-slate-600 mb-1" />
+            <div className="w-full h-0.5 bg-cyan-200 rounded-sm" />
+            <div className="w-2/3 h-0.5 bg-slate-600 rounded-sm mt-0.5" />
+          </div>
+          <div className="flex-1 p-1.5 space-y-1">
+            <div className="w-full h-3 bg-slate-100 rounded-sm" />
+            <div className="w-full h-0.5 bg-slate-200 rounded-sm" />
+            <div className="w-5/6 h-0.5 bg-slate-200 rounded-sm" />
+          </div>
+        </div>
+      );
+    case "new-academic":
+      return (
+        <div className="w-full h-full bg-white rounded-md p-1.5 flex flex-col gap-1 border border-slate-200">
+          <div className="flex gap-1 border-b-2 border-slate-900 pb-1">
+            <div className="h-4 w-3 rounded-t-full bg-slate-200" />
+            <div className="flex-1 space-y-0.5">
+              <div className="w-2/3 h-1 bg-slate-900 rounded-sm" />
+              <div className="w-1/2 h-0.5 bg-slate-400 rounded-sm" />
+            </div>
+          </div>
+          <div className="grid grid-cols-[1fr_0.4fr] gap-1 pt-1">
+            <div className="space-y-0.5">
+              <div className="w-full h-0.5 bg-slate-200 rounded-sm" />
+              <div className="w-full h-0.5 bg-slate-200 rounded-sm" />
+              <div className="w-3/4 h-0.5 bg-slate-200 rounded-sm" />
+            </div>
+            <div className="space-y-0.5">
+              <div className="w-full h-0.5 bg-slate-300 rounded-sm" />
+              <div className="w-2/3 h-0.5 bg-slate-300 rounded-sm" />
+            </div>
+          </div>
+        </div>
+      );
+    case "ref-torres":
+      return (
+        <div className="w-full h-full bg-white rounded-md overflow-hidden border border-slate-200">
+          <div className="h-5 bg-[#315b74]" />
+          <div className="flex h-full">
+            <div className="w-1/3 bg-slate-100 p-1">
+              <div className="mx-auto -mt-3 mb-1 h-7 w-7 rounded-full border-2 border-slate-300 bg-slate-300" />
+              <div className="h-1 w-full bg-[#1d3f59] rounded-sm" />
+              <div className="mt-1 h-0.5 w-2/3 bg-slate-300 rounded-sm" />
+            </div>
+            <div className="flex-1 p-1.5 space-y-1">
+              <div className="h-1 w-1/2 bg-[#1d3f59] rounded-sm" />
+              <div className="h-0.5 w-full bg-slate-200 rounded-sm" />
+              <div className="h-0.5 w-4/5 bg-slate-200 rounded-sm" />
+            </div>
+          </div>
+        </div>
+      );
+    case "ref-silva":
+      return (
+        <div className="w-full h-full bg-white rounded-md overflow-hidden border border-slate-200">
+          <div className="flex h-6 items-center gap-1 bg-[#342820] p-1">
+            <div className="h-4 w-4 rounded-full bg-stone-300" />
+            <div className="h-4 w-0.5 bg-white" />
+            <div className="h-1 w-1/2 bg-white rounded-sm" />
+          </div>
+          <div className="flex h-full">
+            <div className="w-1/3 bg-[#fff0e3] p-1 space-y-1">
+              <div className="h-0.5 w-full bg-stone-300 rounded-sm" />
+              <div className="h-0.5 w-3/4 bg-stone-300 rounded-sm" />
+            </div>
+            <div className="flex-1 p-1.5 space-y-1">
+              <div className="h-1 w-1/2 bg-stone-800 rounded-sm" />
+              <div className="h-0.5 w-full bg-stone-200 rounded-sm" />
+              <div className="h-0.5 w-5/6 bg-stone-200 rounded-sm" />
+            </div>
+          </div>
+        </div>
+      );
+    case "ref-schumacher":
+      return (
+        <div className="w-full h-full bg-white rounded-md p-1.5 border-2 border-[#7c3cff]">
+          <div className="grid grid-cols-[0.45fr_1fr] gap-1">
+            <div className="h-4 w-full bg-slate-900 rounded-sm" />
+            <div className="grid grid-cols-2 gap-1">
+              <div className="h-0.5 w-full bg-slate-400 mt-1" />
+              <div className="h-0.5 w-full bg-slate-400 mt-1" />
+            </div>
+          </div>
+          <div className="mt-2 grid grid-cols-[0.45fr_1fr] gap-1">
+            <div className="space-y-0.5">
+              <div className="h-1 w-2/3 bg-slate-900 rounded-sm" />
+              <div className="h-0.5 w-full bg-slate-200 rounded-sm" />
+              <div className="h-0.5 w-4/5 bg-slate-200 rounded-sm" />
+            </div>
+            <div className="grid grid-cols-2 gap-1">
+              {[1, 2, 3, 4].map((item) => (
+                <div key={item}>
+                  <div className="h-0.5 w-3/4 bg-slate-900 rounded-sm" />
+                  <div className="mt-0.5 h-1.5 bg-slate-300"><div className="h-full w-2/3 bg-[#ff8a22]" /></div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      );
+    case "ref-palmerston":
+      return (
+        <div className="w-full h-full bg-white rounded-md overflow-hidden border border-slate-200">
+          <div className="relative h-7">
+            <div className="absolute left-0 top-0 h-5 w-1/3 rounded-br-lg bg-[#303b4e]" />
+            <div className="ml-[40%] pt-1 space-y-0.5">
+              <div className="h-1.5 w-2/3 bg-[#223a59] rounded-sm" />
+              <div className="h-0.5 w-1/2 bg-[#223a59] rounded-sm" />
+            </div>
+            <div className="absolute bottom-0 left-1 right-1 h-2 rounded-full bg-[#303b4e]" />
+          </div>
+          <div className="flex h-full">
+            <div className="w-1/3 bg-[#303b4e] p-1 space-y-1">
+              <div className="h-0.5 w-full bg-white/50 rounded-sm" />
+              <div className="h-0.5 w-4/5 bg-white/40 rounded-sm" />
+              <div className="mt-1 h-1 bg-white/20"><div className="h-full w-2/3 bg-white" /></div>
+            </div>
+            <div className="flex-1 p-1.5 space-y-1">
+              <div className="h-1 w-1/2 bg-[#223a59] rounded-sm" />
+              <div className="h-0.5 w-full bg-slate-200 rounded-sm" />
+              <div className="h-0.5 w-5/6 bg-slate-200 rounded-sm" />
+            </div>
+          </div>
+        </div>
+      );
+    case "ref-sanchez":
+      return (
+        <div className="w-full h-full bg-white rounded-md overflow-hidden border border-slate-200">
+          <div className="relative h-7 bg-[#303b4e]">
+            <div className="absolute left-1 top-3 h-5 w-5 rounded-full border-2 border-white bg-slate-300" />
+            <div className="ml-9 pt-2 space-y-0.5">
+              <div className="h-1.5 w-1/2 bg-white rounded-sm" />
+              <div className="h-0.5 w-1/3 bg-white/70 rounded-sm" />
+            </div>
+          </div>
+          <div className="flex h-full">
+            <div className="w-1/3 bg-slate-200 p-1 pt-3 space-y-1">
+              <div className="h-0.5 w-full bg-slate-500 rounded-sm" />
+              <div className="flex gap-0.5">{[1,2,3,4,5].map(i => <span key={i} className="h-1 w-1 rounded-full bg-[#303b4e]" />)}</div>
+            </div>
+            <div className="flex-1 p-1.5 space-y-1">
+              <div className="h-1 w-1/2 bg-[#303b4e] rounded-sm" />
+              <div className="h-0.5 w-full bg-slate-200 rounded-sm" />
+              <div className="h-0.5 w-4/5 bg-slate-200 rounded-sm" />
+            </div>
+          </div>
+        </div>
+      );
     default:
       // Minimal and others
       return (
@@ -232,13 +478,15 @@ function TemplatesPage() {
   
   const [active, setActive] = useState<TemplateId>("minimal");
   const [filter, setFilter] = useState<Category>("All");
+  const [soraniMode, setSoraniMode] = useState(false);
+  const previewData = useMemo(() => soraniMode ? toSoraniResume(data) : data, [data, soraniMode]);
 
   const filteredTemplates = useMemo(() => {
     if (filter === "All") return TEMPLATES;
     return TEMPLATES.filter(t => t.category === filter);
   }, [filter]);
 
-  const categories: Category[] = ["All", "Minimal", "Professional", "Creative"];
+  const categories: Category[] = ["All", "Minimal", "Professional", "Academic", "Creative"];
 
   return (
     <div className="min-h-screen bg-[#f8faff] text-slate-900 font-sans selection:bg-blue-100 selection:text-blue-900 relative overflow-hidden flex flex-col">
@@ -365,13 +613,24 @@ function TemplatesPage() {
                 <span className="text-xs font-bold uppercase tracking-wider text-slate-700">Live Preview</span>
               </div>
               <div className="flex items-center gap-2">
-                <ExportButtons data={data} template={active} name={data.name} />
+                <button
+                  onClick={() => setSoraniMode((value) => !value)}
+                  className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-bold tracking-wide shadow-sm transition-all active:scale-[0.98] ${
+                    soraniMode
+                      ? "border-slate-800 bg-slate-900 text-white"
+                      : "border-white bg-white/80 text-slate-700 hover:bg-white"
+                  }`}
+                >
+                  <Languages className="h-3.5 w-3.5" />
+                  {soraniMode ? "کوردی" : "Kurdish RTL"}
+                </button>
+                <ExportButtons data={previewData} template={active} name={previewData.name} />
               </div>
             </div>
 
             {/* Resume Container with smooth scroll */}
-            <div className="flex-1 overflow-hidden rounded-[1rem] shadow-[0_0_0_1px_rgba(0,0,0,0.05),0_30px_60px_-20px_rgba(0,0,0,0.15)] bg-white relative">
-              <ClientPDFPreview data={data} template={active} />
+            <div className="flex-1 overflow-hidden rounded-[1rem] shadow-[0_0_0_1px_rgba(0,0,0,0.05),0_30px_60px_-20px_rgba(0,0,0,0.15)] bg-white relative @container">
+              <ClientPDFPreview data={previewData} template={active} />
             </div>
           </div>
         </section>
@@ -380,11 +639,8 @@ function TemplatesPage() {
   );
 }
 
-// Client-only wrapper for the PDF Viewer to avoid SSR hydration issues
-import { usePDF } from "@react-pdf/renderer";
-import { GetPDFDocument, exportResumePDF } from "@/components/resume/pdf-templates";
+import { exportResumePDF } from "@/components/resume/pdf-templates";
 import { exportResumeDocx } from "@/components/resume/docx-templates";
-import { useEffect } from "react";
 import { Download, FileText } from "lucide-react";
 
 function ExportButtons({ data, template, name }: { data: ResumeData; template: TemplateId; name: string }) {
@@ -426,50 +682,15 @@ function ExportButtons({ data, template, name }: { data: ResumeData; template: T
 
 
 function ClientPDFPreview({ data, template }: { data: ResumeData; template: TemplateId }) {
-  const [mounted, setMounted] = useState(false);
-  
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  if (!mounted) {
-    return (
-      <div className="w-full h-full flex flex-col items-center justify-center bg-slate-50 text-slate-400">
-        <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-4" />
-        <span className="text-sm font-medium">Loading preview engine...</span>
-      </div>
-    );
-  }
-
-  return <PDFLivePreview data={data} template={template} />;
-}
-
-function PDFLivePreview({ data, template }: { data: ResumeData; template: TemplateId }) {
-  const [instance, updateInstance] = usePDF({ document: <GetPDFDocument data={data} template={template} /> });
-
-  useEffect(() => {
-    updateInstance(<GetPDFDocument data={data} template={template} />);
-  }, [data, template, updateInstance]);
-
-  if (instance.loading) {
-    return (
-      <div className="w-full h-full flex flex-col items-center justify-center bg-slate-50 text-slate-400">
-         <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-4" />
-         <span className="text-sm font-medium">Rendering vector preview...</span>
-      </div>
-    );
-  }
-
-  if (instance.error) {
-    return <div className="p-4 text-red-500 flex h-full items-center justify-center text-center font-medium">Error rendering PDF: {String(instance.error)}</div>;
-  }
-
   return (
-    <iframe 
-      src={`${instance.url}#toolbar=0&navpanes=0&scrollbar=0&view=Fit`} 
-      className="w-full h-full border-0 bg-white"
-      title="Resume PDF Preview"
-    />
+    <div className="h-full w-full overflow-auto bg-slate-100 p-4">
+      <div
+        className="mx-auto w-[794px] min-w-[794px] origin-top overflow-hidden rounded-sm bg-white shadow-[0_20px_50px_-24px_rgba(15,23,42,0.45)]"
+        style={{ zoom: "min(1, calc(100cqw / 794))" }}
+      >
+        <ResumePreview data={data} template={template} />
+      </div>
+    </div>
   );
 }
 

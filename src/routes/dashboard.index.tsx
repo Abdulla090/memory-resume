@@ -1,12 +1,16 @@
 import { createFileRoute, Link } from '@tanstack/react-router';
 import { Plus, Upload, BrainCircuit, FileText, CheckCircle2, LayoutTemplate, PenTool, Briefcase, BarChart2, Sun, ArrowRight, MoreVertical, Settings, Wand2 } from 'lucide-react';
 import { LeftCardSVG, CenterCardSVG } from './index';
+import { useAppStore } from '@/lib/store';
 
 export const Route = createFileRoute('/dashboard/')({
   component: DashboardIndex,
 });
 
 function DashboardIndex() {
+  const language = useAppStore((state) => state.language);
+  const isKu = language === "ku";
+
   return (
     <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6 pb-10">
       
@@ -42,20 +46,24 @@ function DashboardIndex() {
 
           <div className="relative z-10 max-w-[400px]">
             <div className="inline-block text-sm font-bold text-slate-600 mb-4 bg-white/60 backdrop-blur-sm px-4 py-1.5 rounded-full shadow-sm">
-              Hello! 👋
+              {isKu ? "سڵاو! 👋" : "Hello! 👋"}
             </div>
             <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-slate-900 tracking-tight leading-[1.1] mb-3 sm:mb-4">
-              Let AI build your<br/>perfect CV
+              {isKu ? (
+                <>با زیرەکی دەستکرد<br/>سیڤییەکی نایابت بۆ دروست بکات</>
+              ) : (
+                <>Let AI build your<br/>perfect CV</>
+              )}
             </h1>
             <p className="text-slate-500 font-medium mb-8 text-sm md:text-base max-w-[280px]">
-              Smart. Personalized. Memory-based. Built for your next opportunity.
+              {isKu ? "زیرەک. تایبەت. پشت بەستوو بە یادگە. دروستکراوە بۆ دەرفەتی داهاتووت." : "Smart. Personalized. Memory-based. Built for your next opportunity."}
             </p>
             <div className="flex flex-wrap gap-3 sm:gap-4">
               <Link to="/onboarding" className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-2xl font-bold shadow-lg shadow-blue-600/20 transition-all hover:-translate-y-0.5">
-                <Plus className="w-5 h-5" /> Create New CV
+                <Plus className="w-5 h-5" /> {isKu ? "دروستکردنی سیڤیی نوێ" : "Create New CV"}
               </Link>
               <button className="flex items-center gap-2 bg-white text-blue-600 px-6 py-3 rounded-2xl font-bold shadow-sm border border-blue-100 hover:shadow-md transition-all">
-                <Upload className="w-5 h-5" /> Upload Existing
+                <Upload className="w-5 h-5" /> {isKu ? "بارکردنی سیڤیی هەبوو" : "Upload Existing"}
               </button>
             </div>
           </div>
@@ -68,18 +76,18 @@ function DashboardIndex() {
               <div className="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center text-blue-600">
                 <BrainCircuit className="w-6 h-6" />
               </div>
-              <h3 className="text-xl font-extrabold text-slate-900">AI Memory</h3>
+              <h3 className="text-xl font-extrabold text-slate-900">{isKu ? "یادگەی زیرەکی دەستکرد" : "AI Memory"}</h3>
             </div>
             <p className="text-slate-500 text-sm font-medium mb-6 leading-relaxed">
-              I remember your experience, skills, and preferences to make every CV better.
+              {isKu ? "ئەزموون، شارەزایی و ئارەزووەکانت لە یاد دەهێڵمەوە بۆ ئەوەی هەر سیڤییەک باشتر بکەم." : "I remember your experience, skills, and preferences to make every CV better."}
             </p>
             
             <div className="grid grid-cols-2 gap-3">
               {[
-                { label: 'Experiences', count: 24, icon: FileText },
-                { label: 'Skills', count: 18, icon: PenTool },
-                { label: 'Achievements', count: 15, icon: CheckCircle2 },
-                { label: 'Preferences', count: 12, icon: Settings },
+                { label: isKu ? 'ئەزموونەکان' : 'Experiences', count: 24, icon: FileText },
+                { label: isKu ? 'شارەزاییەکان' : 'Skills', count: 18, icon: PenTool },
+                { label: isKu ? 'دەستکەوتەکان' : 'Achievements', count: 15, icon: CheckCircle2 },
+                { label: isKu ? 'ئارەزووەکان' : 'Preferences', count: 12, icon: Settings },
               ].map((item) => (
                 <div key={item.label} className="bg-slate-50 p-3 rounded-2xl flex gap-3 items-center border border-slate-100/50">
                    <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-blue-500 shadow-sm shrink-0">
@@ -87,7 +95,7 @@ function DashboardIndex() {
                    </div>
                    <div>
                      <div className="text-[10px] font-bold text-slate-900 leading-none">{item.label}</div>
-                     <div className="text-[10px] font-medium text-slate-500 mt-1">{item.count} saved</div>
+                     <div className="text-[10px] font-medium text-slate-500 mt-1">{item.count} {isKu ? "پاشەکەوتکراوە" : "saved"}</div>
                    </div>
                 </div>
               ))}
@@ -95,10 +103,10 @@ function DashboardIndex() {
           </div>
           <div className="mt-6 flex justify-between items-end">
             <div className="text-[10px] text-slate-400 font-semibold leading-tight">
-              Memory last updated<br/><span className="text-slate-600">Today, 10:30 AM</span>
+              {isKu ? "دوایین نوێکردنەوەی یادگە" : "Memory last updated"}<br/><span className="text-slate-600">{isKu ? "ئەمڕۆ، ١٠:٣٠ بەیانی" : "Today, 10:30 AM"}</span>
             </div>
             <button className="text-blue-600 text-xs font-bold flex items-center gap-1 hover:underline">
-              Manage Memory <ArrowRight className="w-3 h-3" />
+              {isKu ? "بەڕێوەبردنی یادگە" : "Manage Memory"} <ArrowRight className={`w-3 h-3 ${isKu ? 'rotate-180' : ''}`} />
             </button>
           </div>
         </div>
@@ -115,9 +123,9 @@ function DashboardIndex() {
                <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center text-blue-500">
                  <FileText className="w-4 h-4" />
                </div>
-               <h3 className="font-bold text-slate-900">My CVs</h3>
+               <h3 className="font-bold text-slate-900">{isKu ? "سیڤییەکانم" : "My CVs"}</h3>
             </div>
-            <Link to="/dashboard/my-cvs" className="text-blue-600 text-xs font-bold flex items-center gap-1 hover:underline">View all <ArrowRight className="w-3 h-3" /></Link>
+            <Link to="/dashboard/my-cvs" className="text-blue-600 text-xs font-bold flex items-center gap-1 hover:underline">{isKu ? "هەمووی ببینە" : "View all"} <ArrowRight className={`w-3 h-3 ${isKu ? 'rotate-180' : ''}`} /></Link>
           </div>
           
           <div className="space-y-3">
@@ -149,9 +157,9 @@ function DashboardIndex() {
         <div className="rounded-[2rem] bg-white border border-slate-100 p-8 shadow-sm relative overflow-hidden flex flex-col items-center justify-center text-center">
           <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-blue-400 to-blue-600" />
           <h3 className="font-bold text-slate-900 flex items-center gap-2 mb-2">
-            <Wand2 className="w-5 h-5 text-blue-500" /> AI Optimize
+            <Wand2 className="w-5 h-5 text-blue-500" /> {isKu ? "باشترکردنی زیرەکی دەستکرد" : "AI Optimize"}
           </h3>
-          <p className="text-xs font-medium text-slate-500 mb-6">Improve your CV with AI suggestions.</p>
+          <p className="text-xs font-medium text-slate-500 mb-6">{isKu ? "سیڤییەکەت بە پێشنیاری زیرەکی دەستکرد باشتر بکە." : "Improve your CV with AI suggestions."}</p>
           
           <div className="flex items-center justify-center gap-8 w-full mb-8">
              <div className="relative w-24 h-24 flex items-center justify-center">
@@ -166,7 +174,11 @@ function DashboardIndex() {
              </div>
              
              <div className="space-y-3 text-left">
-               {['Content', 'Structure', 'Keywords', 'Impact'].map((item) => (
+               {isKu ? ['ناوەڕۆک', 'پێکهاتە', 'وشە سەرەکییەکان', 'کاریگەری'].map((item) => (
+                 <div key={item} className="flex items-center gap-2 text-[11px] font-bold text-slate-600">
+                   <CheckCircle2 className="w-4 h-4 text-emerald-500" /> {item}
+                 </div>
+               )) : ['Content', 'Structure', 'Keywords', 'Impact'].map((item) => (
                  <div key={item} className="flex items-center gap-2 text-[11px] font-bold text-slate-600">
                    <CheckCircle2 className="w-4 h-4 text-emerald-500" /> {item}
                  </div>
@@ -175,7 +187,7 @@ function DashboardIndex() {
           </div>
           
           <button className="w-full py-3.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold shadow-lg shadow-blue-500/20 transition-all text-sm flex justify-center items-center gap-2 hover:-translate-y-0.5">
-            Optimize Now <ArrowRight className="w-4 h-4" />
+            {isKu ? "ئێستا باشتر بکە" : "Optimize Now"} <ArrowRight className={`w-4 h-4 ${isKu ? 'rotate-180' : ''}`} />
           </button>
         </div>
 
@@ -186,9 +198,9 @@ function DashboardIndex() {
                <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center text-blue-500">
                  <LayoutTemplate className="w-4 h-4" />
                </div>
-               <h3 className="font-bold text-slate-900">Templates</h3>
+               <h3 className="font-bold text-slate-900">{isKu ? "تیمپڵەیتەکان" : "Templates"}</h3>
             </div>
-            <Link to="/templates" className="text-blue-600 text-xs font-bold flex items-center gap-1 hover:underline">View all <ArrowRight className="w-3 h-3" /></Link>
+            <Link to="/templates" className="text-blue-600 text-xs font-bold flex items-center gap-1 hover:underline">{isKu ? "هەمووی ببینە" : "View all"} <ArrowRight className={`w-3 h-3 ${isKu ? 'rotate-180' : ''}`} /></Link>
           </div>
           
           <div className="grid grid-cols-3 gap-4">
@@ -223,19 +235,23 @@ function DashboardIndex() {
              <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center text-blue-500">
                <PenTool className="w-4 h-4" />
              </div>
-             <h3 className="font-bold text-slate-900">AI Writer</h3>
+             <h3 className="font-bold text-slate-900">{isKu ? "نووسەری زیرەکی دەستکرد" : "AI Writer"}</h3>
           </div>
-          <p className="text-xs font-medium text-slate-500 mb-6 pl-10">Generate tailored content for your CV</p>
+          <p className="text-xs font-medium text-slate-500 mb-6 pl-10">{isKu ? "ناوەڕۆکی تایبەت بۆ سیڤییەکەت دروست بکە" : "Generate tailored content for your CV"}</p>
           
           <div className="grid grid-cols-2 gap-3 mb-6">
-             {['Professional Summary', 'Work Experience', 'Key Achievements', 'Skills Section'].map((item) => (
+             {isKu ? ['پوختەی پیشەیی', 'ئەزموونی کار', 'دەستکەوتە سەرەکییەکان', 'بەشی شارەزایی'].map((item) => (
+                <button key={item} className="px-3 py-3 bg-blue-50 hover:bg-blue-100 text-blue-600 text-[10px] font-bold rounded-xl transition-colors border border-blue-100/50 text-center">
+                  {item}
+                </button>
+             )) : ['Professional Summary', 'Work Experience', 'Key Achievements', 'Skills Section'].map((item) => (
                 <button key={item} className="px-3 py-3 bg-blue-50 hover:bg-blue-100 text-blue-600 text-[10px] font-bold rounded-xl transition-colors border border-blue-100/50 text-center">
                   {item}
                 </button>
              ))}
           </div>
           <button className="w-full py-3.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold shadow-lg shadow-blue-500/20 transition-all text-sm flex justify-center items-center gap-2 hover:-translate-y-0.5">
-            <Wand2 className="w-4 h-4" /> Generate with AI
+            <Wand2 className="w-4 h-4" /> {isKu ? "دروستکردن بە زیرەکی دەستکرد" : "Generate with AI"}
           </button>
         </div>
 
@@ -246,13 +262,30 @@ function DashboardIndex() {
                <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center text-blue-500">
                  <Briefcase className="w-4 h-4" />
                </div>
-               <h3 className="font-bold text-slate-900">Job Tracker</h3>
+               <h3 className="font-bold text-slate-900">{isKu ? "چاودێری کار" : "Job Tracker"}</h3>
             </div>
-            <Link to="/dashboard/job-tracker" className="text-blue-600 text-xs font-bold flex items-center gap-1 hover:underline">View all <ArrowRight className="w-3 h-3" /></Link>
+            <Link to="/dashboard/job-tracker" className="text-blue-600 text-xs font-bold flex items-center gap-1 hover:underline">{isKu ? "هەمووی ببینە" : "View all"} <ArrowRight className={`w-3 h-3 ${isKu ? 'rotate-180' : ''}`} /></Link>
           </div>
           
           <div className="space-y-4">
-            {[
+            {isKu ? [
+              { role: 'دیزاینەری بەرهەم', company: 'Google', status: 'چاوپێکەوتن', date: '٢٢ ئایار', color: 'text-blue-600 bg-blue-50 border-blue-200' },
+              { role: 'دیزاینەری UI/UX', company: 'Microsoft', status: 'پێشکەشکراوە', date: '١٨ ئایار', color: 'text-emerald-600 bg-emerald-50 border-emerald-200' },
+              { role: 'پێشەنگی دیزاین', company: 'Netflix', status: 'پاڵێوراو', date: '١٥ ئایار', color: 'text-amber-600 bg-amber-50 border-amber-200' },
+            ].map((job, i) => (
+              <div key={i} className="flex items-center justify-between border-b border-slate-50 pb-4 last:border-0 last:pb-0">
+                 <div>
+                   <div className="text-sm font-bold text-slate-900">{job.role}</div>
+                   <div className="text-[10px] font-medium text-slate-500 mt-0.5">{job.company}</div>
+                 </div>
+                 <div className="flex items-center gap-4">
+                   <div className={`text-[10px] font-bold px-2.5 py-1 rounded-full border ${job.color}`}>
+                     {job.status}
+                   </div>
+                   <div className={`text-[10px] font-bold text-slate-400 w-10 ${isKu ? 'text-left' : 'text-right'}`}>{job.date}</div>
+                 </div>
+              </div>
+            )) : [
               { role: 'Product Designer', company: 'Google', status: 'Interview', date: 'May 22', color: 'text-blue-600 bg-blue-50 border-blue-200' },
               { role: 'UI/UX Designer', company: 'Microsoft', status: 'Applied', date: 'May 18', color: 'text-emerald-600 bg-emerald-50 border-emerald-200' },
               { role: 'Design Lead', company: 'Netflix', status: 'Shortlisted', date: 'May 15', color: 'text-amber-600 bg-amber-50 border-amber-200' },
@@ -266,7 +299,7 @@ function DashboardIndex() {
                    <div className={`text-[10px] font-bold px-2.5 py-1 rounded-full border ${job.color}`}>
                      {job.status}
                    </div>
-                   <div className="text-[10px] font-bold text-slate-400 w-10 text-right">{job.date}</div>
+                   <div className={`text-[10px] font-bold text-slate-400 w-10 ${isKu ? 'text-left' : 'text-right'}`}>{job.date}</div>
                  </div>
               </div>
             ))}
@@ -280,15 +313,15 @@ function DashboardIndex() {
                <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center text-blue-500">
                  <BarChart2 className="w-4 h-4" />
                </div>
-               <h3 className="font-bold text-slate-900">Analytics</h3>
+               <h3 className="font-bold text-slate-900">{isKu ? "شیکاری" : "Analytics"}</h3>
             </div>
-            <Link to="/dashboard/analytics" className="text-blue-600 text-xs font-bold flex items-center gap-1 hover:underline">View all <ArrowRight className="w-3 h-3" /></Link>
+            <Link to="/dashboard/analytics" className="text-blue-600 text-xs font-bold flex items-center gap-1 hover:underline">{isKu ? "هەمووی ببینە" : "View all"} <ArrowRight className={`w-3 h-3 ${isKu ? 'rotate-180' : ''}`} /></Link>
           </div>
           
           <div className="flex gap-4 h-[140px]">
              {/* Views Chart */}
              <div className="flex-1 border border-slate-100 rounded-2xl p-4 flex flex-col justify-between">
-                <div className="text-[10px] font-bold text-slate-500">Profile Views</div>
+                <div className="text-[10px] font-bold text-slate-500">{isKu ? "بینینی پرۆفایل" : "Profile Views"}</div>
                 <div className="flex items-end gap-2 mt-1">
                   <div className="text-3xl font-black text-slate-900 leading-none">247</div>
                   <div className="text-[10px] font-bold text-emerald-500 mb-1">↑ 18%</div>
@@ -308,7 +341,7 @@ function DashboardIndex() {
              
              {/* Match Score */}
              <div className="w-2/5 border border-slate-100 rounded-2xl p-4 flex flex-col items-center justify-center text-center">
-                <div className="text-[10px] font-bold text-slate-500 mb-3">Match Score</div>
+                <div className="text-[10px] font-bold text-slate-500 mb-3">{isKu ? "ڕێژەی گونجان" : "Match Score"}</div>
                 <div className="relative w-16 h-16 flex items-center justify-center">
                    <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
                      <circle cx="50" cy="50" r="40" stroke="#f1f5f9" strokeWidth="10" fill="none" />
@@ -318,7 +351,7 @@ function DashboardIndex() {
                      <span className="text-sm font-black text-slate-900 leading-none">87%</span>
                    </div>
                  </div>
-                 <span className="text-[10px] font-bold text-emerald-500 mt-2">Excellent</span>
+                 <span className="text-[10px] font-bold text-emerald-500 mt-2">{isKu ? "نایاب" : "Excellent"}</span>
              </div>
           </div>
         </div>
@@ -332,12 +365,12 @@ function DashboardIndex() {
                <Sun className="w-6 h-6 text-amber-400" />
             </div>
             <div>
-               <h4 className="text-sm font-bold text-slate-900">Tip of the day</h4>
-               <p className="text-xs font-medium text-slate-600 mt-1">Add quantified achievements to your experience to stand out to recruiters.</p>
+               <h4 className="text-sm font-bold text-slate-900">{isKu ? "ئامۆژگاری ئەمڕۆ" : "Tip of the day"}</h4>
+               <p className="text-xs font-medium text-slate-600 mt-1">{isKu ? "دەستکەوتە ژمارەییەکان زیاد بکە بۆ ئەزموونەکەت بۆ ئەوەی سەرنجی دامەزرێنەران ڕابکێشیت." : "Add quantified achievements to your experience to stand out to recruiters."}</p>
             </div>
          </div>
          <button className="bg-white text-blue-600 text-xs font-bold px-4 py-2.5 rounded-xl shadow-sm hover:shadow border border-blue-100 transition-all flex items-center gap-1 shrink-0">
-            See Example <ArrowRight className="w-3 h-3" />
+            {isKu ? "نموونە ببینە" : "See Example"} <ArrowRight className={`w-3 h-3 ${isKu ? 'rotate-180' : ''}`} />
          </button>
       </div>
       

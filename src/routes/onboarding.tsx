@@ -31,6 +31,8 @@ function ChatOnboarding() {
   const profile = useAppStore((s) => s.profile);
   const apiKey = useAppStore((s) => s.apiKey);
   const addResume = useAppStore((s) => s.addResume);
+  const language = useAppStore((s) => s.language);
+  const isKu = language === "ku";
 
   const parseMemoryFn   = useServerFn(parseMemory);
   const generateFn      = useServerFn(generateResume);
@@ -62,7 +64,7 @@ function ChatOnboarding() {
     const reader = new FileReader();
     reader.onload = (ev) => {
       setProfile({ ...profile, photoUrl: ev.target?.result as string });
-      toast.success(`Photo attached!`);
+      toast.success(isKu ? "وێنەکە هاوپێچ کرا!" : `Photo attached!`);
     };
     reader.readAsDataURL(file);
     e.target.value = "";
@@ -87,7 +89,7 @@ function ChatOnboarding() {
   // ── Step 1: extract ──────────────────────────────────────────────────────
   const handleExtract = async () => {
     if (inputText.trim().length < 20) {
-      toast.error("Add a bit more detail about yourself.");
+      toast.error(isKu ? "تکایە کەمێک وردەکاری زیاتر دەربارەی خۆت بنووسە." : "Add a bit more detail about yourself.");
       return;
     }
     const memory = inputText.trim();
@@ -107,10 +109,10 @@ function ChatOnboarding() {
       setIsThinking(false);
 
       if (isComplete || questions.length === 0) {
-        addMsg({ from: "ai", content: `Profile captured, ${parsed.name || "there"}! What role are you targeting for this resume?` });
+        addMsg({ from: "ai", content: isKu ? `پرۆفایلەکە وەرگیرا، ${parsed.name || "بەڕێز"}! چ ڕۆڵێک دەکەیتە ئامانج بۆ ئەم سیڤییە؟` : `Profile captured, ${parsed.name || "there"}! What role are you targeting for this resume?` });
         setStage("builder");
       } else {
-        addMsg({ from: "ai", content: `Got your profile, ${parsed.name || "there"}! Just a few quick questions to make your resume even stronger.` });
+        addMsg({ from: "ai", content: isKu ? `پرۆفایلەکەتم دەستکەوت، ${parsed.name || "بەڕێز"}! تەنها چەند پرسیارێکی خێرا بۆ ئەوەی سیڤییەکەت بەهێزتر بێت.` : `Got your profile, ${parsed.name || "there"}! Just a few quick questions to make your resume even stronger.` });
         setPendingQs(questions);
         setQIdx(0);
         setStage("questions");
@@ -118,7 +120,7 @@ function ChatOnboarding() {
       }
     } catch (err) {
       setIsThinking(false);
-      toast.error(err instanceof Error ? err.message : "Failed to analyze. Try again.");
+      toast.error(err instanceof Error ? err.message : (isKu ? "شیکردنەوەکە سەرکەوتوو نەبوو. دووبارە هەوڵ بدەرەوە." : "Failed to analyze. Try again."));
       setStage("intake");
     }
   };
@@ -144,7 +146,7 @@ function ChatOnboarding() {
   };
 
   const handleSkip = () => {
-    addMsg({ from: "user", content: "Skip" });
+    addMsg({ from: "user", content: isKu ? "بازدان" : "Skip" });
     setSelectedOpts([]);
     setCustomInput("");
     const next = qIdx + 1;
@@ -163,18 +165,18 @@ function ChatOnboarding() {
       const { profile: patched } = await patchProfileFn({ data: { apiKey, profile, answers: all } });
       setProfile(patched);
       setIsThinking(false);
-      addMsg({ from: "ai", content: `All done! Your profile is ready, ${patched.name || "there"}. What role are you targeting?` });
+      addMsg({ from: "ai", content: isKu ? `هەمووی تەواو بوو! پرۆفایلەکەت ئامادەیە، ${patched.name || "بەڕێز"}. چ ڕۆڵێک دەکەیتە ئامانج؟` : `All done! Your profile is ready, ${patched.name || "there"}. What role are you targeting?` });
       setStage("builder");
     } catch {
       setIsThinking(false);
-      addMsg({ from: "ai", content: "Profile updated! What role are you targeting?" });
+      addMsg({ from: "ai", content: isKu ? "پرۆفایلەکە نوێکرایەوە! چ ڕۆڵێک دەکەیتە ئامانج؟" : "Profile updated! What role are you targeting?" });
       setStage("builder");
     }
   };
 
   // ── Step 3: generate ─────────────────────────────────────────────────────
   const handleBuild = async () => {
-    if (jobTarget.trim().length < 2) { toast.error("Enter a role or job title."); return; }
+    if (jobTarget.trim().length < 2) { toast.error(isKu ? "ناوی ڕۆڵەکە یان کارەکە بنووسە." : "Enter a role or job title."); return; }
     if (!profile) return;
     addMsg({ from: "user", content: jobTarget });
     setIsThinking(true);
@@ -196,7 +198,7 @@ function ChatOnboarding() {
       setLoaderResumeId(saved.id);
     } catch (e) {
       setIsThinking(false);
-      toast.error(e instanceof Error ? e.message : "Generation failed.");
+      toast.error(e instanceof Error ? e.message : (isKu ? "دروستکردنەکە سەرکەوتوو نەبوو." : "Generation failed."));
       setStage("builder");
     }
   };
@@ -206,7 +208,7 @@ function ChatOnboarding() {
     const reader = new FileReader();
     reader.onload = (ev) => {
       setInputText((p) => p + (p ? "\n\n" : "") + `[${file.name}]\n` + (ev.target?.result as string));
-      toast.success(`Loaded ${file.name}`);
+      toast.success(isKu ? `بارکرا ${file.name}` : `Loaded ${file.name}`);
     };
     reader.readAsText(file);
     e.target.value = "";
@@ -273,10 +275,10 @@ function ChatOnboarding() {
             animate={{ opacity: 1, y: 0 }}
             className="text-3xl font-semibold text-slate-900 tracking-tight mb-2 text-center drop-shadow-sm"
           >
-            Tell me about yourself.
+            {isKu ? "دەربارەی خۆتم پێ بڵێ." : "Tell me about yourself."}
           </motion.h1>
           <p className="text-slate-600 font-medium text-sm mb-8 text-center max-w-sm drop-shadow-sm">
-            Paste your resume, LinkedIn bio, career history — or just write freely.
+            {isKu ? "سیڤییەکەت، بایۆی لینکدین، مێژووی کارکردنت دابنێ - یان تەنها بە ئازادی بنووسە." : "Paste your resume, LinkedIn bio, career history — or just write freely."}
           </p>
 
           {/* Big intake card */}
@@ -291,7 +293,7 @@ function ChatOnboarding() {
               ref={inputRef}
               value={inputText}
               onChange={(e) => setInputText(e.target.value)}
-              placeholder="Paste your resume, LinkedIn summary, career history, or just write about yourself..."
+              placeholder={isKu ? "سیڤییەکەت، پوختەی لینکدین، مێژووی کارکردن دابنێ، یان تەنها دەربارەی خۆت بنووسە..." : "Paste your resume, LinkedIn summary, career history, or just write about yourself..."}
               className="w-full bg-transparent resize-none outline-none text-slate-900 text-[15.5px] font-medium leading-relaxed placeholder:text-slate-400 px-6 pt-6 pb-3"
               style={{ minHeight: "200px" }}
               onKeyDown={(e) => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) handleExtract(); }}
@@ -305,14 +307,14 @@ function ChatOnboarding() {
                   onClick={() => fileInputRef.current?.click()}
                   className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12.5px] font-medium text-slate-600 hover:bg-blue-50 transition-colors border border-slate-200 bg-white/70"
                 >
-                  <Paperclip className="w-3.5 h-3.5" /> Upload
+                  <Paperclip className="w-3.5 h-3.5" /> {isKu ? "بارکردن" : "Upload"}
                 </button>
                 {SAMPLE_MEMORIES[0] && (
                   <button
-                    onClick={() => { setInputText(SAMPLE_MEMORIES[0].text); toast.success("Sample loaded"); }}
+                    onClick={() => { setInputText(SAMPLE_MEMORIES[0].text); toast.success(isKu ? "نموونە بارکرا" : "Sample loaded"); }}
                     className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12.5px] font-medium text-slate-600 hover:bg-blue-50 transition-colors border border-slate-200 bg-white/70"
                   >
-                    <FileText className="w-3.5 h-3.5" /> Try Sample
+                    <FileText className="w-3.5 h-3.5" /> {isKu ? "نموونە تاقی بکەرەوە" : "Try Sample"}
                   </button>
                 )}
               </div>
@@ -321,13 +323,13 @@ function ChatOnboarding() {
                 disabled={inputText.trim().length < 20}
                 className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white px-5 py-2.5 rounded-full text-[14px] font-semibold shadow-md shadow-blue-200 transition-all active:scale-95"
               >
-                Analyze Me
+                {isKu ? "شیکارم بکە" : "Analyze Me"}
                 <ArrowUp className="w-4 h-4" />
               </button>
             </div>
           </motion.div>
 
-          <p className="text-center text-[11.5px] text-slate-400 mt-4">⌘ + Enter to submit</p>
+          <p className="text-center text-[11.5px] text-slate-400 mt-4">{isKu ? "بۆ ناردن ⌘ + Enter" : "⌘ + Enter to submit"}</p>
         </div>
       )}
 
@@ -445,7 +447,7 @@ function ChatOnboarding() {
                         onClick={() => handleAnswer(selectedOpts.join(", "), qIdx)}
                         className="mb-2 text-sm font-semibold text-blue-600 hover:text-blue-800 flex items-center gap-1"
                       >
-                        Confirm <ArrowUp className="w-3.5 h-3.5 rotate-90" />
+                        {isKu ? "پشتڕاستکردنەوە" : "Confirm"} <ArrowUp className={`w-3.5 h-3.5 ${isKu ? '-rotate-90' : 'rotate-90'}`} />
                       </button>
                     )}
                   </motion.div>
@@ -463,7 +465,7 @@ function ChatOnboarding() {
                     ref={chatInputRef}
                     value={customInput}
                     onChange={(e) => setCustomInput(e.target.value)}
-                    placeholder={curQ.placeholder || "Type your answer or pick above..."}
+                    placeholder={curQ.placeholder || (isKu ? "وەڵامەکەت بنووسە یان لە سەرەوە هەڵبژێرە..." : "Type your answer or pick above...")}
                     className="flex-1 bg-transparent outline-none text-slate-800 text-[15px] placeholder:text-slate-400"
                     onKeyDown={(e) => { if (e.key === "Enter" && customInput.trim()) handleAnswer(customInput.trim(), qIdx); }}
                   />
@@ -474,7 +476,7 @@ function ChatOnboarding() {
                   <input
                     value={jobTarget}
                     onChange={(e) => setJobTarget(e.target.value)}
-                    placeholder="What role are you targeting? e.g. Senior PM at a startup..."
+                    placeholder={isKu ? "چ ڕۆڵێک دەکەیتە ئامانج؟ نموونە: بەڕێوەبەری پرۆژە..." : "What role are you targeting? e.g. Senior PM at a startup..."}
                     className="flex-1 bg-transparent outline-none text-slate-800 text-[15px] placeholder:text-slate-400"
                     onKeyDown={(e) => { if (e.key === "Enter") handleBuild(); }}
                     autoFocus
@@ -484,7 +486,7 @@ function ChatOnboarding() {
                 {/* Placeholder while AI is thinking */}
                 {!inQA && !inBuild && (
                   <span className="flex-1 text-slate-400 text-[15px] select-none">
-                    {stage === "generating" ? "Generating your resume..." : "Hang on a second..."}
+                    {stage === "generating" ? (isKu ? "خەریکی دروستکردنی سیڤییەکەت..." : "Generating your resume...") : (isKu ? "کەمێک چاوەڕێ بکە..." : "Hang on a second...")}
                   </span>
                 )}
 
@@ -495,7 +497,7 @@ function ChatOnboarding() {
                     <button
                       onClick={() => chatPhotoInputRef.current?.click()}
                       className={`w-8 h-8 rounded-full flex items-center justify-center transition-all shadow-sm ${profile?.photoUrl ? 'border border-green-200' : 'bg-slate-100 hover:bg-blue-50 text-slate-500 hover:text-blue-600'}`}
-                      title={profile?.photoUrl ? "Photo attached! Click to change." : "Attach a photo (optional)"}
+                      title={profile?.photoUrl ? (isKu ? "وێنەکە هاوپێچ کراوە! کلیک بکە بۆ گۆڕین." : "Photo attached! Click to change.") : (isKu ? "وێنەیەک هاوپێچ بکە (ئارەزوومەندانە)" : "Attach a photo (optional)")}
                     >
                       {profile?.photoUrl ? <img src={profile.photoUrl} className="w-8 h-8 rounded-full object-cover" alt="Profile" /> : <ImagePlus className="w-4 h-4" />}
                     </button>
@@ -517,7 +519,7 @@ function ChatOnboarding() {
                         onClick={handleSkip}
                         className="flex items-center gap-1 text-[12px] font-medium text-slate-400 hover:text-slate-700 transition-colors px-2 py-1 rounded-lg hover:bg-slate-100"
                       >
-                        <SkipForward className="w-3.5 h-3.5" /> Skip
+                        <SkipForward className="w-3.5 h-3.5" /> {isKu ? "بازدان" : "Skip"}
                       </button>
                       {customInput.trim() && (
                         <button
@@ -534,7 +536,7 @@ function ChatOnboarding() {
                       onClick={handleBuild}
                       className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-full text-[13px] font-semibold shadow-md shadow-blue-200 transition-all active:scale-95"
                     >
-                      Generate <Sparkles className="w-3.5 h-3.5" />
+                      {isKu ? "دروستکردن" : "Generate"} <Sparkles className="w-3.5 h-3.5" />
                     </button>
                   )}
                 </div>
@@ -557,7 +559,18 @@ const STEPS = [
   "Finalizing your resume...",
 ];
 
+const STEPS_KU = [
+  "خوێندنەوەی چیرۆکی پیشەییت...",
+  "دیاریکردنی خاڵە بەهێزەکان...",
+  "دروستکردنی سەردێڕەکەت...",
+  "نووسینی خاڵەکانی ئەزموون...",
+  "ڕێکخستنی پوختەکەت...",
+  "کۆتاییهێنان بە سیڤییەکەت...",
+];
+
 function GeneratingLoader({ onDone }: { onDone: () => void }) {
+  const language = useAppStore((s) => s.language);
+  const isKu = language === "ku";
   const [step, setStep] = useState(0);
   const [progress, setProgress] = useState(0);
 
@@ -598,7 +611,7 @@ function GeneratingLoader({ onDone }: { onDone: () => void }) {
 
       {/* Headline */}
       <h2 className="text-2xl font-semibold text-white mb-2 tracking-tight">
-        Writing your resume
+        {isKu ? "سیڤییەکەت دەنووسرێت" : "Writing your resume"}
       </h2>
 
       {/* Animated step text */}
@@ -610,7 +623,7 @@ function GeneratingLoader({ onDone }: { onDone: () => void }) {
         transition={{ duration: 0.3 }}
         className="text-blue-300 text-sm mb-10"
       >
-        {STEPS[step]}
+        {isKu ? STEPS_KU[step] : STEPS[step]}
       </motion.p>
 
       {/* Progress bar */}

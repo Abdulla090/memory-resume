@@ -935,6 +935,196 @@ function VectorPDF({ data }: { data: ResumeData }) {
   );
 }
 
+const rtlTextPattern = /[\u0600-\u06ff\u0750-\u077f\u08a0-\u08ff]/;
+
+function pdfIsRTL(data: ResumeData) {
+  return rtlTextPattern.test([
+    data.name,
+    data.title,
+    data.location,
+    data.summary,
+    ...data.skills,
+    ...data.certifications,
+    ...data.experience.flatMap((item) => [item.title, item.company, item.description, ...item.achievements]),
+    ...data.projects.flatMap((item) => [item.name, item.description, item.impact, ...item.tech]),
+    ...data.education.flatMap((item) => [item.degree, item.institution]),
+  ].filter(Boolean).join(" "));
+}
+
+function pdfLabels(rtl: boolean) {
+  return rtl
+    ? { profile: "PROFILE", experience: "EXPERIENCE", projects: "PROJECTS", skills: "SKILLS", education: "EDUCATION", certifications: "CERTIFICATIONS", contact: "CONTACT" }
+    : { profile: "PROFILE", experience: "EXPERIENCE", projects: "PROJECTS", skills: "SKILLS", education: "EDUCATION", certifications: "CERTIFICATIONS", contact: "CONTACT" };
+}
+
+const newSleek = StyleSheet.create({
+  page: { padding: 34, fontSize: 9, fontFamily: "Helvetica", color: "#0f172a", backgroundColor: "#ffffff" },
+  header: { flexDirection: "row", justifyContent: "space-between", borderBottomWidth: 1, borderBottomColor: "#d8dee8", paddingBottom: 22 },
+  headerRTL: { flexDirection: "row-reverse" },
+  accent: { width: 70, height: 4, backgroundColor: "#0f172a", borderRadius: 4, marginBottom: 14 },
+  name: { fontSize: 28, fontWeight: 700, lineHeight: 0.95 },
+  title: { fontSize: 8, color: "#64748b", letterSpacing: 2, marginTop: 10 },
+  photo: { width: 76, height: 76, borderRadius: 14, objectFit: "cover", marginBottom: 10 },
+  contact: { fontSize: 7.5, color: "#64748b", marginBottom: 3 },
+  bodyGrid: { flexDirection: "row", gap: 24, paddingTop: 20 },
+  bodyGridRTL: { flexDirection: "row-reverse" },
+  main: { flex: 1 },
+  side: { width: 150, borderLeftWidth: 1, borderLeftColor: "#e2e8f0", paddingLeft: 16 },
+  sideRTL: { borderLeftWidth: 0, borderRightWidth: 1, borderRightColor: "#e2e8f0", paddingLeft: 0, paddingRight: 16 },
+  section: { fontSize: 7.5, fontWeight: 700, letterSpacing: 2, borderBottomWidth: 0.7, borderBottomColor: "#0f172a", paddingBottom: 4, marginBottom: 8, marginTop: 12 },
+  body: { fontSize: 8.3, lineHeight: 1.45, color: "#334155" },
+  itemTitle: { fontSize: 9.5, fontWeight: 700, color: "#0f172a" },
+  itemMeta: { fontSize: 7.3, color: "#64748b", marginTop: 2, marginBottom: 3 },
+  bullet: { flexDirection: "row", marginTop: 2 },
+  chip: { fontSize: 7.2, borderWidth: 0.6, borderColor: "#d8dee8", paddingHorizontal: 5, paddingVertical: 2, marginRight: 4, marginBottom: 4, borderRadius: 8 },
+});
+
+function NewSleekPDF({ data }: { data: ResumeData }) {
+  const c = optimizeResumeForOnePage(data);
+  const rtl = pdfIsRTL(c);
+  const l = pdfLabels(rtl);
+  const align = rtl ? "right" : "left";
+  return (
+    <Document>
+      <Page size="A4" style={newSleek.page}>
+        <View style={[newSleek.header, rtl && newSleek.headerRTL]}>
+          <View style={{ flex: 1 }}>
+            <View style={newSleek.accent} />
+            <Text style={{ ...newSleek.name, textAlign: align }}>{c.name}</Text>
+            <Text style={{ ...newSleek.title, textAlign: align }}>{c.title.toUpperCase()}</Text>
+          </View>
+          <View style={{ alignItems: rtl ? "flex-start" : "flex-end", width: 130 }}>
+            {c.photoUrl ? <Image src={c.photoUrl} style={newSleek.photo} /> : <View style={{ ...newSleek.photo, backgroundColor: "#e2e8f0" }} />}
+            {[c.location, c.email, c.phone].filter(Boolean).map((item) => <Text key={item} style={{ ...newSleek.contact, textAlign: align }}>{item}</Text>)}
+          </View>
+        </View>
+        <View style={[newSleek.bodyGrid, rtl && newSleek.bodyGridRTL]}>
+          <View style={newSleek.main}>
+            <Text style={{ ...newSleek.section, textAlign: align }}>{l.profile}</Text>
+            <Text style={{ ...newSleek.body, textAlign: align }}>{c.summary}</Text>
+            {c.experience.length > 0 ? <><Text style={{ ...newSleek.section, textAlign: align }}>{l.experience}</Text>{c.experience.map((e, i) => <View key={i} style={{ marginBottom: 9 }}><Text style={{ ...newSleek.itemTitle, textAlign: align }}>{e.title}</Text><Text style={{ ...newSleek.itemMeta, textAlign: align }}>{e.company} / {e.duration}</Text>{e.achievements.map((a, j) => <View key={j} style={{ ...newSleek.bullet, flexDirection: rtl ? "row-reverse" : "row" }}><Text style={{ width: 10, color: "#0f172a" }}>-</Text><Text style={{ ...newSleek.body, flex: 1, textAlign: align }}>{a}</Text></View>)}</View>)}</> : null}
+            {c.projects.length > 0 ? <><Text style={{ ...newSleek.section, textAlign: align }}>{l.projects}</Text>{c.projects.map((p, i) => <View key={i} style={{ marginBottom: 6 }}><Text style={{ ...newSleek.itemTitle, textAlign: align }}>{p.name}</Text><Text style={{ ...newSleek.body, textAlign: align }}>{p.description}</Text></View>)}</> : null}
+          </View>
+          <View style={[newSleek.side, rtl && newSleek.sideRTL]}>
+            {c.skills.length > 0 ? <><Text style={{ ...newSleek.section, textAlign: align }}>{l.skills}</Text><View style={{ flexDirection: rtl ? "row-reverse" : "row", flexWrap: "wrap" }}>{c.skills.map((skill) => <Text key={skill} style={newSleek.chip}>{skill}</Text>)}</View></> : null}
+            {c.education.length > 0 ? <><Text style={{ ...newSleek.section, textAlign: align }}>{l.education}</Text>{c.education.map((e, i) => <View key={i} style={{ marginBottom: 7 }}><Text style={{ ...newSleek.itemTitle, fontSize: 8.5, textAlign: align }}>{e.degree}</Text><Text style={{ ...newSleek.body, textAlign: align }}>{e.institution} / {e.year}</Text></View>)}</> : null}
+            {c.certifications.length > 0 ? <><Text style={{ ...newSleek.section, textAlign: align }}>{l.certifications}</Text>{c.certifications.map((cert) => <Text key={cert} style={{ ...newSleek.body, marginBottom: 4, textAlign: align }}>{cert}</Text>)}</> : null}
+          </View>
+        </View>
+      </Page>
+    </Document>
+  );
+}
+
+const newProfessional = StyleSheet.create({
+  page: { padding: 24, fontSize: 9, fontFamily: "Helvetica", color: "#0f172a", backgroundColor: "#f8fafc" },
+  shell: { flexDirection: "row", minHeight: 794, borderWidth: 1, borderColor: "#e2e8f0", borderRadius: 18, overflow: "hidden", backgroundColor: "#ffffff" },
+  shellRTL: { flexDirection: "row-reverse" },
+  side: { width: 165, backgroundColor: "#0f172a", color: "#ffffff", padding: 20 },
+  photo: { width: 74, height: 74, borderRadius: 37, objectFit: "cover", marginBottom: 18 },
+  sideName: { fontSize: 19, fontWeight: 700, lineHeight: 1.05, color: "#ffffff" },
+  sideRole: { fontSize: 7.5, letterSpacing: 1.5, color: "#a5f3fc", marginTop: 8 },
+  sideHeading: { fontSize: 7.5, letterSpacing: 1.8, color: "#94a3b8", marginTop: 18, marginBottom: 7 },
+  sideText: { fontSize: 7.8, color: "#e2e8f0", lineHeight: 1.35, marginBottom: 5 },
+  main: { flex: 1, padding: 24 },
+  profileBox: { backgroundColor: "#f8fafc", borderWidth: 1, borderColor: "#e2e8f0", borderRadius: 16, padding: 14, marginBottom: 14 },
+  heading: { fontSize: 7.5, fontWeight: 700, letterSpacing: 2, color: "#0e7490", borderBottomWidth: 0.7, borderBottomColor: "#0e7490", paddingBottom: 4, marginTop: 12, marginBottom: 8 },
+  body: { fontSize: 8.3, lineHeight: 1.45, color: "#334155" },
+  title: { fontSize: 9.5, fontWeight: 700 },
+  meta: { fontSize: 7.5, color: "#64748b", marginTop: 2, marginBottom: 3 },
+  bullet: { flexDirection: "row", marginTop: 2 },
+});
+
+function NewProfessionalPDF({ data }: { data: ResumeData }) {
+  const c = optimizeResumeForOnePage(data);
+  const rtl = pdfIsRTL(c);
+  const l = pdfLabels(rtl);
+  const align = rtl ? "right" : "left";
+  return (
+    <Document>
+      <Page size="A4" style={newProfessional.page}>
+        <View style={[newProfessional.shell, rtl && newProfessional.shellRTL]}>
+          <View style={newProfessional.side}>
+            {c.photoUrl ? <Image src={c.photoUrl} style={newProfessional.photo} /> : <View style={{ ...newProfessional.photo, backgroundColor: "#334155" }} />}
+            <Text style={{ ...newProfessional.sideName, textAlign: align }}>{c.name}</Text>
+            <Text style={{ ...newProfessional.sideRole, textAlign: align }}>{c.title.toUpperCase()}</Text>
+            <Text style={{ ...newProfessional.sideHeading, textAlign: align }}>{l.contact}</Text>
+            {[c.location, c.email, c.phone].filter(Boolean).map((item) => <Text key={item} style={{ ...newProfessional.sideText, textAlign: align }}>{item}</Text>)}
+            {c.skills.length > 0 ? <><Text style={{ ...newProfessional.sideHeading, textAlign: align }}>{l.skills}</Text>{c.skills.map((skill) => <Text key={skill} style={{ ...newProfessional.sideText, textAlign: align }}>{skill}</Text>)}</> : null}
+          </View>
+          <View style={newProfessional.main}>
+            <View style={newProfessional.profileBox}>
+              <Text style={{ ...newProfessional.heading, marginTop: 0, textAlign: align }}>{l.profile}</Text>
+              <Text style={{ ...newProfessional.body, textAlign: align }}>{c.summary}</Text>
+            </View>
+            {c.experience.length > 0 ? <><Text style={{ ...newProfessional.heading, textAlign: align }}>{l.experience}</Text>{c.experience.map((e, i) => <View key={i} style={{ marginBottom: 9, borderLeftWidth: rtl ? 0 : 1.5, borderRightWidth: rtl ? 1.5 : 0, borderColor: "#cbd5e1", paddingLeft: rtl ? 0 : 10, paddingRight: rtl ? 10 : 0 }}><Text style={{ ...newProfessional.title, textAlign: align }}>{e.title}</Text><Text style={{ ...newProfessional.meta, textAlign: align }}>{e.company} / {e.duration}</Text>{e.achievements.map((a, j) => <View key={j} style={{ ...newProfessional.bullet, flexDirection: rtl ? "row-reverse" : "row" }}><Text style={{ width: 10 }}>-</Text><Text style={{ ...newProfessional.body, flex: 1, textAlign: align }}>{a}</Text></View>)}</View>)}</> : null}
+            <View style={{ flexDirection: rtl ? "row-reverse" : "row", gap: 16 }}>
+              <View style={{ flex: 1 }}>{c.projects.length > 0 ? <><Text style={{ ...newProfessional.heading, textAlign: align }}>{l.projects}</Text>{c.projects.map((p, i) => <View key={i} style={{ marginBottom: 6 }}><Text style={{ ...newProfessional.title, fontSize: 8.8, textAlign: align }}>{p.name}</Text><Text style={{ ...newProfessional.body, textAlign: align }}>{p.description}</Text></View>)}</> : null}</View>
+              <View style={{ flex: 1 }}>{c.education.length > 0 ? <><Text style={{ ...newProfessional.heading, textAlign: align }}>{l.education}</Text>{c.education.map((e, i) => <View key={i} style={{ marginBottom: 6 }}><Text style={{ ...newProfessional.title, fontSize: 8.8, textAlign: align }}>{e.degree}</Text><Text style={{ ...newProfessional.body, textAlign: align }}>{e.institution} / {e.year}</Text></View>)}</> : null}</View>
+            </View>
+          </View>
+        </View>
+      </Page>
+    </Document>
+  );
+}
+
+const newAcademic = StyleSheet.create({
+  page: { padding: 38, fontSize: 9, fontFamily: "Times-Roman", color: "#111827", backgroundColor: "#ffffff" },
+  header: { flexDirection: "row", gap: 22, borderBottomWidth: 1.6, borderBottomColor: "#111827", paddingBottom: 18 },
+  headerRTL: { flexDirection: "row-reverse" },
+  photo: { width: 72, height: 88, borderTopLeftRadius: 36, borderTopRightRadius: 36, borderBottomLeftRadius: 10, borderBottomRightRadius: 10, objectFit: "cover" },
+  kicker: { fontSize: 7.5, letterSpacing: 2.2, color: "#64748b", marginBottom: 8 },
+  name: { fontSize: 26, fontWeight: 700 },
+  role: { fontSize: 11, color: "#334155", marginTop: 4 },
+  contacts: { flexDirection: "row", flexWrap: "wrap", gap: 10, marginTop: 9 },
+  contact: { fontSize: 7.5, color: "#64748b" },
+  grid: { flexDirection: "row", gap: 24, paddingTop: 18 },
+  gridRTL: { flexDirection: "row-reverse" },
+  main: { flex: 1 },
+  side: { width: 150 },
+  heading: { fontSize: 7.8, fontWeight: 700, letterSpacing: 2, borderBottomWidth: 0.7, borderBottomColor: "#111827", paddingBottom: 4, marginTop: 12, marginBottom: 8 },
+  body: { fontSize: 8.5, lineHeight: 1.5, color: "#334155" },
+  itemTitle: { fontSize: 9.5, fontWeight: 700 },
+  itemMeta: { fontSize: 7.8, color: "#64748b", marginTop: 2, marginBottom: 3 },
+  bullet: { flexDirection: "row", marginTop: 2 },
+});
+
+function NewAcademicPDF({ data }: { data: ResumeData }) {
+  const c = optimizeResumeForOnePage(data);
+  const rtl = pdfIsRTL(c);
+  const l = pdfLabels(rtl);
+  const align = rtl ? "right" : "left";
+  return (
+    <Document>
+      <Page size="A4" style={newAcademic.page}>
+        <View style={[newAcademic.header, rtl && newAcademic.headerRTL]}>
+          {c.photoUrl ? <Image src={c.photoUrl} style={newAcademic.photo} /> : <View style={{ ...newAcademic.photo, backgroundColor: "#e2e8f0" }} />}
+          <View style={{ flex: 1 }}>
+            <Text style={{ ...newAcademic.kicker, textAlign: align }}>SELECTED CURRICULUM VITAE</Text>
+            <Text style={{ ...newAcademic.name, textAlign: align }}>{c.name}</Text>
+            <Text style={{ ...newAcademic.role, textAlign: align }}>{c.title}</Text>
+            <View style={{ ...newAcademic.contacts, flexDirection: rtl ? "row-reverse" : "row" }}>{[c.location, c.email, c.phone].filter(Boolean).map((item) => <Text key={item} style={newAcademic.contact}>{item}</Text>)}</View>
+          </View>
+        </View>
+        <View style={[newAcademic.grid, rtl && newAcademic.gridRTL]}>
+          <View style={newAcademic.main}>
+            <Text style={{ ...newAcademic.heading, textAlign: align }}>{l.profile}</Text>
+            <Text style={{ ...newAcademic.body, textAlign: align }}>{c.summary}</Text>
+            {c.experience.length > 0 ? <><Text style={{ ...newAcademic.heading, textAlign: align }}>{l.experience}</Text>{c.experience.map((e, i) => <View key={i} style={{ marginBottom: 9 }}><Text style={{ ...newAcademic.itemTitle, textAlign: align }}>{e.title}</Text><Text style={{ ...newAcademic.itemMeta, textAlign: align }}>{e.company} / {e.duration}</Text>{e.achievements.map((a, j) => <View key={j} style={{ ...newAcademic.bullet, flexDirection: rtl ? "row-reverse" : "row" }}><Text style={{ width: 10 }}>-</Text><Text style={{ ...newAcademic.body, flex: 1, textAlign: align }}>{a}</Text></View>)}</View>)}</> : null}
+            {c.projects.length > 0 ? <><Text style={{ ...newAcademic.heading, textAlign: align }}>{l.projects}</Text>{c.projects.map((p, i) => <View key={i} style={{ marginBottom: 6 }}><Text style={{ ...newAcademic.itemTitle, textAlign: align }}>{p.name}</Text><Text style={{ ...newAcademic.body, textAlign: align }}>{p.description}</Text>{p.impact ? <Text style={{ ...newAcademic.itemMeta, textAlign: align }}>{p.impact}</Text> : null}</View>)}</> : null}
+          </View>
+          <View style={newAcademic.side}>
+            {c.education.length > 0 ? <><Text style={{ ...newAcademic.heading, textAlign: align }}>{l.education}</Text>{c.education.map((e, i) => <View key={i} style={{ marginBottom: 7 }}><Text style={{ ...newAcademic.itemTitle, fontSize: 8.8, textAlign: align }}>{e.degree}</Text><Text style={{ ...newAcademic.body, textAlign: align }}>{e.institution}</Text><Text style={{ ...newAcademic.itemMeta, textAlign: align }}>{e.year}</Text></View>)}</> : null}
+            {c.skills.length > 0 ? <><Text style={{ ...newAcademic.heading, textAlign: align }}>{l.skills}</Text><Text style={{ ...newAcademic.body, textAlign: align }}>{c.skills.join(" / ")}</Text></> : null}
+            {c.certifications.length > 0 ? <><Text style={{ ...newAcademic.heading, textAlign: align }}>{l.certifications}</Text>{c.certifications.map((cert) => <Text key={cert} style={{ ...newAcademic.body, marginBottom: 4, textAlign: align }}>{cert}</Text>)}</> : null}
+          </View>
+        </View>
+      </Page>
+    </Document>
+  );
+}
+
 export function GetPDFDocument({ data, template }: { data: ResumeData; template: TemplateId }) {
   switch (template) {
     case 'executive': return <ExecutivePDF data={data} />;
@@ -947,6 +1137,14 @@ export function GetPDFDocument({ data, template }: { data: ResumeData; template:
     case 'forge': return <ForgePDF data={data} />;
     case 'zenith': return <ZenithPDF data={data} />;
     case 'vector': return <VectorPDF data={data} />;
+    case 'new-sleek': return <NewSleekPDF data={data} />;
+    case 'new-professional': return <NewProfessionalPDF data={data} />;
+    case 'new-academic': return <NewAcademicPDF data={data} />;
+    case 'ref-torres': return <AtlasPDF data={data} />;
+    case 'ref-silva': return <ExecutivePDF data={data} />;
+    case 'ref-schumacher': return <ForgePDF data={data} />;
+    case 'ref-palmerston': return <AtlasPDF data={data} />;
+    case 'ref-sanchez': return <CarbonPDF data={data} />;
     // Dedicated renderers matching live preview designs
     case 'noir': return <NoirPDF data={data} />;
     case 'apex': return <AtlasPDF data={data} />;
@@ -972,4 +1170,3 @@ export async function exportResumePDF(data: ResumeData, template: TemplateId, fi
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
 }
-

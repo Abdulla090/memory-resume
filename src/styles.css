@@ -369,6 +369,17 @@
     color: var(--color-muted-foreground);
   }
 
+  .resume-rtl-scope[dir="rtl"],
+  .resume-rtl-scope[dir="rtl"] * {
+    letter-spacing: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .resume-rtl-scope[dir="rtl"] {
+    text-align: right;
+    line-height: 1.55;
+  }
+
   /* ─── Form inputs ───────────────────────────── */
   .field-input {
     width: 100%;

@@ -1,6 +1,7 @@
 import { createFileRoute, Outlet, Link, useLocation } from '@tanstack/react-router';
 import { Home, Files, LayoutTemplate, PenTool, Wand2, BarChart2, FileText, Briefcase, Settings, Cloud, BrainCircuit, ChevronRight, Menu, X } from 'lucide-react';
 import { useState } from 'react';
+import { useAppStore } from '@/lib/store';
 
 export const Route = createFileRoute('/dashboard')({
   component: DashboardLayout,
@@ -9,17 +10,19 @@ export const Route = createFileRoute('/dashboard')({
 function DashboardLayout() {
   const location = useLocation();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const language = useAppStore((state) => state.language);
+  const isKu = language === "ku";
 
   const navItems = [
-    { name: 'Home', icon: Home, path: '/dashboard' },
-    { name: 'My CVs', icon: Files, path: '/dashboard/my-cvs' },
-    { name: 'Templates', icon: LayoutTemplate, path: '/templates' },
-    { name: 'AI Writer', icon: PenTool, path: '/dashboard/ai-writer' },
-    { name: 'AI Optimize', icon: Wand2, path: '/dashboard/ai-optimize' },
-    { name: 'Analytics', icon: BarChart2, path: '/dashboard/analytics' },
-    { name: 'Cover Letters', icon: FileText, path: '/dashboard/cover-letters' },
-    { name: 'Job Tracker', icon: Briefcase, path: '/dashboard/job-tracker' },
-    { name: 'Settings', icon: Settings, path: '/dashboard/settings' },
+    { name: isKu ? 'سەرەتا' : 'Home', icon: Home, path: '/dashboard' },
+    { name: isKu ? 'سیڤییەکانم' : 'My CVs', icon: Files, path: '/dashboard/my-cvs' },
+    { name: isKu ? 'تیمپڵەیتەکان' : 'Templates', icon: LayoutTemplate, path: '/templates' },
+    { name: isKu ? 'نووسەری AI' : 'AI Writer', icon: PenTool, path: '/dashboard/ai-writer' },
+    { name: isKu ? 'باشترکردنی AI' : 'AI Optimize', icon: Wand2, path: '/dashboard/ai-optimize' },
+    { name: isKu ? 'شیکاری' : 'Analytics', icon: BarChart2, path: '/dashboard/analytics' },
+    { name: isKu ? 'نامەی ڕووپۆش' : 'Cover Letters', icon: FileText, path: '/dashboard/cover-letters' },
+    { name: isKu ? 'چاودێری کار' : 'Job Tracker', icon: Briefcase, path: '/dashboard/job-tracker' },
+    { name: isKu ? 'ڕێکخستنەکان' : 'Settings', icon: Settings, path: '/dashboard/settings' },
   ];
 
   return (
@@ -36,22 +39,22 @@ function DashboardLayout() {
       {/* Sidebar — slide-over on mobile, collapsed icon-bar on desktop */}
       <aside className={`
         fixed md:relative z-50 md:z-auto
-        bg-white border-r border-slate-100 flex flex-col justify-between py-6 shrink-0 h-full overflow-y-auto
+        bg-white border-x border-slate-100 flex flex-col justify-between py-6 shrink-0 h-full overflow-y-auto
         transition-all duration-300 ease-in-out
         ${isSidebarOpen
           ? 'w-[280px] translate-x-0'
-          : '-translate-x-full md:translate-x-0 md:w-[80px] w-[280px]'}
+          : `${isKu ? 'translate-x-full md:translate-x-0' : '-translate-x-full md:translate-x-0'} md:w-[80px] w-[280px]`}
       `}>
         <div>
           <div className={`flex items-center px-4 mb-10 ${isSidebarOpen ? 'gap-3' : 'md:justify-center'}`}>
             <button
               onClick={() => setIsSidebarOpen(!isSidebarOpen)}
               className="w-10 h-10 rounded-xl bg-blue-500 flex items-center justify-center shadow-lg shadow-blue-500/30 text-white shrink-0 cursor-pointer hover:bg-blue-600 transition-colors"
-              title="Toggle Sidebar"
+              title={isKu ? "پیشاندانی لیستی لاتەنیشت" : "Toggle Sidebar"}
             >
               {isSidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
-            {isSidebarOpen && <span className="text-xl font-bold text-slate-900 tracking-tight leading-tight">AI CV<br/>Builder</span>}
+            {isSidebarOpen && <span className="text-xl font-bold text-slate-900 tracking-tight leading-tight">{isKu ? <>دروستکەری<br/>سیڤی AI</> : <>AI CV<br/>Builder</>}</span>}
           </div>
 
           <nav className="space-y-1 px-3">
@@ -76,7 +79,7 @@ function DashboardLayout() {
           </nav>
         </div>
 
-        <div className={`px-4 mt-10 transition-opacity duration-300 ${isSidebarOpen ? 'opacity-100' : 'opacity-0 hidden'}`}>
+         <div className={`px-4 mt-10 transition-opacity duration-300 ${isSidebarOpen ? 'opacity-100' : 'opacity-0 hidden'}`}>
           <div className="bg-gradient-to-b from-white to-[#f8fbff] border border-blue-100 p-5 rounded-3xl shadow-sm">
             <div className="flex justify-between items-start mb-4">
                <div className="flex gap-2 items-center">
@@ -84,21 +87,21 @@ function DashboardLayout() {
                     <BrainCircuit className="w-4 h-4" />
                  </div>
                  <div>
-                    <div className="text-xs font-bold text-blue-600">AI Memory</div>
+                    <div className="text-xs font-bold text-blue-600">{isKu ? "یادگەی AI" : "AI Memory"}</div>
                     <div className="flex items-center gap-1 text-[10px] font-bold text-emerald-500 mt-0.5">
-                      <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" /> On
+                      <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" /> {isKu ? "کراوەتەوە" : "On"}
                     </div>
                  </div>
                </div>
             </div>
             <div className="flex justify-between text-[10px] font-bold text-slate-500 mb-2">
-              <span>Memory Usage</span><span className="text-slate-900">68%</span>
+              <span>{isKu ? "بەکارهێنانی یادگە" : "Memory Usage"}</span><span className="text-slate-900">68%</span>
             </div>
             <div className="h-1.5 w-full bg-blue-100 rounded-full overflow-hidden mb-4">
-              <div className="h-full bg-blue-500 rounded-full w-[68%]" />
+              <div className={`h-full bg-blue-500 rounded-full w-[68%] ${isKu ? 'ml-auto' : ''}`} />
             </div>
             <button className="text-[10px] font-bold text-blue-600 flex items-center gap-1 hover:underline cursor-pointer">
-              Learn more <ChevronRight className="w-3 h-3" />
+              {isKu ? "زیاتر بزانە" : "Learn more"} <ChevronRight className={`w-3 h-3 ${isKu ? 'rotate-180' : ''}`} />
             </button>
           </div>
         </div>

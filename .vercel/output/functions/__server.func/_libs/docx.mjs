@@ -19256,7 +19256,7 @@ export {
   WidthType as W,
   Paragraph as a,
   Table as b,
-  convertInchesToTwip as c,
-  TableRow as d,
-  TableCell as e
+  TableRow as c,
+  TableCell as d,
+  convertInchesToTwip as e
 };

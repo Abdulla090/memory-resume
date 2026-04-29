@@ -1,22 +1,70 @@
 import type { ResumeData, TemplateId } from "@/lib/types";
 
+const rtlPattern = /[\u0600-\u06ff\u0750-\u077f\u08a0-\u08ff]/;
+
+function isRTL(data: ResumeData) {
+  return rtlPattern.test(
+    [
+      data.name,
+      data.title,
+      data.location,
+      data.summary,
+      ...data.skills,
+      ...data.certifications,
+      ...data.experience.flatMap((item) => [item.title, item.company, item.description, ...item.achievements]),
+      ...data.projects.flatMap((item) => [item.name, item.description, item.impact, ...item.tech]),
+      ...data.education.flatMap((item) => [item.degree, item.institution]),
+    ].filter(Boolean).join(" "),
+  );
+}
+
+function labels(rtl: boolean) {
+  return rtl
+    ? {
+        summary: "پوختە",
+        profile: "پڕۆفایل",
+        experience: "ئەزموون",
+        projects: "پرۆژەکان",
+        selectedProjects: "پرۆژە دیاریکراوەکان",
+        skills: "لێهاتووییەکان",
+        expertise: "پسپۆڕی",
+        education: "خوێندن",
+        certifications: "بڕوانامەکان",
+        impact: "کاریگەری",
+      }
+    : {
+        summary: "Summary",
+        profile: "Profile",
+        experience: "Experience",
+        projects: "Projects",
+        selectedProjects: "Selected Projects",
+        skills: "Skills",
+        expertise: "Expertise",
+        education: "Education",
+        certifications: "Certifications",
+        impact: "Impact",
+      };
+}
+
 export function MinimalTemplate({ data }: { data: ResumeData }) {
+  const rtl = isRTL(data);
+  const l = labels(rtl);
   return (
-    <div className="bg-white p-12 text-[#111] font-sans" style={{ minHeight: "1122px", width: "100%" }}>
+    <div dir={rtl ? "rtl" : "ltr"} className="bg-white p-12 text-[#111] font-sans" style={{ minHeight: "1122px", width: "100%" }}>
       <header className="border-b border-neutral-300 pb-4">
-        <h1 className="text-3xl font-semibold tracking-tight">{data.name}</h1>
+        <h1 className="text-3xl font-semibold tracking-tight rtl:tracking-normal">{data.name}</h1>
         <p className="mt-1 text-base text-neutral-700">{data.title}</p>
         <p className="mt-2 text-xs text-neutral-500">
           {[data.location, data.email, data.phone].filter(Boolean).join(" · ")}
         </p>
       </header>
 
-      <Section title="Summary">
+      <Section title={l.summary}>
         <p className="text-sm leading-relaxed">{data.summary}</p>
       </Section>
 
       {data.experience.length > 0 && (
-        <Section title="Experience">
+        <Section title={l.experience}>
           <div className="space-y-4">
             {data.experience.map((e, i) => (
               <div key={i}>
@@ -29,7 +77,7 @@ export function MinimalTemplate({ data }: { data: ResumeData }) {
                 {e.description && (
                   <p className="mt-1 text-sm text-neutral-700">{e.description}</p>
                 )}
-                <ul className="mt-1.5 list-disc space-y-1 pl-5 text-sm">
+                <ul className="mt-1.5 list-disc space-y-1 pl-5 text-sm rtl:pl-0 rtl:pr-5">
                   {e.achievements.map((a, j) => (
                     <li key={j}>{a}</li>
                   ))}
@@ -41,7 +89,7 @@ export function MinimalTemplate({ data }: { data: ResumeData }) {
       )}
 
       {data.projects.length > 0 && (
-        <Section title="Projects">
+        <Section title={l.projects}>
           <div className="space-y-3">
             {data.projects.map((p, i) => (
               <div key={i}>
@@ -57,13 +105,13 @@ export function MinimalTemplate({ data }: { data: ResumeData }) {
       )}
 
       {data.skills.length > 0 && (
-        <Section title="Skills">
+        <Section title={l.skills}>
           <p className="text-sm">{data.skills.join(" · ")}</p>
         </Section>
       )}
 
       {data.education.length > 0 && (
-        <Section title="Education">
+        <Section title={l.education}>
           <div className="space-y-1.5">
             {data.education.map((e, i) => (
               <div key={i} className="flex items-baseline justify-between text-sm">
@@ -83,7 +131,7 @@ export function MinimalTemplate({ data }: { data: ResumeData }) {
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section className="mt-6">
-      <h2 className="mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-neutral-500">
+      <h2 className="mb-2 text-xs font-semibold uppercase tracking-[0.2em] rtl:tracking-normal text-neutral-500">
         {title}
       </h2>
       {children}
@@ -92,12 +140,15 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 }
 
 export function ExecutiveTemplate({ data }: { data: ResumeData }) {
+  const rtl = isRTL(data);
+  const l = labels(rtl);
   return (
     <div
+      dir={rtl ? "rtl" : "ltr"}
       className="bg-white text-[#111]"
       style={{ minHeight: "1122px", fontFamily: "Georgia, serif", display: "flex", flexDirection: "column", width: "100%" }}
     >
-      <div className="grid grid-cols-3" style={{ flex: 1, minHeight: "1122px" }}>
+      <div className="grid grid-cols-3 rtl:[direction:rtl]" style={{ flex: 1, minHeight: "1122px" }}>
         <aside className="col-span-1 bg-neutral-900 p-8 text-neutral-100">
           <div>
             <h1 className="text-2xl font-bold leading-tight">{data.name}</h1>
@@ -111,8 +162,8 @@ export function ExecutiveTemplate({ data }: { data: ResumeData }) {
 
           {data.skills.length > 0 && (
             <div className="mt-8">
-              <h3 className="mb-2 text-[10px] font-bold uppercase tracking-[0.2em] text-neutral-400">
-                Expertise
+              <h3 className="mb-2 text-[10px] font-bold uppercase tracking-[0.2em] rtl:tracking-normal text-neutral-400">
+                {l.expertise}
               </h3>
               <ul className="space-y-1 text-sm">
                 {data.skills.map((s, i) => (
@@ -124,8 +175,8 @@ export function ExecutiveTemplate({ data }: { data: ResumeData }) {
 
           {data.education.length > 0 && (
             <div className="mt-8">
-              <h3 className="mb-2 text-[10px] font-bold uppercase tracking-[0.2em] text-neutral-400">
-                Education
+              <h3 className="mb-2 text-[10px] font-bold uppercase tracking-[0.2em] rtl:tracking-normal text-neutral-400">
+                {l.education}
               </h3>
               {data.education.map((e, i) => (
                 <div key={i} className="mb-2 text-xs">
@@ -138,8 +189,8 @@ export function ExecutiveTemplate({ data }: { data: ResumeData }) {
 
           {data.certifications.length > 0 && (
             <div className="mt-8">
-              <h3 className="mb-2 text-[10px] font-bold uppercase tracking-[0.2em] text-neutral-400">
-                Certifications
+              <h3 className="mb-2 text-[10px] font-bold uppercase tracking-[0.2em] rtl:tracking-normal text-neutral-400">
+                {l.certifications}
               </h3>
               <ul className="space-y-1 text-xs">
                 {data.certifications.map((c, i) => (
@@ -152,16 +203,16 @@ export function ExecutiveTemplate({ data }: { data: ResumeData }) {
 
         <main className="col-span-2 p-10">
           <section>
-            <h2 className="mb-2 border-b border-neutral-300 pb-1 text-xs font-bold uppercase tracking-[0.2em] text-neutral-700">
-              Profile
+            <h2 className="mb-2 border-b border-neutral-300 pb-1 text-xs font-bold uppercase tracking-[0.2em] rtl:tracking-normal text-neutral-700">
+              {l.profile}
             </h2>
             <p className="text-sm leading-relaxed">{data.summary}</p>
           </section>
 
           {data.experience.length > 0 && (
             <section className="mt-6">
-              <h2 className="mb-3 border-b border-neutral-300 pb-1 text-xs font-bold uppercase tracking-[0.2em] text-neutral-700">
-                Experience
+              <h2 className="mb-3 border-b border-neutral-300 pb-1 text-xs font-bold uppercase tracking-[0.2em] rtl:tracking-normal text-neutral-700">
+                {l.experience}
               </h2>
               <div className="space-y-4">
                 {data.experience.map((e, i) => (
@@ -173,7 +224,7 @@ export function ExecutiveTemplate({ data }: { data: ResumeData }) {
                     {e.description && (
                       <p className="mt-1 text-sm text-neutral-800">{e.description}</p>
                     )}
-                    <ul className="mt-1.5 list-disc space-y-1 pl-5 text-sm">
+                    <ul className="mt-1.5 list-disc space-y-1 pl-5 text-sm rtl:pl-0 rtl:pr-5">
                       {e.achievements.map((a, j) => (
                         <li key={j}>{a}</li>
                       ))}
@@ -186,8 +237,8 @@ export function ExecutiveTemplate({ data }: { data: ResumeData }) {
 
           {data.projects.length > 0 && (
             <section className="mt-6">
-              <h2 className="mb-3 border-b border-neutral-300 pb-1 text-xs font-bold uppercase tracking-[0.2em] text-neutral-700">
-                Selected Projects
+              <h2 className="mb-3 border-b border-neutral-300 pb-1 text-xs font-bold uppercase tracking-[0.2em] rtl:tracking-normal text-neutral-700">
+                {l.selectedProjects}
               </h2>
               <div className="space-y-2.5">
                 {data.projects.map((p, i) => (
@@ -195,7 +246,7 @@ export function ExecutiveTemplate({ data }: { data: ResumeData }) {
                     <div className="font-bold">{p.name}</div>
                     <p className="text-sm">{p.description}</p>
                     {p.impact && (
-                      <p className="text-xs italic text-neutral-600">Impact: {p.impact}</p>
+                      <p className="text-xs italic text-neutral-600">{l.impact}: {p.impact}</p>
                     )}
                   </div>
                 ))}
@@ -222,6 +273,16 @@ import {
   CipherTemplate, 
   PinnacleTemplate 
 } from "./templates-extra";
+import {
+  NewAcademicTemplate,
+  NewProfessionalTemplate,
+  NewSleekTemplate,
+  RefPalmerstonTemplate,
+  RefSanchezTemplate,
+  RefSchumacherTemplate,
+  RefSilvaTemplate,
+  RefTorresTemplate,
+} from "./templates-new";
 
 export function ResumePreview({
   data,
@@ -230,21 +291,37 @@ export function ResumePreview({
   data: ResumeData;
   template: TemplateId;
 }) {
+  const rtl = isRTL(data);
+  let preview: React.ReactNode;
   switch (template) {
-    case "executive": return <ExecutiveTemplate data={data} />;
-    case "noir": return <NoirTemplate data={data} />;
-    case "apex": return <ApexTemplate data={data} />;
-    case "nexus": return <NexusTemplate data={data} />;
-    case "orbit": return <OrbitTemplate data={data} />;
-    case "metric": return <MetricTemplate data={data} />;
-    case "prism": return <PrismTemplate data={data} />;
-    case "slate": return <SlateTemplate data={data} />;
-    case "avant": return <AvantTemplate data={data} />;
-    case "vanguard": return <VanguardTemplate data={data} />;
-    case "monolith": return <MonolithTemplate data={data} />;
-    case "cipher": return <CipherTemplate data={data} />;
-    case "pinnacle": return <PinnacleTemplate data={data} />;
+    case "executive": preview = <ExecutiveTemplate data={data} />; break;
+    case "noir": preview = <NoirTemplate data={data} />; break;
+    case "apex": preview = <ApexTemplate data={data} />; break;
+    case "nexus": preview = <NexusTemplate data={data} />; break;
+    case "orbit": preview = <OrbitTemplate data={data} />; break;
+    case "metric": preview = <MetricTemplate data={data} />; break;
+    case "prism": preview = <PrismTemplate data={data} />; break;
+    case "slate": preview = <SlateTemplate data={data} />; break;
+    case "avant": preview = <AvantTemplate data={data} />; break;
+    case "vanguard": preview = <VanguardTemplate data={data} />; break;
+    case "monolith": preview = <MonolithTemplate data={data} />; break;
+    case "cipher": preview = <CipherTemplate data={data} />; break;
+    case "pinnacle": preview = <PinnacleTemplate data={data} />; break;
+    case "new-sleek": preview = <NewSleekTemplate data={data} />; break;
+    case "new-professional": preview = <NewProfessionalTemplate data={data} />; break;
+    case "new-academic": preview = <NewAcademicTemplate data={data} />; break;
+    case "ref-torres": preview = <RefTorresTemplate data={data} />; break;
+    case "ref-silva": preview = <RefSilvaTemplate data={data} />; break;
+    case "ref-schumacher": preview = <RefSchumacherTemplate data={data} />; break;
+    case "ref-palmerston": preview = <RefPalmerstonTemplate data={data} />; break;
+    case "ref-sanchez": preview = <RefSanchezTemplate data={data} />; break;
     case "minimal":
-    default: return <MinimalTemplate data={data} />;
+    default: preview = <MinimalTemplate data={data} />;
   }
+
+  return (
+    <div dir={rtl ? "rtl" : "ltr"} className="resume-rtl-scope h-full w-full [unicode-bidi:plaintext]">
+      {preview}
+    </div>
+  );
 }

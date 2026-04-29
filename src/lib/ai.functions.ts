@@ -347,6 +347,18 @@ const resumeSchema = {
       },
     },
     skills: { type: "array", items: { type: "string" } },
+    skillItems: {
+      type: "array",
+      description: "Skill ratings used by visual resume templates. Keep names aligned with skills. Level is 1-5 and controls bars, dots, stars, or other skill graphics.",
+      items: {
+        type: "object",
+        properties: {
+          name: { type: "string" },
+          level: { type: "number" },
+        },
+        required: ["name", "level"],
+      },
+    },
     certifications: { type: "array", items: { type: "string" } },
   },
   required: [
@@ -357,6 +369,7 @@ const resumeSchema = {
     "projects",
     "education",
     "skills",
+    "skillItems",
     "certifications",
   ],
 };
@@ -414,7 +427,7 @@ export const chatEditResume = createServerFn({ method: "POST" })
         {
           role: "system",
           content:
-            "You are an elite resume editor and AI assistant. The user will provide their current resume data (in JSON) and a message detailing what changes they want. You must output the fully updated resume data reflecting these changes using the save_resume tool. You must also provide a brief reply confirming what you changed.",
+            "You are an elite resume editor and AI assistant. The user will provide their current resume data (in JSON) and a message detailing what changes they want. You must output the fully updated resume data reflecting these changes using the save_resume tool. You must also provide a brief reply confirming what you changed. If the user asks to raise, lower, reduce, fill, or change skill bars, dots, stars, or visual skill levels, update resume.skillItems with names aligned to resume.skills and levels from 1 to 5.",
         },
         {
           role: "user",
