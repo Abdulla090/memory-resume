@@ -1329,18 +1329,18 @@ const matrix3dParsers = {
 function defaultTransformValue(name) {
   return name.includes("scale") ? 1 : 0;
 }
-function parseValueFromTransform(transform, name) {
-  if (!transform || transform === "none") {
+function parseValueFromTransform(transform2, name) {
+  if (!transform2 || transform2 === "none") {
     return defaultTransformValue(name);
   }
-  const matrix3dMatch = transform.match(/^matrix3d\(([-\d.e\s,]+)\)$/u);
+  const matrix3dMatch = transform2.match(/^matrix3d\(([-\d.e\s,]+)\)$/u);
   let parsers;
   let match;
   if (matrix3dMatch) {
     parsers = matrix3dParsers;
     match = matrix3dMatch;
   } else {
-    const matrix2dMatch = transform.match(/^matrix\(([-\d.e\s,]+)\)$/u);
+    const matrix2dMatch = transform2.match(/^matrix\(([-\d.e\s,]+)\)$/u);
     parsers = matrix2dParsers;
     match = matrix2dMatch;
   }
@@ -1352,8 +1352,8 @@ function parseValueFromTransform(transform, name) {
   return typeof valueParser === "function" ? valueParser(values) : values[valueParser];
 }
 const readTransformValue = (instance, name) => {
-  const { transform = "none" } = getComputedStyle(instance);
-  return parseValueFromTransform(transform, name);
+  const { transform: transform2 = "none" } = getComputedStyle(instance);
+  return parseValueFromTransform(transform2, name);
 };
 function convertTransformToNumber(value) {
   return parseFloat(value.trim());
@@ -1407,8 +1407,8 @@ const positionalValues = {
   bottom: ({ y }, { top }) => parseFloat(top) + (y.max - y.min),
   right: ({ x }, { left }) => parseFloat(left) + (x.max - x.min),
   // Transform
-  x: (_bbox, { transform }) => parseValueFromTransform(transform, "x"),
-  y: (_bbox, { transform }) => parseValueFromTransform(transform, "y")
+  x: (_bbox, { transform: transform2 }) => parseValueFromTransform(transform2, "x"),
+  y: (_bbox, { transform: transform2 }) => parseValueFromTransform(transform2, "y")
 };
 positionalValues.translateX = positionalValues.x;
 positionalValues.translateY = positionalValues.y;
@@ -1546,6 +1546,7 @@ function memoSupports(callback, supportsFlag) {
   return () => supportsFlags[supportsFlag] ?? memoized();
 }
 const supportsScrollTimeline = /* @__PURE__ */ memoSupports(() => window.ScrollTimeline !== void 0, "scrollTimeline");
+const supportsViewTimeline = /* @__PURE__ */ memoSupports(() => window.ViewTimeline !== void 0, "viewTimeline");
 const supportsLinearEasing = /* @__PURE__ */ memoSupports(() => {
   try {
     document.createElement("div").animate({ opacity: 0 }, { easing: "linear(0, 1)" });
@@ -2312,6 +2313,9 @@ const MAX_VELOCITY_DELTA = 30;
 const isFloat = (value) => {
   return !isNaN(parseFloat(value));
 };
+const collectMotionValues = {
+  current: void 0
+};
 class MotionValue {
   /**
    * @param init - The initiating value
@@ -2487,6 +2491,9 @@ class MotionValue {
    * @public
    */
   get() {
+    if (collectMotionValues.current) {
+      collectMotionValues.current.push(this);
+    }
     return this.current;
   }
   /**
@@ -3330,8 +3337,32 @@ function resizeWindow(callback) {
 function resize(a, b) {
   return typeof a === "function" ? resizeWindow(a) : resizeElement(a, b);
 }
+function observeTimeline(update, timeline) {
+  let prevProgress;
+  const onFrame = () => {
+    const { currentTime } = timeline;
+    const percentage = currentTime === null ? 0 : currentTime.value;
+    const progress2 = percentage / 100;
+    if (prevProgress !== progress2) {
+      update(progress2);
+    }
+    prevProgress = progress2;
+  };
+  frame.preUpdate(onFrame, true);
+  return () => cancelFrame(onFrame);
+}
 function isSVGSVGElement(element) {
   return isSVGElement(element) && element.tagName === "svg";
+}
+function transform(...args) {
+  const useImmediate = !Array.isArray(args[0]);
+  const argOffset = useImmediate ? 0 : -1;
+  const inputValue = args[0 + argOffset];
+  const inputRange = args[1 + argOffset];
+  const outputRange = args[2 + argOffset];
+  const options = args[3 + argOffset];
+  const interpolator = interpolate(inputRange, outputRange, options);
+  return useImmediate ? interpolator(inputValue) : interpolator;
 }
 const valueTypes = [...dimensionValueTypes, color, complex];
 const findValueType = (v) => valueTypes.find(testValueType(v));
@@ -3957,10 +3988,10 @@ function resolveAxisTranslate(value, axis) {
   }
   return value;
 }
-function transformBox(box, transform, sourceBox) {
+function transformBox(box, transform2, sourceBox) {
   const resolveBox = sourceBox ?? box;
-  transformAxis(box.x, resolveAxisTranslate(transform.x, resolveBox.x), transform.scaleX, transform.scale, transform.originX);
-  transformAxis(box.y, resolveAxisTranslate(transform.y, resolveBox.y), transform.scaleY, transform.scale, transform.originY);
+  transformAxis(box.x, resolveAxisTranslate(transform2.x, resolveBox.x), transform2.scaleX, transform2.scale, transform2.originX);
+  transformAxis(box.y, resolveAxisTranslate(transform2.y, resolveBox.y), transform2.scaleY, transform2.scale, transform2.originY);
 }
 function measureViewportBox(instance, transformPoint) {
   return convertBoundingBoxToBox(transformBoxPoints(instance.getBoundingClientRect(), transformPoint));
@@ -3981,7 +4012,7 @@ const translateAlias = {
   transformPerspective: "perspective"
 };
 const numTransforms = transformPropOrder.length;
-function buildTransform(latestValues, transform, transformTemplate) {
+function buildTransform(latestValues, transform2, transformTemplate) {
   let transformString = "";
   let transformIsDefault = true;
   for (let i = 0; i < numTransforms; i++) {
@@ -4004,13 +4035,13 @@ function buildTransform(latestValues, transform, transformTemplate) {
         transformString += `${transformName}(${valueAsType}) `;
       }
       if (transformTemplate) {
-        transform[key] = valueAsType;
+        transform2[key] = valueAsType;
       }
     }
   }
   transformString = transformString.trim();
   if (transformTemplate) {
-    transformString = transformTemplate(transform, transformIsDefault ? "" : transformString);
+    transformString = transformTemplate(transform2, transformIsDefault ? "" : transformString);
   } else if (transformIsDefault) {
     transformString = "none";
   }
@@ -4702,37 +4733,37 @@ function eachAxis(callback) {
   return [callback("x"), callback("y")];
 }
 function buildProjectionTransform(delta, treeScale, latestTransform) {
-  let transform = "";
+  let transform2 = "";
   const xTranslate = delta.x.translate / treeScale.x;
   const yTranslate = delta.y.translate / treeScale.y;
   const zTranslate = latestTransform?.z || 0;
   if (xTranslate || yTranslate || zTranslate) {
-    transform = `translate3d(${xTranslate}px, ${yTranslate}px, ${zTranslate}px) `;
+    transform2 = `translate3d(${xTranslate}px, ${yTranslate}px, ${zTranslate}px) `;
   }
   if (treeScale.x !== 1 || treeScale.y !== 1) {
-    transform += `scale(${1 / treeScale.x}, ${1 / treeScale.y}) `;
+    transform2 += `scale(${1 / treeScale.x}, ${1 / treeScale.y}) `;
   }
   if (latestTransform) {
     const { transformPerspective, rotate: rotate2, rotateX, rotateY, skewX, skewY } = latestTransform;
     if (transformPerspective)
-      transform = `perspective(${transformPerspective}px) ${transform}`;
+      transform2 = `perspective(${transformPerspective}px) ${transform2}`;
     if (rotate2)
-      transform += `rotate(${rotate2}deg) `;
+      transform2 += `rotate(${rotate2}deg) `;
     if (rotateX)
-      transform += `rotateX(${rotateX}deg) `;
+      transform2 += `rotateX(${rotateX}deg) `;
     if (rotateY)
-      transform += `rotateY(${rotateY}deg) `;
+      transform2 += `rotateY(${rotateY}deg) `;
     if (skewX)
-      transform += `skewX(${skewX}deg) `;
+      transform2 += `skewX(${skewX}deg) `;
     if (skewY)
-      transform += `skewY(${skewY}deg) `;
+      transform2 += `skewY(${skewY}deg) `;
   }
   const elementScaleX = delta.x.scale * treeScale.x;
   const elementScaleY = delta.y.scale * treeScale.y;
   if (elementScaleX !== 1 || elementScaleY !== 1) {
-    transform += `scale(${elementScaleX}, ${elementScaleY})`;
+    transform2 += `scale(${elementScaleX}, ${elementScaleY})`;
   }
-  return transform || "none";
+  return transform2 || "none";
 }
 const borderLabels = [
   "borderTopLeftRadius",
@@ -5779,11 +5810,11 @@ function createProjectionNode({ attachResizeListener, defaultParent, measureScro
       targetStyle.visibility = "";
       const valuesToRender = lead.animationValues || lead.latestValues;
       this.applyTransformsToTarget();
-      let transform = buildProjectionTransform(this.projectionDeltaWithTransform, this.treeScale, valuesToRender);
+      let transform2 = buildProjectionTransform(this.projectionDeltaWithTransform, this.treeScale, valuesToRender);
       if (transformTemplate) {
-        transform = transformTemplate(valuesToRender, transform);
+        transform2 = transformTemplate(valuesToRender, transform2);
       }
-      targetStyle.transform = transform;
+      targetStyle.transform = transform2;
       const { x, y } = this.projectionDelta;
       targetStyle.transformOrigin = `${x.origin * 100}% ${y.origin * 100}% 0`;
       if (lead.animationValues) {
@@ -5795,7 +5826,7 @@ function createProjectionNode({ attachResizeListener, defaultParent, measureScro
         if (valuesToRender[key] === void 0)
           continue;
         const { correct, applyTo, isCSSVariable } = scaleCorrectors[key];
-        const corrected = transform === "none" ? valuesToRender[key] : correct(valuesToRender[key], lead);
+        const corrected = transform2 === "none" ? valuesToRender[key] : correct(valuesToRender[key], lead);
         if (applyTo) {
           const num = applyTo.length;
           for (let i = 0; i < num; i++) {
@@ -6022,7 +6053,7 @@ const HTMLProjectionNode = createProjectionNode({
   checkIsScrollRoot: (instance) => Boolean(window.getComputedStyle(instance).position === "fixed")
 });
 export {
-  ObjectVisualElement as $,
+  resolveElements as $,
   createBox as A,
   eachAxis as B,
   measurePageBox as C,
@@ -6042,20 +6073,26 @@ export {
   hover as Q,
   press as R,
   SVGVisualElement as S,
-  resolveElements as T,
-  defaultOffset as U,
-  createGeneratorEasing as V,
-  fillOffset as W,
-  isGenerator as X,
-  isSVGElement as Y,
-  isSVGSVGElement as Z,
-  visualElementStore as _,
+  supportsViewTimeline as T,
+  supportsScrollTimeline as U,
+  interpolate as V,
+  defaultOffset as W,
+  observeTimeline as X,
+  motionValue as Y,
+  collectMotionValues as Z,
+  transform as _,
   isMotionValue as a,
-  animateSingleValue as a0,
-  animateTarget as a1,
-  motionValue as a2,
-  spring as a3,
-  GroupAnimationWithThen as a4,
+  createGeneratorEasing as a0,
+  fillOffset as a1,
+  isGenerator as a2,
+  isSVGElement as a3,
+  isSVGSVGElement as a4,
+  visualElementStore as a5,
+  ObjectVisualElement as a6,
+  animateSingleValue as a7,
+  animateTarget as a8,
+  spring as a9,
+  GroupAnimationWithThen as aa,
   isControllingVariants as b,
   isVariantLabel as c,
   isForcedMotionValue as d,

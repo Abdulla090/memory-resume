@@ -775,6 +775,13 @@ function RouterProvider({ router, ...rest }) {
     children: /* @__PURE__ */ jsxRuntimeExports.jsx(Matches, {})
   });
 }
+function useLocation(opts) {
+  const router = useRouter();
+  {
+    const location = router.stores.location.get();
+    return location;
+  }
+}
 function Asset({ tag, attrs, children, nonce }) {
   switch (tag) {
     case "title":
@@ -1090,6 +1097,7 @@ export {
   createFileRoute as b,
   createRouter as c,
   useNavigate as d,
+  useLocation as e,
   lazyRouteComponent as l,
   renderRouterToStream as r,
   useRouter as u

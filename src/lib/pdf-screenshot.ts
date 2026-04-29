@@ -40,7 +40,7 @@ export async function exportPreviewAsPDF(
   try {
     canvas = await toCanvas(previewElement, {
       pixelRatio: 2,           // 2× for retina-quality sharpness
-      backgroundColor: null,   // preserve dark/custom template backgrounds
+      backgroundColor: undefined,   // preserve dark/custom template backgrounds
       width: 794,
       height: fullHeight,
     });

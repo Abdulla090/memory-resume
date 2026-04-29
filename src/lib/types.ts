@@ -89,7 +89,7 @@ export interface FollowUpQuestion {
   field: string;
   question: string;
   helperText: string;
-  inputType: "text" | "select";
+  inputType: "text" | "select" | "multiselect";
   options: string[];
   placeholder?: string;
 }
