@@ -7,6 +7,7 @@ import { useAppStore } from "@/lib/store";
 import appCss from "../styles.css?url";
 
 function NotFoundComponent() {
+
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="max-w-md text-center">
@@ -166,6 +167,12 @@ function ApiKeySettings() {
 }
 
 function RootComponent() {
+  useEffect(() => {
+    if (import.meta.env.DEV) {
+      void import("react-grab");
+    }
+  }, []);
+
   return (
     <>
       <Outlet />

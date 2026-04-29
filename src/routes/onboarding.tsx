@@ -214,7 +214,42 @@ function ChatOnboarding() {
 
   // ── Render ───────────────────────────────────────────────────────────────
   return (
-    <div className="min-h-dvh flex flex-col" style={{ background: "linear-gradient(165deg, #b3d9f7 0%, #cce8ff 30%, #ddf0ff 60%, #ecf7ff 100%)" }}>
+    <div className="min-h-dvh flex flex-col relative overflow-hidden bg-sky-100">
+      {/* Background Gradient */}
+      <div className="absolute inset-0 z-0" style={{ background: "linear-gradient(180deg, #93c5fd 0%, #e0f2fe 50%, #fef3c7 100%)" }} />
+
+      {/* Warm Sun Glow */}
+      <div className="absolute top-10 right-32 w-[500px] h-[500px] bg-amber-300/40 rounded-full blur-[100px] pointer-events-none z-0" />
+
+      {/* Giant Fluffy Cloud (Top Left) */}
+      <div className="absolute top-[-80px] left-[-50px] w-[600px] h-[300px] pointer-events-none z-0 opacity-95">
+        <div className="absolute top-16 left-10 w-48 h-48 bg-white rounded-full blur-[4px] drop-shadow-sm" />
+        <div className="absolute top-[-20px] left-32 w-64 h-64 bg-white rounded-full blur-[4px] drop-shadow-sm" />
+        <div className="absolute top-20 left-72 w-48 h-48 bg-white rounded-full blur-[4px] drop-shadow-sm" />
+        <div className="absolute top-32 left-0 w-[500px] h-40 bg-white rounded-full blur-[4px]" />
+      </div>
+
+      {/* Giant Fluffy Cloud (Top Right) */}
+      <div className="absolute top-[-100px] right-[-100px] w-[700px] h-[350px] pointer-events-none z-0 opacity-90">
+        <div className="absolute top-20 right-10 w-56 h-56 bg-white rounded-full blur-[4px] drop-shadow-sm" />
+        <div className="absolute top-[-40px] right-40 w-80 h-80 bg-white rounded-full blur-[4px] drop-shadow-sm" />
+        <div className="absolute top-16 right-96 w-64 h-64 bg-white rounded-full blur-[4px] drop-shadow-sm" />
+        <div className="absolute top-40 right-0 w-[700px] h-48 bg-white rounded-full blur-[4px]" />
+      </div>
+
+      {/* Small Floating Cloud (Mid Left) */}
+      <div className="absolute top-[25%] left-[5%] w-[250px] h-[100px] pointer-events-none z-0 opacity-70">
+        <div className="absolute top-0 left-10 w-24 h-24 bg-white rounded-full blur-[3px]" />
+        <div className="absolute top-[-10px] left-24 w-28 h-28 bg-white rounded-full blur-[3px]" />
+        <div className="absolute top-8 left-0 w-[200px] h-16 bg-white rounded-full blur-[3px]" />
+      </div>
+
+      {/* Small Floating Cloud (Right side below header) */}
+      <div className="absolute top-[30%] right-[10%] w-[300px] h-[120px] pointer-events-none z-0 opacity-60">
+        <div className="absolute top-0 right-16 w-24 h-24 bg-white rounded-full blur-[4px]" />
+        <div className="absolute top-[-20px] right-32 w-32 h-32 bg-white rounded-full blur-[4px]" />
+        <div className="absolute top-10 right-0 w-[250px] h-20 bg-white rounded-full blur-[4px]" />
+      </div>
 
       {/* ── Full-screen generating loader ── */}
       {showLoader && loaderResumeId && (
@@ -222,7 +257,7 @@ function ChatOnboarding() {
       )}
 
       {/* ── Header ── */}
-      <header className="px-6 py-4 flex items-center gap-2 shrink-0">
+      <header className="relative z-10 px-6 py-4 flex items-center gap-2 shrink-0">
         <div className="w-7 h-7 rounded-full bg-blue-600 flex items-center justify-center shadow-md">
           <Sparkles className="w-3.5 h-3.5 text-white" />
         </div>
@@ -232,15 +267,15 @@ function ChatOnboarding() {
 
       {/* ── INTAKE — centered big textarea ── */}
       {!inChat && (
-        <div className="flex-1 flex flex-col items-center justify-center px-4 pb-8">
+        <div className="relative z-10 flex-1 flex flex-col items-center justify-center px-4 pb-8">
           <motion.h1
             initial={{ opacity: 0, y: -12 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-3xl font-semibold text-slate-900 tracking-tight mb-2 text-center"
+            className="text-3xl font-semibold text-slate-900 tracking-tight mb-2 text-center drop-shadow-sm"
           >
             Tell me about yourself.
           </motion.h1>
-          <p className="text-slate-500 text-sm mb-8 text-center max-w-sm">
+          <p className="text-slate-600 font-medium text-sm mb-8 text-center max-w-sm drop-shadow-sm">
             Paste your resume, LinkedIn bio, career history — or just write freely.
           </p>
 
@@ -249,15 +284,15 @@ function ChatOnboarding() {
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="w-full max-w-[44rem] rounded-3xl overflow-hidden shadow-[0_8px_40px_-8px_rgba(0,80,200,0.18)] border border-blue-100/80"
-            style={{ background: "rgba(255,255,255,0.75)", backdropFilter: "blur(20px)" }}
+            className="w-full max-w-[44rem] rounded-3xl overflow-hidden shadow-[0_30px_60px_-15px_rgba(2,132,199,0.35)] border-2 border-white"
+            style={{ background: "rgba(255,255,255,0.95)", backdropFilter: "blur(24px)" }}
           >
             <textarea
               ref={inputRef}
               value={inputText}
               onChange={(e) => setInputText(e.target.value)}
               placeholder="Paste your resume, LinkedIn summary, career history, or just write about yourself..."
-              className="w-full bg-transparent resize-none outline-none text-slate-800 text-[15.5px] leading-relaxed placeholder:text-slate-400 px-6 pt-6 pb-3"
+              className="w-full bg-transparent resize-none outline-none text-slate-900 text-[15.5px] font-medium leading-relaxed placeholder:text-slate-400 px-6 pt-6 pb-3"
               style={{ minHeight: "200px" }}
               onKeyDown={(e) => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) handleExtract(); }}
             />
@@ -298,7 +333,7 @@ function ChatOnboarding() {
 
       {/* ── CHAT VIEW ── */}
       {inChat && (
-        <div className="flex-1 flex flex-col min-h-0">
+        <div className="relative z-10 flex-1 flex flex-col min-h-0">
           {/* Messages — takes all remaining space, scrolls naturally */}
           <div className="flex-1 overflow-y-auto px-4 pt-2 pb-4" style={{ scrollbarWidth: "none" }}>
             <div className="max-w-[42rem] mx-auto flex flex-col gap-4">
@@ -419,8 +454,8 @@ function ChatOnboarding() {
 
               {/* Input row */}
               <div
-                className="flex items-center gap-3 rounded-2xl px-4 py-3 border border-blue-200 shadow-lg shadow-blue-100/40"
-                style={{ background: "rgba(255,255,255,0.92)" }}
+                className="flex items-center gap-3 rounded-2xl px-4 py-3 border-2 border-white shadow-[0_20px_40px_-10px_rgba(2,132,199,0.3)]"
+                style={{ background: "rgba(255,255,255,0.98)" }}
               >
                 {/* Q&A text input */}
                 {inQA && curQ && (

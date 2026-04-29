@@ -134,7 +134,8 @@
   .app-frame {
     position: relative;
     margin-inline: auto;
-    width: min(1200px, calc(100% - 2rem));
+    width: min(1200px, 100%);
+    padding-inline: 0;
   }
 
   /* ─── Navbar ────────────────────────────────── */

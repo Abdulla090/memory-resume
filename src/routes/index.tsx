@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { motion, useMotionValue, useTransform, animate } from "framer-motion";
-import { ArrowRight, Sparkles, Star, Users, TrendingUp, CheckCircle, Brain, FileText, Zap, Target, Layers, Download } from "lucide-react";
+import { motion, useScroll, useTransform, animate } from "framer-motion";
+import { ArrowRight, Sparkles, Star, Users, TrendingUp, CheckCircle, Brain, FileText, Zap, Target, Layers, Download, Menu } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 export const Route = createFileRoute("/")(({
@@ -50,6 +50,7 @@ function Sparkline({ color = "#2563eb" }: { color?: string }) {
 
 /* ── Navbar ── */
 function Header() {
+  const [mobileOpen, setMobileOpen] = useState(false);
   return (
     <header className="saas-nav">
       <div className="app-frame px-4 sm:px-6">
@@ -67,172 +68,234 @@ function Header() {
                 id={`nav-${label.toLowerCase()}`}>{label}</Link>
             ))}
           </nav>
-          <Link to="/onboarding" id="nav-free-trial"
-            className="primary-button px-5 py-2.5 text-sm cursor-pointer">
-            Free Trial
-          </Link>
+          <div className="flex items-center gap-2">
+            <Link to="/onboarding" id="nav-free-trial"
+              className="primary-button px-4 sm:px-5 py-2.5 text-sm cursor-pointer">
+              Free Trial
+            </Link>
+            <button
+              className="md:hidden w-9 h-9 rounded-lg border border-slate-200 flex items-center justify-center text-slate-600 hover:bg-slate-50 transition-colors"
+              onClick={() => setMobileOpen(!mobileOpen)}
+            >
+              <Menu className="w-5 h-5" />
+            </button>
+          </div>
         </div>
+        {/* Mobile nav drawer */}
+        {mobileOpen && (
+          <div className="md:hidden pb-4 border-t border-slate-100 mt-1">
+            {[["Home","/"],["Features","/templates"],["Build Resume","/onboarding"],["Contact","/"]].map(([label,path])=>(
+              <Link key={label} to={path as any}
+                onClick={() => setMobileOpen(false)}
+                className="block px-4 py-3 text-sm font-medium text-slate-700 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+              >{label}</Link>
+            ))}
+          </div>
+        )}
       </div>
     </header>
   );
 }
 
+
+export const LeftCardSVG = () => (
+  <svg viewBox="0 0 240 320" className="w-full h-auto drop-shadow-2xl" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="left-header-gradient" x1="0" y1="0" x2="240" y2="80" gradientUnits="userSpaceOnUse">
+        <stop stopColor="#2563eb" />
+        <stop offset="1" stopColor="#3b82f6" />
+      </linearGradient>
+    </defs>
+    {/* Card Background */}
+    <rect width="240" height="320" rx="16" fill="#ffffff" />
+    <rect x="0.5" y="0.5" width="239" height="319" rx="15.5" fill="none" stroke="#e2e8f0" />
+    
+    {/* Header Accent */}
+    <path d="M0 16C0 7.16344 7.16344 0 16 0H224C232.837 0 240 7.16344 240 16V80H0V16Z" fill="url(#left-header-gradient)" />
+
+    {/* Avatar */}
+    <circle cx="48" cy="40" r="24" fill="white" fillOpacity="0.2" />
+    <circle cx="48" cy="40" r="20" fill="white" />
+    <path d="M48 34C44.6863 34 42 36.6863 42 40C42 43.3137 44.6863 46 48 46C51.3137 46 54 43.3137 54 40C54 36.6863 51.3137 34 48 34ZM38 40C38 34.4772 42.4772 30 48 30C53.5228 30 58 34.4772 58 40C58 45.5228 53.5228 50 48 50C42.4772 50 38 45.5228 38 40Z" fill="#2563eb" />
+    
+    <text x="84" y="36" fill="white" fontSize="16" fontWeight="bold" fontFamily="system-ui, sans-serif">Sarah Chen</text>
+    <text x="84" y="52" fill="#bfdbfe" fontSize="11" fontFamily="system-ui, sans-serif">Senior UX Designer</text>
+
+    {/* Body Content */}
+    <text x="24" y="110" fill="#2563eb" fontSize="9" fontWeight="bold" letterSpacing="1" fontFamily="system-ui, sans-serif">PROFESSIONAL EXPERIENCE</text>
+    
+    {/* Job 1 */}
+    <rect x="24" y="124" width="2" height="24" fill="#3b82f6" />
+    <text x="34" y="132" fill="#0f172a" fontSize="12" fontWeight="bold" fontFamily="system-ui, sans-serif">Google</text>
+    <text x="216" y="132" fill="#64748b" fontSize="9" textAnchor="end" fontFamily="system-ui, sans-serif">2021 – Present</text>
+    <text x="34" y="146" fill="#475569" fontSize="10" fontFamily="system-ui, sans-serif">Senior Product Designer</text>
+    
+    {/* Job 2 */}
+    <rect x="24" y="164" width="2" height="24" fill="#cbd5e1" />
+    <text x="34" y="172" fill="#0f172a" fontSize="12" fontWeight="bold" fontFamily="system-ui, sans-serif">Figma</text>
+    <text x="216" y="172" fill="#64748b" fontSize="9" textAnchor="end" fontFamily="system-ui, sans-serif">2019 – 2021</text>
+    <text x="34" y="186" fill="#475569" fontSize="10" fontFamily="system-ui, sans-serif">UX Lead</text>
+
+    {/* Skills */}
+    <text x="24" y="224" fill="#2563eb" fontSize="9" fontWeight="bold" letterSpacing="1" fontFamily="system-ui, sans-serif">CORE SKILLS</text>
+    <rect x="24" y="234" width="56" height="20" rx="10" fill="#eff6ff" />
+    <text x="52" y="247" fill="#1d4ed8" fontSize="9" fontWeight="600" textAnchor="middle" fontFamily="system-ui, sans-serif">UI Design</text>
+    
+    <rect x="84" y="234" width="60" height="20" rx="10" fill="#eff6ff" />
+    <text x="114" y="247" fill="#1d4ed8" fontSize="9" fontWeight="600" textAnchor="middle" fontFamily="system-ui, sans-serif">Prototyping</text>
+
+    <rect x="148" y="234" width="68" height="20" rx="10" fill="#eff6ff" />
+    <text x="182" y="247" fill="#1d4ed8" fontSize="9" fontWeight="600" textAnchor="middle" fontFamily="system-ui, sans-serif">User Testing</text>
+
+    {/* Completion Status */}
+    <path d="M24 286 L216 286" stroke="#f1f5f9" strokeWidth="6" strokeLinecap="round" />
+    <path d="M24 286 L170 286" stroke="#3b82f6" strokeWidth="6" strokeLinecap="round" />
+    <text x="24" y="274" fill="#64748b" fontSize="8" fontFamily="system-ui, sans-serif">Profile Extraction Complete</text>
+    <text x="216" y="274" fill="#2563eb" fontSize="9" fontWeight="bold" textAnchor="end" fontFamily="system-ui, sans-serif">100%</text>
+  </svg>
+);
+
+export const CenterCardSVG = () => (
+  <svg viewBox="0 0 280 400" className="w-full h-auto drop-shadow-2xl" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect width="280" height="400" rx="8" fill="#ffffff" />
+    <rect x="0.5" y="0.5" width="279" height="399" rx="7.5" fill="none" stroke="#e2e8f0" />
+    
+    {/* Elegant floating overlay badge indicating it's an AI preview */}
+    <g transform="translate(190, 10)">
+      <rect width="80" height="24" rx="12" fill="#eff6ff" stroke="#bfdbfe" />
+      <text x="40" y="26" fill="#1d4ed8" fontSize="9" fontWeight="bold" textAnchor="middle" fontFamily="system-ui, sans-serif" transform="translate(0, -9)">AI GENERATED</text>
+    </g>
+
+    {/* Name and Contact */}
+    <text x="140" y="56" fill="#0f172a" fontSize="18" fontWeight="bold" textAnchor="middle" fontFamily="system-ui, sans-serif">ALEXANDRA SMITH</text>
+    <text x="140" y="68" fill="#64748b" fontSize="8" textAnchor="middle" fontFamily="system-ui, sans-serif">New York, NY • alexandra@email.com • (555) 123-4567</text>
+    
+    <path d="M20 80 L260 80" stroke="#f1f5f9" strokeWidth="1" />
+    
+    {/* Summary */}
+    <text x="20" y="96" fill="#2563eb" fontSize="10" fontWeight="bold" fontFamily="system-ui, sans-serif">PROFESSIONAL SUMMARY</text>
+    <text x="20" y="110" fill="#475569" fontSize="7" fontFamily="system-ui, sans-serif">Results-driven Senior Engineer with 8+ years of experience in scalable web</text>
+    <text x="20" y="120" fill="#475569" fontSize="7" fontFamily="system-ui, sans-serif">architecture and cloud-native applications. Proven track record of leading</text>
+    <text x="20" y="130" fill="#475569" fontSize="7" fontFamily="system-ui, sans-serif">cross-functional teams to deliver enterprise-grade solutions.</text>
+
+    {/* Experience */}
+    <text x="20" y="156" fill="#2563eb" fontSize="10" fontWeight="bold" fontFamily="system-ui, sans-serif">EXPERIENCE</text>
+    
+    <text x="20" y="172" fill="#0f172a" fontSize="9" fontWeight="bold" fontFamily="system-ui, sans-serif">TechCorp Industries</text>
+    <text x="260" y="172" fill="#0f172a" fontSize="8" fontWeight="bold" textAnchor="end" fontFamily="system-ui, sans-serif">2020 - Present</text>
+    <text x="20" y="182" fill="#64748b" fontSize="8" fontStyle="italic" fontFamily="system-ui, sans-serif">Senior Software Engineer</text>
+    <circle cx="26" cy="194" r="1.5" fill="#3b82f6" />
+    <text x="32" y="196" fill="#475569" fontSize="7" fontFamily="system-ui, sans-serif">Architected microservices migrating 2M+ users with 99.99% uptime.</text>
+    <circle cx="26" cy="206" r="1.5" fill="#3b82f6" />
+    <text x="32" y="208" fill="#475569" fontSize="7" fontFamily="system-ui, sans-serif">Reduced AWS infrastructure costs by 30% through resource optimization.</text>
+    
+    <text x="20" y="230" fill="#0f172a" fontSize="9" fontWeight="bold" fontFamily="system-ui, sans-serif">Innovate Software</text>
+    <text x="260" y="230" fill="#0f172a" fontSize="8" fontWeight="bold" textAnchor="end" fontFamily="system-ui, sans-serif">2016 - 2020</text>
+    <text x="20" y="240" fill="#64748b" fontSize="8" fontStyle="italic" fontFamily="system-ui, sans-serif">Software Engineer</text>
+    <circle cx="26" cy="252" r="1.5" fill="#3b82f6" />
+    <text x="32" y="254" fill="#475569" fontSize="7" fontFamily="system-ui, sans-serif">Developed RESTful APIs serving 50M+ requests monthly.</text>
+    <circle cx="26" cy="264" r="1.5" fill="#3b82f6" />
+    <text x="32" y="266" fill="#475569" fontSize="7" fontFamily="system-ui, sans-serif">Mentored 4 junior developers and established CI/CD best practices.</text>
+
+    {/* Education */}
+    <text x="20" y="296" fill="#2563eb" fontSize="10" fontWeight="bold" fontFamily="system-ui, sans-serif">EDUCATION</text>
+    <text x="20" y="312" fill="#0f172a" fontSize="9" fontWeight="bold" fontFamily="system-ui, sans-serif">University of Technology</text>
+    <text x="260" y="312" fill="#0f172a" fontSize="8" fontWeight="bold" textAnchor="end" fontFamily="system-ui, sans-serif">2012 - 2016</text>
+    <text x="20" y="322" fill="#64748b" fontSize="8" fontStyle="italic" fontFamily="system-ui, sans-serif">Bachelor of Science in Computer Science</text>
+    
+    {/* Skills Mini */}
+    <text x="20" y="352" fill="#2563eb" fontSize="10" fontWeight="bold" fontFamily="system-ui, sans-serif">TECHNICAL SKILLS</text>
+    <text x="20" y="368" fill="#475569" fontSize="7" fontFamily="system-ui, sans-serif"><tspan fontWeight="bold" fill="#0f172a">Languages:</tspan> JavaScript, TypeScript, Python, Java, Go</text>
+    <text x="20" y="380" fill="#475569" fontSize="7" fontFamily="system-ui, sans-serif"><tspan fontWeight="bold" fill="#0f172a">Frameworks:</tspan> React, Node.js, Express, Django, Next.js</text>
+  </svg>
+);
+
+export const RightCardSVG = () => (
+  <svg viewBox="0 0 240 320" className="w-full h-auto drop-shadow-2xl" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="right-header-gradient" x1="0" y1="0" x2="240" y2="100" gradientUnits="userSpaceOnUse">
+        <stop stopColor="#1e3a8a" />
+        <stop offset="1" stopColor="#1e40af" />
+      </linearGradient>
+    </defs>
+    <rect width="240" height="320" rx="16" fill="#ffffff" />
+    <rect x="0.5" y="0.5" width="239" height="319" rx="15.5" fill="none" stroke="#e2e8f0" />
+    
+    <path d="M0 16C0 7.16344 7.16344 0 16 0H224C232.837 0 240 7.16344 240 16V100H0V16Z" fill="url(#right-header-gradient)" />
+    
+    <text x="24" y="36" fill="#93c5fd" fontSize="10" fontWeight="bold" letterSpacing="1" fontFamily="system-ui, sans-serif">TARGET ROLE MATCH</text>
+    <text x="24" y="76" fill="white" fontSize="42" fontWeight="900" fontFamily="system-ui, sans-serif">96<tspan fontSize="24" fill="#93c5fd">%</tspan></text>
+    
+    <rect x="24" y="124" width="24" height="24" rx="6" fill="#dcfce7" />
+    <path d="M30 136L34 140L42 130" stroke="#16a34a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    <text x="56" y="136" fill="#0f172a" fontSize="12" fontWeight="bold" fontFamily="system-ui, sans-serif">Strong Match</text>
+    <text x="56" y="148" fill="#64748b" fontSize="9" fontFamily="system-ui, sans-serif">Ready to apply for Senior Dev</text>
+
+    <text x="24" y="184" fill="#2563eb" fontSize="9" fontWeight="bold" letterSpacing="1" fontFamily="system-ui, sans-serif">MATCH BREAKDOWN</text>
+    
+    <text x="24" y="206" fill="#334155" fontSize="10" fontWeight="600" fontFamily="system-ui, sans-serif">Required Skills</text>
+    <text x="216" y="206" fill="#0f172a" fontSize="10" fontWeight="bold" textAnchor="end" fontFamily="system-ui, sans-serif">100%</text>
+    <path d="M24 216 L216 216" stroke="#f1f5f9" strokeWidth="6" strokeLinecap="round" />
+    <path d="M24 216 L216 216" stroke="#16a34a" strokeWidth="6" strokeLinecap="round" />
+
+    <text x="24" y="238" fill="#334155" fontSize="10" fontWeight="600" fontFamily="system-ui, sans-serif">Experience Level</text>
+    <text x="216" y="238" fill="#0f172a" fontSize="10" fontWeight="bold" textAnchor="end" fontFamily="system-ui, sans-serif">90%</text>
+    <path d="M24 248 L216 248" stroke="#f1f5f9" strokeWidth="6" strokeLinecap="round" />
+    <path d="M24 248 L196 248" stroke="#2563eb" strokeWidth="6" strokeLinecap="round" />
+
+    <text x="24" y="270" fill="#334155" fontSize="10" fontWeight="600" fontFamily="system-ui, sans-serif">Keywords</text>
+    <text x="216" y="270" fill="#0f172a" fontSize="10" fontWeight="bold" textAnchor="end" fontFamily="system-ui, sans-serif">85%</text>
+    <path d="M24 280 L216 280" stroke="#f1f5f9" strokeWidth="6" strokeLinecap="round" />
+    <path d="M24 280 L180 280" stroke="#f59e0b" strokeWidth="6" strokeLinecap="round" />
+
+  </svg>
+);
+
 /* ── Hero three CV-themed floating cards ── */
 function HeroCards() {
-  const cardBase = "bg-white rounded-2xl border border-blue-100 shadow-2xl select-none overflow-hidden cursor-pointer";
+  const ref = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ["start 85%", "center center"]
+  });
+  
+  // Smooth fan-out animation linked to the scroll position relative to the element
+  // Opens entirely when the center of the cards reaches the center of the viewport
+  const leftX = useTransform(scrollYProgress, [0, 1], [0, -220]);
+  const leftY = useTransform(scrollYProgress, [0, 1], [0, 40]);
+  const leftRotate = useTransform(scrollYProgress, [0, 1], [0, -12]);
+
+  const rightX = useTransform(scrollYProgress, [0, 1], [0, 220]);
+  const rightY = useTransform(scrollYProgress, [0, 1], [0, 40]);
+  const rightRotate = useTransform(scrollYProgress, [0, 1], [0, 12]);
+
+  // Center card slightly moves up for a subtle parallax feel
+  const centerY = useTransform(scrollYProgress, [0, 1], [0, -20]);
+
   return (
-    <div className="relative w-full flex items-end justify-center -space-x-12 sm:space-x-0 sm:gap-5 transform scale-[0.8] sm:scale-100 origin-top" style={{ height: 380 }}>
+    <div ref={ref} className="relative w-full flex items-center justify-center origin-top" style={{ height: "clamp(240px,50vw,400px)" }}>
 
-      {/* LEFT — Profile Card */}
-      <motion.div
-        initial={{ opacity: 0, y: 40, rotate: -4 }}
-        animate={{ opacity: 1, y: 0, rotate: -4 }}
-        transition={{ delay: 0.5, type: "spring", stiffness: 70 }}
-        whileHover={{ y: -4, transition: { duration: 0.3, ease: "easeOut" }, zIndex: 30 }}
-        className={cardBase}
-        style={{ width: 192, alignSelf: "flex-end", zIndex: 10 }}
-        id="hero-card-profile"
-      >
-        <div className="px-4 pt-4 pb-3 flex items-center gap-2.5" style={{ background: "linear-gradient(135deg,#1d4ed8,#3b82f6)" }}>
-          <div className="w-9 h-9 rounded-xl bg-white/20 flex items-center justify-center flex-shrink-0">
-            <Brain className="w-4 h-4 text-white" />
-          </div>
-          <div>
-            <div className="text-[10px] font-bold text-white leading-tight">Sarah Chen</div>
-            <div className="text-[8px] text-blue-200">Senior UX Designer</div>
-          </div>
-        </div>
-        <div className="px-4 py-3 space-y-2.5">
-          <div>
-            <div className="text-[7px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">Experience</div>
-            {([["Google","Product Design","2021–Now"],["Figma Inc","UX Lead","2019–21"]] as [string,string,string][]).map(([co,role,yr])=>(
-              <div key={co} className="flex justify-between items-start mb-1.5">
-                <div>
-                  <div className="text-[8.5px] font-semibold text-slate-800">{co}</div>
-                  <div className="text-[7.5px] text-slate-400">{role}</div>
-                </div>
-                <span className="text-[7px] text-blue-400 font-medium">{yr}</span>
-              </div>
-            ))}
-          </div>
-          <div className="h-px bg-blue-50" />
-          <div>
-            <div className="text-[7px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">Skills</div>
-            <div className="flex flex-wrap gap-1">
-              {["Figma","UX","Prototyping"].map(s=>(
-                <span key={s} className="text-[7px] font-semibold px-1.5 py-0.5 rounded-full" style={{background:"#eff6ff",color:"#2563eb"}}>{s}</span>
-              ))}
-            </div>
-          </div>
-          <div className="h-px bg-blue-50" />
-          <div>
-            <div className="flex justify-between mb-1">
-              <span className="text-[7px] text-slate-400">Profile complete</span>
-              <span className="text-[7px] font-bold text-blue-600">78%</span>
-            </div>
-            <div className="h-1.5 rounded-full bg-blue-100"><div className="h-full rounded-full bg-blue-500" style={{width:"78%"}} /></div>
-          </div>
-        </div>
+      {/* LEFT */}
+      <motion.div className="absolute" style={{ width: "clamp(120px,20vw,220px)", zIndex: 10, x: leftX, y: leftY, rotate: leftRotate }}
+        initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}
+        transition={{ delay: 0.4, type: "spring", stiffness: 70 }} id="hero-card-profile">
+        <LeftCardSVG />
       </motion.div>
 
-      {/* CENTER — Resume Preview Card (tallest, elevated) */}
-      <motion.div
-        initial={{ opacity: 0, y: 80 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.3, type: "spring", stiffness: 55 }}
-        whileHover={{ y: -8, transition: { duration: 0.3, ease: "easeOut" } }}
-        className={cardBase}
-        style={{ width: 218, marginBottom: 48, zIndex: 20 }}
-        id="hero-card-resume"
-      >
-        <div className="px-4 pt-4 pb-3 flex items-center justify-between" style={{ background: "linear-gradient(135deg,#1d4ed8,#2563eb)" }}>
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg bg-white/20 flex items-center justify-center">
-              <FileText className="w-3.5 h-3.5 text-white" />
-            </div>
-            <div>
-              <div className="text-[9px] font-bold text-white">Resume Preview</div>
-              <div className="text-[7px] text-blue-200">AI-Generated</div>
-            </div>
-          </div>
-          <span className="text-[7.5px] font-bold px-1.5 py-0.5 rounded-full bg-white" style={{ color:"#1d4ed8" }}>AI</span>
-        </div>
-        <div className="px-4 py-3 space-y-2.5">
-          <div>
-            <div className="h-2.5 rounded-full w-3/5 mb-1" style={{ background:"linear-gradient(90deg,#1d4ed8,#3b82f6)" }} />
-            <div className="h-1.5 rounded-full bg-slate-200 w-4/5" />
-          </div>
-          <div className="h-px bg-blue-50" />
-          <div>
-            <div className="text-[7px] font-bold text-blue-600 uppercase tracking-widest mb-1.5">Experience</div>
-            {["Google LLC","Dribbble Inc"].map(co=>(
-              <div key={co} className="mb-1.5">
-                <div className="flex justify-between">
-                  <div className="h-1.5 rounded-full bg-slate-700 w-2/5" />
-                  <div className="h-1.5 rounded-full bg-slate-300 w-1/4" />
-                </div>
-                <div className="h-1 rounded-full bg-slate-200 w-full mt-0.5" />
-                <div className="h-1 rounded-full bg-slate-100 w-4/5 mt-0.5" />
-              </div>
-            ))}
-          </div>
-          <div className="h-px bg-blue-50" />
-          <div>
-            <div className="text-[7px] font-bold text-blue-600 uppercase tracking-widest mb-1.5">Skills</div>
-            <div className="flex flex-wrap gap-1">
-              {["React","Figma","UX","TypeScript"].map(s=>(
-                <span key={s} className="text-[6.5px] font-semibold px-1.5 py-0.5 rounded-full" style={{ background:"#eff6ff", color:"#2563eb" }}>{s}</span>
-              ))}
-            </div>
-          </div>
-          <div className="h-px bg-blue-50" />
-          <div>
-            <div className="text-[7px] font-bold text-blue-600 uppercase tracking-widest mb-1">Education</div>
-            <div className="h-1.5 rounded-full bg-slate-700 w-3/5 mb-0.5" />
-            <div className="h-1 rounded-full bg-slate-200 w-2/5" />
-          </div>
-          <div className="flex items-center gap-1.5 rounded-xl px-2 py-1.5" style={{ background:"#eff6ff" }}>
-            <Sparkles className="w-2.5 h-2.5 flex-shrink-0" style={{ color:"#2563eb" }} />
-            <span className="text-[7px] font-semibold" style={{ color:"#1d4ed8" }}>Tailored for this role</span>
-          </div>
-        </div>
+      {/* RIGHT */}
+      <motion.div className="absolute" style={{ width: "clamp(120px,20vw,220px)", zIndex: 10, x: rightX, y: rightY, rotate: rightRotate }}
+        initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}
+        transition={{ delay: 0.5, type: "spring", stiffness: 70 }} id="hero-card-match">
+        <RightCardSVG />
       </motion.div>
 
-      {/* RIGHT — Job Match Card */}
-      <motion.div
-        initial={{ opacity: 0, y: 40, rotate: 4 }}
-        animate={{ opacity: 1, y: 0, rotate: 4 }}
-        transition={{ delay: 0.62, type: "spring", stiffness: 70 }}
-        whileHover={{ y: -4, transition: { duration: 0.3, ease: "easeOut" }, zIndex: 30 }}
-        className={cardBase}
-        style={{ width: 192, alignSelf: "flex-end", zIndex: 10 }}
-        id="hero-card-match"
-      >
-        <div className="px-4 pt-4 pb-3" style={{ background: "linear-gradient(135deg,#1e40af,#2563eb)" }}>
-          <div className="text-[7.5px] font-bold text-blue-200 uppercase tracking-widest mb-1">Job Match Score</div>
-          <div className="text-3xl font-black text-white leading-none">94<span className="text-base font-bold text-blue-300">%</span></div>
-          <div className="mt-2 h-1.5 rounded-full bg-white/20"><div className="h-full rounded-full bg-white" style={{width:"94%"}} /></div>
-        </div>
-        <div className="px-4 py-3 space-y-2">
-          <div className="text-[7px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">Breakdown</div>
-          {([["Keywords",92],["Experience",96],["Skills",91],["Education",88]] as [string,number][]).map(([label,pct])=>(
-            <div key={label}>
-              <div className="flex justify-between mb-0.5">
-                <span className="text-[7.5px] text-slate-500">{label}</span>
-                <span className="text-[7.5px] font-bold text-blue-600">{pct}%</span>
-              </div>
-              <div className="h-1.5 rounded-full bg-blue-50">
-                <div className="h-full rounded-full" style={{width:`${pct}%`,background:"linear-gradient(90deg,#2563eb,#60a5fa)"}} />
-              </div>
-            </div>
-          ))}
-          <div className="h-px bg-blue-50" />
-          <div className="flex items-center gap-1.5 rounded-xl px-2 py-1.5" style={{background:"#eff6ff"}}>
-            <Zap className="w-2.5 h-2.5 flex-shrink-0 text-blue-500" />
-            <span className="text-[7px] font-semibold text-blue-700">Strong match — Apply now</span>
-          </div>
-        </div>
+      {/* CENTER */}
+      <motion.div className="absolute" style={{ width: "clamp(150px,26vw,280px)", zIndex: 20, y: centerY }}
+        initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}
+        transition={{ delay: 0.3, type: "spring", stiffness: 70 }} id="hero-card-resume">
+        <CenterCardSVG />
       </motion.div>
+
     </div>
   );
 }
@@ -240,46 +303,38 @@ function HeroCards() {
 /* ── Hero ── */
 function Hero() {
   return (
-    <section className="app-frame px-4 sm:px-6 pt-6 pb-0">
-      {/* Rounded panel with cloud gradient */}
-      <div className="hero-gradient relative overflow-hidden" style={{ paddingBottom: 80 }}>
+    <section className="app-frame px-3 sm:px-6 pt-4 sm:pt-6 pb-0">
+      <div className="hero-gradient relative overflow-hidden pb-16 sm:pb-20">
 
         {/* Center content */}
-        <div className="relative text-center pt-10 sm:pt-16 pb-4 px-4 sm:px-6">
+        <div className="relative text-center pt-8 sm:pt-16 pb-4 px-4 sm:px-6">
           <motion.h1
-            initial={{ opacity: 0, y: 28 }}
-            animate={{ opacity: 1, y: 0 }}
+            initial={{ opacity: 0, y: 28 }} animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
-            className="font-bold text-white leading-[1.12] tracking-tight mx-auto text-4xl sm:text-5xl md:text-6xl"
+            className="font-bold text-white leading-[1.12] tracking-tight mx-auto text-3xl sm:text-5xl md:text-6xl"
             style={{ maxWidth: 660 }}
           >
             Elevate Your Career<br className="hidden sm:block" />
             Management with{" "}
-            <span className="inline-flex items-center align-middle mx-1.5 px-3 py-1 bg-blue-500/20 border border-blue-400/30 backdrop-blur-sm rounded-full -translate-y-1 shadow-[0_0_15px_rgba(59,130,246,0.3)] mt-2 sm:mt-0">
-               <FileText className="w-5 h-5 sm:w-7 sm:h-7 mr-1.5 sm:mr-2 text-blue-200" />
-               <span className="text-[#bfdbfe] text-3xl sm:text-4xl md:text-5xl">MemoryCV</span>
+            <span className="inline-flex items-center align-middle mx-1 px-2 sm:px-3 py-1 bg-blue-500/20 border border-blue-400/30 backdrop-blur-sm rounded-full shadow-[0_0_15px_rgba(59,130,246,0.3)] mt-1 sm:mt-0">
+               <FileText className="w-4 h-4 sm:w-7 sm:h-7 mr-1 sm:mr-2 text-blue-200" />
+               <span className="text-[#bfdbfe] text-2xl sm:text-4xl md:text-5xl">MemoryCV</span>
             </span>
           </motion.h1>
 
           <motion.p
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
+            initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.14, duration: 0.5 }}
-            className="mt-5 mx-auto leading-relaxed"
-            style={{ color: "rgba(219,234,254,0.9)", fontSize: "0.97rem", maxWidth: 480 }}
+            className="mt-4 mx-auto leading-relaxed text-sm sm:text-base"
+            style={{ color: "rgba(219,234,254,0.9)", maxWidth: 480 }}
           >
             Streamline your job search with our intuitive AI platform.
             Designed for professionals, our solutions simplify complex processes.
           </motion.p>
 
-          <motion.div
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.26, duration: 0.5 }}
-            className="mt-8"
-          >
+          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.26, duration: 0.5 }} className="mt-6 sm:mt-8">
             <Link to="/onboarding" id="hero-cta"
-              className="inline-flex items-center gap-2 rounded-full bg-white font-semibold text-sm px-8 py-3.5 shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all cursor-pointer"
+              className="inline-flex items-center gap-2 rounded-full bg-white font-semibold text-sm px-6 sm:px-8 py-3 sm:py-3.5 shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all cursor-pointer"
               style={{ color: "#1d4ed8" }}
             >
               Start now — It's Free
@@ -287,8 +342,8 @@ function Hero() {
           </motion.div>
         </div>
 
-        {/* Cards container — positioned to overflow the bottom edge of the panel */}
-        <div className="relative mx-auto" style={{ maxWidth: 720, height: 220, marginTop: 40 }}>
+        {/* Cards container */}
+        <div className="relative mx-auto" style={{ maxWidth: "min(720px,100%)", height: "clamp(180px,42vw,260px)", marginTop: "clamp(40px,8vw,80px)" }}>
           <HeroCards />
         </div>
       </div>
@@ -299,51 +354,59 @@ function Hero() {
 
 /* ── Stats Bento ── */
 const stats = [
-  { icon: Users,       value: 2500,  suffix: "+", label: "Partners & customers",  id: "stat-partners" },
-  { icon: TrendingUp,  value: 2259,  suffix: "+", label: "Base invest in 2024",   id: "stat-invest"   },
-  { icon: Star,        value: 49,    suffix: "/5.0", label: "Customer review",    id: "stat-rating"   },
+  { icon: Users,       value: 150,   suffix: "K+", label: "Resumes Generated",  id: "stat-partners" },
+  { icon: TrendingUp,  value: 85,    suffix: "%",  label: "Higher Interview Rate", id: "stat-invest"   },
+  { icon: Star,        value: 49,    suffix: "/5.0", label: "Average User Rating", id: "stat-rating"   },
 ];
 
 function StatsSection() {
   return (
-    <section className="app-frame px-4 sm:px-6 pb-16" style={{ paddingTop: 120 }}>
-      <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 mb-10">
+    <section className="app-frame px-4 sm:px-6 pb-16 sm:pb-24 relative" style={{ paddingTop: "clamp(80px,14vw,140px)" }}>
+      {/* Background Subtle Glows */}
+      <div className="absolute top-20 left-10 w-96 h-96 bg-blue-100/40 blur-[80px] rounded-full pointer-events-none -z-10" />
+      <div className="absolute bottom-10 right-10 w-80 h-80 bg-sky-100/40 blur-[70px] rounded-full pointer-events-none -z-10" />
+
+      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 mb-10 sm:mb-16">
         <motion.h2
           initial={{ opacity: 0, x: -20 }}
           whileInView={{ opacity: 1, x: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.55 }}
-          className="text-3xl sm:text-4xl font-bold text-slate-900 leading-tight"
+          className="text-3xl sm:text-5xl md:text-6xl font-extrabold text-slate-900 leading-[1.1] tracking-tight"
         >
           Unlock the Power of Your<br />
-          Business <span className="gradient-text">Data</span>
+          Professional <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-sky-500">Career</span>
         </motion.h2>
-        <motion.div initial={{ opacity: 0, x: 20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.55 }}>
-          <Link to="/onboarding" id="stats-free-trial" className="primary-button px-6 py-3 text-sm cursor-pointer flex-shrink-0">
-            Free Trial
+        <motion.div initial={{ opacity: 0, x: 20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.55 }} className="shrink-0">
+          <Link to="/onboarding" id="stats-free-trial" className="inline-flex items-center justify-center px-8 py-4 text-base font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-full shadow-[0_10px_20px_rgba(37,99,235,0.2)] hover:shadow-[0_15px_30px_rgba(37,99,235,0.3)] transition-all duration-300 transform hover:-translate-y-1 whitespace-nowrap">
+            Build Your CV Free
           </Link>
         </motion.div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
         {stats.map((s, i) => (
           <motion.div
             key={s.id} id={s.id}
-            initial={{ opacity: 0, y: 24 }}
+            initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ delay: i * 0.1, duration: 0.5 }}
-            whileHover={{ y: -4, boxShadow: "0 12px 32px -8px rgba(37,99,235,0.18)", transition: { duration: 0.22 } }}
-            className="stat-card cursor-pointer"
+            transition={{ delay: i * 0.15, duration: 0.6, ease: "easeOut" }}
+            whileHover={{ y: -6, boxShadow: "0 25px 50px -12px rgba(37,99,235,0.15)", transition: { duration: 0.3 } }}
+            className="relative bg-white/80 backdrop-blur-xl border border-slate-100 p-8 sm:p-10 rounded-[2rem] shadow-lg flex flex-col items-start overflow-hidden group cursor-pointer"
           >
-            <div className="stat-icon-badge">
-              <s.icon className="w-5 h-5 text-white" />
+            {/* Hover subtle gradient overlay */}
+            <div className="absolute inset-0 bg-gradient-to-br from-blue-50/0 to-blue-50/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+            
+            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-700 to-blue-500 flex items-center justify-center shadow-lg shadow-blue-500/30 mb-6 relative z-10 transform group-hover:scale-110 transition-transform duration-300">
+              <s.icon className="w-6 h-6 text-white" />
             </div>
-            <div>
-              <div className="text-xl font-bold text-slate-900">
+            
+            <div className="relative z-10">
+              <div className="text-4xl font-black text-slate-900 tracking-tight flex items-baseline">
                 <Counter to={s.value} suffix={s.suffix} />
               </div>
-              <div className="text-xs text-slate-500 mt-0.5">{s.label}</div>
+              <div className="text-sm font-semibold text-slate-500 mt-2 uppercase tracking-wider">{s.label}</div>
             </div>
           </motion.div>
         ))}
@@ -352,245 +415,268 @@ function StatsSection() {
   );
 }
 
-/* ── Workflow bento grid ── */
-const steps = [
-  { n: 1, title: "Sign Up and Customize",   body: "Create your account in minutes and tailor the platform to meet your unique career needs.", icon: Sparkles },
-  { n: 2, title: "Import Your AI Memory",   body: "Paste memory from ChatGPT, Claude, Gemini, or your narrative notes to extract a structured profile.", icon: Brain },
-  { n: 3, title: "Generate & Export",       body: "Switch templates, tune bullets, tailor to job descriptions, and export a recruiter-ready PDF.", icon: FileText },
-];
+/* ── Premium Bento Grid Sections ── */
 
-function WorkflowSection() {
+const BentoHeroCard = () => {
   return (
-    <section className="px-4 sm:px-6 pt-40 pb-24 bg-gradient-to-b from-blue-50/60 via-white to-[#f0f5ff] relative overflow-hidden">
-      <div className="absolute top-0 left-1/4 w-[800px] h-[600px] bg-blue-100/40 rounded-full blur-[100px] opacity-70 mix-blend-multiply pointer-events-none -translate-y-1/2" />
-      <div className="absolute top-1/4 right-0 w-[600px] h-[500px] bg-sky-100/40 rounded-full blur-[100px] opacity-60 mix-blend-multiply pointer-events-none" />
-      <div className="max-w-6xl mx-auto">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.55 }}
-          className="text-center mb-16"
-        >
-          <h2 className="text-4xl sm:text-5xl font-extrabold text-blue-950 tracking-tight leading-tight mb-4">
-            The Ultimate <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-blue-700">Resume Engine</span>
-          </h2>
-          <p className="text-slate-500 text-lg max-w-2xl mx-auto">
-            Everything you need to turn scattered career memories into highly-targeted, ATS-beating resumes in seconds.
-          </p>
-        </motion.div>
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      whileHover={{ y: -5, boxShadow: "0 20px 40px -10px rgba(37,99,235,0.15)" }}
+      className="w-full rounded-[2rem] overflow-hidden relative group bg-gradient-to-br from-[#e8f3ff] to-[#cce4ff] border border-white/50 shadow-xl"
+    >
+      {/* Background clouds and airplane */}
+      <div className="absolute inset-0 z-0 pointer-events-none">
+        {/* Soft bottom clouds */}
+        <div className="absolute bottom-[-10%] left-[10%] w-[400px] h-[200px] bg-white/60 blur-3xl rounded-full" />
+        <div className="absolute bottom-[-20%] right-[-10%] w-[600px] h-[300px] bg-white/80 blur-[80px] rounded-full" />
+        
+        {/* Airplane trailing line SVG */}
+        <svg className="absolute top-[20%] left-[45%] w-[150px] h-[150px] overflow-visible" fill="none">
+          <path d="M0,150 Q50,100 150,0" stroke="white" strokeWidth="2" strokeDasharray="6 6" className="opacity-60 group-hover:opacity-100 transition-opacity duration-500" />
+          <path d="M150,0 L130,5 L140,25 Z" fill="white" className="group-hover:translate-x-2 group-hover:-translate-y-2 transition-transform duration-500" />
+        </svg>
+      </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="relative z-10 p-6 sm:p-10 md:p-14 flex flex-col md:flex-row h-full items-center gap-8 md:gap-0">
+        {/* Left Content */}
+        <div className="w-full md:w-1/2 flex flex-col items-start text-left relative z-20">
+          <div className="bg-white/90 backdrop-blur-sm rounded-full px-4 py-1.5 flex items-center gap-2 mb-8 shadow-sm border border-white">
+            <Sparkles className="w-4 h-4 text-blue-500" />
+            <span className="text-sm font-semibold text-blue-700">AI-Powered</span>
+          </div>
           
-          {/* Card 1: AI Extraction (Span 2) */}
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="md:col-span-2 bg-[radial-gradient(ellipse_at_center,_#ffffff_0%,_#eff6ff_100%)] rounded-3xl p-8 md:p-10 border border-blue-200 shadow-[inset_0_0_20px_rgba(37,99,235,0.05)] hover:border-blue-300 hover:shadow-[inset_0_0_30px_rgba(37,99,235,0.1),0_8px_40px_rgba(37,99,235,0.12)] transition-all duration-700 overflow-hidden relative group"
-          >
-            <div className="absolute top-0 right-0 w-80 h-80 bg-blue-100/50 rounded-full blur-3xl -mr-20 -mt-20 opacity-0 group-hover:opacity-100 group-hover:scale-125 group-hover:rotate-12 transition-all duration-1000 ease-out" />
-            <div className="absolute bottom-0 left-0 w-64 h-64 bg-blue-100/50 rounded-full blur-3xl -ml-20 -mb-20 opacity-0 group-hover:opacity-100 group-hover:scale-110 transition-all duration-1000 delay-100 ease-out" />
+          <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold text-slate-900 leading-[1.1] mb-4 sm:mb-6 tracking-tight">
+            Build a CV that<br/>
+            <span className="text-blue-600">gets you hired.</span>
+          </h2>
+          
+          <p className="text-slate-600 text-lg md:text-xl font-medium mb-10 max-w-[28ch] leading-relaxed">
+            Create a professional CV in minutes with the power of AI.
+          </p>
+          
+          <Link to="/onboarding" className="bg-blue-600 hover:bg-blue-700 text-white rounded-2xl px-8 py-4 font-bold text-lg flex items-center gap-2 shadow-[0_8px_20px_-6px_rgba(37,99,235,0.5)] hover:shadow-[0_12px_25px_-6px_rgba(37,99,235,0.6)] hover:-translate-y-1 transition-all duration-300">
+            Build My CV <ArrowRight className="w-5 h-5" />
+          </Link>
+          
+          <div className="flex items-center gap-4 mt-8">
+            <div className="flex -space-x-3">
+              {[1,2,3,4].map((i) => (
+                <div key={i} className="w-10 h-10 rounded-full border-2 border-[#e8f3ff] bg-slate-200 overflow-hidden shadow-sm">
+                  <img src={`https://i.pravatar.cc/100?img=${i+10}`} alt="user" className="w-full h-full object-cover" />
+                </div>
+              ))}
+              <div className="w-10 h-10 rounded-full border-2 border-[#e8f3ff] bg-white flex items-center justify-center shadow-sm text-blue-600 font-bold text-lg">+</div>
+            </div>
+            <span className="text-sm font-semibold text-slate-600">Loved by 100K+ job seekers</span>
+          </div>
+        </div>
+
+        {/* Right Content - Cloudy Resume Mockups */}
+        <div className="w-full md:w-1/2 relative h-[300px] sm:h-[380px] md:h-[450px] flex justify-center items-center pointer-events-none">
+          
+          {/* Cloudy Background Glows */}
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] bg-gradient-to-tr from-blue-300/30 via-white/50 to-blue-200/30 blur-[60px] rounded-full pointer-events-none" />
+          <div className="absolute top-[10%] right-[5%] w-[200px] h-[150px] bg-white/70 blur-[40px] rounded-full pointer-events-none" />
+          <div className="absolute bottom-[5%] left-[5%] w-[250px] h-[180px] bg-[#e0f2fe]/60 blur-[50px] rounded-full pointer-events-none" />
+
+          <div className="relative w-[260px] sm:w-[320px] md:w-[340px] h-[320px] sm:h-[380px] md:h-[400px] pointer-events-none select-none flex items-center justify-center">
             
-            <div className="relative z-10 flex flex-col h-full">
-              <div className="w-12 h-12 bg-white text-blue-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 group-hover:-rotate-3 transition-transform duration-500 shadow-sm border border-blue-100">
-                <Brain className="w-6 h-6" />
-              </div>
-              <h3 className="text-2xl font-bold text-slate-900 mb-3 tracking-tight">AI Memory Extraction</h3>
-              <p className="text-slate-500 leading-relaxed max-w-md mb-8">
-                Dump your performance reviews, rough notes, or old cover letters. Our AI instantly categorizes it into a structured, queryable career database.
-              </p>
-              
-              <div className="mt-auto relative h-32 bg-white/60 backdrop-blur-md rounded-2xl border border-blue-100 overflow-hidden p-4 group-hover:border-blue-200 group-hover:bg-white/80 transition-colors duration-700 shadow-sm">
-                <div className="flex gap-4 items-center h-full">
-                  <div className="flex-1 space-y-2.5 opacity-30 group-hover:opacity-100 transition-opacity duration-500">
-                    <div className="h-1.5 w-full bg-blue-200 rounded-full" />
-                    <div className="h-1.5 w-5/6 bg-blue-200 rounded-full" />
-                    <div className="h-1.5 w-4/6 bg-blue-200 rounded-full" />
-                    <div className="h-1.5 w-full bg-blue-200 rounded-full" />
-                  </div>
-                  <ArrowRight className="w-5 h-5 text-blue-400 flex-shrink-0 group-hover:text-blue-600 group-hover:translate-x-2 transition-all duration-700" />
-                  <div className="flex-1 flex flex-wrap gap-2">
-                    <span className="px-3 py-1.5 bg-blue-50 border border-blue-200 rounded-full text-[10px] font-bold text-blue-700 shadow-sm translate-y-6 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] hover:scale-110 hover:bg-blue-100 hover:border-blue-300 cursor-default">React.js</span>
-                    <span className="px-3 py-1.5 bg-blue-50 border border-blue-200 rounded-full text-[10px] font-bold text-blue-700 shadow-sm translate-y-6 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500 delay-75 ease-[cubic-bezier(0.23,1,0.32,1)] hover:scale-110 hover:bg-blue-100 hover:border-blue-300 cursor-default">Product Lead</span>
-                    <span className="px-3 py-1.5 bg-blue-50 border border-blue-200 rounded-full text-[10px] font-bold text-blue-700 shadow-sm translate-y-6 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500 delay-150 ease-[cubic-bezier(0.23,1,0.32,1)] hover:scale-110 hover:bg-blue-100 hover:border-blue-300 cursor-default">Q3 Metrics</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </motion.div>
-
-          {/* Card 2: ATS Matching (Span 1) */}
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.1 }}
-            className="md:col-span-1 bg-[radial-gradient(ellipse_at_center,_#ffffff_0%,_#eff6ff_100%)] rounded-3xl p-8 md:p-10 border border-blue-200 shadow-[inset_0_0_20px_rgba(37,99,235,0.05)] hover:border-blue-300 hover:shadow-[inset_0_0_30px_rgba(37,99,235,0.1),0_8px_40px_rgba(37,99,235,0.12)] transition-all duration-700 overflow-hidden relative group"
-          >
-            <div className="absolute inset-0 bg-gradient-to-b from-transparent to-blue-100/30 opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
-            <div className="relative z-10 flex flex-col h-full">
-              <div className="w-12 h-12 bg-white text-blue-600 shadow-sm border border-blue-100 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 group-hover:-rotate-3 transition-transform duration-500">
-                <Target className="w-6 h-6" />
-              </div>
-              <h3 className="text-2xl font-bold text-slate-900 mb-3 tracking-tight">Role Tailoring</h3>
-              <p className="text-slate-500 leading-relaxed mb-8">
-                Auto-align your resume to hit all the right keywords and beat the ATS.
-              </p>
-              <div className="mt-auto flex items-center justify-center group-hover:-translate-y-1 transition-transform duration-700">
-                <div className="relative w-32 h-32 flex items-center justify-center">
-                  <svg className="w-full h-full transform -rotate-90 group-hover:rotate-0 transition-all duration-1000 ease-[cubic-bezier(0.23,1,0.32,1)]" viewBox="0 0 100 100">
-                    <circle cx="50" cy="50" r="40" stroke="currentColor" strokeWidth="8" fill="transparent" className="text-blue-100" />
-                    <circle cx="50" cy="50" r="40" stroke="currentColor" strokeWidth="8" fill="transparent" strokeDasharray="251.2" strokeDashoffset="251.2" className="text-blue-500 transition-all duration-1500 ease-[cubic-bezier(0.23,1,0.32,1)] group-hover:stroke-dashoffset-[10]" />
-                  </svg>
-                  <div className="absolute flex flex-col items-center">
-                    <span className="text-3xl font-black text-slate-900 group-hover:scale-110 transition-transform duration-500 delay-300">96<span className="text-sm text-blue-500">%</span></span>
-                    <span className="text-[9px] font-bold text-blue-500 uppercase tracking-widest mt-1">Match</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </motion.div>
-
-          {/* Card 3: Templates (Span 1) */}
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.2 }}
-            className="md:col-span-1 bg-[radial-gradient(ellipse_at_center,_#ffffff_0%,_#eff6ff_100%)] rounded-3xl p-8 md:p-10 border border-blue-200 shadow-[inset_0_0_20px_rgba(37,99,235,0.05)] hover:border-blue-300 hover:shadow-[inset_0_0_30px_rgba(37,99,235,0.1),0_8px_40px_rgba(37,99,235,0.12)] transition-all duration-700 overflow-hidden relative group"
-          >
-            <div className="absolute inset-0 bg-gradient-to-b from-transparent to-blue-100/30 opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
-            <div className="relative z-10 flex flex-col h-full">
-              <div className="w-12 h-12 bg-white text-blue-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500 shadow-sm border border-blue-100">
-                <Layers className="w-6 h-6" />
-              </div>
-              <h3 className="text-2xl font-bold text-slate-900 mb-3 tracking-tight">Smart Templates</h3>
-              <p className="text-slate-500 leading-relaxed mb-8">
-                Swap between premium, ATS-friendly designs without breaking formatting.
-              </p>
-              <div className="mt-auto relative h-32 flex justify-center items-end overflow-hidden">
-                {/* Template 1 (Classic) */}
-                <div className="absolute bottom-0 w-3/4 h-28 bg-white border border-blue-100 rounded-t-xl p-3 transform transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] group-hover:translate-y-full group-hover:opacity-0 group-hover:scale-95 shadow-[0_-4px_10px_rgba(0,0,0,0.02)]">
-                  <div className="w-1/2 h-2 bg-blue-200 rounded-full mb-3" />
-                  <div className="space-y-1.5">
-                    <div className="w-full h-1.5 bg-slate-100 rounded-full" />
-                    <div className="w-5/6 h-1.5 bg-slate-100 rounded-full" />
-                    <div className="w-4/6 h-1.5 bg-slate-100 rounded-full" />
-                  </div>
-                </div>
-
-                {/* Template 2 (Modern split layout) sliding in on hover */}
-                <div className="absolute bottom-0 w-3/4 h-28 bg-white border border-blue-200 rounded-t-xl p-3 transform translate-y-full opacity-0 scale-95 transition-all duration-700 delay-75 ease-[cubic-bezier(0.23,1,0.32,1)] group-hover:translate-y-0 group-hover:opacity-100 group-hover:scale-100 shadow-[0_-8px_20px_rgba(37,99,235,0.08)]">
-                  <div className="flex gap-2 h-full">
-                    <div className="w-1/3 bg-slate-50 rounded flex flex-col items-center py-2">
-                       <div className="w-4 h-4 bg-blue-200 rounded-full mb-1.5" />
-                       <div className="w-2/3 h-1 bg-slate-200 rounded-full" />
-                    </div>
-                    <div className="flex-1 space-y-1.5 mt-1">
-                      <div className="w-full h-1.5 bg-slate-100 rounded-full" />
-                      <div className="w-5/6 h-1.5 bg-slate-100 rounded-full" />
-                      <div className="w-full h-1.5 bg-slate-100 rounded-full" />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </motion.div>
-
-          {/* Card 4: Version Control (Span 2) */}
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.3 }}
-            className="md:col-span-2 bg-gradient-to-br from-blue-700 via-blue-600 to-blue-500 rounded-3xl p-8 md:p-10 border border-blue-400 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.2)] hover:shadow-[inset_0_0_0_1px_rgba(255,255,255,0.3),0_8px_40px_rgba(37,99,235,0.4)] transition-all duration-500 overflow-hidden relative group"
-          >
-            <div className="absolute top-0 right-0 w-full h-full overflow-hidden opacity-20 pointer-events-none transition-opacity duration-500 group-hover:opacity-30">
-              <svg viewBox="0 0 400 400" className="absolute -right-20 -top-20 w-[500px] h-[500px] text-white">
-                <defs>
-                  <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
-                    <path d="M 40 0 L 0 0 0 40" fill="none" stroke="currentColor" strokeWidth="1"/>
-                  </pattern>
-                </defs>
-                <rect width="100%" height="100%" fill="url(#grid)" />
-              </svg>
+            {/* Back Resume — rotated right, shifted up & scaled up */}
+            <div 
+              className="absolute top-[2%] right-[2%] w-[160px] sm:w-[200px] md:w-[220px] origin-center drop-shadow-2xl transition-transform duration-700 hover:scale-105"
+              style={{ transform: 'rotate(10deg) translateX(15px) translateY(-15px)' }}
+            >
+              <LeftCardSVG />
             </div>
 
-            <div className="relative z-10 flex flex-col md:flex-row gap-8 items-center h-full">
-              <div className="flex-1">
-                <div className="w-12 h-12 bg-white/10 text-white rounded-2xl flex items-center justify-center mb-6 backdrop-blur-sm group-hover:rotate-12 transition-transform duration-500">
-                  <Download className="w-6 h-6" />
-                </div>
-                <h3 className="text-2xl font-bold text-white mb-3 tracking-tight">One-Click Export</h3>
-                <p className="text-blue-100 leading-relaxed">
-                  Generate pixel-perfect PDFs ready for the recruiter's inbox. Manage unlimited tailored versions of your resume from a single source of truth.
-                </p>
-              </div>
-              <div className="flex-1 w-full flex flex-col gap-3">
-                {[
-                  { name: "Frontend_Engineer_Google.pdf", time: "Just now", initial: "translate-x-4", delay: "delay-0" },
-                  { name: "Fullstack_Stripe_Draft.pdf", time: "2 hrs ago", initial: "translate-x-8", delay: "delay-75" },
-                  { name: "UX_Designer_Apple.pdf", time: "Yesterday", initial: "translate-x-12", delay: "delay-150" }
-                ].map((file, i) => (
-                  <div key={i} className={`bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-3 flex items-center justify-between transform transition-all duration-500 ease-out group-hover:translate-x-0 ${file.initial} ${file.delay}`}>
-                    <div className="flex items-center gap-3">
-                      <FileText className="w-4 h-4 text-blue-200" />
-                      <div>
-                        <div className="text-xs font-semibold text-white">{file.name}</div>
-                        <div className="text-[9px] text-blue-200">{file.time}</div>
-                      </div>
-                    </div>
-                    <button className="w-7 h-7 rounded-full bg-white text-blue-600 flex items-center justify-center hover:bg-blue-50 transition-colors">
-                      <Download className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                ))}
-              </div>
+            {/* Front Resume — rotated left, shifted down & scaled up */}
+            <div 
+              className="absolute bottom-[2%] left-[2%] w-[180px] sm:w-[220px] md:w-[250px] origin-center z-10 drop-shadow-[0_25px_35px_rgba(37,99,235,0.15)] transition-transform duration-700 hover:scale-105"
+              style={{ transform: 'rotate(-8deg) translateX(-15px) translateY(10px)' }}
+            >
+              <CenterCardSVG />
             </div>
-          </motion.div>
 
+            {/* Foreground subtle cloud overlay for depth */}
+            <div className="absolute -bottom-10 -left-10 w-[200px] h-[150px] bg-white/30 blur-[30px] rounded-full z-20 pointer-events-none" />
+          </div>
+        </div>
+      </div>
+    </motion.div>
+  );
+};
+
+const BentoStandOutCard = () => {
+  return (
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      whileHover={{ y: -5, boxShadow: "0 20px 40px -10px rgba(37,99,235,0.1)" }}
+      className="w-full rounded-[2rem] bg-white border border-slate-100 shadow-xl overflow-hidden relative group p-10 flex flex-col justify-between min-h-[360px]"
+    >
+      <div className="absolute right-0 top-0 w-1/2 h-full bg-gradient-to-l from-[#f0f7ff] to-transparent pointer-events-none z-0" />
+      <div className="absolute right-[-10%] bottom-[-10%] w-[300px] h-[300px] bg-[#e0f2fe]/50 blur-3xl rounded-full pointer-events-none z-0" />
+
+      <div className="relative z-10 w-full max-w-[200px]">
+        <h3 className="text-3xl font-extrabold text-slate-900 leading-[1.1] tracking-tight mb-2">
+          Stand out.<br/>
+          <span className="text-blue-500">Get noticed.</span>
+        </h3>
+        <p className="text-slate-500 text-sm font-medium mt-4 leading-relaxed">
+          A great CV opens doors to greater opportunities.
+        </p>
+      </div>
+
+      <div className="relative z-10 flex flex-col gap-1 mt-auto pt-8">
+        <div className="flex -space-x-2">
+          {[1,2,3,4].map((i) => (
+            <div key={i} className="w-8 h-8 rounded-full border-2 border-white bg-slate-200 overflow-hidden shadow-sm">
+              <img src={`https://i.pravatar.cc/100?img=${i+20}`} alt="user" className="w-full h-full object-cover" />
+            </div>
+          ))}
+        </div>
+        <p className="text-[10px] text-slate-400 font-semibold max-w-[120px] mt-2 leading-snug">
+          Join 100K+ successful professionals
+        </p>
+      </div>
+
+      {/* Right side illustration */}
+      <div className="absolute right-[-20px] bottom-0 w-[240px] h-[280px] pointer-events-none z-10 flex items-end justify-center">
+        <motion.img 
+          src="/images/bento/3d guy transparent.png" 
+          alt="3D Character"
+          className="w-full h-full object-contain object-bottom drop-shadow-2xl transition-transform duration-500 pointer-events-none select-none"
+          draggable={false}
+          onContextMenu={(e) => e.preventDefault()}
+        />
+      </div>
+    </motion.div>
+  );
+};
+
+const BentoSecurityCard = () => {
+  return (
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ delay: 0.1 }}
+      whileHover={{ y: -5, boxShadow: "0 20px 40px -10px rgba(37,99,235,0.1)" }}
+      className="w-full rounded-[2rem] bg-white border border-slate-100 shadow-xl overflow-hidden relative group p-10 flex flex-col justify-between min-h-[360px]"
+    >
+      <div className="absolute right-0 top-0 w-2/3 h-full bg-gradient-to-l from-[#f0f7ff] to-transparent pointer-events-none z-0" />
+      
+      <div className="relative z-10 w-full max-w-[220px]">
+        <h3 className="text-3xl font-extrabold text-slate-900 leading-[1.1] tracking-tight mb-2">
+          Your data is<br/>
+          <span className="text-blue-500">100% secure.</span>
+        </h3>
+        <p className="text-slate-500 text-sm font-medium mt-4 leading-relaxed">
+          We use enterprise-grade security to protect your information.
+        </p>
+      </div>
+
+      <div className="relative z-10 mt-auto pt-8">
+        <div className="inline-flex items-center gap-2 px-4 py-2 bg-white rounded-xl shadow-sm border border-slate-100 group-hover:shadow-md transition-shadow">
+          <div className="text-blue-500"><svg width="14" height="16" viewBox="0 0 14 16" fill="currentColor"><path d="M7 0C4.79 0 3 1.79 3 4V5H2C0.9 5 0 5.9 0 7V14C0 15.1 0.9 16 2 16H12C13.1 16 14 15.1 14 14V7C14 5.9 13.1 5 12 5H11V4C11 1.79 9.21 0 7 0ZM7 2C8.1 2 9 2.9 9 4V5H5V4C5 2.9 5.9 2 7 2ZM2 7H12V14H2V7ZM7 9C6.45 9 6 9.45 6 10C6 10.38 6.22 10.7 6.53 10.88L5.94 12.63C5.83 12.96 6.07 13.29 6.42 13.29H7.58C7.93 13.29 8.17 12.96 8.06 12.63L7.47 10.88C7.78 10.7 8 10.38 8 10C8 9.45 7.55 9 7 9Z"/></svg></div>
+          <span className="text-xs font-bold text-blue-600">Privacy First. Always.</span>
         </div>
       </div>
 
-      {/* CTA band */}
-      <motion.div
-        initial={{ opacity: 0, y: 24 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.6 }}
-        className="mt-16 rounded-2xl px-8 py-14 text-center relative overflow-hidden"
-        style={{ background: "linear-gradient(145deg,#1e40af 0%,#2563eb 55%,#3b82f6 100%)" }}
-        id="closing-cta"
-      >
-        <div className="absolute top-4 right-10 w-20 h-14 rounded-xl opacity-15 border border-white/20 bg-white/10 rotate-6 pointer-events-none" />
-        <div className="absolute bottom-4 left-10 w-16 h-10 rounded-xl opacity-10 border border-white/15 bg-white/8 -rotate-3 pointer-events-none" />
-        <h2 className="text-2xl sm:text-3xl font-bold text-white mb-3">
-          Build resumes with stronger signal and less waste.
-        </h2>
-        <p className="text-blue-100/80 text-sm mb-8 max-w-[44ch] mx-auto">
-          Import memory, confirm your profile, generate for a role, and refine where it matters.
-        </p>
-        <div className="flex flex-wrap gap-3 justify-center">
-          <Link to="/onboarding" id="closing-cta-btn"
-            className="inline-flex items-center gap-2 rounded-full bg-white text-blue-700 font-bold text-sm px-7 py-3.5 shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all cursor-pointer">
-            Open the workflow <ArrowRight className="w-4 h-4" />
-          </Link>
-          <Link to="/templates" id="closing-templates-btn"
-            className="hero-outline-button px-7 py-3.5">
-            View Templates
-          </Link>
-        </div>
-      </motion.div>
+      {/* Right side illustration - Image */}
+      <div className="absolute right-[-10px] bottom-[20px] w-[220px] h-[220px] pointer-events-none z-10 flex items-center justify-center">
+        <motion.img 
+          src="/images/bento/sheild transparent.png" 
+          alt="Security Shield"
+          className="w-full h-full object-contain drop-shadow-2xl transition-transform duration-500 pointer-events-none select-none"
+          draggable={false}
+          onContextMenu={(e) => e.preventDefault()}
+          animate={{ y: [0, -8, 0] }}
+          transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+        />
+      </div>
+    </motion.div>
+  );
+};
 
-      {/* Trust row */}
-      <div className="mt-10 flex flex-wrap items-center justify-center gap-8 text-sm text-slate-400">
-        {["No credit card required","Free 14-day trial","Cancel anytime"].map((item) => (
-          <div key={item} className="flex items-center gap-2">
-            <CheckCircle className="w-4 h-4 text-blue-500" />
-            <span>{item}</span>
+const BentoCreateWinCard = () => {
+  return (
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ delay: 0.2 }}
+      className="w-full relative min-h-[300px] flex items-center justify-center"
+    >
+      <img 
+        src="/images/bento/download cv bento.webp" 
+        alt="Create and Download CV"
+        className="w-full h-auto object-contain pointer-events-none select-none"
+        draggable={false}
+        onContextMenu={(e) => e.preventDefault()}
+      />
+    </motion.div>
+  );
+};
+
+function BentoGridSection() {
+  return (
+    <section className="px-4 sm:px-6 pt-16 sm:pt-28 md:pt-40 pb-16 sm:pb-24 bg-[#f4f9ff] relative overflow-hidden">
+      <div className="absolute top-0 left-1/4 w-[800px] h-[600px] bg-blue-100/40 rounded-full blur-[100px] opacity-70 pointer-events-none -translate-y-1/2" />
+      <div className="absolute top-1/4 right-0 w-[600px] h-[500px] bg-sky-100/40 rounded-full blur-[100px] opacity-60 pointer-events-none" />
+      
+      <div className="max-w-6xl mx-auto space-y-6">
+        <BentoHeroCard />
+        
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          <BentoStandOutCard />
+          <BentoSecurityCard />
+        </div>
+        
+        <BentoCreateWinCard />
+
+        {/* CTA band */}
+        <motion.div
+          initial={{ opacity: 0, y: 24 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+          className="mt-12 sm:mt-20 rounded-[2rem] px-6 sm:px-8 py-10 sm:py-16 text-center relative overflow-hidden shadow-2xl"
+          style={{ background: "linear-gradient(145deg,#1e40af 0%,#2563eb 55%,#3b82f6 100%)" }}
+          id="closing-cta"
+        >
+          <div className="absolute top-4 right-10 w-20 h-14 rounded-xl opacity-15 border border-white/20 bg-white/10 rotate-6 pointer-events-none" />
+          <div className="absolute bottom-4 left-10 w-16 h-10 rounded-xl opacity-10 border border-white/15 bg-white/8 -rotate-3 pointer-events-none" />
+          <h2 className="text-2xl sm:text-4xl font-extrabold text-white mb-4 tracking-tight">
+            Build resumes with stronger signal and less waste.
+          </h2>
+          <p className="text-blue-100/90 text-base md:text-lg mb-10 max-w-[50ch] mx-auto font-medium">
+            Import memory, confirm your profile, generate for a role, and refine where it matters.
+          </p>
+          <div className="flex flex-wrap gap-4 justify-center">
+            <Link to="/onboarding" id="closing-cta-btn"
+              className="inline-flex items-center gap-2 rounded-2xl bg-white text-blue-700 font-bold text-lg px-8 py-4 shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all cursor-pointer">
+              Open the workflow <ArrowRight className="w-5 h-5" />
+            </Link>
+            <Link to="/templates" id="closing-templates-btn"
+              className="hero-outline-button px-8 py-4 rounded-2xl font-bold text-lg border-2 border-blue-300 text-white hover:bg-blue-600 hover:border-blue-200 transition-all">
+              View Templates
+            </Link>
           </div>
-        ))}
+        </motion.div>
+
+        {/* Trust row */}
+        <div className="mt-12 flex flex-wrap items-center justify-center gap-10 text-sm font-semibold text-slate-500">
+          {["No credit card required","Free 14-day trial","Cancel anytime"].map((item) => (
+            <div key={item} className="flex items-center gap-2">
+              <CheckCircle className="w-5 h-5 text-blue-500" />
+              <span>{item}</span>
+            </div>
+          ))}
+        </div>
       </div>
     </section>
   );
@@ -603,7 +689,7 @@ function Landing() {
       <main>
         <Hero />
         <StatsSection />
-        <WorkflowSection />
+        <BentoGridSection />
       </main>
     </div>
   );

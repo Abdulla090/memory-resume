@@ -81,7 +81,7 @@ function getResponse() {
 }
 var HEADERS = { TSS_SHELL: "X-TSS_SHELL" };
 async function getStartManifest(matchedRoutes) {
-  const { tsrStartManifest } = await import("../_tanstack-start-manifest_v-BnjTu6FG.mjs");
+  const { tsrStartManifest } = await import("../_tanstack-start-manifest_v-DMA0Wo83.mjs");
   const startManifest = tsrStartManifest();
   const rootRoute = startManifest.routes[rootRouteId] = startManifest.routes[rootRouteId] || {};
   rootRoute.assets = rootRoute.assets || [];
@@ -108,43 +108,43 @@ async function getStartManifest(matchedRoutes) {
 const manifest = {
   "dbb32cc290c3284385b65fed8f41aeaed3fc4879a571067f87e6359594909413": {
     functionName: "parseMemory_createServerFn_handler",
-    importer: () => import("./ai.functions-BW3j-Xax.mjs")
+    importer: () => import("./ai.functions-LbwmNmmH.mjs")
   },
   "3a1982be35adca2338b054bcd959f47c33abe8f4400d4ae0fdb6ebd7d5f96019": {
     functionName: "getFollowUpQuestions_createServerFn_handler",
-    importer: () => import("./ai.functions-BW3j-Xax.mjs")
+    importer: () => import("./ai.functions-LbwmNmmH.mjs")
   },
   "ab8d9e1d698d4300df9f0bf7927e37f0f327ce394c206fc5ca59eb833e126efa": {
     functionName: "patchProfileWithAnswers_createServerFn_handler",
-    importer: () => import("./ai.functions-BW3j-Xax.mjs")
+    importer: () => import("./ai.functions-LbwmNmmH.mjs")
   },
   "f795326b699c1d220517649fee5a4949a36221cc9ae67737cdf5167f7fd3864b": {
     functionName: "generateResume_createServerFn_handler",
-    importer: () => import("./ai.functions-BW3j-Xax.mjs")
+    importer: () => import("./ai.functions-LbwmNmmH.mjs")
   },
   "83a99bd00f312255f1fa4387e6d2db8731d02727defa44cfeeb9059d9edb73ec": {
     functionName: "chatEditResume_createServerFn_handler",
-    importer: () => import("./ai.functions-BW3j-Xax.mjs")
+    importer: () => import("./ai.functions-LbwmNmmH.mjs")
   },
   "7e2bff48ee3e2c36279db8965a21df5962a27efe76541f787ad6c5118d6b41b6": {
     functionName: "suggestFollowUpQuestions_createServerFn_handler",
-    importer: () => import("./ai.functions-BW3j-Xax.mjs")
+    importer: () => import("./ai.functions-LbwmNmmH.mjs")
   },
   "d7b1bbd3298f1a808aebef6ff6150ef93c543a4fb232b6bea173f4b714366398": {
     functionName: "applyFollowUpAnswers_createServerFn_handler",
-    importer: () => import("./ai.functions-BW3j-Xax.mjs")
+    importer: () => import("./ai.functions-LbwmNmmH.mjs")
   },
   "780bac92f4bd76d017925d809cd8e1798400c2f387c70bb5fdbbea8f4645e906": {
     functionName: "improveBullet_createServerFn_handler",
-    importer: () => import("./ai.functions-BW3j-Xax.mjs")
+    importer: () => import("./ai.functions-LbwmNmmH.mjs")
   },
   "227ee91be8b92a0fb0f252de125c3605d7d7e16f11da75e09df0b3a034a4b999": {
     functionName: "suggestCareerPaths_createServerFn_handler",
-    importer: () => import("./ai.functions-BW3j-Xax.mjs")
+    importer: () => import("./ai.functions-LbwmNmmH.mjs")
   },
   "1162af18a42f876cf63c90b0d0b59d4071609b74c49e713518ce4c7bbb54c6f1": {
     functionName: "tailorToJob_createServerFn_handler",
-    importer: () => import("./ai.functions-BW3j-Xax.mjs")
+    importer: () => import("./ai.functions-LbwmNmmH.mjs")
   }
 };
 async function getServerFnById(id, access) {
@@ -899,7 +899,7 @@ var baseManifestPromise;
 var cachedFinalManifestPromise;
 async function loadEntries() {
   const [routerEntry, startEntry, pluginAdapters] = await Promise.all([
-    import("./router-BTQpAUON.mjs").then((n) => n.r),
+    import("./router-CgSB-9vC.mjs").then((n) => n.r),
     import("./start-HYkvq4Ni.mjs"),
     import("../__23tanstack-start-plugin-adapters-Cwee5PKy.mjs")
   ]);
