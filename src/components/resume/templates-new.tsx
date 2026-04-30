@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { Phone, Mail, Globe, MapPin } from "lucide-react";
 import type { ResumeData } from "@/lib/types";
 import { optimizeResumeForOnePage } from "@/lib/resume-utils";
 
@@ -113,7 +114,7 @@ function ExperienceList({ data, marker = "dot" }: { data: ResumeData; marker?: "
           {item.description && <p className="mt-2 text-[11px] leading-5 text-slate-600">{item.description}</p>}
           <ul className="mt-2 space-y-1.5">
             {item.achievements.map((achievement, achievementIndex) => (
-              <li key={achievementIndex} className="grid grid-cols-[14px_1fr] gap-2 text-[11px] leading-5 text-slate-700 rtl:grid-cols-[1fr_14px]">
+              <li key={achievementIndex} className="grid grid-cols-[14px_1fr] gap-2 text-[11px] leading-5 text-slate-700 ">
                 {marker === "index" ? (
                   <span className="text-[9px] font-black text-slate-400">{String(achievementIndex + 1).padStart(2, "0")}</span>
                 ) : (
@@ -136,7 +137,7 @@ export function NewSleekTemplate({ data }: { data: ResumeData }) {
 
   return (
     <div dir={rtl ? "rtl" : "ltr"} className="bg-white p-10 font-sans text-slate-950" style={{ minHeight: "1122px", width: "100%" }}>
-      <header className="grid grid-cols-[1fr_auto] items-start gap-8 border-b border-slate-200 pb-8 rtl:grid-cols-[auto_1fr]">
+      <header className="grid grid-cols-[1fr_auto] items-start gap-8 border-b border-slate-200 pb-8 ">
         <div>
           <div className="mb-5 h-1.5 w-24 rounded-full bg-slate-950" />
           <h1 className="max-w-[12ch] text-5xl font-black leading-[0.94] tracking-tight rtl:tracking-normal text-slate-950">{c.name}</h1>
@@ -148,7 +149,7 @@ export function NewSleekTemplate({ data }: { data: ResumeData }) {
         </div>
       </header>
 
-      <div className="grid grid-cols-[1fr_260px] gap-10 pt-8 rtl:grid-cols-[260px_1fr]">
+      <div className="grid grid-cols-[1fr_260px] gap-10 pt-8 ">
         <main className="space-y-7">
           <Section title={l.profile}>
             <p className="text-[13px] leading-7 text-slate-700">{c.summary}</p>
@@ -218,8 +219,8 @@ export function NewProfessionalTemplate({ data }: { data: ResumeData }) {
 
   return (
     <div dir={rtl ? "rtl" : "ltr"} className="bg-[#fbfcfd] p-8 font-sans text-slate-950" style={{ minHeight: "1122px", width: "100%" }}>
-      <div className="grid min-h-[1058px] grid-cols-[230px_1fr] overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-[0_20px_70px_-45px_rgba(15,23,42,0.55)] rtl:grid-cols-[1fr_230px]">
-        <aside className="bg-slate-950 p-7 text-white rtl:col-start-2 rtl:row-start-1">
+      <div className="grid min-h-[1058px] grid-cols-[230px_1fr] overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-[0_20px_70px_-45px_rgba(15,23,42,0.55)] ">
+        <aside className="bg-slate-950 p-7 text-white ">
           <PhotoBlock data={c} shape="circle" />
           <h1 className="mt-7 text-3xl font-black leading-[1] tracking-tight rtl:tracking-normal">{c.name}</h1>
           <p className="mt-3 text-[11px] font-black uppercase leading-5 tracking-[0.2em] rtl:tracking-normal text-cyan-200">{c.title}</p>
@@ -241,7 +242,7 @@ export function NewProfessionalTemplate({ data }: { data: ResumeData }) {
           )}
         </aside>
 
-        <main className="space-y-7 p-9 rtl:col-start-1 rtl:row-start-1">
+        <main className="space-y-7 p-9 ">
           <section className="rounded-3xl border border-slate-200 bg-slate-50 p-6">
             <h2 className="mb-3 text-[10px] font-black uppercase tracking-[0.22em] rtl:tracking-normal text-cyan-700">{l.profile}</h2>
             <p className="text-[13px] leading-7 text-slate-700">{c.summary}</p>
@@ -290,7 +291,7 @@ export function NewAcademicTemplate({ data }: { data: ResumeData }) {
 
   return (
     <div dir={rtl ? "rtl" : "ltr"} className="bg-white p-11 font-serif text-slate-950" style={{ minHeight: "1122px", width: "100%" }}>
-      <header className="grid grid-cols-[120px_1fr] gap-8 border-b-2 border-slate-950 pb-7 rtl:grid-cols-[1fr_120px]">
+      <header className="grid grid-cols-[120px_1fr] gap-8 border-b-2 border-slate-950 pb-7 ">
         <PhotoBlock data={c} shape="arch" />
         <div>
           <p className="text-[11px] font-bold uppercase tracking-[0.3em] rtl:tracking-normal text-slate-500">{l.selected} Curriculum Vitae</p>
@@ -302,7 +303,7 @@ export function NewAcademicTemplate({ data }: { data: ResumeData }) {
         </div>
       </header>
 
-      <div className="grid grid-cols-[1fr_235px] gap-10 pt-7 rtl:grid-cols-[235px_1fr]">
+      <div className="grid grid-cols-[1fr_235px] gap-10 pt-7 ">
         <main className="space-y-7">
           <Section title={l.profile} accent="border-slate-950 text-slate-950">
             <p className="text-[13px] leading-7 text-slate-700">{c.summary}</p>
@@ -379,8 +380,8 @@ export function RefTorresTemplate({ data }: { data: ResumeData }) {
       <div className="h-[168px] bg-[#315b74]">
         <div className="h-full w-full opacity-20" style={{ backgroundImage: "linear-gradient(135deg, transparent 0 46%, rgba(255,255,255,.35) 46% 47%, transparent 47% 100%)", backgroundSize: "28px 28px" }} />
       </div>
-      <div className="grid grid-cols-[308px_1fr] rtl:grid-cols-[1fr_308px]">
-        <aside className="relative min-h-[954px] bg-[#f3f3f3] px-12 pb-10 pt-32 rtl:col-start-2 rtl:row-start-1">
+      <div className="grid grid-cols-[308px_1fr] ">
+        <aside className="relative min-h-[954px] bg-[#f3f3f3] px-12 pb-10 pt-32 ">
           <div className="absolute -top-[105px] left-1/2 h-[220px] w-[220px] -translate-x-1/2 overflow-hidden rounded-full border-[5px] border-[#d8e2e9] bg-slate-200">
             {c.photoUrl ? <img src={c.photoUrl} alt={c.name} className="h-full w-full object-cover" /> : <div className="flex h-full w-full items-center justify-center text-5xl font-black text-slate-500">{initials(c.name)}</div>}
           </div>
@@ -416,7 +417,7 @@ export function RefTorresTemplate({ data }: { data: ResumeData }) {
           )}
         </aside>
 
-        <main className="px-11 pb-10 pt-7 text-neutral-800 rtl:col-start-1 rtl:row-start-1">
+        <main className="px-11 pb-10 pt-7 text-neutral-800 ">
           <Section title={l.profile} accent="border-[#b8c5ce] text-[#1d3f59]">
             <p className="text-[12px] leading-5">{c.summary}</p>
           </Section>
@@ -488,8 +489,8 @@ export function RefSilvaTemplate({ data }: { data: ResumeData }) {
         </div>
       </header>
 
-      <div className="grid grid-cols-[230px_1fr] rtl:grid-cols-[1fr_230px]">
-        <aside className="min-h-[932px] bg-[#fff0e3] px-8 py-9 rtl:col-start-2 rtl:row-start-1">
+      <div className="grid grid-cols-[230px_1fr] ">
+        <aside className="min-h-[932px] bg-[#fff0e3] px-8 py-9 ">
           <Section title={l.contact} accent="border-transparent text-[#1f1b18]">
             <div className="space-y-4 text-[12px] leading-5">
               {[c.phone, c.email, c.location].filter(Boolean).map((item) => <p key={item}>{item}</p>)}
@@ -519,7 +520,7 @@ export function RefSilvaTemplate({ data }: { data: ResumeData }) {
           )}
         </aside>
 
-        <main className="px-8 py-9 rtl:col-start-1 rtl:row-start-1">
+        <main className="px-8 py-9 ">
           <section>
             <h2 className="mb-5 text-[23px] font-normal">{rtl ? "پوختە" : "Summary"}</h2>
             <ul className="list-disc space-y-1.5 pl-5 text-[12px] leading-5 rtl:pl-0 rtl:pr-5">
@@ -569,7 +570,7 @@ export function RefSchumacherTemplate({ data }: { data: ResumeData }) {
 
   return (
     <div dir={rtl ? "rtl" : "ltr"} className="border-[4px] border-[#7c3cff] bg-white px-[80px] py-[84px] font-sans text-[#161616]" style={{ minHeight: "1122px", width: "100%" }}>
-      <header className="grid grid-cols-[230px_1fr_1fr] gap-14 rtl:grid-cols-[1fr_1fr_230px]">
+      <header className="grid grid-cols-[230px_1fr_1fr] gap-14 ">
         <h1 className="text-[42px] font-black leading-[0.86] tracking-tight rtl:tracking-normal">{c.name.split(/\s+/).slice(0, 1).join(" ")}<br />{c.name.split(/\s+/).slice(1).join(" ") || c.name}</h1>
         {contact.slice(0, 2).map((item) => (
           <div key={item} className="pt-7 text-[13px] font-bold leading-4">
@@ -579,8 +580,8 @@ export function RefSchumacherTemplate({ data }: { data: ResumeData }) {
         ))}
       </header>
 
-      <div className="mt-12 grid grid-cols-[230px_1fr] gap-14 rtl:grid-cols-[1fr_230px]">
-        <aside className="space-y-9 rtl:col-start-2 rtl:row-start-1">
+      <div className="mt-12 grid grid-cols-[230px_1fr] gap-14 ">
+        <aside className="space-y-9 ">
           <section>
             <h2 className="mb-4 text-[22px] font-black leading-none">{l.profile}</h2>
             <p className="text-[12px] font-semibold leading-[1.15]">{c.summary}</p>
@@ -609,7 +610,7 @@ export function RefSchumacherTemplate({ data }: { data: ResumeData }) {
           )}
         </aside>
 
-        <main className="rtl:col-start-1 rtl:row-start-1">
+        <main className="">
           {c.skills.length > 0 && (
             <section>
               <h2 className="mb-5 text-[22px] font-black leading-none">{rtl ? "لێهاتووییە سەرەکییەکان" : "Core Skills"}</h2>
@@ -677,8 +678,8 @@ export function RefPalmerstonTemplate({ data }: { data: ResumeData }) {
         </div>
       </header>
 
-      <div className="grid grid-cols-[285px_1fr] rtl:grid-cols-[1fr_285px]">
-        <aside className="min-h-[796px] bg-[#303b4e] px-12 py-12 text-white rtl:col-start-2 rtl:row-start-1">
+      <div className="grid grid-cols-[285px_1fr] ">
+        <aside className="min-h-[796px] bg-[#303b4e] px-12 py-12 text-white ">
           {c.education.length > 0 && (
             <section>
               <h2 className="mb-4 border-b border-white/50 pb-2 text-[22px] font-black tracking-[0.12em] rtl:tracking-normal">{l.education}</h2>
@@ -724,7 +725,7 @@ export function RefPalmerstonTemplate({ data }: { data: ResumeData }) {
           </section>
         </aside>
 
-        <main className="px-10 py-12 rtl:col-start-1 rtl:row-start-1">
+        <main className="px-10 py-12 ">
           <Section title={rtl ? "دەربارەی من" : "About me"} accent="border-[#9aa3ad] text-[#1f3148]">
             <p className="text-[12px] leading-5">{c.summary}</p>
           </Section>
@@ -790,8 +791,8 @@ export function RefSanchezTemplate({ data }: { data: ResumeData }) {
         </div>
       </header>
 
-      <div className="grid grid-cols-[245px_1fr] rtl:grid-cols-[1fr_245px]">
-        <aside className="min-h-[937px] bg-[#e6e6e6] px-6 pb-9 pt-[120px] rtl:col-start-2 rtl:row-start-1">
+      <div className="grid grid-cols-[245px_1fr] ">
+        <aside className="min-h-[937px] bg-[#e6e6e6] px-6 pb-9 pt-[120px] ">
           <section>
             <h2 className="mb-4 border-b-2 border-[#8c939a] pb-2 text-[18px] font-black uppercase tracking-[0.15em] rtl:tracking-normal">{l.contact}</h2>
             <div className="space-y-3 text-[12px] leading-5">
@@ -833,7 +834,7 @@ export function RefSanchezTemplate({ data }: { data: ResumeData }) {
           )}
         </aside>
 
-        <main className="space-y-9 px-11 py-12 rtl:col-start-1 rtl:row-start-1">
+        <main className="space-y-9 px-11 py-12 ">
           <TimelineSection title={l.profile} icon="i">
             <p className="text-[12px] leading-5">{c.summary}</p>
           </TimelineSection>
@@ -877,3 +878,175 @@ export function RefSanchezTemplate({ data }: { data: ResumeData }) {
     </div>
   );
 }
+
+export function MercerTemplate({ data }: { data: ResumeData }) {
+  const c = optimizeResumeForOnePage(data);
+  const rtl = isRTL(c);
+  const l = labels(rtl);
+
+  const SectionHeader = ({ title }: { title: string }) => (
+    <div className="bg-[#305178] text-white px-6 py-2 rounded-full inline-block mb-4 text-lg font-black min-w-[200px]">
+      {title}
+    </div>
+  );
+
+  return (
+    <div dir={rtl ? "rtl" : "ltr"} className="bg-white font-sans text-slate-900" style={{ minHeight: "1122px", width: "100%", position: "relative", overflow: "hidden" }}>
+      <div className="grid grid-cols-[320px_1fr] min-h-[1122px] ">
+        {/* Sidebar */}
+        <aside className="bg-[#305178] p-10 pt-64 text-white flex flex-col gap-10 relative z-0">
+          {/* Education */}
+          {c.education.length > 0 && (
+            <section>
+              <h2 className="text-xl font-bold border-b border-white pb-2 mb-6 tracking-wide">{l.education}</h2>
+              <div className="space-y-6">
+                {c.education.map((edu, i) => (
+                  <div key={i}>
+                    <div className="font-bold text-[14px] leading-tight">{edu.institution}</div>
+                    <div className="text-[12px] font-bold mt-1">{edu.year}</div>
+                    <div className="text-[12px] mt-1 leading-relaxed opacity-90">{edu.degree}</div>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+
+          {/* Skills */}
+          {c.skills.length > 0 && (
+            <section>
+              <h2 className="text-xl font-bold border-b border-white pb-2 mb-6 tracking-wide">{l.skills}</h2>
+              <div className="space-y-4">
+                {c.skills.slice(0, 8).map((skill, i) => (
+                  <div key={i} className="flex justify-between items-center gap-4">
+                    <div className="text-[10px] font-black uppercase w-24 truncate">
+                      {skill}
+                    </div>
+                    <div className="flex-1 h-3 bg-white/20">
+                      <div 
+                        className="h-full bg-slate-200" 
+                        style={{ width: skillLevel(c, skill, i) }}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+
+          {/* Contact */}
+          <section>
+            <h2 className="text-xl font-bold border-b border-white pb-2 mb-6 tracking-wide">{l.contact}</h2>
+            <div className="space-y-4 text-[12px] font-bold">
+              {c.phone && (
+                <div className="flex items-center gap-4">
+                  <div className="w-5 h-5 rounded-full bg-white text-[#305178] flex items-center justify-center shrink-0">
+                    <Phone size={10} fill="currentColor" />
+                  </div>
+                  <span>{c.phone}</span>
+                </div>
+              )}
+              {c.email && (
+                <div className="flex items-center gap-4">
+                  <div className="w-5 h-5 rounded-full bg-white text-[#305178] flex items-center justify-center shrink-0">
+                    <Mail size={10} fill="currentColor" />
+                  </div>
+                  <span className="truncate">{c.email}</span>
+                </div>
+              )}
+              <div className="flex items-center gap-4">
+                <div className="w-5 h-5 rounded-full bg-white text-[#305178] flex items-center justify-center shrink-0">
+                  <Globe size={10} />
+                </div>
+                <span>www.reallygreatsite.com</span>
+              </div>
+              {c.location && (
+                <div className="flex items-center gap-4">
+                  <div className="w-5 h-5 rounded-full bg-white text-[#305178] flex items-center justify-center shrink-0">
+                    <MapPin size={10} fill="currentColor" />
+                  </div>
+                  <span>{c.location}</span>
+                </div>
+              )}
+            </div>
+          </section>
+        </aside>
+
+        {/* Main Content */}
+        <main className="p-10 pt-16 flex flex-col gap-10 relative z-10">
+           {/* Profile Photo */}
+           <div 
+            className="absolute -left-[180px] top-10 w-64 h-64 rounded-full border-[12px] border-white overflow-hidden bg-slate-200 shadow-lg rtl:left-auto rtl:-right-[180px]"
+           >
+              {c.photoUrl ? (
+                <img src={c.photoUrl} alt={c.name} className="w-full h-full object-cover" />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-slate-100 to-slate-200 text-6xl font-black text-slate-400">
+                  {initials(c.name)}
+                </div>
+              )}
+           </div>
+
+           {/* Header Area */}
+           <div className="ml-20 pt-4 rtl:ml-0 rtl:mr-20">
+              <h1 className="text-6xl font-black text-[#305178] leading-[0.85] tracking-tighter uppercase break-words w-min">
+                {c.name.split(/\s+/).map((word, idx) => (
+                  <div key={idx}>{word}</div>
+                ))}
+              </h1>
+              <p className="text-[20px] font-black text-slate-950 mt-4 tracking-widest uppercase">{c.title}</p>
+           </div>
+
+           <div className="mt-4">
+             {/* About Me */}
+             <section className="mb-10">
+                <SectionHeader title={rtl ? "دەربارەی من" : "About Me"} />
+                <p className="text-[13px] leading-relaxed text-slate-800 font-medium px-1">{c.summary}</p>
+             </section>
+
+             {/* Experience */}
+             {c.experience.length > 0 && (
+               <section className="mb-10">
+                  <SectionHeader title={rtl ? "ئەزموونی کار" : "Experience Work"} />
+                  <div className="space-y-6 px-1">
+                    {c.experience.map((exp, i) => (
+                      <div key={i} className="relative">
+                         <div className="flex items-center gap-3 mb-1">
+                            <div className="w-4 h-4 rounded-full bg-[#305178]" />
+                            <h3 className="font-light tracking-wide uppercase text-[16px] text-slate-700">{exp.title}</h3>
+                         </div>
+                         <div className="font-black text-[13px] text-slate-900 ml-7 uppercase tracking-wider mb-2">
+                           {exp.duration} - {exp.company}
+                         </div>
+                         <p className="text-[12px] text-slate-700 ml-7 leading-relaxed font-medium">
+                           {exp.description}
+                           {exp.achievements.length > 0 && " " + exp.achievements.join(". ")}
+                         </p>
+                      </div>
+                    ))}
+                  </div>
+               </section>
+             )}
+
+             {/* Reference */}
+             <section>
+                <SectionHeader title={rtl ? "سەرچاوە" : "Reference"} />
+                <div className="grid grid-cols-2 gap-10 px-1 mt-2">
+                   <div>
+                      <div className="font-bold text-[13px] text-slate-900">Juliana Silva</div>
+                      <div className="text-[12px] text-slate-800 font-bold mt-0.5">Rimberio / CTO</div>
+                      <div className="text-[12px] text-slate-600 mt-0.5 font-bold">+123-456-7890</div>
+                   </div>
+                   <div>
+                      <div className="font-bold text-[13px] text-slate-900">Donna Stroupe</div>
+                      <div className="text-[12px] text-slate-800 font-bold mt-0.5">Borcelle / CEO</div>
+                      <div className="text-[12px] text-slate-600 mt-0.5 font-bold">+123-456-7890</div>
+                   </div>
+                </div>
+             </section>
+           </div>
+        </main>
+      </div>
+    </div>
+  );
+}
+

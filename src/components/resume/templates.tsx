@@ -282,6 +282,7 @@ import {
   RefSchumacherTemplate,
   RefSilvaTemplate,
   RefTorresTemplate,
+  MercerTemplate,
 } from "./templates-new";
 
 export function ResumePreview({
@@ -315,6 +316,7 @@ export function ResumePreview({
     case "ref-schumacher": preview = <RefSchumacherTemplate data={data} />; break;
     case "ref-palmerston": preview = <RefPalmerstonTemplate data={data} />; break;
     case "ref-sanchez": preview = <RefSanchezTemplate data={data} />; break;
+    case "mercer": preview = <MercerTemplate data={data} />; break;
     case "minimal":
     default: preview = <MinimalTemplate data={data} />;
   }

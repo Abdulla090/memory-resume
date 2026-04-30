@@ -5,6 +5,7 @@ import type { Profile, SavedResume, TemplateId } from "./types";
 interface AppState {
   profile: Profile | null;
   resumes: SavedResume[];
+  preferences: { defaultTemplate: TemplateId };
   language: "en" | "ku";
   apiKey?: string;
   setProfile: (profile: Profile | null) => void;

@@ -1,9 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { animate, motion, useScroll, useTransform } from "framer-motion";
+import { animate, motion, useMotionValue, useScroll, useSpring, useTransform, AnimatePresence } from "framer-motion";
 import {
   ArrowLeft,
   ArrowRight,
   CheckCircle,
+  ChevronDown,
   Download,
   FileText,
   Globe,
@@ -13,8 +14,10 @@ import {
   Star,
   TrendingUp,
   Users,
+  ArrowUpRight,
 } from "lucide-react";
-import { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
+import { HeroV2 } from "@/components/HeroV2";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -30,9 +33,9 @@ export const Route = createFileRoute("/")({
   component: Landing,
 });
 
-type Language = "en" | "ku";
+export type Language = "en" | "ku";
 
-const copy = {
+export const copy = {
   en: {
     dir: "ltr",
     lang: "en",
@@ -83,6 +86,25 @@ const copy = {
     ctaPrimary: "Open the workflow",
     ctaSecondary: "View templates",
     trust: ["No credit card required", "Free start", "Edit anytime"],
+    faqTitle: "Frequently Asked Questions",
+    faqItems: [
+      {
+        q: "How does the AI resume builder work?",
+        a: "MemoryCV asks you targeted questions about your career, then uses advanced AI to instantly organize and write a clean, professional resume tailored to your target role."
+      },
+      {
+        q: "Will my resume be ATS-friendly?",
+        a: "Yes. All our templates are designed to be easily read by Applicant Tracking Systems (ATS), ensuring your resume passes automated screenings."
+      },
+      {
+        q: "Can I export my resume to PDF?",
+        a: "Absolutely. Once you are happy with your resume, you can download it as a high-quality PDF ready to be attached to your job applications."
+      },
+      {
+        q: "Do you offer cover letter generation?",
+        a: "Currently, our primary focus is generating world-class resumes. However, cover letter generation based on your resume profile is a planned feature!"
+      }
+    ],
     characterAlt: "Career character illustration",
     shieldAlt: "Data protection shield",
   },
@@ -136,6 +158,25 @@ const copy = {
     ctaPrimary: "کردنەوەی پرۆسە",
     ctaSecondary: "بینینی قاڵبەکان",
     trust: ["پێویست بە کارتی بانکی ناکات", "دەستپێکردنی خۆڕایی", "هەر کات دەتوانیت بگۆڕیت"],
+    faqTitle: "پرسیارە باوەکان",
+    faqItems: [
+      {
+        q: "دروستکەری سیڤی بە زیرەکی دەستکرد چۆن کار دەکات؟",
+        a: "مێمۆری سیڤی پرسیاری ورد لەسەر ئەزموونەکانت دەکات، پاشان زیرەکی دەستکرد بەکاردێنێت بۆ نووسین و ڕێکخستنی سیڤییەکی پیشەیی کە بۆ ڕۆڵی مەبەستت گونجاو بێت."
+      },
+      {
+        q: "ئایا سیڤییەکەم بۆ سیستەمی ATS گونجاوە؟",
+        a: "بەڵێ. سەرجەم قاڵبەکانمان بە شێوەیەکە کە بە ئاسانی لەلایەن سیستەمەکانی بەدواداچوونی داواکاران (ATS) دەخوێندرێنەوە، کە دڵنیایی دەدات لە دەرچوونی سیڤییەکەت لە پشکنینە ئۆتۆماتیکییەکان."
+      },
+      {
+        q: "دەتوانم سیڤییەکەم بە فۆرماتی PDF دابگرم؟",
+        a: "بێگومان. کاتێک لە سیڤییەکەت ڕازی بوویت، دەتوانیت بە کوالێتی بەرز وەکو PDF دایبگریت و ئامادەیە بۆ ناردن لەگەڵ داواکارییەکانت."
+      },
+      {
+        q: "ئایا خزمەتگوزاری نووسینی نامەی پێشەکی (Cover Letter)تان هەیە؟",
+        a: "لە ئێستادا تەرکیزمان لەسەر دروستکردنی سیڤییەکی پێشکەوتووە، بەڵام خزمەتگوزاری دروستکردنی نامەی پێشەکی لەسەر بنەمای سیڤییەکەت یەکێکە لەو تایبەتمەندییانەی کە لە پلاندایە."
+      }
+    ],
     characterAlt: "وێنەی کەسایەتی بۆ کار",
     shieldAlt: "نیشانی پاراستنی داتا",
   },
@@ -163,59 +204,130 @@ function Counter({ to, suffix = "" }: { to: number; suffix?: string }) {
   );
 }
 
-function Header({ language, onToggleLanguage }: { language: Language; onToggleLanguage: () => void }) {
+export function Header({ language, onToggleLanguage }: { language: Language; onToggleLanguage: () => void }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const t = copy[language];
 
+  // Raw scroll progress 0→1 (clamped to first 120px)
+  const rawScroll = useMotionValue(0);
+
+  useEffect(() => {
+    const onScroll = () => rawScroll.set(Math.min(window.scrollY / 120, 1));
+    window.addEventListener("scroll", onScroll, { passive: true });
+    onScroll();
+    return () => window.removeEventListener("scroll", onScroll);
+  }, [rawScroll]);
+
+  // Spring-smooth version of the scroll progress
+  const progress = useSpring(rawScroll, { stiffness: 160, damping: 28, mass: 0.6 });
+
+  // Interpolated style values — morph from full-width bar → centered pill
+  const maxW         = useTransform(progress, [0, 1], ["1280px", "780px"]);
+  const marginTop    = useTransform(progress, [0, 1], ["0px",    "12px"]);
+  const paddingX     = useTransform(progress, [0, 1], ["24px",   "20px"]);
+  const height       = useTransform(progress, [0, 1], ["64px",   "52px"]);
+  const borderRadius = useTransform(progress, [0, 1], ["0px",    "999px"]);
+  const bgOpacity    = useTransform(progress, [0, 1], [0,        0.85]);
+  const shadowOpacity= useTransform(progress, [0, 1], [0,        1]);
+  const borderOpacity= useTransform(progress, [0, 1], [0,        1]);
+  const gap          = useTransform(progress, [0, 1], ["0px",    "8px"]);
+
+  // Nav link sizes
+  const navPx        = useTransform(progress, [0, 1], ["16px",   "12px"]);
+  const navPy        = useTransform(progress, [0, 1], ["8px",    "6px"]);
+  const navFontSize  = useTransform(progress, [0, 1], ["14px",   "13px"]);
+
+  // CTA button
+  const ctaPx        = useTransform(progress, [0, 1], ["20px",   "14px"]);
+  const ctaPy        = useTransform(progress, [0, 1], ["10px",   "7px"]);
+  const ctaFontSize  = useTransform(progress, [0, 1], ["14px",   "12px"]);
+
   return (
-    <header className="saas-nav" dir="ltr">
-      <div className="app-frame px-4 sm:px-6">
-        <div className="flex h-16 items-center justify-between">
-          <Link to="/" className="flex items-center gap-2 cursor-pointer" id="nav-logo">
+    <>
+      <header className="fixed left-0 right-0 top-0 z-50 pointer-events-none" dir="ltr">
+        {/* Pill container */}
+        <motion.div
+          className="relative mx-auto pointer-events-auto flex items-center justify-between"
+          style={{
+            maxWidth: maxW,
+            marginTop,
+            paddingLeft: paddingX,
+            paddingRight: paddingX,
+            height,
+            borderRadius,
+            gap,
+            // layered background & border
+            backgroundColor: useTransform(bgOpacity, (v) => `rgba(255,255,255,${v})`),
+            boxShadow: useTransform(shadowOpacity, (v) => `0 8px 32px rgba(0,0,0,${v * 0.09}), 0 1px 3px rgba(0,0,0,${v * 0.05})`),
+            border: useTransform(borderOpacity, (v) => `1px solid rgba(203,213,225,${v * 0.6})`),
+            backdropFilter: useTransform(bgOpacity, (v) => `blur(${v * 16}px)`) as any,
+            WebkitBackdropFilter: useTransform(bgOpacity, (v) => `blur(${v * 16}px)`) as any,
+          }}
+        >
+          {/* Logo */}
+          <Link to="/" className="flex shrink-0 items-center gap-2 cursor-pointer" id="nav-logo">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600 shadow-sm">
               <Sparkles className="h-4 w-4 text-white" />
             </div>
-            <span className="text-[1rem] font-bold tracking-tight text-slate-900">MemoryCV</span>
+            <span className="text-sm font-bold tracking-tight text-slate-900 hidden sm:block">
+              MemoryCV
+            </span>
           </Link>
 
-          <nav className="hidden items-center gap-1 md:flex">
+          {/* Center nav */}
+          <nav className="hidden items-center md:flex" style={{ gap: "2px" }}>
             {t.nav.map((item) => (
-              <Link
-                key={item.label}
-                to={item.to}
-                className="rounded-lg px-4 py-2 text-sm font-semibold text-slate-600 transition-colors hover:bg-slate-50 hover:text-slate-900"
-                dir={t.dir}
-              >
-                {item.label}
-              </Link>
+              <motion.div key={item.label} style={{ paddingLeft: navPx, paddingRight: navPx, paddingTop: navPy, paddingBottom: navPy }}>
+                <Link
+                  to={item.to}
+                  className="rounded-lg font-semibold text-slate-600 transition-colors hover:text-slate-900"
+                  style={{ fontSize: navFontSize } as React.CSSProperties}
+                  dir={t.dir}
+                >
+                  {item.label}
+                </Link>
+              </motion.div>
             ))}
           </nav>
 
-          <div className="flex items-center gap-2">
+          {/* Right actions */}
+          <div className="flex shrink-0 items-center gap-2">
             <button
               onClick={onToggleLanguage}
-              className="hidden items-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold text-slate-600 transition-colors hover:bg-slate-50 hover:text-slate-900 md:flex"
+              className="hidden items-center gap-1.5 rounded-lg font-semibold text-slate-600 transition-colors hover:text-slate-900 md:flex"
+              style={{ fontSize: navFontSize } as React.CSSProperties}
               aria-label="Change language"
               dir={t.dir}
             >
-              <Globe className="h-4 w-4" />
+              <Globe className="h-4 w-4 shrink-0" />
               {t.toggle}
             </button>
-            <Link to="/onboarding" id="nav-free-trial" className="primary-button px-4 py-2.5 text-sm sm:px-5" dir={t.dir}>
-              {t.navCta}
-            </Link>
+
+            <motion.div style={{ paddingLeft: ctaPx, paddingRight: ctaPx, paddingTop: ctaPy, paddingBottom: ctaPy }} className="rounded-full bg-blue-600 shadow-sm transition-shadow hover:bg-blue-700 hover:shadow-md">
+              <Link
+                to="/onboarding"
+                id="nav-free-trial"
+                className="block whitespace-nowrap font-bold text-white"
+                style={{ fontSize: ctaFontSize } as React.CSSProperties}
+                dir={t.dir}
+              >
+                {t.navCta}
+              </Link>
+            </motion.div>
+
             <button
-              className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-slate-600 transition-colors hover:bg-slate-50 md:hidden"
-              onClick={() => setMobileOpen((open) => !open)}
+              className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 transition-colors hover:bg-slate-50 md:hidden"
+              onClick={() => setMobileOpen((o) => !o)}
               aria-label={t.menu}
             >
               <Menu className="h-5 w-5" />
             </button>
           </div>
-        </div>
+        </motion.div>
 
+        {/* Mobile menu */}
         {mobileOpen && (
-          <div className="mt-1 border-t border-slate-100 pb-4 md:hidden">
+          <div className="pointer-events-auto mx-4 mt-2 rounded-2xl bg-white p-4 shadow-xl border border-slate-100 md:hidden">
             <button
               onClick={onToggleLanguage}
               className="flex w-full items-center gap-2 rounded-lg px-4 py-3 text-sm font-semibold text-slate-700 transition-colors hover:bg-blue-50 hover:text-blue-600"
@@ -237,8 +349,11 @@ function Header({ language, onToggleLanguage }: { language: Language; onToggleLa
             ))}
           </div>
         )}
-      </div>
-    </header>
+      </header>
+
+      {/* Spacer */}
+      <div className="h-16 w-full flex-none" />
+    </>
   );
 }
 
@@ -437,14 +552,21 @@ function Hero({ language }: { language: Language }) {
             {t.heroBody}
           </motion.p>
 
-          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.26, duration: 0.5 }} className="mt-7">
+          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.26, duration: 0.5 }} className="mt-7 flex flex-wrap items-center justify-center gap-4">
             <Link
               to="/onboarding"
               id="hero-cta"
-              className="inline-flex items-center gap-2 rounded-full bg-white px-6 py-3 text-sm font-bold text-blue-700 shadow-lg transition-all hover:-translate-y-0.5 hover:shadow-xl sm:px-8 sm:py-3.5"
+              className="inline-flex items-center gap-2 rounded-full bg-blue-600 px-6 py-3 text-sm font-bold text-white shadow-[0_4px_14px_0_rgba(37,99,235,0.39)] transition-all hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(37,99,235,0.5)] active:scale-95 sm:px-8 sm:py-3.5"
             >
               {t.heroCta}
               <DirectionArrow language={language} className="h-4 w-4" />
+            </Link>
+            <Link
+              to="/templates"
+              className="group inline-flex items-center gap-2 rounded-full border border-blue-200/50 bg-white/10 px-6 py-3 text-sm font-bold text-blue-50 backdrop-blur-md shadow-[inset_0_1px_0_rgba(255,255,255,0.2)] transition-all hover:-translate-y-0.5 hover:bg-white/20 hover:text-white hover:shadow-[0_8px_20px_rgba(0,0,0,0.1)] active:scale-95 sm:px-8 sm:py-3.5"
+            >
+              {t.ctaSecondary}
+              <ArrowUpRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
             </Link>
           </motion.div>
         </div>
@@ -457,12 +579,12 @@ function Hero({ language }: { language: Language }) {
   );
 }
 
-function StatsSection({ language }: { language: Language }) {
+export function StatsSection({ language }: { language: Language }) {
   const t = copy[language];
   const textAlign = language === "ku" ? "text-right" : "text-left";
 
   return (
-    <section className="app-frame relative px-4 pb-16 sm:px-6 sm:pb-24" style={{ paddingTop: "clamp(80px,14vw,140px)" }} dir="ltr">
+    <section className="app-frame relative px-4 pb-12 sm:px-6 sm:pb-24" style={{ paddingTop: "clamp(60px,10vw,140px)" }} dir="ltr">
       <div className="absolute right-10 top-20 -z-10 h-96 w-96 rounded-full bg-blue-100/40 blur-3xl" />
       <div className="absolute bottom-10 left-10 -z-10 h-80 w-80 rounded-full bg-sky-100/40 blur-3xl" />
 
@@ -472,7 +594,7 @@ function StatsSection({ language }: { language: Language }) {
           whileInView={{ opacity: 1, x: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.55 }}
-          className="text-3xl font-extrabold leading-[1.18] tracking-tight text-slate-900 sm:text-5xl md:text-6xl"
+          className="text-[clamp(1.75rem,6vw,3.75rem)] font-extrabold leading-[1.18] tracking-tight text-slate-900"
           dir={t.dir}
         >
           {t.statsTitleA}<br />
@@ -500,7 +622,7 @@ function StatsSection({ language }: { language: Language }) {
             viewport={{ once: true }}
             transition={{ delay: i * 0.15, duration: 0.6, ease: "easeOut" }}
             whileHover={{ y: -6, boxShadow: "0 25px 50px -12px rgba(37,99,235,0.15)" }}
-            className={`group relative flex cursor-pointer flex-col items-start overflow-hidden rounded-[2rem] border border-slate-100 bg-white/80 p-8 ${textAlign} shadow-lg backdrop-blur-xl sm:p-10`}
+            className={`group relative flex cursor-pointer flex-col items-start overflow-hidden rounded-[1.5rem] border border-slate-100 bg-white/80 p-6 ${textAlign} shadow-lg backdrop-blur-xl sm:rounded-[2rem] sm:p-10`}
             dir={t.dir}
           >
             <div className="absolute inset-0 bg-gradient-to-bl from-blue-50/0 to-blue-50/50 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
@@ -538,14 +660,14 @@ const BentoHeroCard = ({ language }: { language: Language }) => {
       <div className="absolute bottom-[-20%] left-[-10%] h-[300px] w-[600px] rounded-full bg-white/80 blur-3xl" />
     </div>
 
-    <div className="relative z-10 grid gap-8 p-6 sm:p-10 md:grid-cols-[0.95fr_1.05fr] md:p-14">
+    <div className="relative z-10 grid gap-6 p-5 sm:p-10 md:grid-cols-[0.95fr_1.05fr] md:p-14">
       <div className={`relative z-20 flex flex-col items-start ${textAlign} md:items-start`} dir={t.dir}>
         <div className="mb-8 flex items-center gap-2 rounded-full border border-white bg-white/90 px-4 py-1.5 shadow-sm backdrop-blur-sm">
           <Sparkles className="h-4 w-4 text-blue-500" />
           <span className="text-sm font-semibold text-blue-700">{t.bentoBadge}</span>
         </div>
 
-        <h2 className="mb-6 text-3xl font-extrabold leading-[1.15] tracking-tight text-slate-900 sm:text-4xl md:text-5xl">
+        <h2 className="mb-5 text-[clamp(1.6rem,5vw,3rem)] font-extrabold leading-[1.15] tracking-tight text-slate-900">
           {t.bentoTitleA}<br />
           <span className="text-blue-600">{t.bentoTitleB}</span>
         </h2>
@@ -560,7 +682,7 @@ const BentoHeroCard = ({ language }: { language: Language }) => {
         </Link>
       </div>
 
-      <div className="pointer-events-none relative flex h-[330px] items-center justify-center sm:h-[420px] md:h-[460px]" dir="ltr">
+      <div className="pointer-events-none relative hidden h-[330px] items-center justify-center sm:flex sm:h-[420px] md:h-[460px]" dir="ltr">
         <div className="absolute left-1/2 top-1/2 h-[400px] w-[400px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-gradient-to-tr from-blue-300/30 via-white/50 to-blue-200/30 blur-3xl" />
         <div className="relative flex h-[320px] w-[280px] select-none items-center justify-center sm:h-[400px] sm:w-[360px]">
           <div className="absolute right-[7%] top-[6%] w-[145px] origin-center rounded-2xl shadow-[0_20px_40px_rgba(0,0,0,0.15)] sm:w-[190px]" style={{ transform: "rotate(-8deg)" }}>
@@ -578,7 +700,8 @@ const BentoHeroCard = ({ language }: { language: Language }) => {
 
 const BentoStandOutCard = ({ language }: { language: Language }) => {
   const t = copy[language];
-  const textAlign = language === "ku" ? "text-right" : "text-left";
+  const isRtl = language === "ku";
+  const textAlign = isRtl ? "text-right" : "text-left";
 
   return (
   <motion.div
@@ -586,12 +709,14 @@ const BentoStandOutCard = ({ language }: { language: Language }) => {
     whileInView={{ opacity: 1, y: 0 }}
     viewport={{ once: true }}
     whileHover={{ y: -5, boxShadow: "0 20px 40px -10px rgba(37,99,235,0.1)" }}
-    className={`group relative flex min-h-[380px] w-full flex-col justify-between overflow-hidden rounded-[2rem] border border-slate-100 bg-white p-8 ${textAlign} shadow-xl sm:p-10`}
+    className={`group relative flex min-h-[300px] w-full flex-col justify-between overflow-hidden rounded-[1.5rem] border border-slate-100 bg-white p-6 ${textAlign} shadow-xl sm:min-h-[380px] sm:rounded-[2rem] sm:p-10`}
     dir="ltr"
   >
-    <div className="pointer-events-none absolute left-0 top-0 z-0 h-full w-1/2 bg-gradient-to-r from-[#f0f7ff] to-transparent" />
+    {/* Subtle gradient wash on the text side */}
+    <div className={`pointer-events-none absolute top-0 z-0 h-full w-1/2 ${isRtl ? "right-0 bg-gradient-to-l" : "left-0 bg-gradient-to-r"} from-[#f0f7ff] to-transparent`} />
+
     <div className="relative z-10 max-w-[230px]" dir={t.dir}>
-      <h3 className="mb-2 text-3xl font-extrabold leading-[1.18] tracking-tight text-slate-900">
+      <h3 className="mb-2 text-[clamp(1.5rem,4vw,1.875rem)] font-extrabold leading-[1.18] tracking-tight text-slate-900">
         {t.standTitleA}<br />
         <span className="text-blue-500">{t.standTitleB}</span>
       </h3>
@@ -602,21 +727,30 @@ const BentoStandOutCard = ({ language }: { language: Language }) => {
     <div className="relative z-10 mt-auto max-w-[160px] pt-8 text-xs font-semibold leading-6 text-slate-400" dir={t.dir}>
       {t.standNote}
     </div>
-    <div className="pointer-events-none absolute bottom-0 left-[-10px] z-10 flex h-[285px] w-[235px] items-end justify-center sm:left-[-20px] sm:w-[250px]" dir="ltr">
+
+    {/* Image: right for EN, left for KU */}
+    <div
+      className="pointer-events-none absolute bottom-0 z-10 flex h-[200px] w-[180px] items-end justify-center sm:h-[285px] sm:w-[235px]"
+      style={{ [isRtl ? "left" : "right"]: "-10px" }}
+      dir="ltr"
+    >
       <motion.img
         src="/images/bento/3d guy transparent.png"
         alt={t.characterAlt}
         className="h-full w-full select-none object-contain object-bottom drop-shadow-2xl"
         draggable={false}
+        style={{ transform: isRtl ? "scaleX(-1)" : "none" }}
       />
     </div>
   </motion.div>
   );
 };
 
+
 const BentoSecurityCard = ({ language }: { language: Language }) => {
   const t = copy[language];
-  const textAlign = language === "ku" ? "text-right" : "text-left";
+  const isRtl = language === "ku";
+  const textAlign = isRtl ? "text-right" : "text-left";
 
   return (
   <motion.div
@@ -625,12 +759,14 @@ const BentoSecurityCard = ({ language }: { language: Language }) => {
     viewport={{ once: true }}
     transition={{ delay: 0.1 }}
     whileHover={{ y: -5, boxShadow: "0 20px 40px -10px rgba(37,99,235,0.1)" }}
-    className={`group relative flex min-h-[380px] w-full flex-col justify-between overflow-hidden rounded-[2rem] border border-slate-100 bg-white p-8 ${textAlign} shadow-xl sm:p-10`}
+    className={`group relative flex min-h-[300px] w-full flex-col justify-between overflow-hidden rounded-[1.5rem] border border-slate-100 bg-white p-6 ${textAlign} shadow-xl sm:min-h-[380px] sm:rounded-[2rem] sm:p-10`}
     dir="ltr"
   >
-    <div className="pointer-events-none absolute left-0 top-0 z-0 h-full w-2/3 bg-gradient-to-r from-[#f0f7ff] to-transparent" />
+    {/* Gradient on text side */}
+    <div className={`pointer-events-none absolute top-0 z-0 h-full w-2/3 ${isRtl ? "right-0 bg-gradient-to-l" : "left-0 bg-gradient-to-r"} from-[#f0f7ff] to-transparent`} />
+
     <div className="relative z-10 max-w-[240px]" dir={t.dir}>
-      <h3 className="mb-2 text-3xl font-extrabold leading-[1.18] tracking-tight text-slate-900">
+      <h3 className="mb-2 text-[clamp(1.5rem,4vw,1.875rem)] font-extrabold leading-[1.18] tracking-tight text-slate-900">
         {t.securityTitleA}<br />
         <span className="text-blue-500">{t.securityTitleB}</span>
       </h3>
@@ -644,7 +780,13 @@ const BentoSecurityCard = ({ language }: { language: Language }) => {
         {t.securityBadge}
       </div>
     </div>
-    <div className="pointer-events-none absolute bottom-[16px] left-[-8px] z-10 flex h-[220px] w-[220px] items-center justify-center" dir="ltr">
+
+    {/* Image: right for EN, left for KU */}
+    <div
+      className="pointer-events-none absolute bottom-[16px] z-10 flex h-[220px] w-[220px] items-center justify-center"
+      style={{ [isRtl ? "left" : "right"]: "-8px" }}
+      dir="ltr"
+    >
       <motion.img
         src="/images/bento/sheild transparent.png"
         alt={t.shieldAlt}
@@ -658,6 +800,7 @@ const BentoSecurityCard = ({ language }: { language: Language }) => {
   );
 };
 
+
 const BentoCreateWinCard = ({ language }: { language: Language }) => {
   const t = copy[language];
   const textAlign = language === "ku" ? "text-right" : "text-left";
@@ -668,7 +811,7 @@ const BentoCreateWinCard = ({ language }: { language: Language }) => {
     whileInView={{ opacity: 1, y: 0 }}
     viewport={{ once: true }}
     transition={{ delay: 0.2 }}
-    className="relative grid min-h-[300px] overflow-hidden rounded-[2rem] border border-blue-100 bg-white shadow-xl md:grid-cols-[0.8fr_1.2fr]"
+    className="relative grid min-h-[280px] overflow-hidden rounded-[1.5rem] border border-blue-100 bg-white shadow-xl sm:rounded-[2rem] md:grid-cols-[0.8fr_1.2fr]"
     dir="ltr"
   >
     <div className={`relative z-10 flex flex-col justify-center p-8 ${textAlign} sm:p-10`} dir={t.dir}>
@@ -694,11 +837,57 @@ const BentoCreateWinCard = ({ language }: { language: Language }) => {
   );
 };
 
-function BentoGridSection({ language }: { language: Language }) {
+export function FAQSection({ language }: { language: Language }) {
+  const t = copy[language];
+  const [openIndex, setOpenIndex] = useState<number | null>(null);
+
+  return (
+    <div className="mt-16 mb-10 w-full max-w-4xl mx-auto px-4 sm:px-0" dir={t.dir}>
+      <h2 className="mb-8 text-[clamp(1.5rem,4vw,2.25rem)] font-extrabold tracking-tight text-slate-900 text-center">
+        {t.faqTitle}
+      </h2>
+      <div className="space-y-4">
+        {t.faqItems.map((item, i) => (
+          <div key={i} className="rounded-2xl border border-slate-200/60 bg-white/60 backdrop-blur-sm shadow-sm overflow-hidden transition-all duration-300 hover:shadow-md hover:border-blue-200/50 hover:bg-white/90">
+            <button
+              onClick={() => setOpenIndex(openIndex === i ? null : i)}
+              className="flex w-full items-center justify-between px-6 py-5 text-left font-bold text-slate-800 focus:outline-none"
+            >
+              <span className="text-base sm:text-lg">{item.q}</span>
+              <div className={`ml-4 flex h-8 w-8 shrink-0 items-center justify-center rounded-full transition-colors duration-200 ${openIndex === i ? "bg-blue-100 text-blue-600" : "bg-slate-100 text-slate-400"}`}>
+                <ChevronDown
+                  className={`h-5 w-5 transition-transform duration-300 ${
+                    openIndex === i ? "rotate-180" : ""
+                  }`}
+                />
+              </div>
+            </button>
+            <AnimatePresence initial={false}>
+              {openIndex === i && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: "auto", opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={{ duration: 0.3, ease: "easeInOut" }}
+                >
+                  <div className="px-6 pb-6 text-slate-600 font-medium leading-relaxed border-t border-slate-100 pt-4">
+                    {item.a}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+export function BentoGridSection({ language }: { language: Language }) {
   const t = copy[language];
 
   return (
-    <section className="relative overflow-hidden bg-[#f4f9ff] px-4 pb-16 pt-16 sm:px-6 sm:pb-24 sm:pt-28 md:pt-40" dir="ltr">
+    <section className="relative overflow-hidden bg-[#f4f9ff] px-4 pb-12 pt-12 sm:px-6 sm:pb-24 sm:pt-28 md:pt-40" dir="ltr">
       <div className="pointer-events-none absolute right-1/4 top-0 h-[600px] w-[800px] -translate-y-1/2 rounded-full bg-blue-100/40 opacity-70 blur-3xl" />
       <div className="pointer-events-none absolute left-0 top-1/4 h-[500px] w-[600px] rounded-full bg-sky-100/40 opacity-60 blur-3xl" />
 
@@ -712,36 +901,38 @@ function BentoGridSection({ language }: { language: Language }) {
 
         <BentoCreateWinCard language={language} />
 
+        <FAQSection language={language} />
+
         <motion.div
           initial={{ opacity: 0, y: 24 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
-          className="relative mt-12 overflow-hidden rounded-[2rem] px-6 py-10 text-center shadow-2xl sm:mt-20 sm:px-8 sm:py-16"
+          className="relative mt-10 overflow-hidden rounded-[1.5rem] px-5 py-10 text-center shadow-2xl sm:mt-20 sm:rounded-[2rem] sm:px-8 sm:py-16"
           style={{ background: "linear-gradient(145deg,#1e40af 0%,#2563eb 55%,#3b82f6 100%)" }}
           id="closing-cta"
           dir="ltr"
         >
           <div className="pointer-events-none absolute right-10 top-4 h-14 w-20 rotate-6 rounded-xl border border-white/20 bg-white/10 opacity-15" />
           <div className="pointer-events-none absolute bottom-4 left-10 h-10 w-16 -rotate-3 rounded-xl border border-white/15 bg-white/10 opacity-10" />
-          <h2 className="mb-4 text-2xl font-extrabold tracking-tight text-white sm:text-4xl" dir={t.dir}>
+          <h2 className="mb-3 text-[clamp(1.4rem,4vw,2.25rem)] font-extrabold tracking-tight text-white sm:mb-4" dir={t.dir}>
             {t.ctaTitle}
           </h2>
-          <p className="mx-auto mb-10 max-w-[54ch] text-base font-medium leading-8 text-blue-100/90 md:text-lg" dir={t.dir}>
+          <p className="mx-auto mb-8 max-w-[54ch] text-sm font-medium leading-7 text-blue-100/90 sm:mb-10 sm:text-base md:text-lg" dir={t.dir}>
             {t.ctaBody}
           </p>
           <div className="flex flex-wrap justify-center gap-4">
-            <Link to="/onboarding" id="closing-cta-btn" className="inline-flex items-center gap-2 rounded-2xl bg-white px-8 py-4 text-lg font-bold text-blue-700 shadow-lg transition-all hover:-translate-y-1 hover:shadow-xl">
+            <Link to="/onboarding" id="closing-cta-btn" className="inline-flex items-center gap-2 rounded-xl bg-white px-6 py-3 text-base font-bold text-blue-700 shadow-lg transition-all hover:-translate-y-1 hover:shadow-xl sm:rounded-2xl sm:px-8 sm:py-4 sm:text-lg">
               {t.ctaPrimary}
               <DirectionArrow language={language} className="h-5 w-5" />
             </Link>
-            <Link to="/templates" id="closing-templates-btn" className="hero-outline-button rounded-2xl border-2 border-blue-300 px-8 py-4 text-lg font-bold text-white transition-all hover:border-blue-200 hover:bg-blue-600">
+            <Link to="/templates" id="closing-templates-btn" className="hero-outline-button rounded-xl border-2 border-blue-300 px-6 py-3 text-base font-bold text-white transition-all hover:border-blue-200 hover:bg-blue-600 sm:rounded-2xl sm:px-8 sm:py-4 sm:text-lg">
               {t.ctaSecondary}
             </Link>
           </div>
         </motion.div>
 
-        <div className="mt-12 flex flex-wrap items-center justify-center gap-8 text-sm font-semibold text-slate-500">
+        <div className="mt-8 flex flex-wrap items-center justify-center gap-5 text-xs font-semibold text-slate-500 sm:mt-12 sm:gap-8 sm:text-sm">
           {t.trust.map((item) => (
             <div key={item} className="flex items-center gap-2">
               <CheckCircle className="h-5 w-5 text-blue-500" />
@@ -762,7 +953,7 @@ function Landing() {
     <div className="page-shell bg-background text-foreground" dir="ltr" lang={t.lang}>
       <Header language={language} onToggleLanguage={() => setLanguage((current) => (current === "en" ? "ku" : "en"))} />
       <main>
-        <Hero language={language} />
+        <HeroV2 language={language} />
         <StatsSection language={language} />
         <BentoGridSection language={language} />
       </main>

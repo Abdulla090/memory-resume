@@ -1,11 +1,12 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState, useMemo, useRef } from "react";
+import { useState, useMemo, useRef, useLayoutEffect } from "react";
 import type { RefObject } from "react";
-import { ArrowLeft, Sparkles, LayoutTemplate, CheckCircle2, Languages } from "lucide-react";
+import { ArrowLeft, Sparkles, LayoutTemplate, CheckCircle2, Languages, X } from "lucide-react";
 import { ResumePreview } from "@/components/resume/templates";
 import { useAppStore } from "@/lib/store";
 import type { ResumeData, TemplateId } from "@/lib/types";
 import { exportPreviewAsPDF } from "@/lib/pdf-screenshot";
+import { ZoomIn, ZoomOut } from "lucide-react";
 
 const rtlTextPattern = /[\u0600-\u06ff\u0750-\u077f\u08a0-\u08ff]/;
 
@@ -164,6 +165,7 @@ const TEMPLATES: { id: TemplateId; label: string; desc: string; category: Catego
   { id: "ref-schumacher", label: "NEW Schumacher Exact", desc: "Orange skill bars", category: "Creative", isNew: true },
   { id: "ref-palmerston", label: "NEW Palmerston Exact", desc: "Slate graphic designer", category: "Professional", isNew: true },
   { id: "ref-sanchez", label: "NEW Sanchez Exact", desc: "Timeline manager", category: "Professional", isNew: true },
+  { id: "mercer", label: "NEW Mercer Exact", desc: "Navy structured dual-column", category: "Professional", isNew: true },
   { id: "noir",      label: "Noir",       desc: "All-black luxury", category: "Creative" },
   { id: "cipher",    label: "Cipher",     desc: "Dark tech aesthetic", category: "Creative" },
   { id: "pinnacle",  label: "Pinnacle",   desc: "Dark layered layout", category: "Creative" },
@@ -478,6 +480,25 @@ function Thumbnail({ id }: { id: TemplateId }) {
           </div>
         </div>
       );
+    case "mercer":
+      return (
+        <div className="w-full h-full bg-white rounded-md overflow-hidden border border-slate-200">
+          <div className="flex h-full">
+            <div className="w-[35%] bg-[#305178] p-1 pt-3">
+              <div className="h-0.5 w-full bg-white/40 rounded-sm mb-1 mt-4" />
+              <div className="h-0.5 w-4/5 bg-white/40 rounded-sm" />
+            </div>
+            <div className="flex-1 p-1.5 pt-2 space-y-1 relative">
+              <div className="absolute -left-3 top-2 h-5 w-5 rounded-full border-2 border-white bg-slate-200" />
+              <div className="h-1.5 w-2/3 bg-[#305178] rounded-sm ml-2" />
+              <div className="h-0.5 w-1/3 bg-slate-900 rounded-sm mb-2 ml-2" />
+              <div className="h-1 w-1/2 bg-[#305178] rounded-sm mt-1" />
+              <div className="h-0.5 w-full bg-slate-200 rounded-sm" />
+              <div className="h-0.5 w-5/6 bg-slate-200 rounded-sm" />
+            </div>
+          </div>
+        </div>
+      );
     default:
       // Minimal and others
       return (
@@ -500,6 +521,8 @@ function TemplatesPage() {
   const [filter, setFilter] = useState<Category>("All");
   const [soraniMode, setSoraniMode] = useState(false);
   const previewData = useMemo(() => soraniMode ? toSoraniResume(data) : data, [data, soraniMode]);
+  const [zoom, setZoom] = useState(1);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const previewRef = useRef<HTMLDivElement>(null);
 
   const filteredTemplates = useMemo(() => {
@@ -541,21 +564,41 @@ function TemplatesPage() {
         </div>
       </header>
 
-      <main className="flex-1 max-w-[1600px] w-full mx-auto grid gap-6 px-4 pb-24 pt-6 sm:px-6 lg:grid-cols-[400px_1fr] xl:grid-cols-[440px_1fr] relative z-10">
+      <main className="flex-1 max-w-[1600px] w-full mx-auto grid gap-4 px-3 pb-20 pt-4 sm:gap-6 sm:px-6 sm:pb-24 sm:pt-6 lg:grid-cols-[400px_1fr] xl:grid-cols-[440px_1fr] relative z-10">
+        
+        {/* Backdrop for mobile sidebar */}
+        {isSidebarOpen && (
+          <div 
+            className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[90] lg:hidden"
+            onClick={() => setIsSidebarOpen(false)}
+          />
+        )}
         
         {/* SIDEBAR: Ultimate User Friendly Template Picker */}
-        <aside className="flex flex-col gap-5 lg:sticky lg:top-24 lg:h-[calc(100vh-8rem)]">
+        <aside className={`
+          flex flex-col gap-4
+          fixed inset-y-0 left-0 z-[100] w-[320px] sm:w-[380px] bg-[#f8faff] pt-4 pb-6 px-4 sm:px-5 transition-transform duration-300 overflow-y-auto
+          lg:static lg:overflow-visible lg:bg-transparent lg:p-0 lg:z-auto lg:sticky lg:top-24 lg:h-[calc(100vh-8rem)]
+          ${isSidebarOpen ? "translate-x-0 shadow-2xl" : "-translate-x-full lg:translate-x-0 lg:shadow-none"}
+        `}>
           
           {/* Header Card */}
-          <div className="bg-white/80 backdrop-blur-md rounded-[1.5rem] p-6 border border-white/50 shadow-[0_8px_30px_rgb(0,0,0,0.04)] relative overflow-hidden shrink-0">
+          <div className="bg-white/80 backdrop-blur-md rounded-[1.5rem] p-5 border border-white/50 shadow-[0_8px_30px_rgb(0,0,0,0.04)] relative overflow-hidden shrink-0">
+            {/* Mobile close button */}
+            <button
+              onClick={() => setIsSidebarOpen(false)}
+              className="absolute top-3 right-3 lg:hidden p-1.5 rounded-full text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
+            >
+              <X className="w-4 h-4" />
+            </button>
             <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-blue-50 border border-blue-100 text-blue-600 text-xs font-bold tracking-wide uppercase mb-3">
               <LayoutTemplate className="w-3.5 h-3.5" />
               Template Library
             </div>
-            <h1 className="text-2xl font-extrabold tracking-tight text-slate-900 leading-tight">
+            <h1 className="text-xl font-extrabold tracking-tight text-slate-900 leading-tight">
               Curated <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-blue-400">Aesthetics</span>
             </h1>
-            <p className="mt-2 text-sm text-slate-600">
+            <p className="mt-1.5 text-sm text-slate-600">
               Select a template to instantly reformat your content.
             </p>
           </div>
@@ -624,14 +667,22 @@ function TemplatesPage() {
         </aside>
 
         {/* Preview Area */}
-        <section className="flex flex-col h-full min-h-[800px] lg:h-[calc(100vh-8rem)]">
-          <div className="flex-1 bg-slate-200/50 backdrop-blur-3xl rounded-[2rem] p-4 sm:p-6 border border-slate-300/60 shadow-[inset_0_0_20px_rgba(0,0,0,0.02)] relative flex flex-col overflow-hidden">
+        <section className="flex flex-col h-full lg:h-[calc(100vh-8rem)]">
+          <div className="flex-1 bg-slate-200/50 backdrop-blur-3xl rounded-[2rem] p-2 sm:p-4 lg:p-6 border border-slate-300/60 shadow-[inset_0_0_20px_rgba(0,0,0,0.02)] relative flex flex-col overflow-hidden h-[calc(100vh-10rem)] lg:h-auto">
             
             {/* Toolbar Area */}
-            <div className="flex items-center justify-between mb-4 px-2 shrink-0">
-              <div className="flex items-center gap-3 bg-white/60 backdrop-blur-md px-3 py-1.5 rounded-full border border-white shadow-sm">
-                <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                <span className="text-xs font-bold uppercase tracking-wider text-slate-700">Live Preview</span>
+            <div className="flex flex-wrap items-center justify-between gap-3 mb-4 px-2 shrink-0">
+              <div className="flex items-center gap-3">
+                <button 
+                  onClick={() => setIsSidebarOpen(true)}
+                  className="lg:hidden p-2 rounded-full bg-white/80 border border-slate-200 text-slate-700 shadow-sm hover:bg-white active:scale-95 transition-all"
+                >
+                  <LayoutTemplate className="w-5 h-5" />
+                </button>
+                <div className="hidden sm:flex items-center gap-3 bg-white/60 backdrop-blur-md px-3 py-1.5 rounded-full border border-white shadow-sm">
+                  <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                  <span className="text-xs font-bold uppercase tracking-wider text-slate-700">Live Preview</span>
+                </div>
               </div>
               <div className="flex items-center gap-2">
                 <button
@@ -645,13 +696,28 @@ function TemplatesPage() {
                   <Languages className="h-3.5 w-3.5" />
                   {soraniMode ? "کوردی" : "Kurdish RTL"}
                 </button>
-                <ExportButtons data={previewData} name={previewData.name} previewRef={previewRef} />
+                <div className="flex items-center rounded-full border border-slate-200 bg-white/80 shadow-sm overflow-hidden hidden sm:flex">
+                  <button onClick={() => setZoom(z => Math.max(0.5, z - 0.25))} className="p-1.5 hover:bg-slate-100 text-slate-600 transition-colors" title="Zoom Out">
+                    <ZoomOut className="w-4 h-4" />
+                  </button>
+                  <span className="text-xs font-bold text-slate-700 w-10 text-center">{Math.round(zoom * 100)}%</span>
+                  <button onClick={() => setZoom(z => Math.min(2, z + 0.25))} className="p-1.5 hover:bg-slate-100 text-slate-600 transition-colors" title="Zoom In">
+                    <ZoomIn className="w-4 h-4" />
+                  </button>
+                </div>
+                <div className="hidden sm:block">
+                  <ExportButtons data={previewData} template={active} name={previewData.name} previewRef={previewRef} />
+                </div>
+                <div className="sm:hidden">
+                  {/* Minimal export button for mobile */}
+                  <ExportButtons data={previewData} template={active} name={previewData.name} previewRef={previewRef} />
+                </div>
               </div>
             </div>
 
             {/* Resume Container with smooth scroll */}
             <div className="flex-1 overflow-hidden rounded-[1rem] shadow-[0_0_0_1px_rgba(0,0,0,0.05),0_30px_60px_-20px_rgba(0,0,0,0.15)] bg-white relative @container">
-              <ClientPDFPreview data={previewData} template={active} previewRef={previewRef} />
+              <ClientPDFPreview data={previewData} template={active} previewRef={previewRef} zoom={zoom} />
             </div>
           </div>
         </section>
@@ -663,7 +729,7 @@ function TemplatesPage() {
 import { exportResumeDocx } from "@/components/resume/docx-templates";
 import { Download, FileText } from "lucide-react";
 
-function ExportButtons({ data, name, previewRef }: { data: ResumeData; name: string; previewRef: RefObject<HTMLDivElement | null> }) {
+function ExportButtons({ data, template, name, previewRef }: { data: ResumeData; template: TemplateId; name: string; previewRef: RefObject<HTMLDivElement | null> }) {
   const [pdfLoading, setPdfLoading] = useState(false);
   const [docxLoading, setDocxLoading] = useState(false);
   const filename = name.replace(/\s+/g, "_") || "resume";
@@ -708,15 +774,60 @@ function ExportButtons({ data, name, previewRef }: { data: ResumeData; name: str
 
 
 
-function ClientPDFPreview({ data, template, previewRef }: { data: ResumeData; template: TemplateId; previewRef: RefObject<HTMLDivElement | null> }) {
+function ClientPDFPreview({ data, template, previewRef, zoom = 1 }: { data: ResumeData; template: TemplateId; previewRef: RefObject<HTMLDivElement | null>; zoom?: number }) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [baseScale, setBaseScale] = useState(0.5); // Default safe scale
+  const [contentHeight, setContentHeight] = useState(1122);
+
+  useLayoutEffect(() => {
+    const container = containerRef.current;
+    const preview = previewRef.current;
+    if (!container || !preview) return;
+
+    const updateScale = () => {
+      // Use parentElement's dimensions if possible, or container itself
+      const parent = container.parentElement;
+      if (!parent) return;
+      
+      const availableW = parent.clientWidth - 32; // 16px padding * 2
+      const availableH = parent.clientHeight - 32;
+      
+      const contentW = 794; // Fixed A4 width
+      // Get the actual height of the content, ensuring at least A4 height
+      const actualContentH = Math.max(preview.scrollHeight, 1122);
+      setContentHeight(actualContentH);
+      
+      const scaleW = availableW / contentW;
+      const scaleH = availableH / actualContentH;
+      
+      setBaseScale(Math.min(scaleW, scaleH));
+    };
+
+    const observer = new ResizeObserver(updateScale);
+    if (container.parentElement) observer.observe(container.parentElement);
+    observer.observe(preview);
+
+    // Initial calculation
+    updateScale();
+
+    return () => observer.disconnect();
+  }, [data, template, previewRef]);
+
   return (
-    <div className="h-full w-full overflow-auto bg-slate-100 p-4">
-      <div
-        ref={previewRef}
-        className="mx-auto w-[794px] min-w-[794px] origin-top overflow-hidden rounded-sm bg-white shadow-[0_20px_50px_-24px_rgba(15,23,42,0.45)]"
-        style={{ zoom: "min(1, calc(100cqw / 794))" }}
-      >
-        <ResumePreview data={data} template={template} />
+    <div ref={containerRef} className="absolute inset-0 overflow-auto bg-slate-100/50 p-2 sm:p-4">
+      <div className="flex min-h-full min-w-full w-fit">
+        <div 
+          className="m-auto transition-all duration-300 ease-out shrink-0 flex justify-center" 
+          style={{ width: 794 * baseScale * zoom, height: contentHeight * baseScale * zoom }}
+        >
+          <div
+            ref={previewRef}
+            className="w-[794px] origin-top transition-transform duration-300 ease-out overflow-hidden rounded-sm bg-white shadow-[0_20px_50px_-24px_rgba(15,23,42,0.45)] shrink-0"
+            style={{ transform: `scale(${baseScale * zoom})`, minHeight: '1122px' }}
+          >
+            <ResumePreview data={data} template={template} />
+          </div>
+        </div>
       </div>
     </div>
   );
