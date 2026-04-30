@@ -1,5 +1,5 @@
-import { createFileRoute, Link } from '@tanstack/react-router';
-import { Plus, Upload, BrainCircuit, FileText, CheckCircle2, LayoutTemplate, PenTool, Briefcase, BarChart2, Sun, ArrowRight, MoreVertical, Settings, Wand2 } from 'lucide-react';
+import { createFileRoute, Link, useNavigate } from '@tanstack/react-router';
+import { Plus, Upload, BrainCircuit, FileText, CheckCircle2, LayoutTemplate, PenTool, Briefcase, BarChart2, Sun, ArrowRight, MoreVertical, Settings, Wand2, Clock } from 'lucide-react';
 import { LeftCardSVG, CenterCardSVG } from './index';
 import { useAppStore } from '@/lib/store';
 
@@ -8,8 +8,11 @@ export const Route = createFileRoute('/dashboard/')({
 });
 
 function DashboardIndex() {
+  const navigate = useNavigate();
   const language = useAppStore((state) => state.language);
   const isKu = language === "ku";
+  const resumes = useAppStore((state) => state.resumes);
+  const recentCVs = resumes.slice(0, 3);
 
   return (
     <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6 pb-10">
@@ -129,26 +132,37 @@ function DashboardIndex() {
           </div>
           
           <div className="space-y-3">
-            {[
-              { title: 'Senior Product Designer', date: 'Updated 2h ago', score: 92 },
-              { title: 'Full Stack Developer', date: 'Updated 1d ago', score: 81 },
-              { title: 'UX Designer', date: 'Updated 3d ago', score: 85 },
-            ].map((cv, i) => (
-              <div key={i} className="flex items-center justify-between p-3 -mx-3 rounded-2xl hover:bg-slate-50 transition-colors cursor-pointer group border border-transparent hover:border-slate-100">
+            {recentCVs.length === 0 ? (
+              <div className="text-center py-6">
+                <FileText className="w-8 h-8 text-slate-200 mx-auto mb-3" />
+                <p className="text-xs text-slate-400 font-medium">{isKu ? "هێشتا سیڤییەک نەدروستکراوە" : "No CVs yet"}</p>
+                <Link to="/onboarding" className="inline-flex items-center gap-1 mt-3 text-xs font-bold text-blue-600 hover:underline">
+                  <Plus className="w-3 h-3" /> {isKu ? "دروستکردنی یەکەم سیڤی" : "Create your first CV"}
+                </Link>
+              </div>
+            ) : recentCVs.map((cv) => (
+              <button
+                key={cv.id}
+                onClick={() => navigate({ to: '/editor/$id', params: { id: cv.id } })}
+                className="w-full flex items-center justify-between p-3 -mx-3 rounded-2xl hover:bg-slate-50 transition-colors cursor-pointer group border border-transparent hover:border-slate-100 text-left"
+              >
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-slate-400 group-hover:bg-white group-hover:shadow-sm group-hover:text-blue-500 transition-all">
                     <FileText className="w-5 h-5" />
                   </div>
                   <div>
-                    <div className="text-sm font-bold text-slate-900">{cv.title}</div>
-                    <div className="text-[10px] text-slate-500 font-medium mt-0.5">{cv.date}</div>
+                    <div className="text-sm font-bold text-slate-900 truncate max-w-[150px]">{cv.title}</div>
+                    <div className="text-[10px] text-slate-500 font-medium mt-0.5 flex items-center gap-1">
+                      <Clock className="w-2.5 h-2.5" />
+                      {new Date(cv.createdAt).toLocaleDateString()}
+                    </div>
                   </div>
                 </div>
-                <div className="flex items-center gap-4">
-                   <div className="text-[10px] font-bold text-emerald-500 bg-emerald-50 px-2 py-1 rounded-md">{cv.score}%</div>
-                   <button className="text-slate-300 hover:text-slate-900 transition-colors"><MoreVertical className="w-4 h-4" /></button>
+                <div className="flex items-center gap-2">
+                   <div className="text-[10px] font-bold text-blue-500 bg-blue-50 px-2 py-1 rounded-md capitalize">{cv.template}</div>
+                   <ArrowRight className="w-3.5 h-3.5 text-slate-300 group-hover:text-blue-500 transition-colors" />
                 </div>
-              </div>
+              </button>
             ))}
           </div>
         </div>
@@ -200,7 +214,7 @@ function DashboardIndex() {
                </div>
                <h3 className="font-bold text-slate-900">{isKu ? "تیمپڵەیتەکان" : "Templates"}</h3>
             </div>
-            <Link to="/templates" className="text-blue-600 text-xs font-bold flex items-center gap-1 hover:underline">{isKu ? "هەمووی ببینە" : "View all"} <ArrowRight className={`w-3 h-3 ${isKu ? 'rotate-180' : ''}`} /></Link>
+            <Link to="/templates" className="text-blue-600 text-xs font-bold flex items-center gap-1 hover:underline">{isKu ? "هەمووی ببینە" : "Browse all"} <ArrowRight className={`w-3 h-3 ${isKu ? 'rotate-180' : ''}`} /></Link>
           </div>
           
           <div className="grid grid-cols-3 gap-4">

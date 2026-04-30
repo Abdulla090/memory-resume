@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+﻿import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState, useMemo, useRef, useLayoutEffect } from "react";
 import type { RefObject } from "react";
 import { ArrowLeft, Sparkles, LayoutTemplate, CheckCircle2, Languages, X } from "lucide-react";
@@ -30,7 +30,7 @@ export const Route = createFileRoute("/templates")({
   head: () => ({
     meta: [
       { title: "Templates — MemoryCV" },
-      { name: "description", content: "Preview the resume templates available inside the MemoryCV editor." },
+      { name: "description", content: "Preview the resume Templates — MemoryCV editor." },
     ],
   }),
   component: TemplatesPage,
@@ -49,7 +49,7 @@ const SAMPLE: ResumeData = {
     {
       title: "Staff Software Engineer",
       company: "Klarna",
-      duration: "2022 — Present",
+      duration: "2022 ΓÇö Present",
       description: "Owns the BNPL risk-scoring service across EU markets.",
       achievements: [
         "Rewrote risk-scoring hot path in Go, cutting p99 latency from 480ms to 65ms.",
@@ -60,7 +60,7 @@ const SAMPLE: ResumeData = {
     {
       title: "Senior Engineer",
       company: "N26",
-      duration: "2019 — 2022",
+      duration: "2019 ΓÇö 2022",
       description: "Migrated payment ledger from monolith to event-sourced microservices.",
       achievements: [
         "Architected and shipped an event-sourced ledger handling 12M transactions a day.",
@@ -84,52 +84,52 @@ const SAMPLE: ResumeData = {
 function toSoraniResume(data: ResumeData): ResumeData {
   return {
     ...data,
-    name: "شوان کەمال",
-    title: "ئەندازیاری سینیۆری نەرمەکاڵا",
+    name: "╪┤┘ê╪º┘å ┌⌐█ò┘à╪º┘ä",
+    title: "╪ª█ò┘å╪»╪º╪▓█î╪º╪▒█î ╪│█î┘å█î█å╪▒█î ┘å█ò╪▒┘à█ò┌⌐╪º┌╡╪º",
     email: data.email ?? "shwan@example.com",
     phone: data.phone ?? "+964 750 000 0000",
-    location: "هەولێر، کوردستان",
+    location: "┘ç█ò┘ê┘ä█Ä╪▒╪î ┌⌐┘ê╪▒╪»╪│╪¬╪º┘å",
     summary:
-      "ئەندازیاری نەرمەکاڵا بە ئەزموونی فراوان لە دروستکردنی سیستەمی پەیوەندیدار و خزمەتگوزارییە دیجیتاڵییەکان. پسپۆڕ لە باشترکردنی خێرایی، ڕێکخستنی تیم، و گواستنەوەی بیرۆکە ئاڵۆزەکان بۆ بەرهەمی کاریگەر.",
+      "╪ª█ò┘å╪»╪º╪▓█î╪º╪▒█î ┘å█ò╪▒┘à█ò┌⌐╪º┌╡╪º ╪¿█ò ╪ª█ò╪▓┘à┘ê┘ê┘å█î ┘ü╪▒╪º┘ê╪º┘å ┘ä█ò ╪»╪▒┘ê╪│╪¬┌⌐╪▒╪»┘å█î ╪│█î╪│╪¬█ò┘à█î ┘╛█ò█î┘ê█ò┘å╪»█î╪»╪º╪▒ ┘ê ╪«╪▓┘à█ò╪¬┌»┘ê╪▓╪º╪▒█î█î█ò ╪»█î╪¼█î╪¬╪º┌╡█î█î█ò┌⌐╪º┘å. ┘╛╪│┘╛█å┌ò ┘ä█ò ╪¿╪º╪┤╪¬╪▒┌⌐╪▒╪»┘å█î ╪«█Ä╪▒╪º█î█î╪î ┌ò█Ä┌⌐╪«╪│╪¬┘å█î ╪¬█î┘à╪î ┘ê ┌»┘ê╪º╪│╪¬┘å█ò┘ê█ò█î ╪¿█î╪▒█å┌⌐█ò ╪ª╪º┌╡█å╪▓█ò┌⌐╪º┘å ╪¿█å ╪¿█ò╪▒┘ç█ò┘à█î ┌⌐╪º╪▒█î┌»█ò╪▒.",
     experience: [
       {
-        title: "ئەندازیاری سینیۆری نەرمەکاڵا",
-        company: "کۆمپانیای تەکنەلۆژی ڕووناک",
-        duration: "٢٠٢٢ — ئێستا",
-        description: "سەرپەرشتیاری بنیاتنانی خزمەتگوزارییە سەرەکییەکان و باشترکردنی ئەدای سیستەم.",
+        title: "╪ª█ò┘å╪»╪º╪▓█î╪º╪▒█î ╪│█î┘å█î█å╪▒█î ┘å█ò╪▒┘à█ò┌⌐╪º┌╡╪º",
+        company: "┌⌐█å┘à┘╛╪º┘å█î╪º█î ╪¬█ò┌⌐┘å█ò┘ä█å┌ÿ█î ┌ò┘ê┘ê┘å╪º┌⌐",
+        duration: "┘ó┘á┘ó┘ó ΓÇö ╪ª█Ä╪│╪¬╪º",
+        description: "╪│█ò╪▒┘╛█ò╪▒╪┤╪¬█î╪º╪▒█î ╪¿┘å█î╪º╪¬┘å╪º┘å█î ╪«╪▓┘à█ò╪¬┌»┘ê╪▓╪º╪▒█î█î█ò ╪│█ò╪▒█ò┌⌐█î█î█ò┌⌐╪º┘å ┘ê ╪¿╪º╪┤╪¬╪▒┌⌐╪▒╪»┘å█î ╪ª█ò╪»╪º█î ╪│█î╪│╪¬█ò┘à.",
         achievements: [
-          "خێرایی وەڵامدانەوەی سیستەم بە شێوەیەکی بەرچاو باشترکرا و ئەزموونی بەکارهێنەر ڕوونتر بوو.",
-          "ڕێنمایی چوار تیمی جیاواز کرا بۆ ڕادەستکردنی بەرهەمێکی گرنگ لە کاتی دیاریکراو.",
-          "ڕێکخستنی ڕێبازێکی نوێ بۆ پشکنینی کۆد و کەمکردنەوەی هەڵەکانی بەرهەم.",
+          "╪«█Ä╪▒╪º█î█î ┘ê█ò┌╡╪º┘à╪»╪º┘å█ò┘ê█ò█î ╪│█î╪│╪¬█ò┘à ╪¿█ò ╪┤█Ä┘ê█ò█î█ò┌⌐█î ╪¿█ò╪▒┌å╪º┘ê ╪¿╪º╪┤╪¬╪▒┌⌐╪▒╪º ┘ê ╪ª█ò╪▓┘à┘ê┘ê┘å█î ╪¿█ò┌⌐╪º╪▒┘ç█Ä┘å█ò╪▒ ┌ò┘ê┘ê┘å╪¬╪▒ ╪¿┘ê┘ê.",
+          "┌ò█Ä┘å┘à╪º█î█î ┌å┘ê╪º╪▒ ╪¬█î┘à█î ╪¼█î╪º┘ê╪º╪▓ ┌⌐╪▒╪º ╪¿█å ┌ò╪º╪»█ò╪│╪¬┌⌐╪▒╪»┘å█î ╪¿█ò╪▒┘ç█ò┘à█Ä┌⌐█î ┌»╪▒┘å┌» ┘ä█ò ┌⌐╪º╪¬█î ╪»█î╪º╪▒█î┌⌐╪▒╪º┘ê.",
+          "┌ò█Ä┌⌐╪«╪│╪¬┘å█î ┌ò█Ä╪¿╪º╪▓█Ä┌⌐█î ┘å┘ê█Ä ╪¿█å ┘╛╪┤┌⌐┘å█î┘å█î ┌⌐█å╪» ┘ê ┌⌐█ò┘à┌⌐╪▒╪»┘å█ò┘ê█ò█î ┘ç█ò┌╡█ò┌⌐╪º┘å█î ╪¿█ò╪▒┘ç█ò┘à.",
         ],
       },
       {
-        title: "ئەندازیاری نەرمەکاڵا",
-        company: "ستۆدیۆی دیجیتاڵی کاروان",
-        duration: "٢٠١٩ — ٢٠٢٢",
-        description: "دروستکردنی داشبۆرد و سیستەمی ناوخۆیی بۆ بەڕێوەبردنی کار.",
+        title: "╪ª█ò┘å╪»╪º╪▓█î╪º╪▒█î ┘å█ò╪▒┘à█ò┌⌐╪º┌╡╪º",
+        company: "╪│╪¬█å╪»█î█å█î ╪»█î╪¼█î╪¬╪º┌╡█î ┌⌐╪º╪▒┘ê╪º┘å",
+        duration: "┘ó┘á┘í┘⌐ ΓÇö ┘ó┘á┘ó┘ó",
+        description: "╪»╪▒┘ê╪│╪¬┌⌐╪▒╪»┘å█î ╪»╪º╪┤╪¿█å╪▒╪» ┘ê ╪│█î╪│╪¬█ò┘à█î ┘å╪º┘ê╪«█å█î█î ╪¿█å ╪¿█ò┌ò█Ä┘ê█ò╪¿╪▒╪»┘å█î ┌⌐╪º╪▒.",
         achievements: [
-          "پرۆسەی ڕاپۆرتکردن بە ئۆتۆماتیکی کرا و کاتی کاری هەفتانە کەمکرایەوە.",
-          "چوارچێوەی هاوبەشی UI دروستکرا بۆ یەکسانکردنی ئەزموونی بەکارهێنەر.",
+          "┘╛╪▒█å╪│█ò█î ┌ò╪º┘╛█å╪▒╪¬┌⌐╪▒╪»┘å ╪¿█ò ╪ª█å╪¬█å┘à╪º╪¬█î┌⌐█î ┌⌐╪▒╪º ┘ê ┌⌐╪º╪¬█î ┌⌐╪º╪▒█î ┘ç█ò┘ü╪¬╪º┘å█ò ┌⌐█ò┘à┌⌐╪▒╪º█î█ò┘ê█ò.",
+          "┌å┘ê╪º╪▒┌å█Ä┘ê█ò█î ┘ç╪º┘ê╪¿█ò╪┤█î UI ╪»╪▒┘ê╪│╪¬┌⌐╪▒╪º ╪¿█å █î█ò┌⌐╪│╪º┘å┌⌐╪▒╪»┘å█î ╪ª█ò╪▓┘à┘ê┘ê┘å█î ╪¿█ò┌⌐╪º╪▒┘ç█Ä┘å█ò╪▒.",
         ],
       },
     ],
     projects: [
       {
-        name: "سیستەمی هەڵسەنگاندنی زیرەک",
-        description: "ئامرازێکی ناوخۆیی بۆ ڕێکخستن و پێوانەکردنی کارایی تیمەکان.",
+        name: "╪│█î╪│╪¬█ò┘à█î ┘ç█ò┌╡╪│█ò┘å┌»╪º┘å╪»┘å█î ╪▓█î╪▒█ò┌⌐",
+        description: "╪ª╪º┘à╪▒╪º╪▓█Ä┌⌐█î ┘å╪º┘ê╪«█å█î█î ╪¿█å ┌ò█Ä┌⌐╪«╪│╪¬┘å ┘ê ┘╛█Ä┘ê╪º┘å█ò┌⌐╪▒╪»┘å█î ┌⌐╪º╪▒╪º█î█î ╪¬█î┘à█ò┌⌐╪º┘å.",
         tech: ["TypeScript", "React", "PostgreSQL"],
-        impact: "بەکارهاتووە لەلایەن چەند تیمێکی بەرهەم.",
+        impact: "╪¿█ò┌⌐╪º╪▒┘ç╪º╪¬┘ê┘ê█ò ┘ä█ò┘ä╪º█î█ò┘å ┌å█ò┘å╪» ╪¬█î┘à█Ä┌⌐█î ╪¿█ò╪▒┘ç█ò┘à.",
       },
       {
-        name: "داشبۆردی ڕاپۆرت",
-        description: "بینینی خێرای داتای کار و پێوەرە گرنگەکان بۆ بەڕێوەبەران.",
+        name: "╪»╪º╪┤╪¿█å╪▒╪»█î ┌ò╪º┘╛█å╪▒╪¬",
+        description: "╪¿█î┘å█î┘å█î ╪«█Ä╪▒╪º█î ╪»╪º╪¬╪º█î ┌⌐╪º╪▒ ┘ê ┘╛█Ä┘ê█ò╪▒█ò ┌»╪▒┘å┌»█ò┌⌐╪º┘å ╪¿█å ╪¿█ò┌ò█Ä┘ê█ò╪¿█ò╪▒╪º┘å.",
         tech: ["Node.js", "Charts", "API"],
-        impact: "کاتی ئامادەکردنی ڕاپۆرتی مانگانەی کەمکردەوە.",
+        impact: "┌⌐╪º╪¬█î ╪ª╪º┘à╪º╪»█ò┌⌐╪▒╪»┘å█î ┌ò╪º┘╛█å╪▒╪¬█î ┘à╪º┘å┌»╪º┘å█ò█î ┌⌐█ò┘à┌⌐╪▒╪»█ò┘ê█ò.",
       },
     ],
-    education: [{ degree: "بەکالۆریۆس لە زانستی کۆمپیوتەر", institution: "زانکۆی سەلاحەدین", year: "٢٠١٦" }],
-    skills: ["TypeScript", "React", "Node.js", "PostgreSQL", "Docker", "AWS", "ڕێبەرایەتی تیم", "چارەسەرکردنی کێشە"],
+    education: [{ degree: "╪¿█ò┌⌐╪º┘ä█å╪▒█î█å╪│ ┘ä█ò ╪▓╪º┘å╪│╪¬█î ┌⌐█å┘à┘╛█î┘ê╪¬█ò╪▒", institution: "╪▓╪º┘å┌⌐█å█î ╪│█ò┘ä╪º╪¡█ò╪»█î┘å", year: "┘ó┘á┘í┘ª" }],
+    skills: ["TypeScript", "React", "Node.js", "PostgreSQL", "Docker", "AWS", "┌ò█Ä╪¿█ò╪▒╪º█î█ò╪¬█î ╪¬█î┘à", "┌å╪º╪▒█ò╪│█ò╪▒┌⌐╪▒╪»┘å█î ┌⌐█Ä╪┤█ò"],
     skillItems: [
       { name: "TypeScript", level: 5 },
       { name: "React", level: 5 },
@@ -137,10 +137,10 @@ function toSoraniResume(data: ResumeData): ResumeData {
       { name: "PostgreSQL", level: 4 },
       { name: "Docker", level: 3 },
       { name: "AWS", level: 4 },
-      { name: "ڕێبەرایەتی تیم", level: 5 },
-      { name: "چارەسەرکردنی کێشە", level: 5 },
+      { name: "┌ò█Ä╪¿█ò╪▒╪º█î█ò╪¬█î ╪¬█î┘à", level: 5 },
+      { name: "┌å╪º╪▒█ò╪│█ò╪▒┌⌐╪▒╪»┘å█î ┌⌐█Ä╪┤█ò", level: 5 },
     ],
-    certifications: ["بڕوانامەی پیشەیی AWS", "بڕوانامەی بەڕێوەبردنی پرۆژە"],
+    certifications: ["╪¿┌ò┘ê╪º┘å╪º┘à█ò█î ┘╛█î╪┤█ò█î█î AWS", "╪¿┌ò┘ê╪º┘å╪º┘à█ò█î ╪¿█ò┌ò█Ä┘ê█ò╪¿╪▒╪»┘å█î ┘╛╪▒█å┌ÿ█ò"],
   };
 }
 
@@ -189,7 +189,7 @@ const MINI_SAMPLE: ResumeData = {
     {
       title: "Lead Designer",
       company: "Creative Studio",
-      duration: "2020 — Present",
+      duration: "2020 ΓÇö Present",
       description: "Leading design team for major client projects.",
       achievements: [
         "Delivered award-winning campaigns.",
@@ -198,7 +198,7 @@ const MINI_SAMPLE: ResumeData = {
     {
       title: "UX Designer",
       company: "Tech Startup",
-      duration: "2018 — 2020",
+      duration: "2018 ΓÇö 2020",
       description: "Designed core application interfaces.",
       achievements: [],
     }
@@ -412,7 +412,7 @@ function TemplatesPage() {
                   }`}
                 >
                   <Languages className="h-4 w-4" />
-                  <span className="hidden sm:inline">{soraniMode ? "کوردی" : "Kurdish RTL"}</span>
+                  <span className="hidden sm:inline">{soraniMode ? "┌⌐┘ê╪▒╪»█î" : "Kurdish RTL"}</span>
                   <span className="sm:hidden">{soraniMode ? "KU" : "EN"}</span>
                 </button>
                 <div className="flex items-center rounded-xl border border-slate-200 bg-white/80 shadow-sm overflow-hidden">
@@ -565,3 +565,4 @@ function buildFromProfile(profile: ReturnType<typeof useAppStore.getState>["prof
     certifications: profile.certifications,
   };
 }
+

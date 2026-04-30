@@ -1,0 +1,873 @@
+import { j as jsxRuntimeExports, r as reactExports } from "../_libs/react.mjs";
+import { L as Link } from "../_libs/tanstack__react-router.mjs";
+import { c as copy$1, L as LeftCardSVG, C as CenterCardSVG, R as RightCardSVG } from "./router-CfvqtG96.mjs";
+import "../_libs/sonner.mjs";
+import { m as motion, A as AnimatePresence, u as useMotionValue, a as useSpring, b as useTransform, c as animate } from "../_libs/framer-motion.mjs";
+import { l as CircleCheckBig, m as ChevronDown, b as Sparkles, G as Globe, M as Menu, n as LockKeyhole, D as Download, A as ArrowLeft, o as ArrowRight, p as ArrowUpRight } from "../_libs/lucide-react.mjs";
+import "../_libs/tanstack__router-core.mjs";
+import "../_libs/tanstack__history.mjs";
+import "../_libs/cookie-es.mjs";
+import "../_libs/seroval.mjs";
+import "../_libs/seroval-plugins.mjs";
+import "node:stream/web";
+import "node:stream";
+import "../_libs/react-dom.mjs";
+import "util";
+import "crypto";
+import "async_hooks";
+import "stream";
+import "../_libs/isbot.mjs";
+import "../_libs/zustand.mjs";
+import "../_libs/motion-dom.mjs";
+import "../_libs/motion-utils.mjs";
+const marqueeX = `
+@keyframes marquee-left {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+`;
+const companies = [
+  {
+    name: "Google",
+    svg: /* @__PURE__ */ jsxRuntimeExports.jsx("svg", { viewBox: "0 0 24 24", fill: "currentColor", className: "w-6 h-6", children: /* @__PURE__ */ jsxRuntimeExports.jsx("path", { d: "M12.48 10.92v3.28h7.84c-.24 1.84-2.16 5.36-7.84 5.36-4.88 0-8.88-4.04-8.88-9s4-9 8.88-9c2.8 0 4.68 1.16 5.76 2.2l2.56-2.48C19.12 1.84 16.08 0 12.48 0 5.8 0 .4 5.4.4 12s5.4 12 12.08 12c6.92 0 11.52-4.88 11.52-11.72 0-.8-.08-1.4-.2-2.04h-11.32z" }) })
+  },
+  {
+    name: "Microsoft",
+    svg: /* @__PURE__ */ jsxRuntimeExports.jsx("svg", { viewBox: "0 0 24 24", fill: "currentColor", className: "w-5 h-5", children: /* @__PURE__ */ jsxRuntimeExports.jsx("path", { d: "M11.4 24H0V12.6h11.4V24zM24 24H12.6V12.6H24V24zM11.4 11.4H0V0h11.4v11.4zM24 11.4H12.6V0H24v11.4z" }) })
+  },
+  {
+    name: "Amazon",
+    svg: /* @__PURE__ */ jsxRuntimeExports.jsx("svg", { viewBox: "0 0 24 24", fill: "currentColor", className: "w-6 h-6", children: /* @__PURE__ */ jsxRuntimeExports.jsx("path", { d: "M15.93 17.01c-1.57 1.05-3.71 1.63-5.85 1.63-3.14 0-5.93-1.2-7.93-3.12-.19-.18-.04-.43.2-.33 2.37.95 5.17 1.5 8.1 1.5 2.51 0 5.09-.43 7.33-1.29.27-.1.43.19.15.33l.001.28zm1.96-1.5c-.17-.22-.12-.48.11-.63 1.05-.66 2.05-1.43 2.05-2.84 0-1.89-1.39-2.95-3.51-2.95-1.99 0-4.06.94-4.06 2.6 0 .4.09.77.27 1.06.18.28.05.51-.23.46-1.47-.26-2.31-1.32-2.31-2.47 0-1.89 1.83-3.58 4.79-3.58 3.51 0 5.56 2.06 5.56 4.75 0 2.21-1.47 3.32-2.67 4.14-.17.11-.33.02-.27-.17l.27-2.3zm-6.16 2.07c-2.31 0-3.92-1.32-3.92-3.23 0-1.56 1.09-2.58 3.01-2.58 1.13 0 2.22.4 2.22 1.34v.26c0 .88-.6 1.56-1.63 1.56-1.02 0-1.37-.58-1.37-1.12 0-.25.04-.47.11-.64.07-.17-.03-.27-.18-.21-.86.36-1.37 1.25-1.37 2.18 0 1.4 1.14 2.16 2.5 2.16 1.25 0 2.11-.62 2.65-1.43.08-.12.22-.05.2.08l-.22.28c-.62.83-1.61 1.35-2.00 1.35z" }) })
+  },
+  {
+    name: "Apple",
+    svg: /* @__PURE__ */ jsxRuntimeExports.jsx("svg", { viewBox: "0 0 24 24", fill: "currentColor", className: "w-5 h-5", children: /* @__PURE__ */ jsxRuntimeExports.jsx("path", { d: "M17.05 20.28c-.98.95-2.05 1.72-3.22 1.72-1.15 0-1.58-.69-2.92-.69-1.34 0-1.84.67-2.91.69-1.16.03-2.34-.84-3.32-1.72-2-1.85-3.53-5.22-3.53-8.39 0-3.15 1.57-6.52 3.53-8.38 1-1 2.22-1.51 3.42-1.51 1.2 0 1.71.69 3.04.69 1.33 0 1.8-.69 3.01-.69 1.19 0 2.37.5 3.37 1.51 1.96 1.86 3.49 5.23 3.49 8.38 0 3.17-1.53 6.54-3.49 8.39l.11-.01zm-4.73-19.1c.01 1.5-1.19 2.87-2.67 2.87-1.48 0-2.65-1.37-2.65-2.87 0-1.5 1.17-2.87 2.65-2.87 1.48 0 2.66 1.37 2.67 2.87z" }) })
+  },
+  {
+    name: "Meta",
+    svg: /* @__PURE__ */ jsxRuntimeExports.jsx("svg", { viewBox: "0 0 24 24", fill: "currentColor", className: "w-6 h-6", children: /* @__PURE__ */ jsxRuntimeExports.jsx("path", { d: "M12 4.5C7.3 4.5 3.5 8.3 3.5 13s3.8 8.5 8.5 8.5 8.5-3.8 8.5-8.5S16.7 4.5 12 4.5zm6.5 8.5c0 3.6-2.9 6.5-6.5 6.5s-6.5-2.9-6.5-6.5 2.9-6.5 6.5-6.5 6.5 2.9 6.5 6.5zM12 17c-2.2 0-4-1.8-4-4s1.8-4 4-4 4 1.8 4 4-1.8 4-4 4z" }) })
+  },
+  {
+    name: "Stripe",
+    svg: /* @__PURE__ */ jsxRuntimeExports.jsx("svg", { viewBox: "0 0 24 24", fill: "currentColor", className: "w-6 h-6", children: /* @__PURE__ */ jsxRuntimeExports.jsx("path", { d: "M13.962 8.885c-2.455 0-3.828 1.28-3.828 3.047 0 2.902 3.98 2.427 3.98 3.743 0 .531-.494.814-1.341.814-1.132 0-2.522-.387-3.69-.974l-.454 3.036c1.233.56 2.766.924 4.184.924 2.593 0 4.148-1.28 4.148-3.09 0-2.993-3.98-2.473-3.98-3.766 0-.494.417-.79 1.25-.79.948 0 2.213.315 3.14.73l.484-3.047c-1.11-.476-2.528-.627-3.893-.627zm-10.457.734h3.145V22h-3.145V9.619zm0-4.83h3.145v3.136h-3.145V4.789zm13.125 4.83h3.146V22h-3.146V9.619zm0-4.83h3.146v3.136h-3.146V4.789z" }) })
+  },
+  {
+    name: "Airbnb",
+    svg: /* @__PURE__ */ jsxRuntimeExports.jsx("svg", { viewBox: "0 0 24 24", fill: "currentColor", className: "w-6 h-6", children: /* @__PURE__ */ jsxRuntimeExports.jsx("path", { d: "M12 1.5a7.5 7.5 0 00-6.12 11.83L12 22.5l6.12-9.17A7.5 7.5 0 0012 1.5zm0 10.5a3 3 0 110-6 3 3 0 010 6z" }) })
+  },
+  {
+    name: "Netflix",
+    svg: /* @__PURE__ */ jsxRuntimeExports.jsx("svg", { viewBox: "0 0 24 24", fill: "currentColor", className: "w-6 h-6", children: /* @__PURE__ */ jsxRuntimeExports.jsx("path", { d: "M5.5 0h4v18.5c0 .8.5 1.5 1.2 1.8l-5.2-1.3V0zm9 0h4v24l-4-1V0zm-4.5 10.5L14.5 0h4l-9 24v-1.5L10 10.5z" }) })
+  }
+];
+function Chip({ name, svg }) {
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "mx-6 flex shrink-0 items-center gap-4 rounded-2xl border border-blue-100 bg-blue-50/30 px-8 py-5 shadow-[0_4px_20px_rgba(37,99,235,0.04)] backdrop-blur-md transition-all duration-300 hover:scale-105 hover:bg-blue-50/50 hover:shadow-[0_8px_30px_rgba(37,99,235,0.08)]", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "text-blue-600/80", children: svg }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "whitespace-nowrap text-lg font-bold tracking-tight text-blue-900/70", children: name })
+  ] });
+}
+function TrustedMarquee() {
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("section", { className: "relative overflow-hidden py-16 sm:py-20", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx("style", { children: marqueeX }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "mb-10 text-center", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "inline-block px-4 py-1.5 rounded-full bg-blue-50 text-blue-600 text-[10px] sm:text-xs font-bold uppercase tracking-[0.2em] mb-4", children: "Industry Leaders" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("h3", { className: "text-2xl sm:text-3xl font-black text-slate-900 tracking-tight", children: "Trusted by the world's best" })
+    ] }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx(
+      "div",
+      {
+        className: "relative",
+        style: {
+          maskImage: "linear-gradient(to right, transparent 0%, black 15%, black 85%, transparent 100%)",
+          WebkitMaskImage: "linear-gradient(to right, transparent 0%, black 15%, black 85%, transparent 100%)"
+        },
+        children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex py-4", style: { animation: "marquee-left 14s linear infinite" }, children: [...companies, ...companies].map((c, i) => /* @__PURE__ */ jsxRuntimeExports.jsx(Chip, { name: c.name, svg: c.svg }, `r1-${i}`)) })
+      }
+    )
+  ] });
+}
+const CVCard1 = () => /* @__PURE__ */ jsxRuntimeExports.jsxs("svg", { viewBox: "0 0 240 320", className: "h-auto w-full", fill: "none", xmlns: "http://www.w3.org/2000/svg", children: [
+  /* @__PURE__ */ jsxRuntimeExports.jsx("rect", { width: "240", height: "320", rx: "12", fill: "#ffffff" }),
+  /* @__PURE__ */ jsxRuntimeExports.jsx("rect", { x: "0.5", y: "0.5", width: "239", height: "319", rx: "11.5", stroke: "#e2e8f0" }),
+  /* @__PURE__ */ jsxRuntimeExports.jsx("rect", { width: "240", height: "72", rx: "12", fill: "#1e40af" }),
+  /* @__PURE__ */ jsxRuntimeExports.jsx("rect", { width: "240", height: "72", fill: "#1e40af" }),
+  /* @__PURE__ */ jsxRuntimeExports.jsx("path", { d: "M0 12C0 5.37 5.37 0 12 0H228C234.63 0 240 5.37 240 12V72H0V12Z", fill: "#1e40af" }),
+  /* @__PURE__ */ jsxRuntimeExports.jsx("circle", { cx: "40", cy: "36", r: "18", fill: "white", fillOpacity: "0.2" }),
+  /* @__PURE__ */ jsxRuntimeExports.jsx("circle", { cx: "40", cy: "36", r: "15", fill: "white" }),
+  /* @__PURE__ */ jsxRuntimeExports.jsx("text", { x: "68", y: "32", fill: "white", fontSize: "14", fontWeight: "bold", fontFamily: "system-ui", children: "James Rivera" }),
+  /* @__PURE__ */ jsxRuntimeExports.jsx("text", { x: "68", y: "48", fill: "#93c5fd", fontSize: "10", fontFamily: "system-ui", children: "Full-Stack Developer" }),
+  /* @__PURE__ */ jsxRuntimeExports.jsx("text", { x: "20", y: "100", fill: "#1e40af", fontSize: "9", fontWeight: "bold", letterSpacing: "1", fontFamily: "system-ui", children: "EXPERIENCE" }),
+  /* @__PURE__ */ jsxRuntimeExports.jsx("rect", { x: "20", y: "112", width: "2", height: "20", fill: "#3b82f6" }),
+  /* @__PURE__ */ jsxRuntimeExports.jsx("text", { x: "30", y: "120", fill: "#0f172a", fontSize: "11", fontWeight: "bold", fontFamily: "system-ui", children: "Stripe" }),
+  /* @__PURE__ */ jsxRuntimeExports.jsx("text", { x: "220", y: "120", fill: "#64748b", fontSize: "8", textAnchor: "end", fontFamily: "system-ui", children: "2022 - Present" }),
+  /* @__PURE__ */ jsxRuntimeExports.jsx("text", { x: "30", y: "132", fill: "#475569", fontSize: "9", fontFamily: "system-ui", children: "Senior Engineer" }),
+  /* @__PURE__ */ jsxRuntimeExports.jsx("rect", { x: "20", y: "146", width: "2", height: "20", fill: "#cbd5e1" }),
+  /* @__PURE__ */ jsxRuntimeExports.jsx("text", { x: "30", y: "154", fill: "#0f172a", fontSize: "11", fontWeight: "bold", fontFamily: "system-ui", children: "Shopify" }),
+  /* @__PURE__ */ jsxRuntimeExports.jsx("text", { x: "220", y: "154", fill: "#64748b", fontSize: "8", textAnchor: "end", fontFamily: "system-ui", children: "2019 - 2022" }),
+  /* @__PURE__ */ jsxRuntimeExports.jsx("text", { x: "30", y: "166", fill: "#475569", fontSize: "9", fontFamily: "system-ui", children: "Software Engineer" }),
+  /* @__PURE__ */ jsxRuntimeExports.jsx("text", { x: "20", y: "200", fill: "#1e40af", fontSize: "9", fontWeight: "bold", letterSpacing: "1", fontFamily: "system-ui", children: "SKILLS" }),
+  /* @__PURE__ */ jsxRuntimeExports.jsx("rect", { x: "20", y: "210", width: "52", height: "18", rx: "9", fill: "#eff6ff" }),
+  /* @__PURE__ */ jsxRuntimeExports.jsx("text", { x: "46", y: "222", fill: "#1d4ed8", fontSize: "8", fontWeight: "600", textAnchor: "middle", fontFamily: "system-ui", children: "React" }),
+  /* @__PURE__ */ jsxRuntimeExports.jsx("rect", { x: "76", y: "210", width: "52", height: "18", rx: "9", fill: "#eff6ff" }),
+  /* @__PURE__ */ jsxRuntimeExports.jsx("text", { x: "102", y: "222", fill: "#1d4ed8", fontSize: "8", fontWeight: "600", textAnchor: "middle", fontFamily: "system-ui", children: "Node.js" }),
+  /* @__PURE__ */ jsxRuntimeExports.jsx("rect", { x: "132", y: "210", width: "62", height: "18", rx: "9", fill: "#eff6ff" }),
+  /* @__PURE__ */ jsxRuntimeExports.jsx("text", { x: "163", y: "222", fill: "#1d4ed8", fontSize: "8", fontWeight: "600", textAnchor: "middle", fontFamily: "system-ui", children: "PostgreSQL" }),
+  /* @__PURE__ */ jsxRuntimeExports.jsx("rect", { x: "20", y: "232", width: "56", height: "18", rx: "9", fill: "#eff6ff" }),
+  /* @__PURE__ */ jsxRuntimeExports.jsx("text", { x: "48", y: "244", fill: "#1d4ed8", fontSize: "8", fontWeight: "600", textAnchor: "middle", fontFamily: "system-ui", children: "TypeScript" }),
+  /* @__PURE__ */ jsxRuntimeExports.jsx("text", { x: "20", y: "276", fill: "#1e40af", fontSize: "9", fontWeight: "bold", letterSpacing: "1", fontFamily: "system-ui", children: "EDUCATION" }),
+  /* @__PURE__ */ jsxRuntimeExports.jsx("text", { x: "20", y: "292", fill: "#0f172a", fontSize: "10", fontWeight: "bold", fontFamily: "system-ui", children: "MIT" }),
+  /* @__PURE__ */ jsxRuntimeExports.jsx("text", { x: "20", y: "304", fill: "#475569", fontSize: "9", fontFamily: "system-ui", children: "B.S. Computer Science, 2019" })
+] });
+const CVCard2 = () => /* @__PURE__ */ jsxRuntimeExports.jsxs("svg", { viewBox: "0 0 240 320", className: "h-auto w-full", fill: "none", xmlns: "http://www.w3.org/2000/svg", children: [
+  /* @__PURE__ */ jsxRuntimeExports.jsx("rect", { width: "240", height: "320", rx: "12", fill: "#ffffff" }),
+  /* @__PURE__ */ jsxRuntimeExports.jsx("rect", { x: "0.5", y: "0.5", width: "239", height: "319", rx: "11.5", stroke: "#e2e8f0" }),
+  /* @__PURE__ */ jsxRuntimeExports.jsx("rect", { x: "20", y: "20", width: "200", height: "2", fill: "#2563eb" }),
+  /* @__PURE__ */ jsxRuntimeExports.jsx("text", { x: "20", y: "50", fill: "#0f172a", fontSize: "18", fontWeight: "800", fontFamily: "system-ui", children: "MARIA SANTOS" }),
+  /* @__PURE__ */ jsxRuntimeExports.jsx("text", { x: "20", y: "66", fill: "#64748b", fontSize: "9", fontFamily: "system-ui", children: "Product Designer · San Francisco, CA" }),
+  /* @__PURE__ */ jsxRuntimeExports.jsx("text", { x: "20", y: "94", fill: "#2563eb", fontSize: "9", fontWeight: "bold", letterSpacing: "1", fontFamily: "system-ui", children: "SUMMARY" }),
+  /* @__PURE__ */ jsxRuntimeExports.jsx("text", { x: "20", y: "108", fill: "#475569", fontSize: "8", fontFamily: "system-ui", children: "Award-winning product designer with 6+ years shaping" }),
+  /* @__PURE__ */ jsxRuntimeExports.jsx("text", { x: "20", y: "119", fill: "#475569", fontSize: "8", fontFamily: "system-ui", children: "consumer experiences at leading tech companies." }),
+  /* @__PURE__ */ jsxRuntimeExports.jsx("text", { x: "20", y: "146", fill: "#2563eb", fontSize: "9", fontWeight: "bold", letterSpacing: "1", fontFamily: "system-ui", children: "EXPERIENCE" }),
+  /* @__PURE__ */ jsxRuntimeExports.jsx("text", { x: "20", y: "162", fill: "#0f172a", fontSize: "10", fontWeight: "bold", fontFamily: "system-ui", children: "Airbnb" }),
+  /* @__PURE__ */ jsxRuntimeExports.jsx("text", { x: "220", y: "162", fill: "#64748b", fontSize: "8", textAnchor: "end", fontFamily: "system-ui", children: "2021 - Present" }),
+  /* @__PURE__ */ jsxRuntimeExports.jsx("text", { x: "20", y: "174", fill: "#475569", fontSize: "9", fontStyle: "italic", fontFamily: "system-ui", children: "Lead Product Designer" }),
+  /* @__PURE__ */ jsxRuntimeExports.jsx("circle", { cx: "26", cy: "186", r: "1.5", fill: "#3b82f6" }),
+  /* @__PURE__ */ jsxRuntimeExports.jsx("text", { x: "32", y: "189", fill: "#475569", fontSize: "7.5", fontFamily: "system-ui", children: "Redesigned host onboarding, increasing completion by 34%" }),
+  /* @__PURE__ */ jsxRuntimeExports.jsx("text", { x: "20", y: "210", fill: "#0f172a", fontSize: "10", fontWeight: "bold", fontFamily: "system-ui", children: "Spotify" }),
+  /* @__PURE__ */ jsxRuntimeExports.jsx("text", { x: "220", y: "210", fill: "#64748b", fontSize: "8", textAnchor: "end", fontFamily: "system-ui", children: "2018 - 2021" }),
+  /* @__PURE__ */ jsxRuntimeExports.jsx("text", { x: "20", y: "222", fill: "#475569", fontSize: "9", fontStyle: "italic", fontFamily: "system-ui", children: "Senior Designer" }),
+  /* @__PURE__ */ jsxRuntimeExports.jsx("text", { x: "20", y: "250", fill: "#2563eb", fontSize: "9", fontWeight: "bold", letterSpacing: "1", fontFamily: "system-ui", children: "TOOLS" }),
+  /* @__PURE__ */ jsxRuntimeExports.jsx("rect", { x: "20", y: "258", width: "46", height: "18", rx: "9", fill: "#eff6ff" }),
+  /* @__PURE__ */ jsxRuntimeExports.jsx("text", { x: "43", y: "270", fill: "#1d4ed8", fontSize: "8", fontWeight: "600", textAnchor: "middle", fontFamily: "system-ui", children: "Figma" }),
+  /* @__PURE__ */ jsxRuntimeExports.jsx("rect", { x: "70", y: "258", width: "62", height: "18", rx: "9", fill: "#eff6ff" }),
+  /* @__PURE__ */ jsxRuntimeExports.jsx("text", { x: "101", y: "270", fill: "#1d4ed8", fontSize: "8", fontWeight: "600", textAnchor: "middle", fontFamily: "system-ui", children: "Protopie" }),
+  /* @__PURE__ */ jsxRuntimeExports.jsx("rect", { x: "136", y: "258", width: "54", height: "18", rx: "9", fill: "#eff6ff" }),
+  /* @__PURE__ */ jsxRuntimeExports.jsx("text", { x: "163", y: "270", fill: "#1d4ed8", fontSize: "8", fontWeight: "600", textAnchor: "middle", fontFamily: "system-ui", children: "Framer" }),
+  /* @__PURE__ */ jsxRuntimeExports.jsx("path", { d: "M20 296 L220 296", stroke: "#f1f5f9", strokeWidth: "4", strokeLinecap: "round" }),
+  /* @__PURE__ */ jsxRuntimeExports.jsx("path", { d: "M20 296 L190 296", stroke: "#2563eb", strokeWidth: "4", strokeLinecap: "round" }),
+  /* @__PURE__ */ jsxRuntimeExports.jsx("text", { x: "220", y: "290", fill: "#2563eb", fontSize: "8", fontWeight: "bold", textAnchor: "end", fontFamily: "system-ui", children: "95%" })
+] });
+const CVCard3 = () => /* @__PURE__ */ jsxRuntimeExports.jsxs("svg", { viewBox: "0 0 240 320", className: "h-auto w-full", fill: "none", xmlns: "http://www.w3.org/2000/svg", children: [
+  /* @__PURE__ */ jsxRuntimeExports.jsx("rect", { width: "240", height: "320", rx: "12", fill: "#ffffff" }),
+  /* @__PURE__ */ jsxRuntimeExports.jsx("rect", { x: "0.5", y: "0.5", width: "239", height: "319", rx: "11.5", stroke: "#e2e8f0" }),
+  /* @__PURE__ */ jsxRuntimeExports.jsx("rect", { x: "0", y: "0", width: "80", height: "320", rx: "12", fill: "#0f172a" }),
+  /* @__PURE__ */ jsxRuntimeExports.jsx("rect", { x: "0", y: "0", width: "80", height: "320", fill: "#0f172a" }),
+  /* @__PURE__ */ jsxRuntimeExports.jsx("path", { d: "M0 12C0 5.37 5.37 0 12 0H80V320H12C5.37 320 0 314.63 0 308V12Z", fill: "#0f172a" }),
+  /* @__PURE__ */ jsxRuntimeExports.jsx("circle", { cx: "40", cy: "44", r: "22", fill: "#1e40af" }),
+  /* @__PURE__ */ jsxRuntimeExports.jsx("text", { x: "40", y: "49", fill: "white", fontSize: "16", fontWeight: "bold", textAnchor: "middle", fontFamily: "system-ui", children: "AK" }),
+  /* @__PURE__ */ jsxRuntimeExports.jsx("text", { x: "40", y: "82", fill: "white", fontSize: "8", fontWeight: "bold", textAnchor: "middle", fontFamily: "system-ui", children: "SKILLS" }),
+  /* @__PURE__ */ jsxRuntimeExports.jsx("text", { x: "40", y: "102", fill: "#93c5fd", fontSize: "7", textAnchor: "middle", fontFamily: "system-ui", children: "Python" }),
+  /* @__PURE__ */ jsxRuntimeExports.jsx("text", { x: "40", y: "116", fill: "#93c5fd", fontSize: "7", textAnchor: "middle", fontFamily: "system-ui", children: "ML/AI" }),
+  /* @__PURE__ */ jsxRuntimeExports.jsx("text", { x: "40", y: "130", fill: "#93c5fd", fontSize: "7", textAnchor: "middle", fontFamily: "system-ui", children: "AWS" }),
+  /* @__PURE__ */ jsxRuntimeExports.jsx("text", { x: "40", y: "144", fill: "#93c5fd", fontSize: "7", textAnchor: "middle", fontFamily: "system-ui", children: "Docker" }),
+  /* @__PURE__ */ jsxRuntimeExports.jsx("text", { x: "40", y: "158", fill: "#93c5fd", fontSize: "7", textAnchor: "middle", fontFamily: "system-ui", children: "TensorFlow" }),
+  /* @__PURE__ */ jsxRuntimeExports.jsx("text", { x: "40", y: "186", fill: "white", fontSize: "8", fontWeight: "bold", textAnchor: "middle", fontFamily: "system-ui", children: "CONTACT" }),
+  /* @__PURE__ */ jsxRuntimeExports.jsx("text", { x: "40", y: "202", fill: "#94a3b8", fontSize: "6", textAnchor: "middle", fontFamily: "system-ui", children: "alex@mail.com" }),
+  /* @__PURE__ */ jsxRuntimeExports.jsx("text", { x: "40", y: "216", fill: "#94a3b8", fontSize: "6", textAnchor: "middle", fontFamily: "system-ui", children: "NYC, USA" }),
+  /* @__PURE__ */ jsxRuntimeExports.jsx("text", { x: "100", y: "36", fill: "#0f172a", fontSize: "16", fontWeight: "800", fontFamily: "system-ui", children: "Alex Kim" }),
+  /* @__PURE__ */ jsxRuntimeExports.jsx("text", { x: "100", y: "52", fill: "#64748b", fontSize: "9", fontFamily: "system-ui", children: "ML Engineer · 5 Years Exp." }),
+  /* @__PURE__ */ jsxRuntimeExports.jsx("text", { x: "100", y: "80", fill: "#1e40af", fontSize: "9", fontWeight: "bold", letterSpacing: "1", fontFamily: "system-ui", children: "EXPERIENCE" }),
+  /* @__PURE__ */ jsxRuntimeExports.jsx("text", { x: "100", y: "96", fill: "#0f172a", fontSize: "10", fontWeight: "bold", fontFamily: "system-ui", children: "OpenAI" }),
+  /* @__PURE__ */ jsxRuntimeExports.jsx("text", { x: "232", y: "96", fill: "#64748b", fontSize: "8", textAnchor: "end", fontFamily: "system-ui", children: "2023 - Now" }),
+  /* @__PURE__ */ jsxRuntimeExports.jsx("text", { x: "100", y: "108", fill: "#475569", fontSize: "9", fontFamily: "system-ui", children: "Research Engineer" }),
+  /* @__PURE__ */ jsxRuntimeExports.jsx("text", { x: "100", y: "130", fill: "#0f172a", fontSize: "10", fontWeight: "bold", fontFamily: "system-ui", children: "DeepMind" }),
+  /* @__PURE__ */ jsxRuntimeExports.jsx("text", { x: "232", y: "130", fill: "#64748b", fontSize: "8", textAnchor: "end", fontFamily: "system-ui", children: "2020 - 2023" }),
+  /* @__PURE__ */ jsxRuntimeExports.jsx("text", { x: "100", y: "142", fill: "#475569", fontSize: "9", fontFamily: "system-ui", children: "ML Scientist" }),
+  /* @__PURE__ */ jsxRuntimeExports.jsx("text", { x: "100", y: "172", fill: "#1e40af", fontSize: "9", fontWeight: "bold", letterSpacing: "1", fontFamily: "system-ui", children: "EDUCATION" }),
+  /* @__PURE__ */ jsxRuntimeExports.jsx("text", { x: "100", y: "188", fill: "#0f172a", fontSize: "10", fontWeight: "bold", fontFamily: "system-ui", children: "Stanford University" }),
+  /* @__PURE__ */ jsxRuntimeExports.jsx("text", { x: "100", y: "200", fill: "#475569", fontSize: "9", fontFamily: "system-ui", children: "M.S. Computer Science, 2020" }),
+  /* @__PURE__ */ jsxRuntimeExports.jsx("text", { x: "100", y: "228", fill: "#1e40af", fontSize: "9", fontWeight: "bold", letterSpacing: "1", fontFamily: "system-ui", children: "PUBLICATIONS" }),
+  /* @__PURE__ */ jsxRuntimeExports.jsx("text", { x: "100", y: "244", fill: "#475569", fontSize: "7.5", fontFamily: "system-ui", children: "NeurIPS 2023 · Best Paper Award" }),
+  /* @__PURE__ */ jsxRuntimeExports.jsx("text", { x: "100", y: "256", fill: "#475569", fontSize: "7.5", fontFamily: "system-ui", children: "ICML 2022 · Spotlight Presentation" })
+] });
+const CVCard4 = () => /* @__PURE__ */ jsxRuntimeExports.jsxs("svg", { viewBox: "0 0 240 320", className: "h-auto w-full", fill: "none", xmlns: "http://www.w3.org/2000/svg", children: [
+  /* @__PURE__ */ jsxRuntimeExports.jsx("rect", { width: "240", height: "320", rx: "12", fill: "#ffffff" }),
+  /* @__PURE__ */ jsxRuntimeExports.jsx("rect", { x: "0.5", y: "0.5", width: "239", height: "319", rx: "11.5", stroke: "#e2e8f0" }),
+  /* @__PURE__ */ jsxRuntimeExports.jsx("defs", { children: /* @__PURE__ */ jsxRuntimeExports.jsxs("linearGradient", { id: "card4-grad", x1: "0", y1: "0", x2: "240", y2: "60", gradientUnits: "userSpaceOnUse", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx("stop", { stopColor: "#059669" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("stop", { offset: "1", stopColor: "#10b981" })
+  ] }) }),
+  /* @__PURE__ */ jsxRuntimeExports.jsx("path", { d: "M0 12C0 5.37 5.37 0 12 0H228C234.63 0 240 5.37 240 12V60H0V12Z", fill: "url(#card4-grad)" }),
+  /* @__PURE__ */ jsxRuntimeExports.jsx("text", { x: "20", y: "28", fill: "white", fontSize: "14", fontWeight: "bold", fontFamily: "system-ui", children: "Emma Johnson" }),
+  /* @__PURE__ */ jsxRuntimeExports.jsx("text", { x: "20", y: "44", fill: "#a7f3d0", fontSize: "10", fontFamily: "system-ui", children: "Marketing Director · London" }),
+  /* @__PURE__ */ jsxRuntimeExports.jsx("text", { x: "20", y: "86", fill: "#059669", fontSize: "9", fontWeight: "bold", letterSpacing: "1", fontFamily: "system-ui", children: "KEY ACHIEVEMENTS" }),
+  /* @__PURE__ */ jsxRuntimeExports.jsx("circle", { cx: "26", cy: "102", r: "1.5", fill: "#10b981" }),
+  /* @__PURE__ */ jsxRuntimeExports.jsx("text", { x: "32", y: "105", fill: "#475569", fontSize: "8", fontFamily: "system-ui", children: "Grew organic traffic 280% in 18 months" }),
+  /* @__PURE__ */ jsxRuntimeExports.jsx("circle", { cx: "26", cy: "118", r: "1.5", fill: "#10b981" }),
+  /* @__PURE__ */ jsxRuntimeExports.jsx("text", { x: "32", y: "121", fill: "#475569", fontSize: "8", fontFamily: "system-ui", children: "Managed $2.4M annual ad budget" }),
+  /* @__PURE__ */ jsxRuntimeExports.jsx("circle", { cx: "26", cy: "134", r: "1.5", fill: "#10b981" }),
+  /* @__PURE__ */ jsxRuntimeExports.jsx("text", { x: "32", y: "137", fill: "#475569", fontSize: "8", fontFamily: "system-ui", children: "Led team of 12 across 3 markets" }),
+  /* @__PURE__ */ jsxRuntimeExports.jsx("text", { x: "20", y: "164", fill: "#059669", fontSize: "9", fontWeight: "bold", letterSpacing: "1", fontFamily: "system-ui", children: "EXPERIENCE" }),
+  /* @__PURE__ */ jsxRuntimeExports.jsx("text", { x: "20", y: "180", fill: "#0f172a", fontSize: "10", fontWeight: "bold", fontFamily: "system-ui", children: "Nike" }),
+  /* @__PURE__ */ jsxRuntimeExports.jsx("text", { x: "220", y: "180", fill: "#64748b", fontSize: "8", textAnchor: "end", fontFamily: "system-ui", children: "2021 - Present" }),
+  /* @__PURE__ */ jsxRuntimeExports.jsx("text", { x: "20", y: "192", fill: "#475569", fontSize: "9", fontFamily: "system-ui", children: "Head of Digital Marketing" }),
+  /* @__PURE__ */ jsxRuntimeExports.jsx("text", { x: "20", y: "212", fill: "#0f172a", fontSize: "10", fontWeight: "bold", fontFamily: "system-ui", children: "Unilever" }),
+  /* @__PURE__ */ jsxRuntimeExports.jsx("text", { x: "220", y: "212", fill: "#64748b", fontSize: "8", textAnchor: "end", fontFamily: "system-ui", children: "2018 - 2021" }),
+  /* @__PURE__ */ jsxRuntimeExports.jsx("text", { x: "20", y: "224", fill: "#475569", fontSize: "9", fontFamily: "system-ui", children: "Senior Brand Strategist" }),
+  /* @__PURE__ */ jsxRuntimeExports.jsx("text", { x: "20", y: "254", fill: "#059669", fontSize: "9", fontWeight: "bold", letterSpacing: "1", fontFamily: "system-ui", children: "CERTIFICATIONS" }),
+  /* @__PURE__ */ jsxRuntimeExports.jsx("text", { x: "20", y: "270", fill: "#475569", fontSize: "8", fontFamily: "system-ui", children: "Google Analytics Professional" }),
+  /* @__PURE__ */ jsxRuntimeExports.jsx("text", { x: "20", y: "284", fill: "#475569", fontSize: "8", fontFamily: "system-ui", children: "HubSpot Inbound Marketing" }),
+  /* @__PURE__ */ jsxRuntimeExports.jsx("path", { d: "M20 304 L220 304", stroke: "#f1f5f9", strokeWidth: "4", strokeLinecap: "round" }),
+  /* @__PURE__ */ jsxRuntimeExports.jsx("path", { d: "M20 304 L200 304", stroke: "#10b981", strokeWidth: "4", strokeLinecap: "round" })
+] });
+const CVCard5 = () => /* @__PURE__ */ jsxRuntimeExports.jsxs("svg", { viewBox: "0 0 240 320", className: "h-auto w-full", fill: "none", xmlns: "http://www.w3.org/2000/svg", children: [
+  /* @__PURE__ */ jsxRuntimeExports.jsx("rect", { width: "240", height: "320", rx: "12", fill: "#ffffff" }),
+  /* @__PURE__ */ jsxRuntimeExports.jsx("rect", { x: "0.5", y: "0.5", width: "239", height: "319", rx: "11.5", stroke: "#e2e8f0" }),
+  /* @__PURE__ */ jsxRuntimeExports.jsx("text", { x: "120", y: "36", fill: "#0f172a", fontSize: "17", fontWeight: "800", textAnchor: "middle", fontFamily: "system-ui", children: "DAVID CHEN" }),
+  /* @__PURE__ */ jsxRuntimeExports.jsx("text", { x: "120", y: "52", fill: "#64748b", fontSize: "9", textAnchor: "middle", fontFamily: "system-ui", children: "Data Scientist · Toronto, Canada" }),
+  /* @__PURE__ */ jsxRuntimeExports.jsx("path", { d: "M40 62 L200 62", stroke: "#2563eb", strokeWidth: "2" }),
+  /* @__PURE__ */ jsxRuntimeExports.jsx("text", { x: "20", y: "84", fill: "#2563eb", fontSize: "9", fontWeight: "bold", letterSpacing: "1", fontFamily: "system-ui", children: "PROFILE" }),
+  /* @__PURE__ */ jsxRuntimeExports.jsx("text", { x: "20", y: "98", fill: "#475569", fontSize: "8", fontFamily: "system-ui", children: "Data scientist specializing in predictive analytics and" }),
+  /* @__PURE__ */ jsxRuntimeExports.jsx("text", { x: "20", y: "109", fill: "#475569", fontSize: "8", fontFamily: "system-ui", children: "NLP. Built models processing 10M+ daily records." }),
+  /* @__PURE__ */ jsxRuntimeExports.jsx("text", { x: "20", y: "134", fill: "#2563eb", fontSize: "9", fontWeight: "bold", letterSpacing: "1", fontFamily: "system-ui", children: "EXPERIENCE" }),
+  /* @__PURE__ */ jsxRuntimeExports.jsx("text", { x: "20", y: "150", fill: "#0f172a", fontSize: "10", fontWeight: "bold", fontFamily: "system-ui", children: "Amazon" }),
+  /* @__PURE__ */ jsxRuntimeExports.jsx("text", { x: "220", y: "150", fill: "#64748b", fontSize: "8", textAnchor: "end", fontFamily: "system-ui", children: "2021 - Present" }),
+  /* @__PURE__ */ jsxRuntimeExports.jsx("text", { x: "20", y: "162", fill: "#475569", fontSize: "9", fontStyle: "italic", fontFamily: "system-ui", children: "Senior Data Scientist" }),
+  /* @__PURE__ */ jsxRuntimeExports.jsx("text", { x: "20", y: "182", fill: "#0f172a", fontSize: "10", fontWeight: "bold", fontFamily: "system-ui", children: "Netflix" }),
+  /* @__PURE__ */ jsxRuntimeExports.jsx("text", { x: "220", y: "182", fill: "#64748b", fontSize: "8", textAnchor: "end", fontFamily: "system-ui", children: "2018 - 2021" }),
+  /* @__PURE__ */ jsxRuntimeExports.jsx("text", { x: "20", y: "194", fill: "#475569", fontSize: "9", fontStyle: "italic", fontFamily: "system-ui", children: "Data Analyst → Data Scientist" }),
+  /* @__PURE__ */ jsxRuntimeExports.jsx("text", { x: "20", y: "220", fill: "#2563eb", fontSize: "9", fontWeight: "bold", letterSpacing: "1", fontFamily: "system-ui", children: "TECH STACK" }),
+  /* @__PURE__ */ jsxRuntimeExports.jsx("rect", { x: "20", y: "228", width: "48", height: "18", rx: "9", fill: "#eff6ff" }),
+  /* @__PURE__ */ jsxRuntimeExports.jsx("text", { x: "44", y: "240", fill: "#1d4ed8", fontSize: "8", fontWeight: "600", textAnchor: "middle", fontFamily: "system-ui", children: "Python" }),
+  /* @__PURE__ */ jsxRuntimeExports.jsx("rect", { x: "72", y: "228", width: "32", height: "18", rx: "9", fill: "#eff6ff" }),
+  /* @__PURE__ */ jsxRuntimeExports.jsx("text", { x: "88", y: "240", fill: "#1d4ed8", fontSize: "8", fontWeight: "600", textAnchor: "middle", fontFamily: "system-ui", children: "SQL" }),
+  /* @__PURE__ */ jsxRuntimeExports.jsx("rect", { x: "108", y: "228", width: "54", height: "18", rx: "9", fill: "#eff6ff" }),
+  /* @__PURE__ */ jsxRuntimeExports.jsx("text", { x: "135", y: "240", fill: "#1d4ed8", fontSize: "8", fontWeight: "600", textAnchor: "middle", fontFamily: "system-ui", children: "PyTorch" }),
+  /* @__PURE__ */ jsxRuntimeExports.jsx("rect", { x: "166", y: "228", width: "48", height: "18", rx: "9", fill: "#eff6ff" }),
+  /* @__PURE__ */ jsxRuntimeExports.jsx("text", { x: "190", y: "240", fill: "#1d4ed8", fontSize: "8", fontWeight: "600", textAnchor: "middle", fontFamily: "system-ui", children: "Spark" }),
+  /* @__PURE__ */ jsxRuntimeExports.jsx("text", { x: "20", y: "272", fill: "#2563eb", fontSize: "9", fontWeight: "bold", letterSpacing: "1", fontFamily: "system-ui", children: "EDUCATION" }),
+  /* @__PURE__ */ jsxRuntimeExports.jsx("text", { x: "20", y: "288", fill: "#0f172a", fontSize: "10", fontWeight: "bold", fontFamily: "system-ui", children: "U of Toronto" }),
+  /* @__PURE__ */ jsxRuntimeExports.jsx("text", { x: "20", y: "300", fill: "#475569", fontSize: "9", fontFamily: "system-ui", children: "M.Sc. Statistics, 2018" })
+] });
+const copy = {
+  en: {
+    dir: "ltr",
+    badge: "AI-powered · Free to start",
+    heroTitle: "Your career memory,",
+    heroTitleAccent: "turned into a resume.",
+    heroBody: "Tell us your story. We build the resume.",
+    heroCta: "Build my resume",
+    heroSecondary: "Browse templates"
+  },
+  ku: {
+    dir: "rtl",
+    badge: "زیرەکی دەستکرد · دەستپێکردنی خۆڕایی",
+    heroTitle: "بیرەوەرییەکانت،",
+    heroTitleAccent: "بگۆڕە بۆ سیڤی.",
+    heroBody: "چیرۆکەکەت بگێڕە. ئێمە سیڤییەکەت دادەمەزرێنین.",
+    heroCta: "سیڤییەکەم دروست بکە",
+    heroSecondary: "قاڵبەکان ببینە"
+  }
+};
+function DirectionArrow$1({ language, className }) {
+  return language === "ku" ? /* @__PURE__ */ jsxRuntimeExports.jsx(ArrowLeft, { className }) : /* @__PURE__ */ jsxRuntimeExports.jsx(ArrowRight, { className });
+}
+const marqueeCSS = `
+@keyframes marquee-down {
+  0%   { transform: translateY(0); }
+  100% { transform: translateY(-50%); }
+}
+@keyframes marquee-up {
+  0%   { transform: translateY(-50%); }
+  100% { transform: translateY(0); }
+}
+`;
+const leftCards = [LeftCardSVG, CVCard1, CVCard3, CenterCardSVG, CVCard5];
+const rightCards = [CVCard2, RightCardSVG, CVCard4, LeftCardSVG, CVCard3];
+function MarqueeColumns() {
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx("style", { children: marqueeCSS }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "relative flex h-full w-full items-start justify-center gap-2 overflow-hidden sm:gap-4", dir: "ltr", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx(
+        "div",
+        {
+          className: "relative overflow-hidden",
+          style: { width: "46%", maxWidth: "100%", height: "100%" },
+          children: /* @__PURE__ */ jsxRuntimeExports.jsxs(
+            "div",
+            {
+              className: "flex flex-col gap-2 sm:gap-4",
+              style: { animation: "marquee-down 22s linear infinite" },
+              children: [
+                leftCards.map((Card, i) => /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "shrink-0 overflow-hidden rounded-lg shadow-[0_6px_20px_rgba(0,0,0,0.12)] sm:rounded-xl", children: /* @__PURE__ */ jsxRuntimeExports.jsx(Card, {}) }, `l-${i}`)),
+                leftCards.map((Card, i) => /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "shrink-0 overflow-hidden rounded-lg shadow-[0_6px_20px_rgba(0,0,0,0.12)] sm:rounded-xl", children: /* @__PURE__ */ jsxRuntimeExports.jsx(Card, {}) }, `l2-${i}`))
+              ]
+            }
+          )
+        }
+      ),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(
+        "div",
+        {
+          className: "relative overflow-hidden pt-10 sm:pt-16",
+          style: { width: "46%", maxWidth: "100%", height: "100%" },
+          children: /* @__PURE__ */ jsxRuntimeExports.jsxs(
+            "div",
+            {
+              className: "flex flex-col gap-2 sm:gap-4",
+              style: { animation: "marquee-up 20s linear infinite" },
+              children: [
+                rightCards.map((Card, i) => /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "shrink-0 overflow-hidden rounded-lg shadow-[0_6px_20px_rgba(0,0,0,0.12)] sm:rounded-xl", children: /* @__PURE__ */ jsxRuntimeExports.jsx(Card, {}) }, `r-${i}`)),
+                rightCards.map((Card, i) => /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "shrink-0 overflow-hidden rounded-lg shadow-[0_6px_20px_rgba(0,0,0,0.12)] sm:rounded-xl", children: /* @__PURE__ */ jsxRuntimeExports.jsx(Card, {}) }, `r2-${i}`))
+              ]
+            }
+          )
+        }
+      )
+    ] })
+  ] });
+}
+function HeroV2({ language }) {
+  const t = copy[language];
+  return /* @__PURE__ */ jsxRuntimeExports.jsx("section", { className: "flex-1 max-w-[1600px] w-full mx-auto px-3 sm:px-6 relative z-10 pt-4 sm:pt-6", dir: "ltr", children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "relative overflow-hidden hero-gradient rounded-[2rem] sm:rounded-[2.5rem]", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "relative grid grid-cols-[58%_42%] items-center md:grid-cols-[1.1fr_0.9fr] md:gap-4", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsxs(
+      "div",
+      {
+        className: "relative z-10 flex flex-col pl-4 pr-3 py-8 sm:px-10 sm:py-14 md:px-14 md:py-20 lg:px-16 lg:py-24",
+        dir: t.dir,
+        children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx(
+            motion.div,
+            {
+              initial: { opacity: 0, y: 16 },
+              animate: { opacity: 1, y: 0 },
+              transition: { duration: 0.5 },
+              className: "mb-3 sm:mb-5",
+              children: /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "inline-flex items-center gap-1 rounded-full border border-blue-400/30 bg-blue-500/20 px-2.5 py-1 text-[9px] font-semibold text-blue-100 shadow-[0_0_15px_rgba(59,130,246,0.2)] backdrop-blur-sm sm:gap-2 sm:px-4 sm:py-1.5 sm:text-xs", children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsx(Sparkles, { className: "h-2.5 w-2.5 text-blue-200 sm:h-3.5 sm:w-3.5" }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "hidden xs:inline", children: t.badge }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "xs:hidden", children: "AI · Free" })
+              ] })
+            }
+          ),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs(
+            motion.h1,
+            {
+              initial: { opacity: 0, y: 28 },
+              animate: { opacity: 1, y: 0 },
+              transition: { duration: 0.6, delay: 0.1 },
+              className: "text-[clamp(1.8rem,5.8vw,4rem)] font-extrabold leading-[1.08] tracking-tight text-white sm:text-[clamp(2rem,5.5vw,4rem)]",
+              children: [
+                t.heroTitle,
+                /* @__PURE__ */ jsxRuntimeExports.jsx("br", {}),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "bg-gradient-to-r from-blue-200 to-blue-100 bg-clip-text text-transparent", children: t.heroTitleAccent })
+              ]
+            }
+          ),
+          /* @__PURE__ */ jsxRuntimeExports.jsx(
+            motion.p,
+            {
+              initial: { opacity: 0, y: 16 },
+              animate: { opacity: 1, y: 0 },
+              transition: { delay: 0.2, duration: 0.5 },
+              className: "mt-2 hidden text-[11px] font-medium leading-5 text-blue-100/75 sm:mt-5 sm:block sm:max-w-[36ch] sm:text-lg sm:leading-8",
+              children: t.heroBody
+            }
+          ),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs(
+            motion.div,
+            {
+              initial: { opacity: 0, y: 12 },
+              animate: { opacity: 1, y: 0 },
+              transition: { delay: 0.35, duration: 0.5 },
+              className: "mt-4 flex flex-row flex-wrap gap-2 sm:mt-8 sm:items-center sm:gap-4",
+              children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsxs(
+                  Link,
+                  {
+                    to: "/onboarding",
+                    id: "hero-v2-cta",
+                    className: "relative inline-flex items-center justify-center gap-1.5 rounded-full bg-gradient-to-b from-blue-500 to-blue-600 px-4 py-2.5 text-xs font-bold text-white shadow-[0_8px_24px_rgba(37,99,235,0.25),inset_0_4px_12px_rgba(255,255,255,0.15),inset_0_-6px_16px_rgba(30,58,138,0.15)] transition-all duration-300 hover:shadow-[0_12px_32px_rgba(37,99,235,0.35)] active:scale-95 sm:px-8 sm:py-3.5 sm:text-sm",
+                    children: [
+                      /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "drop-shadow-[0_1px_2px_rgba(0,0,0,0.1)]", children: t.heroCta }),
+                      /* @__PURE__ */ jsxRuntimeExports.jsx(DirectionArrow$1, { language, className: "h-3 w-3 drop-shadow-[0_1px_2px_rgba(0,0,0,0.1)] sm:h-4 sm:w-4" })
+                    ]
+                  }
+                ),
+                /* @__PURE__ */ jsxRuntimeExports.jsxs(
+                  Link,
+                  {
+                    to: "/templates",
+                    className: "group relative inline-flex items-center justify-center gap-1.5 rounded-full border border-white/30 bg-gradient-to-b from-white/80 to-blue-50/60 px-4 py-2.5 text-xs font-bold text-blue-800 backdrop-blur-xl shadow-[0_8px_24px_rgba(0,0,0,0.04),inset_0_4px_12px_rgba(255,255,255,0.8)] transition-all duration-300 hover:bg-white/95 active:scale-95 sm:px-8 sm:py-3.5 sm:text-sm",
+                    children: [
+                      /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "drop-shadow-[0_1px_2px_rgba(255,255,255,0.5)]", children: t.heroSecondary }),
+                      /* @__PURE__ */ jsxRuntimeExports.jsx(ArrowUpRight, { className: "h-3 w-3 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 sm:h-4 sm:w-4" })
+                    ]
+                  }
+                )
+              ]
+            }
+          )
+        ]
+      }
+    ),
+    /* @__PURE__ */ jsxRuntimeExports.jsx(
+      "div",
+      {
+        className: "relative z-10 h-[300px] overflow-hidden sm:h-[420px] md:h-[520px] lg:h-[620px]",
+        style: {
+          maskImage: "linear-gradient(to bottom, transparent 0%, black 8%, black 92%, transparent 100%)",
+          WebkitMaskImage: "linear-gradient(to bottom, transparent 0%, black 8%, black 92%, transparent 100%)"
+        },
+        children: /* @__PURE__ */ jsxRuntimeExports.jsx(MarqueeColumns, {})
+      }
+    )
+  ] }) }) });
+}
+function Counter({
+  to,
+  suffix = ""
+}) {
+  const [val, setVal] = reactExports.useState(0);
+  const ref = reactExports.useRef(false);
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs(motion.span, { onViewportEnter: () => {
+    if (ref.current) return;
+    ref.current = true;
+    animate(0, to, {
+      duration: 1.6,
+      ease: "easeOut",
+      onUpdate: (v) => setVal(Math.round(v))
+    });
+  }, children: [
+    val.toLocaleString("en-US"),
+    suffix
+  ] });
+}
+function Header({
+  language,
+  onToggleLanguage
+}) {
+  const [mobileOpen, setMobileOpen] = reactExports.useState(false);
+  const t = copy$1[language];
+  const rawScroll = useMotionValue(0);
+  reactExports.useEffect(() => {
+    const onScroll = () => rawScroll.set(Math.min(window.scrollY / 120, 1));
+    window.addEventListener("scroll", onScroll, {
+      passive: true
+    });
+    onScroll();
+    return () => window.removeEventListener("scroll", onScroll);
+  }, [rawScroll]);
+  const progress = useSpring(rawScroll, {
+    stiffness: 160,
+    damping: 28,
+    mass: 0.6
+  });
+  const maxW = useTransform(progress, [0, 1], ["1280px", "780px"]);
+  const marginTop = useTransform(progress, [0, 1], ["0px", "12px"]);
+  const paddingX = useTransform(progress, [0, 1], ["24px", "20px"]);
+  const height = useTransform(progress, [0, 1], ["64px", "52px"]);
+  const borderRadius = useTransform(progress, [0, 1], ["0px", "999px"]);
+  const bgOpacity = useTransform(progress, [0, 1], [0, 0.85]);
+  const shadowOpacity = useTransform(progress, [0, 1], [0, 1]);
+  const borderOpacity = useTransform(progress, [0, 1], [0, 1]);
+  const gap = useTransform(progress, [0, 1], ["0px", "8px"]);
+  const navPx = useTransform(progress, [0, 1], ["16px", "12px"]);
+  const navPy = useTransform(progress, [0, 1], ["8px", "6px"]);
+  const navFontSize = useTransform(progress, [0, 1], ["14px", "13px"]);
+  const ctaPx = useTransform(progress, [0, 1], ["20px", "14px"]);
+  const ctaPy = useTransform(progress, [0, 1], ["10px", "7px"]);
+  const ctaFontSize = useTransform(progress, [0, 1], ["14px", "12px"]);
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("header", { className: "fixed left-0 right-0 top-0 z-50 pointer-events-none", dir: "ltr", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsxs(motion.div, { className: "relative mx-auto pointer-events-auto flex items-center justify-between", style: {
+        maxWidth: maxW,
+        marginTop,
+        paddingLeft: paddingX,
+        paddingRight: paddingX,
+        height,
+        borderRadius,
+        gap,
+        // layered background & border
+        backgroundColor: useTransform(bgOpacity, (v) => `rgba(255,255,255,${v})`),
+        boxShadow: useTransform(shadowOpacity, (v) => `0 8px 32px rgba(0,0,0,${v * 0.09}), 0 1px 3px rgba(0,0,0,${v * 0.05})`),
+        border: useTransform(borderOpacity, (v) => `1px solid rgba(203,213,225,${v * 0.6})`),
+        backdropFilter: useTransform(bgOpacity, (v) => `blur(${v * 16}px)`),
+        WebkitBackdropFilter: useTransform(bgOpacity, (v) => `blur(${v * 16}px)`)
+      }, children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs(Link, { to: "/", className: "flex shrink-0 items-center gap-2 cursor-pointer", id: "nav-logo", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600 shadow-sm", children: /* @__PURE__ */ jsxRuntimeExports.jsx(Sparkles, { className: "h-4 w-4 text-white" }) }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-sm font-bold tracking-tight text-slate-900 hidden sm:block", children: "MemoryCV" })
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("nav", { className: "hidden items-center md:flex", style: {
+          gap: "2px"
+        }, children: t.nav.map((item) => /* @__PURE__ */ jsxRuntimeExports.jsx(motion.div, { style: {
+          paddingLeft: navPx,
+          paddingRight: navPx,
+          paddingTop: navPy,
+          paddingBottom: navPy
+        }, children: /* @__PURE__ */ jsxRuntimeExports.jsx(Link, { to: item.to, className: "rounded-lg font-semibold text-slate-600 transition-colors hover:text-slate-900", style: {
+          fontSize: navFontSize
+        }, dir: t.dir, children: item.label }) }, item.label)) }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex shrink-0 items-center gap-2", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("button", { onClick: onToggleLanguage, className: "hidden items-center gap-1.5 rounded-lg font-semibold text-slate-600 transition-colors hover:text-slate-900 md:flex", style: {
+            fontSize: navFontSize
+          }, "aria-label": "Change language", dir: t.dir, children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx(Globe, { className: "h-4 w-4 shrink-0" }),
+            t.toggle
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx(motion.div, { style: {
+            paddingLeft: ctaPx,
+            paddingRight: ctaPx,
+            paddingTop: ctaPy,
+            paddingBottom: ctaPy
+          }, className: "rounded-full bg-blue-600 shadow-sm transition-shadow hover:bg-blue-700 hover:shadow-md", children: /* @__PURE__ */ jsxRuntimeExports.jsx(Link, { to: "/onboarding", id: "nav-free-trial", className: "block whitespace-nowrap font-bold text-white", style: {
+            fontSize: ctaFontSize
+          }, dir: t.dir, children: t.navCta }) }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("button", { className: "flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 transition-colors hover:bg-slate-50 md:hidden", onClick: () => setMobileOpen((o) => !o), "aria-label": t.menu, children: /* @__PURE__ */ jsxRuntimeExports.jsx(Menu, { className: "h-5 w-5" }) })
+        ] })
+      ] }),
+      mobileOpen && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "pointer-events-auto mx-4 mt-2 rounded-2xl bg-white p-4 shadow-xl border border-slate-100 md:hidden", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("button", { onClick: onToggleLanguage, className: "flex w-full items-center gap-2 rounded-lg px-4 py-3 text-sm font-semibold text-slate-700 transition-colors hover:bg-blue-50 hover:text-blue-600", dir: t.dir, children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx(Globe, { className: "h-4 w-4" }),
+          t.toggle
+        ] }),
+        t.nav.map((item) => /* @__PURE__ */ jsxRuntimeExports.jsx(Link, { to: item.to, onClick: () => setMobileOpen(false), className: "block rounded-lg px-4 py-3 text-sm font-semibold text-slate-700 transition-colors hover:bg-blue-50 hover:text-blue-600", dir: t.dir, children: item.label }, item.label))
+      ] })
+    ] }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "h-16 w-full flex-none" })
+  ] });
+}
+function DirectionArrow({
+  language,
+  className
+}) {
+  return language === "ku" ? /* @__PURE__ */ jsxRuntimeExports.jsx(ArrowLeft, { className }) : /* @__PURE__ */ jsxRuntimeExports.jsx(ArrowRight, { className });
+}
+function StatsSection({
+  language
+}) {
+  const t = copy$1[language];
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("section", { className: "app-frame relative px-4 pb-12 sm:px-6 sm:pb-24", style: {
+    paddingTop: "clamp(60px,10vw,140px)"
+  }, dir: "ltr", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "absolute right-10 top-20 -z-10 h-96 w-96 rounded-full bg-blue-100/40 blur-3xl" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "absolute bottom-10 left-10 -z-10 h-80 w-80 rounded-full bg-sky-100/40 blur-3xl" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "mb-10 flex flex-col items-center justify-between gap-6 sm:mb-16 sm:items-start md:flex-row md:items-center", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsxs(motion.h2, { initial: {
+        opacity: 0,
+        x: 20
+      }, whileInView: {
+        opacity: 1,
+        x: 0
+      }, viewport: {
+        once: true
+      }, transition: {
+        duration: 0.55
+      }, className: "text-center text-[clamp(1.75rem,6vw,3.75rem)] font-extrabold leading-[1.18] tracking-tight text-slate-900 sm:text-left", dir: t.dir, children: [
+        t.statsTitleA,
+        /* @__PURE__ */ jsxRuntimeExports.jsx("br", {}),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-blue-600", children: t.statsTitleB })
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(motion.div, { initial: {
+        opacity: 0,
+        x: -20
+      }, whileInView: {
+        opacity: 1,
+        x: 0
+      }, viewport: {
+        once: true
+      }, transition: {
+        duration: 0.55
+      }, className: "hidden shrink-0 sm:flex", children: /* @__PURE__ */ jsxRuntimeExports.jsx(Link, { to: "/onboarding", id: "stats-free-trial", className: "inline-flex items-center justify-center rounded-full bg-blue-600 px-8 py-4 text-base font-bold text-white shadow-[0_10px_20px_rgba(37,99,235,0.2)] transition-all duration-300 hover:-translate-y-1 hover:bg-blue-700 hover:shadow-[0_15px_30px_rgba(37,99,235,0.3)]", dir: t.dir, children: t.statsCta }) })
+    ] }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "grid grid-cols-1 gap-6 sm:grid-cols-3", children: t.stats.map((s, i) => /* @__PURE__ */ jsxRuntimeExports.jsxs(motion.div, { id: s.id, initial: {
+      opacity: 0,
+      y: 30
+    }, whileInView: {
+      opacity: 1,
+      y: 0
+    }, viewport: {
+      once: true
+    }, transition: {
+      delay: i * 0.15,
+      duration: 0.6,
+      ease: "easeOut"
+    }, whileHover: {
+      y: -6,
+      boxShadow: "0 25px 50px -12px rgba(37,99,235,0.15)"
+    }, className: `group relative flex cursor-pointer flex-col items-center overflow-hidden rounded-[1.5rem] border border-slate-100 bg-white/80 p-6 text-center shadow-lg backdrop-blur-xl sm:items-start sm:rounded-[2rem] sm:p-10 sm:text-left`, dir: t.dir, children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "absolute inset-0 bg-gradient-to-bl from-blue-50/0 to-blue-50/50 opacity-0 transition-opacity duration-300 group-hover:opacity-100" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "relative z-10 mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-700 to-blue-500 shadow-lg shadow-blue-500/30 transition-transform duration-300 group-hover:scale-110", children: /* @__PURE__ */ jsxRuntimeExports.jsx(s.icon, { className: "h-6 w-6 text-white" }) }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "relative z-10", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex items-baseline justify-center text-4xl font-black tracking-tight text-slate-900 sm:justify-start", children: /* @__PURE__ */ jsxRuntimeExports.jsx(Counter, { to: s.value, suffix: s.suffix }) }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "mt-2 text-sm font-semibold text-slate-500", children: s.label })
+      ] })
+    ] }, s.id)) })
+  ] });
+}
+const BentoHeroCard = ({
+  language
+}) => {
+  const t = copy$1[language];
+  const textAlign = language === "ku" ? "text-right" : "text-left";
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs(motion.div, { initial: {
+    opacity: 0,
+    y: 20
+  }, whileInView: {
+    opacity: 1,
+    y: 0
+  }, viewport: {
+    once: true
+  }, whileHover: {
+    y: -5,
+    boxShadow: "0 20px 40px -10px rgba(37,99,235,0.15)"
+  }, className: "group relative w-full overflow-hidden rounded-[2rem] border border-white/50 bg-gradient-to-br from-[#e8f3ff] to-[#cce4ff] shadow-xl", dir: "ltr", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "pointer-events-none absolute inset-0", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "absolute bottom-[-10%] right-[10%] h-[200px] w-[400px] rounded-full bg-white/60 blur-2xl" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "absolute bottom-[-20%] left-[-10%] h-[300px] w-[600px] rounded-full bg-white/80 blur-3xl" })
+    ] }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "relative z-10 grid gap-6 p-5 sm:p-10 md:grid-cols-[0.95fr_1.05fr] md:p-14", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: `relative z-20 flex flex-col items-start ${textAlign} md:items-start`, dir: t.dir, children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "mb-8 flex items-center gap-2 rounded-full border border-white bg-white/90 px-4 py-1.5 shadow-sm backdrop-blur-sm", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx(Sparkles, { className: "h-4 w-4 text-blue-500" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-sm font-semibold text-blue-700", children: t.bentoBadge })
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("h2", { className: "mb-5 text-[clamp(1.6rem,5vw,3rem)] font-extrabold leading-[1.15] tracking-tight text-slate-900", children: [
+          t.bentoTitleA,
+          /* @__PURE__ */ jsxRuntimeExports.jsx("br", {}),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-blue-600", children: t.bentoTitleB })
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "mb-10 max-w-[32ch] text-base font-medium leading-8 text-slate-600 md:text-lg", children: t.bentoBody }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs(Link, { to: "/onboarding", className: "flex items-center gap-2 rounded-2xl bg-blue-600 px-8 py-4 text-lg font-bold text-white shadow-[0_8px_20px_-6px_rgba(37,99,235,0.5)] transition-all duration-300 hover:-translate-y-1 hover:bg-blue-700 hover:shadow-[0_12px_25px_-6px_rgba(37,99,235,0.6)]", children: [
+          t.bentoCta,
+          /* @__PURE__ */ jsxRuntimeExports.jsx(DirectionArrow, { language, className: "h-5 w-5" })
+        ] })
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "pointer-events-none relative hidden h-[330px] items-center justify-center sm:flex sm:h-[420px] md:h-[460px]", dir: "ltr", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "absolute left-1/2 top-1/2 h-[400px] w-[400px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-gradient-to-tr from-blue-300/30 via-white/50 to-blue-200/30 blur-3xl" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "relative flex h-[320px] w-[280px] select-none items-center justify-center sm:h-[400px] sm:w-[360px]", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "absolute right-[7%] top-[6%] w-[145px] origin-center rounded-2xl shadow-[0_20px_40px_rgba(0,0,0,0.15)] sm:w-[190px]", style: {
+            transform: "rotate(-8deg)"
+          }, children: /* @__PURE__ */ jsxRuntimeExports.jsx(LeftCardSVG, {}) }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "absolute bottom-[4%] left-[8%] z-10 w-[170px] origin-center rounded-lg shadow-[0_25px_35px_rgba(37,99,235,0.15)] sm:w-[225px]", style: {
+            transform: "rotate(6deg)"
+          }, children: /* @__PURE__ */ jsxRuntimeExports.jsx(CenterCardSVG, {}) })
+        ] })
+      ] })
+    ] })
+  ] });
+};
+const BentoStandOutCard = ({
+  language
+}) => {
+  const t = copy$1[language];
+  const isRtl = language === "ku";
+  const textAlign = isRtl ? "text-right" : "text-left";
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs(motion.div, { initial: {
+    opacity: 0,
+    y: 20
+  }, whileInView: {
+    opacity: 1,
+    y: 0
+  }, viewport: {
+    once: true
+  }, whileHover: {
+    y: -5,
+    boxShadow: "0 20px 40px -10px rgba(37,99,235,0.1)"
+  }, className: `group relative flex min-h-[300px] w-full flex-col justify-between overflow-hidden rounded-[1.5rem] border border-slate-100 bg-white p-6 ${textAlign} shadow-xl sm:min-h-[380px] sm:rounded-[2rem] sm:p-10`, dir: "ltr", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: `pointer-events-none absolute top-0 z-0 h-full w-1/2 ${isRtl ? "right-0 bg-gradient-to-l" : "left-0 bg-gradient-to-r"} from-[#f0f7ff] to-transparent` }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "relative z-10 max-w-[230px]", dir: t.dir, children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("h3", { className: "mb-2 text-[clamp(1.5rem,4vw,1.875rem)] font-extrabold leading-[1.18] tracking-tight text-slate-900", children: [
+        t.standTitleA,
+        /* @__PURE__ */ jsxRuntimeExports.jsx("br", {}),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-blue-500", children: t.standTitleB })
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "mt-4 text-sm font-medium leading-7 text-slate-500", children: t.standBody })
+    ] }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "relative z-10 mt-auto max-w-[160px] pt-8 text-xs font-semibold leading-6 text-slate-400", dir: t.dir, children: t.standNote }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "pointer-events-none absolute bottom-0 z-10 flex h-[200px] w-[180px] items-end justify-center sm:h-[285px] sm:w-[235px]", style: {
+      [isRtl ? "left" : "right"]: "-10px"
+    }, dir: "ltr", children: /* @__PURE__ */ jsxRuntimeExports.jsx(motion.img, { src: "/images/bento/3d guy transparent.png", alt: t.characterAlt, className: "h-full w-full select-none object-contain object-bottom drop-shadow-2xl", draggable: false, style: {
+      transform: isRtl ? "scaleX(-1)" : "none"
+    } }) })
+  ] });
+};
+const BentoSecurityCard = ({
+  language
+}) => {
+  const t = copy$1[language];
+  const isRtl = language === "ku";
+  const textAlign = isRtl ? "text-right" : "text-left";
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs(motion.div, { initial: {
+    opacity: 0,
+    y: 20
+  }, whileInView: {
+    opacity: 1,
+    y: 0
+  }, viewport: {
+    once: true
+  }, transition: {
+    delay: 0.1
+  }, whileHover: {
+    y: -5,
+    boxShadow: "0 20px 40px -10px rgba(37,99,235,0.1)"
+  }, className: `group relative flex min-h-[300px] w-full flex-col justify-between overflow-hidden rounded-[1.5rem] border border-slate-100 bg-white p-6 ${textAlign} shadow-xl sm:min-h-[380px] sm:rounded-[2rem] sm:p-10`, dir: "ltr", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: `pointer-events-none absolute top-0 z-0 h-full w-2/3 ${isRtl ? "right-0 bg-gradient-to-l" : "left-0 bg-gradient-to-r"} from-[#f0f7ff] to-transparent` }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "relative z-10 max-w-[240px]", dir: t.dir, children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("h3", { className: "mb-2 text-[clamp(1.5rem,4vw,1.875rem)] font-extrabold leading-[1.18] tracking-tight text-slate-900", children: [
+        t.securityTitleA,
+        /* @__PURE__ */ jsxRuntimeExports.jsx("br", {}),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-blue-500", children: t.securityTitleB })
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "mt-4 text-sm font-medium leading-7 text-slate-500", children: t.securityBody })
+    ] }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "relative z-10 mt-auto pt-8", dir: t.dir, children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "inline-flex items-center gap-2 rounded-xl border border-slate-100 bg-white px-4 py-2 text-xs font-bold text-blue-600 shadow-sm transition-shadow group-hover:shadow-md", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx(LockKeyhole, { className: "h-4 w-4 text-blue-500" }),
+      t.securityBadge
+    ] }) }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "pointer-events-none absolute bottom-[12px] z-10 flex h-[150px] w-[150px] items-center justify-center sm:h-[190px] sm:w-[190px]", style: {
+      [isRtl ? "left" : "right"]: "-4px"
+    }, dir: "ltr", children: /* @__PURE__ */ jsxRuntimeExports.jsx(motion.img, { src: "/images/bento/sheild transparent.png", alt: t.shieldAlt, className: "h-full w-full select-none object-contain drop-shadow-2xl", draggable: false, animate: {
+      y: [0, -8, 0]
+    }, transition: {
+      duration: 6,
+      repeat: Infinity,
+      ease: "easeInOut"
+    } }) })
+  ] });
+};
+const BentoCreateWinCard = ({
+  language
+}) => {
+  const t = copy$1[language];
+  const textAlign = language === "ku" ? "text-right" : "text-left";
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs(motion.div, { initial: {
+    opacity: 0,
+    y: 20
+  }, whileInView: {
+    opacity: 1,
+    y: 0
+  }, viewport: {
+    once: true
+  }, transition: {
+    delay: 0.2
+  }, className: "relative grid min-h-[280px] overflow-hidden rounded-[1.5rem] border border-blue-100 bg-white shadow-xl sm:rounded-[2rem] md:grid-cols-[0.8fr_1.2fr]", dir: "ltr", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: `relative z-10 flex flex-col justify-center p-8 ${textAlign} sm:p-10`, dir: t.dir, children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-600 text-white", children: /* @__PURE__ */ jsxRuntimeExports.jsx(Download, { className: "h-5 w-5" }) }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("h3", { className: "text-3xl font-extrabold leading-[1.18] tracking-tight text-slate-900", children: t.downloadTitle }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "mt-4 max-w-[34ch] text-sm font-medium leading-7 text-slate-500", children: t.downloadBody })
+    ] }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "relative flex min-h-[260px] items-center justify-center overflow-hidden bg-[#eef6ff] px-4", dir: "ltr", children: /* @__PURE__ */ jsxRuntimeExports.jsx("img", { src: "/images/bento/download cv bento.webp", alt: t.downloadAlt, className: "h-full max-h-[360px] w-full select-none object-contain", draggable: false }) })
+  ] });
+};
+function FAQSection({
+  language
+}) {
+  const t = copy$1[language];
+  const [openIndex, setOpenIndex] = reactExports.useState(null);
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "mt-16 mb-10 w-full max-w-4xl mx-auto px-4 sm:px-0", dir: t.dir, children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "mb-8 text-[clamp(1.5rem,4vw,2.25rem)] font-extrabold tracking-tight text-slate-900 text-center", children: t.faqTitle }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "space-y-4", children: t.faqItems.map((item, i) => /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "rounded-2xl border border-slate-200/60 bg-white/60 backdrop-blur-sm shadow-sm overflow-hidden transition-all duration-300 hover:shadow-md hover:border-blue-200/50 hover:bg-white/90", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("button", { onClick: () => setOpenIndex(openIndex === i ? null : i), className: "flex w-full items-center justify-between px-6 py-5 text-left font-bold text-slate-800 focus:outline-none", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-base sm:text-lg", children: item.q }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: `ml-4 flex h-8 w-8 shrink-0 items-center justify-center rounded-full transition-colors duration-200 ${openIndex === i ? "bg-blue-100 text-blue-600" : "bg-slate-100 text-slate-400"}`, children: /* @__PURE__ */ jsxRuntimeExports.jsx(ChevronDown, { className: `h-5 w-5 transition-transform duration-300 ${openIndex === i ? "rotate-180" : ""}` }) })
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(AnimatePresence, { initial: false, children: openIndex === i && /* @__PURE__ */ jsxRuntimeExports.jsx(motion.div, { initial: {
+        height: 0,
+        opacity: 0
+      }, animate: {
+        height: "auto",
+        opacity: 1
+      }, exit: {
+        height: 0,
+        opacity: 0
+      }, transition: {
+        duration: 0.3,
+        ease: "easeInOut"
+      }, children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "px-6 pb-6 text-slate-600 font-medium leading-relaxed border-t border-slate-100 pt-4", children: item.a }) }) })
+    ] }, i)) })
+  ] });
+}
+function BentoGridSection({
+  language
+}) {
+  const t = copy$1[language];
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("section", { className: "relative overflow-hidden bg-[#f4f9ff] px-4 pb-12 pt-12 sm:px-6 sm:pb-24 sm:pt-28 md:pt-40", dir: "ltr", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "pointer-events-none absolute right-1/4 top-0 h-[600px] w-[800px] -translate-y-1/2 rounded-full bg-blue-100/40 opacity-70 blur-3xl" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "pointer-events-none absolute left-0 top-1/4 h-[500px] w-[600px] rounded-full bg-sky-100/40 opacity-60 blur-3xl" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "mx-auto max-w-6xl space-y-6", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx(BentoHeroCard, { language }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "grid grid-cols-1 gap-6 sm:grid-cols-2", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx(BentoStandOutCard, { language }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx(BentoSecurityCard, { language })
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(BentoCreateWinCard, { language }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(FAQSection, { language }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs(motion.div, { initial: {
+        opacity: 0,
+        y: 24
+      }, whileInView: {
+        opacity: 1,
+        y: 0
+      }, viewport: {
+        once: true
+      }, transition: {
+        duration: 0.6
+      }, className: "relative mt-10 overflow-hidden rounded-[1.5rem] px-5 py-10 text-center shadow-2xl sm:mt-20 sm:rounded-[2rem] sm:px-8 sm:py-16", style: {
+        background: "linear-gradient(145deg,#1e40af 0%,#2563eb 55%,#3b82f6 100%)"
+      }, id: "closing-cta", dir: "ltr", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "pointer-events-none absolute right-10 top-4 h-14 w-20 rotate-6 rounded-xl border border-white/20 bg-white/10 opacity-15" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "pointer-events-none absolute bottom-4 left-10 h-10 w-16 -rotate-3 rounded-xl border border-white/15 bg-white/10 opacity-10" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "mb-3 text-[clamp(1.4rem,4vw,2.25rem)] font-extrabold tracking-tight text-white sm:mb-4", dir: t.dir, children: t.ctaTitle }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "mx-auto mb-8 max-w-[54ch] text-sm font-medium leading-7 text-blue-100/90 sm:mb-10 sm:text-base md:text-lg", dir: t.dir, children: t.ctaBody }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-wrap justify-center gap-4", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsxs(Link, { to: "/onboarding", id: "closing-cta-btn", className: "inline-flex items-center gap-2 rounded-xl bg-white px-6 py-3 text-base font-bold text-blue-700 shadow-lg transition-all hover:-translate-y-1 hover:shadow-xl sm:rounded-2xl sm:px-8 sm:py-4 sm:text-lg", children: [
+            t.ctaPrimary,
+            /* @__PURE__ */ jsxRuntimeExports.jsx(DirectionArrow, { language, className: "h-5 w-5" })
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx(Link, { to: "/templates", id: "closing-templates-btn", className: "hero-outline-button rounded-xl border-2 border-blue-300 px-6 py-3 text-base font-bold text-white transition-all hover:border-blue-200 hover:bg-blue-600 sm:rounded-2xl sm:px-8 sm:py-4 sm:text-lg", children: t.ctaSecondary })
+        ] })
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "mt-8 flex flex-wrap items-center justify-center gap-5 text-xs font-semibold text-slate-500 sm:mt-12 sm:gap-8 sm:text-sm", children: t.trust.map((item) => /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-2", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx(CircleCheckBig, { className: "h-5 w-5 text-blue-500" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: item })
+      ] }, item)) })
+    ] })
+  ] });
+}
+function Landing() {
+  const [language, setLanguage] = reactExports.useState("en");
+  const t = copy$1[language];
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "page-shell bg-background text-foreground", dir: "ltr", lang: t.lang, children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx(Header, { language, onToggleLanguage: () => setLanguage((current) => current === "en" ? "ku" : "en") }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("main", { children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx(HeroV2, { language }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(TrustedMarquee, {}),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(motion.div, { initial: {
+        opacity: 0,
+        y: 40
+      }, whileInView: {
+        opacity: 1,
+        y: 0
+      }, viewport: {
+        once: true,
+        margin: "-20px"
+      }, transition: {
+        duration: 0.8,
+        ease: "easeOut"
+      }, children: /* @__PURE__ */ jsxRuntimeExports.jsx(StatsSection, { language }) }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(motion.div, { initial: {
+        opacity: 0,
+        y: 60
+      }, whileInView: {
+        opacity: 1,
+        y: 0
+      }, viewport: {
+        once: true,
+        margin: "-100px"
+      }, transition: {
+        duration: 0.8,
+        ease: "easeOut",
+        delay: 0.2
+      }, children: /* @__PURE__ */ jsxRuntimeExports.jsx(BentoGridSection, { language }) })
+    ] })
+  ] });
+}
+export {
+  BentoGridSection,
+  FAQSection,
+  Header,
+  StatsSection,
+  Landing as component
+};

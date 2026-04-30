@@ -14,7 +14,7 @@ import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DashboardIndexRouteImport } from './routes/dashboard.index'
-import { Route as ResumeIdRouteImport } from './routes/resume.$id'
+import { Route as EditorIdRouteImport } from './routes/editor.$id'
 import { Route as DashboardSettingsRouteImport } from './routes/dashboard.settings'
 import { Route as DashboardMyCvsRouteImport } from './routes/dashboard.my-cvs'
 import { Route as DashboardJobTrackerRouteImport } from './routes/dashboard.job-tracker'
@@ -22,7 +22,7 @@ import { Route as DashboardCoverLettersRouteImport } from './routes/dashboard.co
 import { Route as DashboardAnalyticsRouteImport } from './routes/dashboard.analytics'
 import { Route as DashboardAiWriterRouteImport } from './routes/dashboard.ai-writer'
 import { Route as DashboardAiOptimizeRouteImport } from './routes/dashboard.ai-optimize'
-import { Route as ResumeRouteImport } from './routes/resume.'
+import { Route as EditorRouteImport } from './routes/editor.'
 
 const TemplatesRoute = TemplatesRouteImport.update({
   id: '/templates',
@@ -49,9 +49,9 @@ const DashboardIndexRoute = DashboardIndexRouteImport.update({
   path: '/',
   getParentRoute: () => DashboardRoute,
 } as any)
-const ResumeIdRoute = ResumeIdRouteImport.update({
-  id: '/resume/$id',
-  path: '/resume/$id',
+const EditorIdRoute = EditorIdRouteImport.update({
+  id: '/editor/$id',
+  path: '/editor/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DashboardSettingsRoute = DashboardSettingsRouteImport.update({
@@ -89,9 +89,9 @@ const DashboardAiOptimizeRoute = DashboardAiOptimizeRouteImport.update({
   path: '/ai-optimize',
   getParentRoute: () => DashboardRoute,
 } as any)
-const ResumeRoute = ResumeRouteImport.update({
-  id: '/resume/',
-  path: '/resume/',
+const EditorRoute = EditorRouteImport.update({
+  id: '/editor/',
+  path: '/editor/',
   getParentRoute: () => rootRouteImport,
 } as any)
 
@@ -100,7 +100,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof DashboardRouteWithChildren
   '/onboarding': typeof OnboardingRoute
   '/templates': typeof TemplatesRoute
-  '/resume/': typeof ResumeRoute
+  '/editor/': typeof EditorRoute
   '/dashboard/ai-optimize': typeof DashboardAiOptimizeRoute
   '/dashboard/ai-writer': typeof DashboardAiWriterRoute
   '/dashboard/analytics': typeof DashboardAnalyticsRoute
@@ -108,14 +108,14 @@ export interface FileRoutesByFullPath {
   '/dashboard/job-tracker': typeof DashboardJobTrackerRoute
   '/dashboard/my-cvs': typeof DashboardMyCvsRoute
   '/dashboard/settings': typeof DashboardSettingsRoute
-  '/resume/$id': typeof ResumeIdRoute
+  '/editor/$id': typeof EditorIdRoute
   '/dashboard/': typeof DashboardIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/onboarding': typeof OnboardingRoute
   '/templates': typeof TemplatesRoute
-  '/resume': typeof ResumeRoute
+  '/editor': typeof EditorRoute
   '/dashboard/ai-optimize': typeof DashboardAiOptimizeRoute
   '/dashboard/ai-writer': typeof DashboardAiWriterRoute
   '/dashboard/analytics': typeof DashboardAnalyticsRoute
@@ -123,7 +123,7 @@ export interface FileRoutesByTo {
   '/dashboard/job-tracker': typeof DashboardJobTrackerRoute
   '/dashboard/my-cvs': typeof DashboardMyCvsRoute
   '/dashboard/settings': typeof DashboardSettingsRoute
-  '/resume/$id': typeof ResumeIdRoute
+  '/editor/$id': typeof EditorIdRoute
   '/dashboard': typeof DashboardIndexRoute
 }
 export interface FileRoutesById {
@@ -132,7 +132,7 @@ export interface FileRoutesById {
   '/dashboard': typeof DashboardRouteWithChildren
   '/onboarding': typeof OnboardingRoute
   '/templates': typeof TemplatesRoute
-  '/resume/': typeof ResumeRoute
+  '/editor/': typeof EditorRoute
   '/dashboard/ai-optimize': typeof DashboardAiOptimizeRoute
   '/dashboard/ai-writer': typeof DashboardAiWriterRoute
   '/dashboard/analytics': typeof DashboardAnalyticsRoute
@@ -140,7 +140,7 @@ export interface FileRoutesById {
   '/dashboard/job-tracker': typeof DashboardJobTrackerRoute
   '/dashboard/my-cvs': typeof DashboardMyCvsRoute
   '/dashboard/settings': typeof DashboardSettingsRoute
-  '/resume/$id': typeof ResumeIdRoute
+  '/editor/$id': typeof EditorIdRoute
   '/dashboard/': typeof DashboardIndexRoute
 }
 export interface FileRouteTypes {
@@ -150,7 +150,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/onboarding'
     | '/templates'
-    | '/resume/'
+    | '/editor/'
     | '/dashboard/ai-optimize'
     | '/dashboard/ai-writer'
     | '/dashboard/analytics'
@@ -158,14 +158,14 @@ export interface FileRouteTypes {
     | '/dashboard/job-tracker'
     | '/dashboard/my-cvs'
     | '/dashboard/settings'
-    | '/resume/$id'
+    | '/editor/$id'
     | '/dashboard/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/onboarding'
     | '/templates'
-    | '/resume'
+    | '/editor'
     | '/dashboard/ai-optimize'
     | '/dashboard/ai-writer'
     | '/dashboard/analytics'
@@ -173,7 +173,7 @@ export interface FileRouteTypes {
     | '/dashboard/job-tracker'
     | '/dashboard/my-cvs'
     | '/dashboard/settings'
-    | '/resume/$id'
+    | '/editor/$id'
     | '/dashboard'
   id:
     | '__root__'
@@ -181,7 +181,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/onboarding'
     | '/templates'
-    | '/resume/'
+    | '/editor/'
     | '/dashboard/ai-optimize'
     | '/dashboard/ai-writer'
     | '/dashboard/analytics'
@@ -189,7 +189,7 @@ export interface FileRouteTypes {
     | '/dashboard/job-tracker'
     | '/dashboard/my-cvs'
     | '/dashboard/settings'
-    | '/resume/$id'
+    | '/editor/$id'
     | '/dashboard/'
   fileRoutesById: FileRoutesById
 }
@@ -198,8 +198,8 @@ export interface RootRouteChildren {
   DashboardRoute: typeof DashboardRouteWithChildren
   OnboardingRoute: typeof OnboardingRoute
   TemplatesRoute: typeof TemplatesRoute
-  ResumeRoute: typeof ResumeRoute
-  ResumeIdRoute: typeof ResumeIdRoute
+  EditorRoute: typeof EditorRoute
+  EditorIdRoute: typeof EditorIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -239,11 +239,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardIndexRouteImport
       parentRoute: typeof DashboardRoute
     }
-    '/resume/$id': {
-      id: '/resume/$id'
-      path: '/resume/$id'
-      fullPath: '/resume/$id'
-      preLoaderRoute: typeof ResumeIdRouteImport
+    '/editor/$id': {
+      id: '/editor/$id'
+      path: '/editor/$id'
+      fullPath: '/editor/$id'
+      preLoaderRoute: typeof EditorIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/dashboard/settings': {
@@ -295,11 +295,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardAiOptimizeRouteImport
       parentRoute: typeof DashboardRoute
     }
-    '/resume/': {
-      id: '/resume/'
-      path: '/resume'
-      fullPath: '/resume/'
-      preLoaderRoute: typeof ResumeRouteImport
+    '/editor/': {
+      id: '/editor/'
+      path: '/editor'
+      fullPath: '/editor/'
+      preLoaderRoute: typeof EditorRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -336,8 +336,8 @@ const rootRouteChildren: RootRouteChildren = {
   DashboardRoute: DashboardRouteWithChildren,
   OnboardingRoute: OnboardingRoute,
   TemplatesRoute: TemplatesRoute,
-  ResumeRoute: ResumeRoute,
-  ResumeIdRoute: ResumeIdRoute,
+  EditorRoute: EditorRoute,
+  EditorIdRoute: EditorIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

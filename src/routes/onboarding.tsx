@@ -216,12 +216,14 @@ function ChatOnboarding() {
 
   // ── Render ───────────────────────────────────────────────────────────────
   return (
-    <div className="min-h-dvh flex flex-col relative overflow-hidden bg-sky-100">
-      {/* Background Gradient */}
-      <div className="absolute inset-0 z-0" style={{ background: "linear-gradient(180deg, #93c5fd 0%, #e0f2fe 50%, #fef3c7 100%)" }} />
+    <div className="min-h-dvh flex flex-col relative overflow-hidden" style={{ background: "#bae6fd" }}>
+      {/* Background Gradient — pure sky blue, no yellow */}
+      <div className="absolute inset-0 z-0" style={{ background: "linear-gradient(160deg, #38bdf8 0%, #7dd3fc 25%, #bae6fd 55%, #e0f2fe 100%)" }} />
 
-      {/* Warm Sun Glow */}
-      <div className="absolute top-10 right-32 w-[500px] h-[500px] bg-amber-300/40 rounded-full blur-[100px] pointer-events-none z-0" />
+      {/* Cool Blue Glow — replaces amber */}
+      <div className="absolute top-10 right-32 w-[500px] h-[500px] bg-blue-400/25 rounded-full blur-[110px] pointer-events-none z-0" />
+      {/* Deep accent glow bottom-left */}
+      <div className="absolute bottom-[-100px] left-[-60px] w-[400px] h-[400px] bg-sky-300/30 rounded-full blur-[90px] pointer-events-none z-0" />
 
       {/* Giant Fluffy Cloud (Top Left) */}
       <div className="absolute top-[-80px] left-[-50px] w-[600px] h-[300px] pointer-events-none z-0 opacity-95">
@@ -255,7 +257,7 @@ function ChatOnboarding() {
 
       {/* ── Full-screen generating loader ── */}
       {showLoader && loaderResumeId && (
-        <GeneratingLoader onDone={() => navigate({ to: "/resume/$id", params: { id: loaderResumeId } })} />
+        <GeneratingLoader onDone={() => navigate({ to: "/editor/$id", params: { id: loaderResumeId } })} />
       )}
 
       {/* ── Header ── */}
@@ -273,11 +275,11 @@ function ChatOnboarding() {
           <motion.h1
             initial={{ opacity: 0, y: -12 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-3xl font-semibold text-slate-900 tracking-tight mb-2 text-center drop-shadow-sm"
+            className="text-3xl font-bold text-slate-950 tracking-tight mb-2 text-center drop-shadow-sm"
           >
             {isKu ? "دەربارەی خۆتم پێ بڵێ." : "Tell me about yourself."}
           </motion.h1>
-          <p className="text-slate-600 font-medium text-sm mb-8 text-center max-w-sm drop-shadow-sm">
+          <p className="text-slate-700 font-semibold text-sm mb-8 text-center max-w-sm drop-shadow-sm">
             {isKu ? "سیڤییەکەت، بایۆی لینکدین، مێژووی کارکردنت دابنێ - یان تەنها بە ئازادی بنووسە." : "Paste your resume, LinkedIn bio, career history — or just write freely."}
           </p>
 
@@ -286,33 +288,33 @@ function ChatOnboarding() {
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="w-full max-w-[44rem] rounded-3xl overflow-hidden shadow-[0_30px_60px_-15px_rgba(2,132,199,0.35)] border-2 border-white"
-            style={{ background: "rgba(255,255,255,0.95)", backdropFilter: "blur(24px)" }}
+            className="w-full max-w-[44rem] rounded-3xl overflow-hidden shadow-[0_30px_70px_-10px_rgba(2,132,199,0.45)] border-2 border-white/80 ring-1 ring-blue-200"
+            style={{ background: "rgba(255,255,255,0.97)", backdropFilter: "blur(28px)" }}
           >
             <textarea
               ref={inputRef}
               value={inputText}
               onChange={(e) => setInputText(e.target.value)}
               placeholder={isKu ? "سیڤییەکەت، پوختەی لینکدین، مێژووی کارکردن دابنێ، یان تەنها دەربارەی خۆت بنووسە..." : "Paste your resume, LinkedIn summary, career history, or just write about yourself..."}
-              className="w-full bg-transparent resize-none outline-none text-slate-900 text-[15.5px] font-medium leading-relaxed placeholder:text-slate-400 px-6 pt-6 pb-3"
+              className="w-full bg-transparent resize-none outline-none text-slate-900 text-[15.5px] font-semibold leading-relaxed placeholder:text-slate-500 px-6 pt-6 pb-3"
               style={{ minHeight: "200px" }}
               onKeyDown={(e) => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) handleExtract(); }}
             />
 
             {/* Toolbar */}
-            <div className="flex items-center justify-between px-4 py-3 border-t border-blue-50">
+            <div className="flex items-center justify-between px-4 py-3 border-t border-blue-100 bg-slate-50/60">
               <div className="flex items-center gap-2">
                 <input type="file" ref={fileInputRef} onChange={handleFileUpload} className="hidden" accept=".txt,.md,.pdf,.docx,.doc,.rtf" />
                 <button
                   onClick={() => fileInputRef.current?.click()}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12.5px] font-medium text-slate-600 hover:bg-blue-50 transition-colors border border-slate-200 bg-white/70"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12.5px] font-semibold text-slate-700 hover:bg-blue-50 hover:text-blue-700 transition-colors border border-slate-300 bg-white shadow-sm"
                 >
                   <Paperclip className="w-3.5 h-3.5" /> {isKu ? "بارکردن" : "Upload"}
                 </button>
                 {SAMPLE_MEMORIES[0] && (
                   <button
                     onClick={() => { setInputText(SAMPLE_MEMORIES[0].text); toast.success(isKu ? "نموونە بارکرا" : "Sample loaded"); }}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12.5px] font-medium text-slate-600 hover:bg-blue-50 transition-colors border border-slate-200 bg-white/70"
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12.5px] font-semibold text-slate-700 hover:bg-blue-50 hover:text-blue-700 transition-colors border border-slate-300 bg-white shadow-sm"
                   >
                     <FileText className="w-3.5 h-3.5" /> {isKu ? "نموونە تاقی بکەرەوە" : "Try Sample"}
                   </button>
@@ -329,7 +331,7 @@ function ChatOnboarding() {
             </div>
           </motion.div>
 
-          <p className="text-center text-[11.5px] text-slate-400 mt-4">{isKu ? "بۆ ناردن ⌘ + Enter" : "⌘ + Enter to submit"}</p>
+          <p className="text-center text-[12px] font-semibold text-slate-600 mt-4">{isKu ? "بۆ ناردن ⌘ + Enter" : "⌘ + Enter to submit"}</p>
         </div>
       )}
 
@@ -356,7 +358,7 @@ function ChatOnboarding() {
                     className={`max-w-[75%] rounded-2xl px-4 py-3 text-[14.5px] leading-relaxed shadow-sm ${
                       msg.from === "user"
                         ? "bg-blue-600 text-white rounded-br-md shadow-blue-200"
-                        : "bg-white text-slate-800 rounded-bl-md border border-blue-100"
+                        : "bg-white text-slate-900 font-medium rounded-bl-md border border-blue-100 shadow-[0_2px_12px_rgba(0,0,0,0.07)]"
                     }`}
                   >
                     {msg.content}
@@ -396,8 +398,8 @@ function ChatOnboarding() {
 
           {/* ── Sticky bottom input ── */}
           <div
-            className="shrink-0 border-t border-blue-100/60 px-4 pt-3 pb-safe-4"
-            style={{ background: "rgba(255,255,255,0.85)", backdropFilter: "blur(24px)", paddingBottom: "max(16px, env(safe-area-inset-bottom))" }}
+            className="shrink-0 border-t border-blue-200 px-4 pt-3 pb-safe-4"
+            style={{ background: "rgba(255,255,255,0.96)", backdropFilter: "blur(28px)", paddingBottom: "max(16px, env(safe-area-inset-bottom))" }}
           >
             <div className="max-w-[42rem] mx-auto">
               {/* Q&A chips — shown above input */}
@@ -474,8 +476,8 @@ function ChatOnboarding() {
 
               {/* Input row */}
               <div
-                className="flex items-center gap-3 rounded-2xl px-4 py-3 border-2 border-white shadow-[0_20px_40px_-10px_rgba(2,132,199,0.3)]"
-                style={{ background: "rgba(255,255,255,0.98)" }}
+                className="flex items-center gap-3 rounded-2xl px-4 py-3 border-2 border-blue-200 shadow-[0_20px_40px_-10px_rgba(2,132,199,0.4)] ring-1 ring-blue-100"
+                style={{ background: "rgba(255,255,255,1)" }}
               >
                 {/* Q&A text input */}
                 {inQA && curQ && (
@@ -484,7 +486,7 @@ function ChatOnboarding() {
                     value={customInput}
                     onChange={(e) => setCustomInput(e.target.value)}
                     placeholder={curQ.placeholder || (isKu ? "وەڵامەکەت بنووسە یان لە سەرەوە هەڵبژێرە..." : "Type your answer or pick above...")}
-                    className="flex-1 bg-transparent outline-none text-slate-800 text-[15px] placeholder:text-slate-400"
+                    className="flex-1 bg-transparent outline-none text-slate-900 font-medium text-[15px] placeholder:text-slate-500"
                     onKeyDown={(e) => { if (e.key === "Enter" && customInput.trim()) handleAnswer(customInput.trim(), qIdx); }}
                   />
                 )}
@@ -495,7 +497,7 @@ function ChatOnboarding() {
                     value={jobTarget}
                     onChange={(e) => setJobTarget(e.target.value)}
                     placeholder={isKu ? "چ ڕۆڵێک دەکەیتە ئامانج؟ نموونە: بەڕێوەبەری پرۆژە..." : "What role are you targeting? e.g. Senior PM at a startup..."}
-                    className="flex-1 bg-transparent outline-none text-slate-800 text-[15px] placeholder:text-slate-400"
+                    className="flex-1 bg-transparent outline-none text-slate-900 font-medium text-[15px] placeholder:text-slate-500"
                     onKeyDown={(e) => { if (e.key === "Enter") handleBuild(); }}
                     autoFocus
                   />
