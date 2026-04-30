@@ -987,7 +987,7 @@ function NewSleekPDF({ data }: { data: ResumeData }) {
   return (
     <Document>
       <Page size="A4" style={newSleek.page}>
-        <View style={[newSleek.header, rtl && newSleek.headerRTL]}>
+        <View style={[newSleek.header, rtl ? newSleek.headerRTL : {}]}>
           <View style={{ flex: 1 }}>
             <View style={newSleek.accent} />
             <Text style={{ ...newSleek.name, textAlign: align }}>{c.name}</Text>
@@ -998,14 +998,14 @@ function NewSleekPDF({ data }: { data: ResumeData }) {
             {[c.location, c.email, c.phone].filter(Boolean).map((item) => <Text key={item} style={{ ...newSleek.contact, textAlign: align }}>{item}</Text>)}
           </View>
         </View>
-        <View style={[newSleek.bodyGrid, rtl && newSleek.bodyGridRTL]}>
+        <View style={[newSleek.bodyGrid, rtl ? newSleek.bodyGridRTL : {}]}>
           <View style={newSleek.main}>
             <Text style={{ ...newSleek.section, textAlign: align }}>{l.profile}</Text>
             <Text style={{ ...newSleek.body, textAlign: align }}>{c.summary}</Text>
             {c.experience.length > 0 ? <><Text style={{ ...newSleek.section, textAlign: align }}>{l.experience}</Text>{c.experience.map((e, i) => <View key={i} style={{ marginBottom: 9 }}><Text style={{ ...newSleek.itemTitle, textAlign: align }}>{e.title}</Text><Text style={{ ...newSleek.itemMeta, textAlign: align }}>{e.company} / {e.duration}</Text>{e.achievements.map((a, j) => <View key={j} style={{ ...newSleek.bullet, flexDirection: rtl ? "row-reverse" : "row" }}><Text style={{ width: 10, color: "#0f172a" }}>-</Text><Text style={{ ...newSleek.body, flex: 1, textAlign: align }}>{a}</Text></View>)}</View>)}</> : null}
             {c.projects.length > 0 ? <><Text style={{ ...newSleek.section, textAlign: align }}>{l.projects}</Text>{c.projects.map((p, i) => <View key={i} style={{ marginBottom: 6 }}><Text style={{ ...newSleek.itemTitle, textAlign: align }}>{p.name}</Text><Text style={{ ...newSleek.body, textAlign: align }}>{p.description}</Text></View>)}</> : null}
           </View>
-          <View style={[newSleek.side, rtl && newSleek.sideRTL]}>
+          <View style={[newSleek.side, rtl ? newSleek.sideRTL : {}]}>
             {c.skills.length > 0 ? <><Text style={{ ...newSleek.section, textAlign: align }}>{l.skills}</Text><View style={{ flexDirection: rtl ? "row-reverse" : "row", flexWrap: "wrap" }}>{c.skills.map((skill) => <Text key={skill} style={newSleek.chip}>{skill}</Text>)}</View></> : null}
             {c.education.length > 0 ? <><Text style={{ ...newSleek.section, textAlign: align }}>{l.education}</Text>{c.education.map((e, i) => <View key={i} style={{ marginBottom: 7 }}><Text style={{ ...newSleek.itemTitle, fontSize: 8.5, textAlign: align }}>{e.degree}</Text><Text style={{ ...newSleek.body, textAlign: align }}>{e.institution} / {e.year}</Text></View>)}</> : null}
             {c.certifications.length > 0 ? <><Text style={{ ...newSleek.section, textAlign: align }}>{l.certifications}</Text>{c.certifications.map((cert) => <Text key={cert} style={{ ...newSleek.body, marginBottom: 4, textAlign: align }}>{cert}</Text>)}</> : null}
@@ -1043,7 +1043,7 @@ function NewProfessionalPDF({ data }: { data: ResumeData }) {
   return (
     <Document>
       <Page size="A4" style={newProfessional.page}>
-        <View style={[newProfessional.shell, rtl && newProfessional.shellRTL]}>
+        <View style={[newProfessional.shell, rtl ? newProfessional.shellRTL : {}]}>
           <View style={newProfessional.side}>
             {c.photoUrl ? <Image src={c.photoUrl} style={newProfessional.photo} /> : <View style={{ ...newProfessional.photo, backgroundColor: "#334155" }} />}
             <Text style={{ ...newProfessional.sideName, textAlign: align }}>{c.name}</Text>
@@ -1098,7 +1098,7 @@ function NewAcademicPDF({ data }: { data: ResumeData }) {
   return (
     <Document>
       <Page size="A4" style={newAcademic.page}>
-        <View style={[newAcademic.header, rtl && newAcademic.headerRTL]}>
+        <View style={[newAcademic.header, rtl ? newAcademic.headerRTL : {}]}>
           {c.photoUrl ? <Image src={c.photoUrl} style={newAcademic.photo} /> : <View style={{ ...newAcademic.photo, backgroundColor: "#e2e8f0" }} />}
           <View style={{ flex: 1 }}>
             <Text style={{ ...newAcademic.kicker, textAlign: align }}>SELECTED CURRICULUM VITAE</Text>
@@ -1107,7 +1107,7 @@ function NewAcademicPDF({ data }: { data: ResumeData }) {
             <View style={{ ...newAcademic.contacts, flexDirection: rtl ? "row-reverse" : "row" }}>{[c.location, c.email, c.phone].filter(Boolean).map((item) => <Text key={item} style={newAcademic.contact}>{item}</Text>)}</View>
           </View>
         </View>
-        <View style={[newAcademic.grid, rtl && newAcademic.gridRTL]}>
+        <View style={[newAcademic.grid, rtl ? newAcademic.gridRTL : {}]}>
           <View style={newAcademic.main}>
             <Text style={{ ...newAcademic.heading, textAlign: align }}>{l.profile}</Text>
             <Text style={{ ...newAcademic.body, textAlign: align }}>{c.summary}</Text>

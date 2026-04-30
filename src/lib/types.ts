@@ -20,6 +20,7 @@ export interface Profile {
   personalityTraits: string[];
   industryExperience: string[];
   inferredStrengths: string[];
+  skillItems?: SkillItem[];
 }
 
 export interface ExperienceItem {
@@ -89,7 +90,7 @@ export interface FollowUpQuestion {
   field: string;
   question: string;
   helperText: string;
-  inputType: "text" | "select" | "multiselect";
+  inputType: "text" | "select" | "multiselect" | "rating";
   options: string[];
   placeholder?: string;
 }

@@ -21,6 +21,10 @@ import {
   FileCode,
   RotateCcw,
   Clock,
+  LayoutTemplate,
+  CheckCircle2,
+  ZoomIn,
+  ZoomOut,
 } from "lucide-react";
 import { toast } from "sonner";
 import { exportResumePDF } from "@/components/resume/pdf-templates";
@@ -75,6 +79,7 @@ function ResumeEditor() {
 
   const [tailorOpen, setTailorOpen] = useState(false);
   const [visualEditOpen, setVisualEditOpen] = useState(false);
+  const [templateModalOpen, setTemplateModalOpen] = useState(false);
   const [jobDescription, setJobDescription] = useState("");
   const [tailoring, setTailoring] = useState(false);
   const [exporting, setExporting] = useState(false);
@@ -107,6 +112,9 @@ function ResumeEditor() {
 
   // Scan-reveal animation — plays once on first mount
   const [isRevealing, setIsRevealing] = useState(true);
+  const [zoom, setZoom] = useState(1);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
   useEffect(() => {
     const t = setTimeout(() => setIsRevealing(false), 1800);
     return () => clearTimeout(t);
@@ -275,65 +283,38 @@ function ResumeEditor() {
   };
 
   return (
-    <div className="page-shell bg-background text-foreground flex flex-col h-[100dvh] overflow-hidden">
-      <header className="saas-nav flex-none">
-        <div className="px-4 sm:px-6">
-          <div className="flex flex-col gap-4 py-3 lg:h-16 lg:flex-row lg:items-center lg:justify-between lg:py-0">
-            <div className="flex items-center gap-3">
-              <Link to="/onboarding" className="flex items-center justify-center h-8 w-8 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors">
-                <ArrowLeft className="h-4 w-4" />
-              </Link>
-              <div className="flex items-center gap-2">
-                <div className="w-6 h-6 rounded-md bg-blue-600 flex items-center justify-center shadow-sm">
-                  <Sparkles className="w-3 h-3 text-white" />
-                </div>
-                <span className="text-sm font-bold tracking-tight text-slate-900 truncate max-w-[200px] sm:max-w-[300px]">{resume.title}</span>
-              </div>
-            </div>
+    <div className="min-h-screen bg-[#f8faff] text-slate-900 font-sans selection:bg-blue-100 selection:text-blue-900 relative overflow-hidden flex flex-col">
+      {/* Background blobs */}
+      <div className="absolute top-[-10%] left-[-10%] w-[600px] h-[600px] bg-blue-300/20 rounded-full blur-[120px] pointer-events-none mix-blend-multiply" />
+      <div className="absolute bottom-[-10%] right-[-10%] w-[800px] h-[800px] bg-blue-400/10 rounded-full blur-[150px] pointer-events-none mix-blend-multiply" />
 
-            <div className="flex flex-wrap items-center gap-2">
+      {/* Glass Navigation */}
+      <header className="sticky top-0 z-50 bg-white/70 backdrop-blur-xl border-b border-blue-100/50">
+        <div className="max-w-[1600px] mx-auto px-4 sm:px-6">
+          <div className="flex h-16 items-center justify-between">
+            <Link to="/onboarding" className="flex items-center gap-2.5 cursor-pointer group">
+              <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center shadow-[0_4px_12px_rgba(37,99,235,0.3)] group-hover:shadow-[0_4px_16px_rgba(37,99,235,0.4)] transition-all duration-300 group-hover:scale-105">
+                <Sparkles className="w-4 h-4 text-white" />
+              </div>
+              <span className="text-[1.05rem] font-bold tracking-tight text-slate-900 group-hover:text-blue-950 transition-colors">
+                MemoryCV
+              </span>
+            </Link>
+
+            <div className="flex items-center gap-2 sm:gap-3">
               <button onClick={() => setVisualEditOpen(true)} className="px-3 py-1.5 text-xs font-medium text-slate-600 hover:text-slate-900 rounded-lg hover:bg-slate-50 transition-colors flex items-center gap-1.5 border border-slate-200">
                 <Edit3 className="h-3.5 w-3.5" />
-                {isKu ? "دەستکاریکردنی بینراو" : "Visual Edit"}
+                <span className="hidden sm:inline">{isKu ? "دەستکاریکردنی بینراو" : "Visual Edit"}</span>
               </button>
               
-              <select
-                value={resume.template}
-                onChange={(e) => setTemplate(e.target.value as TemplateId)}
-                className="rounded-lg border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-medium text-slate-700 outline-none transition-colors hover:bg-slate-100 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-              >
-                <option value="minimal">Minimal</option>
-                <option value="executive">Executive</option>
-                <option value="noir">Noir</option>
-                <option value="apex">Apex</option>
-                <option value="slate">Slate</option>
-                <option value="cipher">Cipher</option>
-                <option value="monolith">Monolith</option>
-                <option value="pinnacle">Pinnacle</option>
-                <option value="avant">Avant</option>
-                <option value="vanguard">Vanguard</option>
-                <option value="nexus">Nexus</option>
-                <option value="orbit">Orbit</option>
-                <option value="metric">Metric</option>
-                <option value="prism">Prism</option>
-                <option value="carbon">Carbon</option>
-                <option value="atlas">Atlas</option>
-                <option value="forge">Forge</option>
-                <option value="zenith">Zenith</option>
-                <option value="vector">Vector</option>
-                <option value="new-sleek">NEW Sleek A4</option>
-                <option value="new-professional">NEW Professional A4</option>
-                <option value="new-academic">NEW Academic A4</option>
-                <option value="ref-torres">NEW Torres Exact</option>
-                <option value="ref-silva">NEW Silva Exact</option>
-                <option value="ref-schumacher">NEW Schumacher Exact</option>
-                <option value="ref-palmerston">NEW Palmerston Exact</option>
-                <option value="ref-sanchez">NEW Sanchez Exact</option>
-              </select>
+              <button onClick={() => setTemplateModalOpen(true)} className="px-3 py-1.5 text-xs font-medium text-purple-600 hover:text-purple-900 rounded-lg hover:bg-purple-50 transition-colors flex items-center gap-1.5 border border-purple-200">
+                <LayoutTemplate className="h-3.5 w-3.5" />
+                <span className="hidden sm:inline">{isKu ? "نەخشەکان" : "Design"}</span>
+              </button>
 
-              <button onClick={() => setTailorOpen(true)} className="px-3 py-1.5 text-xs font-medium text-blue-600 hover:text-blue-900 rounded-lg hover:bg-blue-50 transition-colors flex items-center gap-1.5">
+              <button onClick={() => setTailorOpen(true)} className="px-3 py-1.5 text-xs font-medium text-blue-600 hover:text-blue-900 rounded-lg hover:bg-blue-50 transition-colors flex items-center gap-1.5 border border-blue-200">
                 <Target className="h-3.5 w-3.5" />
-                {isKu ? "گونجاندن" : "Tailor"}
+                <span className="hidden sm:inline">{isKu ? "گونجاندن" : "Tailor"}</span>
               </button>
 
               {/* Export Dropdown */}
@@ -341,7 +322,7 @@ function ResumeEditor() {
                 <button
                   onClick={() => setExportDropdownOpen((v) => !v)}
                   disabled={exporting}
-                  className="primary-button px-4 py-2 text-xs font-medium disabled:opacity-50 flex items-center gap-1.5"
+                  className="px-4 py-2 text-xs font-medium text-white bg-blue-600 hover:bg-blue-700 active:scale-95 transition-all shadow-[0_4px_12px_rgba(37,99,235,0.3)] rounded-xl disabled:opacity-50 flex items-center gap-1.5"
                 >
                   {exporting ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Download className="h-3.5 w-3.5" />}
                   {isKu ? "هەناردەکردن" : "Export"}
@@ -411,149 +392,206 @@ function ResumeEditor() {
         </div>
       </header>
 
-      <main className="flex-1 grid lg:grid-cols-[380px_1fr] overflow-hidden">
-        {/* Left pane: AI Chat */}
-        <aside className="border-r-2 border-blue-200 shadow-md bg-white/50 backdrop-blur-md flex flex-col h-full relative z-10">
-          {/* Header with history toggle */}
-          <div className="px-4 py-3 border-b border-slate-100 bg-white flex items-center justify-between">
-            <div>
-              <h2 className="text-sm font-semibold tracking-tight flex items-center gap-2">
-                <Bot className="w-4 h-4 text-blue-600" />
-                {isKu ? "یاریدەدەری زیرەکی دەستکرد" : "AI Resume Assistant"}
-              </h2>
-              <p className="text-xs text-slate-400 mt-0.5">{isKu ? "داوابکە هەر شتێک بگۆڕێت، یان وەشانی پێشوو هەڵبژێرە لە خوارەوە." : "Ask to change anything, or pick a past version below."}</p>
-            </div>
-            {history.length > 0 && (
-              <button
-                onClick={() => setShowHistory(v => !v)}
-                className={`flex items-center gap-1 text-[11px] font-medium px-2.5 py-1.5 rounded-lg transition-colors ${
-                  showHistory ? 'bg-blue-100 text-blue-700' : 'text-slate-500 hover:bg-slate-100'
-                }`}
-              >
-                <Clock className="w-3 h-3" />
-                {history.length} {isKu ? "وەشان" : `version${history.length !== 1 ? 's' : ''}`}
-              </button>
-            )}
-          </div>
+      <main className="flex-1 max-w-[1600px] w-full mx-auto grid gap-4 px-3 pb-20 pt-4 sm:gap-6 sm:px-6 sm:pb-24 sm:pt-6 lg:grid-cols-[400px_1fr] xl:grid-cols-[440px_1fr] relative z-10">
+        
+        {/* Backdrop for mobile sidebar */}
+        {isSidebarOpen && (
+          <div 
+            className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[90] lg:hidden"
+            onClick={() => setIsSidebarOpen(false)}
+          />
+        )}
 
-          {/* History panel */}
-          {showHistory && history.length > 0 && (
-            <div className="border-b border-slate-100 bg-slate-50/80 px-3 py-2 space-y-1 max-h-44 overflow-y-auto">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2 px-1">{isKu ? "وەشانە پاشەکەوتکراوەکان" : "Saved versions"}</p>
-              {history.map((h) => (
-                <div key={h.id} className="flex items-center justify-between gap-2 rounded-lg px-2 py-1.5 hover:bg-white transition-colors group">
-                  <div className="min-w-0">
-                    <p className="text-[12px] text-slate-700 truncate font-medium">{h.label}</p>
-                    <p className="text-[10px] text-slate-400">{new Date(h.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+        {/* Left pane: AI Chat */}
+        <aside className={`
+          flex flex-col gap-4
+          fixed inset-y-0 left-0 z-[100] w-[320px] sm:w-[380px] bg-[#f8faff] pt-4 pb-6 px-4 sm:px-5 transition-transform duration-300 overflow-y-auto
+          lg:static lg:overflow-visible lg:bg-transparent lg:p-0 lg:z-auto lg:sticky lg:top-24 lg:h-[calc(100vh-8rem)]
+          ${isSidebarOpen ? "translate-x-0 shadow-2xl" : "-translate-x-full lg:translate-x-0 lg:shadow-none"}
+        `}>
+          <div className="bg-white/80 backdrop-blur-md rounded-[1.5rem] flex flex-col h-full relative overflow-hidden border border-white/50 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
+            {/* Header with history toggle */}
+            <div className="px-5 py-4 border-b border-slate-100 bg-white/50 flex items-center justify-between shrink-0">
+              <div>
+                <h2 className="text-sm font-bold tracking-tight flex items-center gap-2 text-slate-900">
+                  <Bot className="w-4 h-4 text-blue-600" />
+                  {isKu ? "یاریدەدەری زیرەکی دەستکرد" : "AI Assistant"}
+                </h2>
+                <p className="text-xs text-slate-500 mt-1">{isKu ? "داوابکە هەر شتێک بگۆڕێت، یان وەشانی پێشوو هەڵبژێرە لە خوارەوە." : "Ask to change anything, or pick a past version."}</p>
+              </div>
+              <button
+                onClick={() => setIsSidebarOpen(false)}
+                className="lg:hidden p-1.5 rounded-full text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {history.length > 0 && (
+              <div className="px-5 py-2 border-b border-slate-100 bg-white/30 flex items-center justify-between shrink-0">
+                <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">{isKu ? "وەشانە پاشەکەوتکراوەکان" : "History"}</span>
+                <button
+                  onClick={() => setShowHistory(v => !v)}
+                  className={`flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-md transition-colors ${
+                    showHistory ? 'bg-blue-100 text-blue-700' : 'text-slate-500 hover:bg-slate-200'
+                  }`}
+                >
+                  <Clock className="w-3 h-3" />
+                  {history.length} {isKu ? "وەشان" : `version${history.length !== 1 ? 's' : ''}`}
+                </button>
+              </div>
+            )}
+
+            {/* History panel */}
+            {showHistory && history.length > 0 && (
+              <div className="border-b border-slate-100 bg-slate-50/80 px-4 py-2 space-y-1 max-h-44 overflow-y-auto shrink-0">
+                {history.map((h) => (
+                  <div key={h.id} className="flex items-center justify-between gap-2 rounded-lg px-3 py-2 hover:bg-white border border-transparent hover:border-slate-200 transition-colors group shadow-sm">
+                    <div className="min-w-0">
+                      <p className="text-[12px] text-slate-700 truncate font-semibold">{h.label}</p>
+                      <p className="text-[10px] text-slate-400 font-medium">{new Date(h.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+                    </div>
+                    <button
+                      onClick={() => handleRevert(h.id)}
+                      className="shrink-0 flex items-center gap-1 text-[11px] font-bold text-blue-600 hover:text-blue-800 opacity-0 group-hover:opacity-100 transition-opacity px-2 py-1 rounded-md hover:bg-blue-50"
+                    >
+                      <RotateCcw className="w-3 h-3" /> {isKu ? "گێڕانەوە" : "Restore"}
+                    </button>
                   </div>
-                  <button
-                    onClick={() => handleRevert(h.id)}
-                    className="shrink-0 flex items-center gap-1 text-[11px] font-semibold text-blue-600 hover:text-blue-800 opacity-0 group-hover:opacity-100 transition-opacity px-2 py-1 rounded-md hover:bg-blue-50"
-                  >
-                    <RotateCcw className="w-3 h-3" /> {isKu ? "گێڕانەوە" : "Restore"}
-                  </button>
+                ))}
+              </div>
+            )}
+
+            {/* Messages */}
+            <div className="flex-1 overflow-y-auto p-5 space-y-4" style={{ scrollbarWidth: 'thin', scrollbarColor: '#e2e8f0 transparent' }}>
+              {messages.map((msg, i) => (
+                <div key={i} className={`flex gap-3 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                  {msg.role === 'assistant' && (
+                    <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center flex-shrink-0 shadow-[0_4px_10px_rgba(37,99,235,0.2)]">
+                      <Sparkles className="w-4 h-4 text-white" />
+                    </div>
+                  )}
+                  <div className="flex flex-col gap-1 max-w-[85%]">
+                    <div className={`text-sm px-4 py-3 rounded-2xl leading-relaxed shadow-sm ${
+                      msg.role === 'user'
+                        ? 'bg-blue-600 text-white rounded-tr-sm'
+                        : 'bg-white border border-slate-100 text-slate-800 rounded-tl-sm'
+                    }`}>
+                      {msg.content}
+                    </div>
+                    {/* Inline revert button on AI messages that caused a change */}
+                    {msg.role === 'assistant' && msg.snapshotId && (
+                      <button
+                        onClick={() => handleRevert(msg.snapshotId!)}
+                        className="self-start flex items-center gap-1 text-[10.5px] font-bold text-slate-400 hover:text-blue-600 transition-colors mt-1"
+                      >
+                        <RotateCcw className="w-3 h-3" /> {isKu ? "گەڕانەوە لەم گۆڕانکارییە" : "Undo this change"}
+                      </button>
+                    )}
+                  </div>
                 </div>
               ))}
+              {chatLoading && (
+                <div className="flex gap-3 justify-start">
+                  <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center flex-shrink-0 shadow-[0_4px_10px_rgba(37,99,235,0.2)]">
+                    <Loader2 className="w-4 h-4 text-white animate-spin" />
+                  </div>
+                  <div className="flex gap-1.5 items-center px-5 py-4 rounded-2xl rounded-tl-sm bg-white border border-slate-100 shadow-sm">
+                    {[0,1,2].map(i => (
+                      <span key={i} className="w-2 h-2 rounded-full bg-blue-400 animate-bounce" style={{ animationDelay: `${i*0.15}s` }} />
+                    ))}
+                  </div>
+                </div>
+              )}
+              <div ref={messagesEndRef} />
             </div>
-          )}
 
-          {/* Messages */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-3" style={{ scrollbarWidth: 'thin', scrollbarColor: '#e2e8f0 transparent' }}>
-            {messages.map((msg, i) => (
-              <div key={i} className={`flex gap-2.5 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                {msg.role === 'assistant' && (
-                  <div className="w-6 h-6 rounded-full bg-blue-600 flex items-center justify-center flex-shrink-0 mt-0.5 shadow-sm shadow-blue-200">
-                    <Sparkles className="w-3 h-3 text-white" />
-                  </div>
-                )}
-                <div className="flex flex-col gap-1 max-w-[85%]">
-                  <div className={`text-sm px-3.5 py-2.5 rounded-2xl leading-relaxed ${
-                    msg.role === 'user'
-                      ? 'bg-blue-600 text-white rounded-tr-sm shadow-sm shadow-blue-200'
-                      : 'bg-white border border-slate-200 text-slate-800 rounded-tl-sm shadow-sm'
-                  }`}>
-                    {msg.content}
-                  </div>
-                  {/* Inline revert button on AI messages that caused a change */}
-                  {msg.role === 'assistant' && msg.snapshotId && (
-                    <button
-                      onClick={() => handleRevert(msg.snapshotId!)}
-                      className="self-start flex items-center gap-1 text-[10.5px] font-medium text-slate-400 hover:text-blue-600 transition-colors ml-1"
-                    >
-                      <RotateCcw className="w-3 h-3" /> {isKu ? "گەڕانەوە لەم گۆڕانکارییە" : "Undo this change"}
-                    </button>
-                  )}
-                </div>
-              </div>
-            ))}
-            {chatLoading && (
-              <div className="flex gap-2.5 justify-start">
-                <div className="w-6 h-6 rounded-full bg-blue-600 flex items-center justify-center flex-shrink-0 mt-0.5 shadow-sm shadow-blue-200">
-                  <Loader2 className="w-3 h-3 text-white animate-spin" />
-                </div>
-                <div className="flex gap-1.5 items-center px-4 py-3 rounded-2xl rounded-tl-sm bg-white border border-slate-200 shadow-sm">
-                  {[0,1,2].map(i => (
-                    <span key={i} className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-bounce" style={{ animationDelay: `${i*0.15}s` }} />
-                  ))}
-                </div>
-              </div>
-            )}
-            <div ref={messagesEndRef} />
-          </div>
-
-          {/* Input */}
-          <div className="p-3 bg-white border-t border-slate-100">
-            <form onSubmit={handleChatSubmit} className="relative">
-              <input
-                value={chatInput}
-                onChange={(e) => setChatInput(e.target.value)}
-                placeholder={isKu ? "پوختەی کارەکەم با بەهێزتر بێت..." : "Make my summary more executive..."}
-                disabled={chatLoading}
-                className="w-full bg-slate-50 border border-slate-200 rounded-full pl-4 pr-12 py-2.5 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 disabled:opacity-50 transition-all"
-              />
-              <button
-                type="submit"
-                disabled={!chatInput.trim() || chatLoading}
-                className="absolute right-1.5 top-1.5 bottom-1.5 w-8 rounded-full bg-blue-600 text-white flex items-center justify-center disabled:bg-slate-200 disabled:text-slate-400 transition-colors"
-              >
-                <Send className="w-3.5 h-3.5 ml-0.5" />
-              </button>
-            </form>
+            {/* Input */}
+            <div className="p-4 bg-white/80 backdrop-blur-md border-t border-slate-100 shrink-0">
+              <form onSubmit={handleChatSubmit} className="relative">
+                <input
+                  value={chatInput}
+                  onChange={(e) => setChatInput(e.target.value)}
+                  placeholder={isKu ? "پوختەی کارەکەم با بەهێزتر بێت..." : "Make my summary more executive..."}
+                  disabled={chatLoading}
+                  className="w-full bg-white border border-slate-200 rounded-full pl-5 pr-14 py-3.5 text-sm shadow-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 disabled:opacity-50 transition-all font-medium"
+                />
+                <button
+                  type="submit"
+                  disabled={!chatInput.trim() || chatLoading}
+                  className="absolute right-2 top-2 bottom-2 w-10 rounded-full bg-blue-600 text-white flex items-center justify-center disabled:bg-slate-200 disabled:text-slate-400 transition-all shadow-sm hover:bg-blue-700 active:scale-95"
+                >
+                  <Send className="w-4 h-4 ml-0.5" />
+                </button>
+              </form>
+            </div>
           </div>
         </aside>
 
-        {/* Right pane: Full size Resume Preview with scan-reveal animation */}
-        <section className="h-full w-full overflow-y-auto bg-slate-50/50 p-4 sm:p-8 flex justify-center items-start @container">
-          {/* We ensure the resume is EXACTLY 794px wide, and scale it down if the container is smaller than that.
-              This guarantees it looks like a real A4 paper on mobile and exports correctly. */}
-          <div className="flex justify-center w-full max-w-[794px]">
-            <div 
-              ref={previewRef} 
-              className="relative w-[794px] min-w-[794px] rounded-xl border-2 border-slate-200 shadow-[0_24px_60px_-24px_rgba(15,23,42,0.25)] bg-white overflow-hidden origin-top"
-              style={{ zoom: "min(1, calc(100cqw / 794))" }}
-            >
-              <ResumePreview data={data} template={resume.template} />
-              {/* Scan-line reveal: slides up revealing the resume from top like AI writing it */}
-              {isRevealing && (
-                <div
-                  className="absolute inset-0 pointer-events-none z-20"
-                  style={{
-                    background: 'linear-gradient(to bottom, transparent 0%, transparent var(--reveal), white var(--reveal), white 100%)',
-                    animation: 'resumeReveal 1.6s cubic-bezier(0.22,1,0.36,1) forwards',
-                  } as React.CSSProperties}
-                />
-              )}
-              <style>{`
-                @keyframes resumeReveal {
-                  from { --reveal: 0%; }
-                  to   { --reveal: 100%; }
-                }
-                @property --reveal {
-                  syntax: '<percentage>';
-                  inherits: false;
-                  initial-value: 0%;
-                }
-              `}</style>
+        {/* Right pane: Preview Area */}
+        <section className="flex flex-col h-full lg:h-[calc(100vh-8rem)]">
+          <div className="flex-1 bg-slate-200/50 backdrop-blur-3xl rounded-[2rem] p-2 sm:p-4 lg:p-6 border border-slate-300/60 shadow-[inset_0_0_20px_rgba(0,0,0,0.02)] relative flex flex-col overflow-hidden h-[calc(100vh-10rem)] lg:h-auto">
+            
+            {/* Toolbar Area */}
+            <div className="flex flex-wrap items-center justify-between gap-3 mb-4 px-2 shrink-0">
+              <div className="flex items-center gap-3">
+                <button 
+                  onClick={() => setIsSidebarOpen(true)}
+                  className="lg:hidden flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white border border-slate-200 text-slate-700 shadow-sm hover:bg-slate-50 active:scale-95 transition-all font-bold text-sm"
+                >
+                  <Bot className="w-4 h-4 text-blue-600" />
+                  AI Assistant
+                </button>
+                <div className="hidden sm:flex items-center gap-3 bg-white/60 backdrop-blur-md px-3 py-1.5 rounded-full border border-white shadow-sm">
+                  <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                  <span className="text-xs font-bold uppercase tracking-wider text-slate-700">Live Preview</span>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="flex items-center rounded-xl border border-slate-200 bg-white/80 shadow-sm overflow-hidden">
+                  <button onClick={() => setZoom(z => Math.max(0.5, z - 0.25))} className="p-1.5 sm:p-2 hover:bg-slate-100 text-slate-600 transition-colors" title="Zoom Out">
+                    <ZoomOut className="w-4 h-4" />
+                  </button>
+                  <span className="text-[10px] sm:text-xs font-bold text-slate-700 w-8 sm:w-10 text-center">{Math.round(zoom * 100)}%</span>
+                  <button onClick={() => setZoom(z => Math.min(2, z + 0.25))} className="p-1.5 sm:p-2 hover:bg-slate-100 text-slate-600 transition-colors" title="Zoom In">
+                    <ZoomIn className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            </div>
+            
+            {/* Resume Container with smooth scroll */}
+            <div className="flex-1 overflow-auto rounded-[1rem] shadow-[0_0_0_1px_rgba(0,0,0,0.05),0_30px_60px_-20px_rgba(0,0,0,0.15)] bg-slate-100 relative @container flex justify-center p-4 sm:p-8">
+              <div className="flex justify-center w-full max-w-[794px]">
+                <div 
+                  ref={previewRef} 
+                  className="relative w-[794px] min-w-[794px] h-fit min-h-[1123px] bg-white overflow-hidden origin-top transition-transform duration-200 ease-out"
+                  style={{ transform: `scale(${zoom})`, transformOrigin: "top center", marginBottom: `${(zoom - 1) * 1123}px` }}
+                >
+                  <ResumePreview data={data} template={resume.template} />
+                  {/* Scan-line reveal: slides up revealing the resume from top like AI writing it */}
+                  {isRevealing && (
+                    <div
+                      className="absolute inset-0 pointer-events-none z-20"
+                      style={{
+                        background: 'linear-gradient(to bottom, transparent 0%, transparent var(--reveal), white var(--reveal), white 100%)',
+                        animation: 'resumeReveal 1.6s cubic-bezier(0.22,1,0.36,1) forwards',
+                      } as React.CSSProperties}
+                    />
+                  )}
+                  <style>{`
+                    @keyframes resumeReveal {
+                      from { --reveal: 0%; }
+                      to   { --reveal: 100%; }
+                    }
+                    @property --reveal {
+                      syntax: '<percentage>';
+                      inherits: false;
+                      initial-value: 0%;
+                    }
+                  `}</style>
+                </div>
+              </div>
             </div>
           </div>
         </section>
@@ -808,6 +846,146 @@ function ResumeEditor() {
           </div>
         </div>
       )}
+
+      {/* Template Selector Modal */}
+      {templateModalOpen && (
+        <div 
+          className="fixed inset-0 z-[100] flex flex-col justify-end sm:justify-center sm:items-center bg-slate-900/60 sm:p-6 backdrop-blur-md animate-in fade-in duration-300"
+          onClick={() => setTemplateModalOpen(false)}
+        >
+          <div 
+            className="w-full sm:max-w-6xl bg-[#f8faff] rounded-t-[2rem] sm:rounded-[2.5rem] p-4 sm:p-8 flex flex-col max-h-[90vh] shadow-2xl animate-in slide-in-from-bottom-8 sm:zoom-in-95 duration-300 border border-white/20"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between mb-6 px-2">
+              <div>
+                <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-blue-50 border border-blue-100 text-blue-600 text-xs font-bold tracking-wide uppercase mb-3">
+                  <LayoutTemplate className="w-3.5 h-3.5" />
+                  {isKu ? "کتێبخانەی نەخشەکان" : "Template Library"}
+                </div>
+                <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 leading-tight">
+                  {isKu ? "هەڵبژاردنی" : "Choose a"} <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-blue-400">{isKu ? "نەخشە" : "Template"}</span>
+                </h2>
+              </div>
+              <button onClick={() => setTemplateModalOpen(false)} className="w-10 h-10 rounded-full hover:bg-slate-200/50 flex items-center justify-center text-slate-500 transition-colors">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto px-2 pb-4 scrollbar-thin scrollbar-thumb-slate-300 scrollbar-track-transparent">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-5">
+                {TEMPLATES.map(({ id, label, isNew }) => {
+                  const isActive = resume.template === id;
+                  return (
+                    <button
+                      key={id}
+                      onClick={() => {
+                        setTemplate(id);
+                        setTemplateModalOpen(false);
+                      }}
+                      className={`group relative flex flex-col items-center gap-2 rounded-[1.2rem] p-2 transition-all duration-300 text-center ${
+                        isActive 
+                          ? "bg-blue-600 shadow-[0_8px_20px_rgba(37,99,235,0.2)] border-transparent scale-[1.02]" 
+                          : "bg-white hover:bg-blue-50/50 border border-slate-200 hover:border-blue-200 hover:shadow-md"
+                      }`}
+                    >
+                      <div className="w-full aspect-[1/1.414] rounded-[0.8rem] overflow-hidden relative shadow-[0_2px_10px_rgba(0,0,0,0.05)] bg-slate-100 border border-slate-100">
+                        <Thumbnail id={id} />
+                        {isActive && (
+                          <div className="absolute inset-0 bg-blue-600/10 flex items-center justify-center backdrop-blur-[1px] z-10">
+                            <CheckCircle2 className="w-10 h-10 text-blue-600 drop-shadow-md bg-white rounded-full" />
+                          </div>
+                        )}
+                      </div>
+                      <div className="w-full px-1 flex flex-col items-center mt-1 sm:mt-2 mb-1">
+                        <span className={`text-xs sm:text-sm font-bold truncate w-full ${isActive ? "text-white" : "text-slate-900"}`}>
+                          {label}
+                        </span>
+                      </div>
+                      {isNew && !isActive && (
+                        <span className="absolute top-0 right-0 -translate-y-1/3 translate-x-1/4 px-2.5 py-0.5 rounded-full bg-blue-500 text-white text-[9px] font-bold uppercase tracking-wider shadow-sm z-10 border-2 border-white">
+                          New
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+// Template Definitions & Thumbnail
+// ─────────────────────────────────────────────────────────────
+
+type Category = "All" | "Minimal" | "Professional" | "Academic" | "Creative";
+
+const TEMPLATES: { id: TemplateId; label: string; desc: string; category: Category; isNew?: boolean }[] = [
+  { id: "minimal",   label: "Minimal",   desc: "Clean hierarchy", category: "Minimal" },
+  { id: "slate",     label: "Slate",      desc: "Swiss precision", category: "Minimal" },
+  { id: "avant",     label: "Avant",      desc: "Brutalist lines", category: "Minimal" },
+  { id: "vanguard",  label: "Vanguard",   desc: "Massive typography", category: "Minimal" },
+  { id: "executive", label: "Executive",  desc: "Dark sidebar", category: "Professional", isNew: false },
+  { id: "apex",      label: "Apex",       desc: "Bold top bar", category: "Professional" },
+  { id: "monolith",  label: "Monolith",   desc: "Highly structured", category: "Professional" },
+  { id: "metric",    label: "Metric",     desc: "Data-driven", category: "Professional" },
+  { id: "carbon",    label: "Carbon",     desc: "Charcoal sidebar", category: "Professional", isNew: true },
+  { id: "atlas",     label: "Atlas",      desc: "Corporate authority", category: "Professional", isNew: true },
+  { id: "new-sleek", label: "NEW Sleek A4", desc: "Photo-led precision", category: "Professional", isNew: true },
+  { id: "new-professional", label: "NEW Professional A4", desc: "Executive sidebar", category: "Professional", isNew: true },
+  { id: "new-academic", label: "NEW Academic A4", desc: "Research CV layout", category: "Academic", isNew: true },
+  { id: "ref-torres", label: "NEW Torres Exact", desc: "Blue photo sidebar", category: "Professional", isNew: true },
+  { id: "ref-silva", label: "NEW Silva Exact", desc: "Brown account split", category: "Professional", isNew: true },
+  { id: "ref-schumacher", label: "NEW Schumacher Exact", desc: "Orange skill bars", category: "Creative", isNew: true },
+  { id: "ref-palmerston", label: "NEW Palmerston Exact", desc: "Slate graphic designer", category: "Professional", isNew: true },
+  { id: "ref-sanchez", label: "NEW Sanchez Exact", desc: "Timeline manager", category: "Professional", isNew: true },
+  { id: "mercer", label: "NEW Mercer Exact", desc: "Navy structured dual-column", category: "Professional", isNew: true },
+  { id: "noir",      label: "Noir",       desc: "All-black luxury", category: "Creative" },
+  { id: "cipher",    label: "Cipher",     desc: "Dark tech aesthetic", category: "Creative" },
+  { id: "pinnacle",  label: "Pinnacle",   desc: "Dark layered layout", category: "Creative" },
+  { id: "nexus",     label: "Nexus",      desc: "Timeline SVG nodes", category: "Creative" },
+  { id: "orbit",     label: "Orbit",      desc: "Interactive elements", category: "Creative" },
+  { id: "prism",     label: "Prism",      desc: "Geometric shapes", category: "Creative" },
+  { id: "forge",     label: "Forge",      desc: "Industrial brutalist", category: "Minimal", isNew: true },
+  { id: "zenith",    label: "Zenith",     desc: "Gold luxury premium", category: "Professional", isNew: true },
+  { id: "vector",    label: "Vector",     desc: "Dark mode tech", category: "Creative", isNew: true },
+];
+
+const MINI_SAMPLE: ResumeData = {
+  name: "Jane Doe",
+  title: "Designer",
+  email: "jane@example.com",
+  phone: "+1 234 567",
+  photoUrl: "https://picsum.photos/seed/maya/240/240",
+  location: "New York",
+  summary: "Creative designer focusing on UI/UX.",
+  experience: [
+    { title: "Lead", company: "Studio", duration: "2020", description: "Design.", achievements: [] }
+  ],
+  projects: [],
+  education: [{ degree: "BFA", institution: "School", year: "2018" }],
+  skills: ["Figma"],
+  certifications: [],
+};
+
+function Thumbnail({ id }: { id: TemplateId }) {
+  return (
+    <div className="absolute inset-0 bg-white overflow-hidden flex items-start justify-center">
+      <div 
+        className="origin-top pointer-events-none mt-2"
+        style={{
+          width: '794px',
+          height: '1123px',
+          transform: 'scale(0.15)',
+        }}
+      >
+        <ResumePreview data={MINI_SAMPLE} template={id} />
+      </div>
     </div>
   );
 }

@@ -1,4 +1,6 @@
 import type { ResumeData } from "@/lib/types";
+import { StarRating, BarRating } from "./templates";
+
 
 const rtlPattern = /[\u0600-\u06ff\u0750-\u077f\u08a0-\u08ff]/;
 
@@ -114,14 +116,25 @@ export function NoirTemplate({ data }: { data: ResumeData }) {
           )}
 
           <div>
-            {data.skills.length > 0 && (
+            {(data.skillItems?.length ? data.skillItems.length > 0 : data.skills.length > 0) && (
               <section className="mb-8">
                 <h2 className="mb-4 text-[10px] font-bold uppercase tracking-[0.3em] rtl:tracking-normal text-neutral-600 border-b border-neutral-800 pb-2">{label(data, "skills")}</h2>
-                <div className="flex flex-wrap gap-2">
-                  {data.skills.map((s, i) => (
-                    <span key={i} className="px-2 py-1 border border-neutral-800 text-xs text-neutral-400 rounded-sm">{s}</span>
-                  ))}
-                </div>
+                {data.skillItems && data.skillItems.length > 0 ? (
+                  <div className="grid grid-cols-1 gap-y-3">
+                    {data.skillItems.map((s, i) => (
+                      <div key={i} className="flex flex-col">
+                        <span className="text-xs text-neutral-400 mb-1">{s.name}</span>
+                        <BarRating level={s.level} />
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="flex flex-wrap gap-2">
+                    {data.skills.map((s, i) => (
+                      <span key={i} className="px-2 py-1 border border-neutral-800 text-xs text-neutral-400 rounded-sm">{s}</span>
+                    ))}
+                  </div>
+                )}
               </section>
             )}
 
@@ -201,14 +214,25 @@ export function ApexTemplate({ data }: { data: ResumeData }) {
           </div>
 
           <aside className="col-span-1 space-y-8">
-            {data.skills.length > 0 && (
+            {(data.skillItems?.length ? data.skillItems.length > 0 : data.skills.length > 0) && (
               <section>
                 <h2 className="text-lg font-bold text-slate-900 mb-4 border-b-2 border-slate-100 pb-2">{label(data, "skills")}</h2>
-                <div className="flex flex-col gap-2">
-                  {data.skills.map((s, i) => (
-                    <span key={i} className="text-sm font-medium text-slate-700 bg-slate-100 px-3 py-1.5 rounded-md">{s}</span>
-                  ))}
-                </div>
+                {data.skillItems && data.skillItems.length > 0 ? (
+                  <div className="flex flex-col gap-3">
+                    {data.skillItems.map((s, i) => (
+                      <div key={i} className="flex flex-col">
+                         <span className="text-sm font-medium text-slate-700">{s.name}</span>
+                         <StarRating level={s.level} />
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="flex flex-col gap-2">
+                    {data.skills.map((s, i) => (
+                      <span key={i} className="text-sm font-medium text-slate-700 bg-slate-100 px-3 py-1.5 rounded-md">{s}</span>
+                    ))}
+                  </div>
+                )}
               </section>
             )}
 
@@ -292,17 +316,28 @@ export function NexusTemplate({ data }: { data: ResumeData }) {
         </div>
 
         <div className="col-span-4 space-y-8">
-          {data.skills.length > 0 && (
+          {(data.skillItems?.length ? data.skillItems.length > 0 : data.skills.length > 0) && (
             <section>
               <h2 className="text-xl font-black text-slate-900 mb-4 flex items-center gap-2">
                 <div className="w-4 h-4 bg-blue-600 rounded-sm"></div>
                 {label(data, "skills")}
               </h2>
-              <div className="flex flex-wrap gap-2">
-                {data.skills.map((s, i) => (
-                  <span key={i} className="text-xs font-bold text-blue-700 bg-blue-50 border border-blue-100 px-2 py-1 rounded-md shadow-sm">{s}</span>
-                ))}
-              </div>
+              {data.skillItems && data.skillItems.length > 0 ? (
+                 <div className="flex flex-col gap-3">
+                    {data.skillItems.map((s, i) => (
+                      <div key={i} className="flex flex-col">
+                         <span className="text-sm font-bold text-blue-900">{s.name}</span>
+                         <BarRating level={s.level} />
+                      </div>
+                    ))}
+                 </div>
+              ) : (
+                <div className="flex flex-wrap gap-2">
+                  {data.skills.map((s, i) => (
+                    <span key={i} className="text-xs font-bold text-blue-700 bg-blue-50 border border-blue-100 px-2 py-1 rounded-md shadow-sm">{s}</span>
+                  ))}
+                </div>
+              )}
             </section>
           )}
 
@@ -397,20 +432,33 @@ export function OrbitTemplate({ data }: { data: ResumeData }) {
             <p className="text-sm leading-relaxed text-neutral-600">{data.summary}</p>
           </section>
 
-          {data.skills.length > 0 && (
+          {(data.skillItems?.length ? data.skillItems.length > 0 : data.skills.length > 0) && (
             <section>
               <h2 className="text-[10px] font-bold uppercase tracking-[0.3em] rtl:tracking-normal text-neutral-400 mb-6 border-b border-neutral-200 pb-2">{label(data, "expertise")}</h2>
               <div className="space-y-3">
-                {data.skills.map((s, i) => (
-                  <div key={i} className="flex justify-between rtl:flex-row-reverse items-center">
-                    <span className="text-xs font-bold text-neutral-700">{s}</span>
-                    <div className="flex gap-1">
-                      {[1,2,3,4,5].map(star => (
-                         <div key={star} className={`w-1.5 h-1.5 rounded-full ${star <= ((s.length % 3) + 3) ? 'bg-neutral-800' : 'bg-neutral-200'}`}></div>
-                      ))}
+                {data.skillItems && data.skillItems.length > 0 ? (
+                  data.skillItems.map((s, i) => (
+                    <div key={i} className="flex justify-between rtl:flex-row-reverse items-center">
+                      <span className="text-xs font-bold text-neutral-700">{s.name}</span>
+                      <div className="flex gap-1">
+                        {[1,2,3,4,5].map(star => (
+                           <div key={star} className={`w-1.5 h-1.5 rounded-full ${star <= s.level ? 'bg-neutral-800' : 'bg-neutral-200'}`}></div>
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  ))
+                ) : (
+                  data.skills.map((s, i) => (
+                    <div key={i} className="flex justify-between rtl:flex-row-reverse items-center">
+                      <span className="text-xs font-bold text-neutral-700">{s}</span>
+                      <div className="flex gap-1">
+                        {[1,2,3,4,5].map(star => (
+                           <div key={star} className={`w-1.5 h-1.5 rounded-full ${star <= ((s.length % 3) + 3) ? 'bg-neutral-800' : 'bg-neutral-200'}`}></div>
+                        ))}
+                      </div>
+                    </div>
+                  ))
+                )}
               </div>
             </section>
           )}
@@ -450,24 +498,41 @@ export function MetricTemplate({ data }: { data: ResumeData }) {
 
       <div className="grid rtl:[direction:rtl] grid-cols-12 gap-10 flex-1">
         <div className="col-span-4 space-y-10">
-          {data.skills.length > 0 && (
+          {(data.skillItems?.length ? data.skillItems.length > 0 : data.skills.length > 0) && (
             <section>
               <h2 className="text-xs font-black uppercase tracking-widest rtl:tracking-normal border-b-4 border-black pb-2 mb-6">{label(data, "metrics")}</h2>
               <div className="space-y-4">
-                {data.skills.map((s, i) => {
-                  const level = ((s.length % 3) + 3) * 20; // 60, 80, 100
-                  return (
-                    <div key={i}>
-                      <div className="flex justify-between rtl:flex-row-reverse text-[10px] font-black uppercase mb-1">
-                        <span>{s}</span>
-                        <span>{level}%</span>
+                {data.skillItems && data.skillItems.length > 0 ? (
+                  data.skillItems.map((s, i) => {
+                    const level = s.level * 20;
+                    return (
+                      <div key={i}>
+                        <div className="flex justify-between rtl:flex-row-reverse text-[10px] font-black uppercase mb-1">
+                          <span>{s.name}</span>
+                          <span>{level}%</span>
+                        </div>
+                        <div className="h-2 w-full border-2 border-black p-[1px]">
+                          <div className="h-full bg-black" style={{ width: `${level}%` }}></div>
+                        </div>
                       </div>
-                      <div className="h-2 w-full border-2 border-black p-[1px]">
-                        <div className="h-full bg-black" style={{ width: `${level}%` }}></div>
+                    );
+                  })
+                ) : (
+                  data.skills.map((s, i) => {
+                    const level = ((s.length % 3) + 3) * 20; // 60, 80, 100
+                    return (
+                      <div key={i}>
+                        <div className="flex justify-between rtl:flex-row-reverse text-[10px] font-black uppercase mb-1">
+                          <span>{s}</span>
+                          <span>{level}%</span>
+                        </div>
+                        <div className="h-2 w-full border-2 border-black p-[1px]">
+                          <div className="h-full bg-black" style={{ width: `${level}%` }}></div>
+                        </div>
                       </div>
-                    </div>
-                  );
-                })}
+                    );
+                  })
+                )}
               </div>
             </section>
           )}
@@ -582,20 +647,31 @@ export function PrismTemplate({ data }: { data: ResumeData }) {
         </div>
 
         <div className="col-span-5 space-y-10">
-          {data.skills.length > 0 && (
+          {(data.skillItems?.length ? data.skillItems.length > 0 : data.skills.length > 0) && (
             <section>
               <h2 className="flex items-center gap-3 text-xs font-bold uppercase tracking-[0.2em] rtl:tracking-normal text-white mb-6">
                 <div className="w-2 h-2 bg-indigo-500 rotate-45"></div>
                 {label(data, "skills")}
                 <div className="flex-1 h-px bg-gray-800 ml-2"></div>
               </h2>
-              <div className="flex flex-wrap gap-2">
-                {data.skills.map((s, i) => (
-                  <span key={i} className="text-[10px] font-bold uppercase tracking-wider rtl:tracking-normal text-gray-300 border border-gray-800 px-3 py-1.5 bg-gray-900/50">
-                    {s}
-                  </span>
-                ))}
-              </div>
+              {data.skillItems && data.skillItems.length > 0 ? (
+                <div className="flex flex-col gap-3">
+                  {data.skillItems.map((s, i) => (
+                    <div key={i} className="flex flex-col">
+                      <span className="text-[10px] font-bold uppercase tracking-wider rtl:tracking-normal text-gray-300">{s.name}</span>
+                      <StarRating level={s.level} />
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="flex flex-wrap gap-2">
+                  {data.skills.map((s, i) => (
+                    <span key={i} className="text-[10px] font-bold uppercase tracking-wider rtl:tracking-normal text-gray-300 border border-gray-800 px-3 py-1.5 bg-gray-900/50">
+                      {s}
+                    </span>
+                  ))}
+                </div>
+              )}
             </section>
           )}
 
@@ -665,10 +741,21 @@ export function SlateTemplate({ data }: { data: ResumeData }) {
         )}
 
         <div className="grid rtl:[direction:rtl] grid-cols-2 gap-10 flex-1">
-           {data.skills.length > 0 && (
+           {(data.skillItems?.length ? data.skillItems.length > 0 : data.skills.length > 0) && (
             <section>
               <h2 className="text-sm font-semibold uppercase tracking-wider rtl:tracking-normal text-slate-900 mb-4 border-b border-slate-200 pb-2">{label(data, "skills")}</h2>
-              <p className="text-sm text-slate-700 leading-relaxed">{data.skills.join(" • ")}</p>
+              {data.skillItems && data.skillItems.length > 0 ? (
+                <div className="flex flex-col gap-3">
+                  {data.skillItems.map((s, i) => (
+                    <div key={i} className="flex flex-col">
+                      <span className="text-sm text-slate-900 font-medium">{s.name}</span>
+                      <BarRating level={s.level} />
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-slate-700 leading-relaxed">{data.skills.join(" • ")}</p>
+              )}
             </section>
           )}
 
@@ -732,13 +819,22 @@ export function AvantTemplate({ data }: { data: ResumeData }) {
         )}
 
         <div className="grid rtl:[direction:rtl] grid-cols-2 gap-12 flex-1">
-          {data.skills.length > 0 && (
+          {(data.skillItems?.length ? data.skillItems.length > 0 : data.skills.length > 0) && (
             <section>
               <h2 className="text-2xl font-black uppercase tracking-tighter rtl:tracking-normal border-b-2 border-black pb-2 mb-6">{label(data, "skills")}</h2>
-              <div className="flex flex-col gap-2">
-                {data.skills.map((s, i) => (
-                  <span key={i} className="text-sm font-bold uppercase">{s}</span>
-                ))}
+              <div className="flex flex-col gap-3">
+                {data.skillItems && data.skillItems.length > 0 ? (
+                  data.skillItems.map((s, i) => (
+                    <div key={i} className="flex flex-col">
+                      <span className="text-sm font-bold uppercase">{s.name}</span>
+                      <BarRating level={s.level} />
+                    </div>
+                  ))
+                ) : (
+                  data.skills.map((s, i) => (
+                    <span key={i} className="text-sm font-bold uppercase">{s}</span>
+                  ))
+                )}
               </div>
             </section>
           )}

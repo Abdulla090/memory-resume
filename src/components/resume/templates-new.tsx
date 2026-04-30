@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { StarRating, BarRating } from "./templates";
 import { Phone, Mail, Globe, MapPin } from "lucide-react";
 import type { ResumeData } from "@/lib/types";
 import { optimizeResumeForOnePage } from "@/lib/resume-utils";
@@ -175,15 +176,26 @@ export function NewSleekTemplate({ data }: { data: ResumeData }) {
         </main>
 
         <aside className="space-y-7 border-l border-slate-200 pl-7 rtl:border-l-0 rtl:border-r rtl:pl-0 rtl:pr-7">
-          {c.skills.length > 0 && (
+          {(c.skillItems?.length ? c.skillItems.length > 0 : c.skills.length > 0) && (
             <Section title={l.skills}>
-              <div className="flex flex-wrap gap-2">
-                {c.skills.map((skill) => (
-                  <span key={skill} className="rounded-full border border-slate-200 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.1em] rtl:tracking-normal text-slate-700">
-                    {skill}
-                  </span>
-                ))}
-              </div>
+              {c.skillItems && c.skillItems.length > 0 ? (
+                <div className="flex flex-col gap-3">
+                  {c.skillItems.map((s, i) => (
+                    <div key={i} className="flex flex-col">
+                      <span className="text-[10px] font-black uppercase tracking-[0.1em] rtl:tracking-normal text-slate-700">{s.name}</span>
+                      <BarRating level={s.level} />
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="flex flex-wrap gap-2">
+                  {c.skills.map((skill) => (
+                    <span key={skill} className="rounded-full border border-slate-200 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.1em] rtl:tracking-normal text-slate-700">
+                      {skill}
+                    </span>
+                  ))}
+                </div>
+              )}
             </Section>
           )}
           {c.education.length > 0 && (
@@ -230,14 +242,29 @@ export function NewProfessionalTemplate({ data }: { data: ResumeData }) {
               {[c.location, c.email, c.phone].filter(Boolean).map((item) => <div key={item}>{item}</div>)}
             </div>
           </div>
-          {c.skills.length > 0 && (
+          {(c.skillItems?.length ? c.skillItems.length > 0 : c.skills.length > 0) && (
             <div className="mt-8">
               <h2 className="mb-3 text-[10px] font-black uppercase tracking-[0.22em] rtl:tracking-normal text-slate-400">{l.skills}</h2>
-              <div className="space-y-2">
-                {c.skills.map((skill) => (
-                  <div key={skill} className="rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2 text-[11px] font-bold text-slate-100">{skill}</div>
-                ))}
-              </div>
+              {c.skillItems && c.skillItems.length > 0 ? (
+                <div className="flex flex-col gap-3">
+                  {c.skillItems.map((s, i) => (
+                    <div key={i} className="flex flex-col">
+                      <span className="text-[11px] font-bold text-slate-100 mb-1">{s.name}</span>
+                      <div className="flex gap-1 rtl:flex-row-reverse">
+                        {Array.from({ length: 5 }).map((_, dot) => (
+                          <span key={dot} className={`h-2 w-2 rounded-full ${dot < s.level ? "bg-white" : "bg-white/20"}`} />
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {c.skills.map((skill) => (
+                    <div key={skill} className="rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2 text-[11px] font-bold text-slate-100">{skill}</div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
         </aside>
@@ -342,9 +369,20 @@ export function NewAcademicTemplate({ data }: { data: ResumeData }) {
               </div>
             </Section>
           )}
-          {c.skills.length > 0 && (
+          {(c.skillItems?.length ? c.skillItems.length > 0 : c.skills.length > 0) && (
             <Section title={l.skills} accent="border-slate-950 text-slate-950">
-              <p className="text-[11px] font-semibold leading-6 text-slate-700">{c.skills.join(" · ")}</p>
+              {c.skillItems && c.skillItems.length > 0 ? (
+                <div className="flex flex-col gap-3">
+                  {c.skillItems.map((s, i) => (
+                    <div key={i} className="flex flex-col">
+                      <span className="text-[11px] font-semibold text-slate-700">{s.name}</span>
+                      <BarRating level={s.level} />
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-[11px] font-semibold leading-6 text-slate-700">{c.skills.join(" · ")}</p>
+              )}
             </Section>
           )}
           {c.certifications.length > 0 && (
@@ -398,12 +436,23 @@ export function RefTorresTemplate({ data }: { data: ResumeData }) {
             </div>
           </section>
 
-          {c.skills.length > 0 && (
+          {(c.skillItems?.length ? c.skillItems.length > 0 : c.skills.length > 0) && (
             <section className="mt-10">
               <h2 className="mb-5 text-[18px] font-black uppercase tracking-[0.2em] rtl:tracking-normal text-[#1d3f59]">{l.skills}</h2>
-              <ul className="list-disc space-y-3 pl-5 text-[13px] font-medium text-neutral-800 rtl:pl-0 rtl:pr-5">
-                {c.skills.slice(0, 7).map((skill) => <li key={skill}>{skill}</li>)}
-              </ul>
+              {c.skillItems && c.skillItems.length > 0 ? (
+                <div className="flex flex-col gap-3">
+                  {c.skillItems.map((s, i) => (
+                    <div key={i} className="flex flex-col">
+                      <span className="text-[13px] font-medium text-neutral-800">{s.name}</span>
+                      <BarRating level={s.level} />
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <ul className="list-disc space-y-3 pl-5 text-[13px] font-medium text-neutral-800 rtl:pl-0 rtl:pr-5">
+                  {c.skills.slice(0, 7).map((skill) => <li key={skill}>{skill}</li>)}
+                </ul>
+              )}
             </section>
           )}
 
@@ -510,12 +559,23 @@ export function RefSilvaTemplate({ data }: { data: ResumeData }) {
               </div>
             </section>
           )}
-          {c.skills.length > 0 && (
+          {(c.skillItems?.length ? c.skillItems.length > 0 : c.skills.length > 0) && (
             <section className="mt-10">
               <h2 className="mb-5 text-[22px] font-normal">{l.skills}</h2>
-              <div className="space-y-5 text-[13px]">
-                {c.skills.slice(0, 8).map((skill) => <p key={skill}>{skill}</p>)}
-              </div>
+              {c.skillItems && c.skillItems.length > 0 ? (
+                <div className="flex flex-col gap-3">
+                  {c.skillItems.map((s, i) => (
+                    <div key={i} className="flex flex-col">
+                      <span className="text-[13px] font-medium">{s.name}</span>
+                      <BarRating level={s.level} />
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="space-y-5 text-[13px]">
+                  {c.skills.slice(0, 8).map((skill) => <p key={skill}>{skill}</p>)}
+                </div>
+              )}
             </section>
           )}
         </aside>
@@ -611,18 +671,29 @@ export function RefSchumacherTemplate({ data }: { data: ResumeData }) {
         </aside>
 
         <main className="">
-          {c.skills.length > 0 && (
+          {(c.skillItems?.length ? c.skillItems.length > 0 : c.skills.length > 0) && (
             <section>
               <h2 className="mb-5 text-[22px] font-black leading-none">{rtl ? "لێهاتووییە سەرەکییەکان" : "Core Skills"}</h2>
               <div className="grid grid-cols-2 gap-x-10 gap-y-5">
-                {c.skills.slice(0, 8).map((skill, index) => (
-                  <div key={skill}>
-                    <p className="mb-1 text-[13px] font-semibold leading-4">{skill}</p>
-                    <div className="h-[18px] bg-neutral-300">
-                      <div className="h-full bg-[#ff8a22] rtl:mr-auto" style={{ width: skillLevel(c, skill, index) }} />
+                {c.skillItems && c.skillItems.length > 0 ? (
+                  c.skillItems.slice(0, 8).map((s, index) => (
+                    <div key={s.name}>
+                      <p className="mb-1 text-[13px] font-semibold leading-4">{s.name}</p>
+                      <div className="h-[18px] bg-neutral-300">
+                        <div className="h-full bg-[#ff8a22] rtl:mr-auto" style={{ width: `${s.level * 20}%` }} />
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  ))
+                ) : (
+                  c.skills.slice(0, 8).map((skill, index) => (
+                    <div key={skill}>
+                      <p className="mb-1 text-[13px] font-semibold leading-4">{skill}</p>
+                      <div className="h-[18px] bg-neutral-300">
+                        <div className="h-full bg-[#ff8a22] rtl:mr-auto" style={{ width: skillLevel(c, skill, index) }} />
+                      </div>
+                    </div>
+                  ))
+                )}
               </div>
             </section>
           )}
@@ -702,18 +773,29 @@ export function RefPalmerstonTemplate({ data }: { data: ResumeData }) {
               </ul>
             </section>
           )}
-          {c.skills.length > 0 && (
+          {(c.skillItems?.length ? c.skillItems.length > 0 : c.skills.length > 0) && (
             <section className="mt-8">
               <h2 className="mb-4 border-b border-white/50 pb-2 text-[22px] font-black tracking-[0.12em] rtl:tracking-normal">{l.skills}</h2>
               <div className="space-y-3">
-                {c.skills.slice(0, 7).map((skill, index) => (
-                  <div key={skill}>
-                    <div className="text-[12px] font-bold">{skill}</div>
-                    <div className="mt-1 h-[5px] bg-white/25">
-                      <div className="h-full bg-white rtl:mr-auto" style={{ width: skillLevel(c, skill, index) }} />
+                {c.skillItems && c.skillItems.length > 0 ? (
+                  c.skillItems.slice(0, 7).map((s, index) => (
+                    <div key={s.name}>
+                      <div className="text-[12px] font-bold">{s.name}</div>
+                      <div className="mt-1 h-[5px] bg-white/25">
+                        <div className="h-full bg-white rtl:mr-auto" style={{ width: `${s.level * 20}%` }} />
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  ))
+                ) : (
+                  c.skills.slice(0, 7).map((skill, index) => (
+                    <div key={skill}>
+                      <div className="text-[12px] font-bold">{skill}</div>
+                      <div className="mt-1 h-[5px] bg-white/25">
+                        <div className="h-full bg-white rtl:mr-auto" style={{ width: skillLevel(c, skill, index) }} />
+                      </div>
+                    </div>
+                  ))
+                )}
               </div>
             </section>
           )}
@@ -799,23 +881,38 @@ export function RefSanchezTemplate({ data }: { data: ResumeData }) {
               {[c.phone, c.email, c.location].filter(Boolean).map((item) => <p key={item}>{item}</p>)}
             </div>
           </section>
-          {c.skills.length > 0 && (
+          {(c.skillItems?.length ? c.skillItems.length > 0 : c.skills.length > 0) && (
             <section className="mt-9">
               <h2 className="mb-4 border-b-2 border-[#8c939a] pb-2 text-[18px] font-black uppercase tracking-[0.15em] rtl:tracking-normal">{l.skills}</h2>
               <div className="space-y-3">
-                {c.skills.slice(0, 7).map((skill, index) => {
-                  const rating = skillRating(c, skill, index);
-                  return (
-                    <div key={skill}>
-                      <p className="text-[12px] font-semibold">{skill}</p>
-                      <div className="mt-1 flex gap-1.5 rtl:flex-row-reverse">
-                        {Array.from({ length: 5 }).map((_, dot) => (
-                          <span key={dot} className={`h-2 w-2 rounded-full ${dot < rating ? "bg-[#303b4e]" : "bg-[#b8bdc3]"}`} />
-                        ))}
+                {c.skillItems && c.skillItems.length > 0 ? (
+                  c.skillItems.slice(0, 7).map((s, index) => {
+                    return (
+                      <div key={s.name}>
+                        <p className="text-[12px] font-semibold">{s.name}</p>
+                        <div className="mt-1 flex gap-1.5 rtl:flex-row-reverse">
+                          {Array.from({ length: 5 }).map((_, dot) => (
+                            <span key={dot} className={`h-2 w-2 rounded-full ${dot < s.level ? "bg-[#303b4e]" : "bg-[#b8bdc3]"}`} />
+                          ))}
+                        </div>
                       </div>
-                    </div>
-                  );
-                })}
+                    );
+                  })
+                ) : (
+                  c.skills.slice(0, 7).map((skill, index) => {
+                    const rating = skillRating(c, skill, index);
+                    return (
+                      <div key={skill}>
+                        <p className="text-[12px] font-semibold">{skill}</p>
+                        <div className="mt-1 flex gap-1.5 rtl:flex-row-reverse">
+                          {Array.from({ length: 5 }).map((_, dot) => (
+                            <span key={dot} className={`h-2 w-2 rounded-full ${dot < rating ? "bg-[#303b4e]" : "bg-[#b8bdc3]"}`} />
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  })
+                )}
               </div>
             </section>
           )}
@@ -912,23 +1009,39 @@ export function MercerTemplate({ data }: { data: ResumeData }) {
           )}
 
           {/* Skills */}
-          {c.skills.length > 0 && (
+          {(c.skillItems?.length ? c.skillItems.length > 0 : c.skills.length > 0) && (
             <section>
               <h2 className="text-xl font-bold border-b border-white pb-2 mb-6 tracking-wide">{l.skills}</h2>
               <div className="space-y-4">
-                {c.skills.slice(0, 8).map((skill, i) => (
-                  <div key={i} className="flex justify-between items-center gap-4">
-                    <div className="text-[10px] font-black uppercase w-24 truncate">
-                      {skill}
+                {c.skillItems && c.skillItems.length > 0 ? (
+                  c.skillItems.slice(0, 8).map((s, i) => (
+                    <div key={i} className="flex justify-between items-center gap-4">
+                      <div className="text-[10px] font-black uppercase w-24 truncate">
+                        {s.name}
+                      </div>
+                      <div className="flex-1 h-3 bg-white/20">
+                        <div 
+                          className="h-full bg-slate-200" 
+                          style={{ width: `${s.level * 20}%` }}
+                        />
+                      </div>
                     </div>
-                    <div className="flex-1 h-3 bg-white/20">
-                      <div 
-                        className="h-full bg-slate-200" 
-                        style={{ width: skillLevel(c, skill, i) }}
-                      />
+                  ))
+                ) : (
+                  c.skills.slice(0, 8).map((skill, i) => (
+                    <div key={i} className="flex justify-between items-center gap-4">
+                      <div className="text-[10px] font-black uppercase w-24 truncate">
+                        {skill}
+                      </div>
+                      <div className="flex-1 h-3 bg-white/20">
+                        <div 
+                          className="h-full bg-slate-200" 
+                          style={{ width: skillLevel(c, skill, i) }}
+                        />
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  ))
+                )}
               </div>
             </section>
           )}

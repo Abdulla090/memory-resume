@@ -46,6 +46,27 @@ function labels(rtl: boolean) {
       };
 }
 
+export function StarRating({ level, max = 5 }: { level: number, max?: number }) {
+  return (
+    <div className="flex gap-0.5 mt-0.5">
+      {Array.from({ length: max }).map((_, i) => (
+        <svg key={i} className={`w-3 h-3 ${i < level ? "text-blue-500 fill-current" : "text-neutral-200 fill-current"}`} viewBox="0 0 24 24">
+          <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+        </svg>
+      ))}
+    </div>
+  )
+}
+
+export function BarRating({ level, max = 5 }: { level: number, max?: number }) {
+  const percentage = (level / max) * 100;
+  return (
+    <div className="w-full h-1.5 bg-neutral-200 rounded-full overflow-hidden mt-1">
+      <div className="h-full bg-blue-600 rounded-full" style={{ width: `${percentage}%` }} />
+    </div>
+  )
+}
+
 export function MinimalTemplate({ data }: { data: ResumeData }) {
   const rtl = isRTL(data);
   const l = labels(rtl);
@@ -104,9 +125,20 @@ export function MinimalTemplate({ data }: { data: ResumeData }) {
         </Section>
       )}
 
-      {data.skills.length > 0 && (
+      {(data.skillItems?.length ? data.skillItems.length > 0 : data.skills.length > 0) && (
         <Section title={l.skills}>
-          <p className="text-sm">{data.skills.join(" · ")}</p>
+          {data.skillItems && data.skillItems.length > 0 ? (
+            <div className="grid grid-cols-2 gap-y-3 gap-x-8">
+              {data.skillItems.map((s, i) => (
+                <div key={i} className="flex flex-col">
+                  <span className="text-sm font-medium text-neutral-800">{s.name}</span>
+                  <StarRating level={s.level} />
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm">{data.skills.join(" · ")}</p>
+          )}
         </Section>
       )}
 
@@ -160,16 +192,27 @@ export function ExecutiveTemplate({ data }: { data: ResumeData }) {
             </div>
           </div>
 
-          {data.skills.length > 0 && (
+          {(data.skillItems?.length ? data.skillItems.length > 0 : data.skills.length > 0) && (
             <div className="mt-8">
-              <h3 className="mb-2 text-[10px] font-bold uppercase tracking-[0.2em] rtl:tracking-normal text-neutral-400">
+              <h3 className="mb-3 text-[10px] font-bold uppercase tracking-[0.2em] rtl:tracking-normal text-neutral-400">
                 {l.expertise}
               </h3>
-              <ul className="space-y-1 text-sm">
-                {data.skills.map((s, i) => (
-                  <li key={i}>{s}</li>
-                ))}
-              </ul>
+              {data.skillItems && data.skillItems.length > 0 ? (
+                <div className="space-y-4">
+                  {data.skillItems.map((s, i) => (
+                    <div key={i} className="flex flex-col">
+                      <span className="text-sm font-medium">{s.name}</span>
+                      <BarRating level={s.level} />
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <ul className="space-y-1 text-sm">
+                  {data.skills.map((s, i) => (
+                    <li key={i}>{s}</li>
+                  ))}
+                </ul>
+              )}
             </div>
           )}
 

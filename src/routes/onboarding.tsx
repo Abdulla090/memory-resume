@@ -6,7 +6,7 @@ import { parseMemory, generateResume, getFollowUpQuestions, patchProfileWithAnsw
 import { useAppStore } from "@/lib/store";
 import type { SavedResume, FollowUpQuestion, FollowUpAnswer } from "@/lib/types";
 import {
-  FileText, Loader2, ArrowUp, SkipForward, Paperclip, Sparkles, CheckCircle2, ImagePlus
+  FileText, Loader2, ArrowUp, SkipForward, Paperclip, Sparkles, CheckCircle2, ImagePlus, Star
 } from "lucide-react";
 import { toast } from "sonner";
 import { SAMPLE_MEMORIES } from "@/lib/sample-memories";
@@ -103,16 +103,16 @@ function ChatOnboarding() {
       const { profile: parsed } = await parseMemoryFn({ data: { apiKey, memory } });
       setProfile(parsed);
 
-      const { isComplete, questions } = await getQuestionsFn({
+      const { state, message, questions } = await getQuestionsFn({
         data: { apiKey, profile: parsed, rawMemory: memory },
       });
       setIsThinking(false);
 
-      if (isComplete || questions.length === 0) {
-        addMsg({ from: "ai", content: isKu ? `پرۆفایلەکە وەرگیرا، ${parsed.name || "بەڕێز"}! چ ڕۆڵێک دەکەیتە ئامانج بۆ ئەم سیڤییە؟` : `Profile captured, ${parsed.name || "there"}! What role are you targeting for this resume?` });
+      if (state === "READY_TO_TEMPLATE" || questions.length === 0) {
+        addMsg({ from: "ai", content: message || (isKu ? `پرۆفایلەکە وەرگیرا، ${parsed.name || "بەڕێز"}! چ ڕۆڵێک دەکەیتە ئامانج بۆ ئەم سیڤییە؟` : `Profile captured, ${parsed.name || "there"}! What role are you targeting for this resume?`) });
         setStage("builder");
       } else {
-        addMsg({ from: "ai", content: isKu ? `پرۆفایلەکەتم دەستکەوت، ${parsed.name || "بەڕێز"}! تەنها چەند پرسیارێکی خێرا بۆ ئەوەی سیڤییەکەت بەهێزتر بێت.` : `Got your profile, ${parsed.name || "there"}! Just a few quick questions to make your resume even stronger.` });
+        addMsg({ from: "ai", content: message || (isKu ? `پرۆفایلەکەتم دەستکەوت، ${parsed.name || "بەڕێز"}! تەنها چەند پرسیارێکی خێرا بۆ ئەوەی سیڤییەکەت بەهێزتر بێت.` : `Got your profile, ${parsed.name || "there"}! Just a few quick questions to make your resume even stronger.`) });
         setPendingQs(questions);
         setQIdx(0);
         setStage("questions");
@@ -412,8 +412,26 @@ function ChatOnboarding() {
                   >
                     {/* Helper */}
                     <p className="text-[11.5px] text-slate-400 mb-2 ml-1">{curQ.helperText}</p>
+                    
+                    {/* Rating Stars */}
+                    {curQ.inputType === "rating" && (
+                      <div className="flex gap-2 mb-3 ml-1">
+                        {[1, 2, 3, 4, 5].map((star) => (
+                          <motion.button
+                            key={star}
+                            whileHover={{ scale: 1.15 }}
+                            whileTap={{ scale: 0.9 }}
+                            onClick={() => handleAnswer(star.toString(), qIdx)}
+                            className="p-1 rounded-full text-slate-300 hover:text-amber-400 transition-colors"
+                          >
+                            <Star className="w-8 h-8 fill-current drop-shadow-sm" />
+                          </motion.button>
+                        ))}
+                      </div>
+                    )}
+
                     {/* Chips */}
-                    {curQ.options.length > 0 && (
+                    {curQ.inputType !== "rating" && curQ.options.length > 0 && (
                       <div className="flex flex-wrap gap-2 mb-3">
                         {curQ.options.map((opt) => {
                           const sel = selectedOpts.includes(opt);

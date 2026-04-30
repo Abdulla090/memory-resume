@@ -139,6 +139,17 @@ const profileSchema = {
     personalityTraits: { type: "array", items: { type: "string" } },
     industryExperience: { type: "array", items: { type: "string" } },
     inferredStrengths: { type: "array", items: { type: "string" } },
+    skillItems: {
+      type: "array",
+      items: {
+        type: "object",
+        properties: {
+          name: { type: "string" },
+          level: { type: "number", description: "1 to 5 rating" },
+        },
+        required: ["name", "level"],
+      },
+    },
   },
   required: [
     "name",
@@ -199,19 +210,35 @@ export const getFollowUpQuestions = createServerFn({ method: "POST" })
       rawMemory: z.string(),
     }),
   )
-  .handler(async ({ data }): Promise<{ questions: import("./types").FollowUpQuestion[]; isComplete: boolean }> => {
+  .handler(async ({ data }): Promise<{ state: "GATHERING" | "READY_TO_TEMPLATE" | "NEED_CLARITY", message: string, questions: import("./types").FollowUpQuestion[] }> => {
     const profileStr = JSON.stringify(data.profile);
     const json = await callGateway({
       apiKey: data.apiKey,
       messages: [
         {
           role: "system",
-          content: `You are a career coach AI helping a user build their resume. You have already extracted a profile from their raw memory, but some fields may be missing or weak. Analyze the profile for gaps and generate smart, friendly follow-up questions to fill those gaps. Focus on the most impactful missing pieces first. Each question must have relevant quick-pick options the user can tap, plus allow custom text input. Return at most 6 questions. If the profile is complete enough (all critical fields filled), return isComplete: true and an empty questions array.
+          content: `You are the "Workflow Navigator" for MemoryCV. Your job is to guide the user through the onboarding funnel and decide when their "Professional Memory" is complete enough to move to the next stage.
+Your tone must be formal and logical, not chatty or casual. You are a system answering and analyzing, not a "dude" chatting.
+
+### THE WORKFLOW STATES
+1. GATHERING: User is still giving info or uploading raw data.
+2. READY_TO_TEMPLATE: You have enough info (Name, Role, Education, Experience) to build a solid resume.
+3. NEED_CLARITY: The data is messy or missing major pieces (e.g., no job dates or vague descriptions).
+
+### YOUR MISSION
+1. Analyze Input: Look at the user's brain dump/upload.
+2. Determine State: Decide if they are ready to move forward.
+3. Draft Response:
+   - If GATHERING/NEED_CLARITY: Ask one or a few sharp, logical questions to fill the gap.
+   - If READY_TO_TEMPLATE: Return a formal summary and move to the next state.
 
 Critical fields: name, email/phone contact, at least 1 experience with achievements, education, skills.
-Good-to-have: location, career goals, certifications, projects.
 
-Important: If the user hasn't provided a profile photo, always include one question asking them if they'd like to upload a professional photo (mention they can use the attachment button next to the input). Make this optional.`,
+IMPORTANT FOR UI COMPONENTS:
+- For 'languages' and 'skills', you MUST use the inputType "rating".
+- For multiple choice, use inputType "multiselect".
+- For standard text, use inputType "text".
+Return at most 4 questions. If READY_TO_TEMPLATE, return an empty questions array.`,
         },
         {
           role: "user",
@@ -222,37 +249,38 @@ Important: If the user hasn't provided a profile photo, always include one quest
         {
           type: "function",
           function: {
-            name: "return_questions",
-            description: "Return follow-up questions to fill profile gaps",
+            name: "return_workflow_state",
+            description: "Return the current workflow state, an accompanying message, and any necessary follow-up questions.",
             parameters: {
               type: "object",
               properties: {
-                isComplete: { type: "boolean", description: "True if profile has enough info to generate a good resume" },
+                state: { type: "string", enum: ["GATHERING", "READY_TO_TEMPLATE", "NEED_CLARITY"] },
+                message: { type: "string", description: "Formal message to the user explaining the state or what is needed." },
                 questions: {
                   type: "array",
                   items: {
                     type: "object",
                     properties: {
                       id: { type: "string" },
-                      field: { type: "string", description: "Which profile field this fills, e.g. 'email', 'experience[0].achievements'" },
-                      question: { type: "string", description: "The friendly question to ask the user" },
-                      helperText: { type: "string", description: "One sentence explaining why this matters" },
-                      inputType: { type: "string", enum: ["text", "select", "multiselect"] },
-                      options: { type: "array", items: { type: "string" }, description: "Quick-pick options the user can tap. Empty for free text only." },
+                      field: { type: "string", description: "Which profile field this fills, e.g. 'email', 'skills'" },
+                      question: { type: "string", description: "The logical question to ask the user" },
+                      helperText: { type: "string", description: "Brief explanation of why this matters" },
+                      inputType: { type: "string", enum: ["text", "select", "multiselect", "rating"] },
+                      options: { type: "array", items: { type: "string" }, description: "Options for select/multiselect. Empty if text or rating." },
                       placeholder: { type: "string" },
                     },
                     required: ["id", "field", "question", "helperText", "inputType", "options"],
                   },
                 },
               },
-              required: ["isComplete", "questions"],
+              required: ["state", "message", "questions"],
             },
           },
         },
       ],
-      toolChoice: { type: "function", function: { name: "return_questions" } },
+      toolChoice: { type: "function", function: { name: "return_workflow_state" } },
     });
-    const result = extractToolArgs<{ isComplete: boolean; questions: import("./types").FollowUpQuestion[] }>(json);
+    const result = extractToolArgs<{ state: "GATHERING" | "READY_TO_TEMPLATE" | "NEED_CLARITY"; message: string; questions: import("./types").FollowUpQuestion[] }>(json);
     return result;
   });
 
@@ -387,7 +415,23 @@ export const generateResume = createServerFn({ method: "POST" })
         {
           role: "system",
           content:
-            "You are an elite resume writer and career strategist. You write resumes that get interviews at top companies. Every bullet must be achievement-oriented with metrics where possible, use strong action verbs, match keywords from the target role, and be honest but framed at maximum impact. Summary is 2-3 punchy sentences. ATS-optimized.",
+            `### ROLE
+You are the "Professional Memory Architect" for MemoryCV. Your goal is to transform messy, raw career data into high-impact, top-1% professional resumes that bypass ATS filters and impress human recruiters.
+
+### THE MISSION
+1. **Analyze:** Parse the provided "Memory JSON" (user's career history).
+2. **Refine:** Upgrade every bullet point using the "Google XYZ Formula": 
+   - [Accomplished X] as measured by [Y], by doing [Z].
+3. **Quantify:** If the user didn't provide numbers, intelligently estimate or use strong action verbs that imply scale (e.g., "Streamlined," "Architected," "Optimized").
+4. **Tone:** Professional, modern, and high-energy. Avoid "I" or "My"; start with powerful action verbs.
+
+### RULES OF ENGAGEMENT
+- **Sorani Context:** If the input is in Kurdish (Sorani), maintain professional linguistic standards.
+- **Conciseness:** No fluff. Every word must justify its existence on the page.
+- **Skills Mapping:** Group skills logically based on the "Memory."
+- **ATS Focus:** Use keywords specific to the job title the user is targeting.
+
+You must output the final resume using the provided schema tool.`,
         },
         {
           role: "user",
