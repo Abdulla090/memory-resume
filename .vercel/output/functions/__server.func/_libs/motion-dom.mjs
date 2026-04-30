@@ -1546,7 +1546,6 @@ function memoSupports(callback, supportsFlag) {
   return () => supportsFlags[supportsFlag] ?? memoized();
 }
 const supportsScrollTimeline = /* @__PURE__ */ memoSupports(() => window.ScrollTimeline !== void 0, "scrollTimeline");
-const supportsViewTimeline = /* @__PURE__ */ memoSupports(() => window.ViewTimeline !== void 0, "viewTimeline");
 const supportsLinearEasing = /* @__PURE__ */ memoSupports(() => {
   try {
     document.createElement("div").animate({ opacity: 0 }, { easing: "linear(0, 1)" });
@@ -3336,20 +3335,6 @@ function resizeWindow(callback) {
 }
 function resize(a, b) {
   return typeof a === "function" ? resizeWindow(a) : resizeElement(a, b);
-}
-function observeTimeline(update, timeline) {
-  let prevProgress;
-  const onFrame = () => {
-    const { currentTime } = timeline;
-    const percentage = currentTime === null ? 0 : currentTime.value;
-    const progress2 = percentage / 100;
-    if (prevProgress !== progress2) {
-      update(progress2);
-    }
-    prevProgress = progress2;
-  };
-  frame.preUpdate(onFrame, true);
-  return () => cancelFrame(onFrame);
 }
 function isSVGSVGElement(element) {
   return isSVGElement(element) && element.tagName === "svg";
@@ -6124,7 +6109,7 @@ const HTMLProjectionNode = createProjectionNode({
   checkIsScrollRoot: (instance) => Boolean(window.getComputedStyle(instance).position === "fixed")
 });
 export {
-  attachFollow as $,
+  isGenerator as $,
   createBox as A,
   eachAxis as B,
   measurePageBox as C,
@@ -6144,27 +6129,23 @@ export {
   hover as Q,
   press as R,
   SVGVisualElement as S,
-  supportsViewTimeline as T,
-  supportsScrollTimeline as U,
-  interpolate as V,
-  defaultOffset as W,
-  observeTimeline as X,
-  motionValue as Y,
-  collectMotionValues as Z,
-  transform as _,
+  motionValue as T,
+  collectMotionValues as U,
+  transform as V,
+  attachFollow as W,
+  resolveElements as X,
+  defaultOffset as Y,
+  createGeneratorEasing as Z,
+  fillOffset as _,
   isMotionValue as a,
-  resolveElements as a0,
-  createGeneratorEasing as a1,
-  fillOffset as a2,
-  isGenerator as a3,
-  isSVGElement as a4,
-  isSVGSVGElement as a5,
-  visualElementStore as a6,
-  ObjectVisualElement as a7,
-  animateSingleValue as a8,
-  animateTarget as a9,
-  spring as aa,
-  GroupAnimationWithThen as ab,
+  isSVGElement as a0,
+  isSVGSVGElement as a1,
+  visualElementStore as a2,
+  ObjectVisualElement as a3,
+  animateSingleValue as a4,
+  animateTarget as a5,
+  spring as a6,
+  GroupAnimationWithThen as a7,
   isControllingVariants as b,
   isVariantLabel as c,
   isForcedMotionValue as d,

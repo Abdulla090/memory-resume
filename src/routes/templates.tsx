@@ -177,339 +177,53 @@ const TEMPLATES: { id: TemplateId; label: string; desc: string; category: Catego
   { id: "vector",    label: "Vector",     desc: "Dark mode tech", category: "Creative", isNew: true },
 ];
 
+const MINI_SAMPLE: ResumeData = {
+  name: "Jane Doe",
+  title: "Product Designer",
+  email: "jane@example.com",
+  phone: "+1 234 567 890",
+  photoUrl: "https://picsum.photos/seed/maya-okafor-headshot/240/240",
+  location: "New York, NY",
+  summary: "Creative designer focusing on UI/UX and visual storytelling.",
+  experience: [
+    {
+      title: "Lead Designer",
+      company: "Creative Studio",
+      duration: "2020 — Present",
+      description: "Leading design team for major client projects.",
+      achievements: [
+        "Delivered award-winning campaigns.",
+      ],
+    },
+    {
+      title: "UX Designer",
+      company: "Tech Startup",
+      duration: "2018 — 2020",
+      description: "Designed core application interfaces.",
+      achievements: [],
+    }
+  ],
+  projects: [],
+  education: [{ degree: "BFA Design", institution: "Design School", year: "2018" }],
+  skills: ["Figma", "UI/UX", "Prototyping"],
+  certifications: [],
+};
+
 function Thumbnail({ id }: { id: TemplateId }) {
-  // Generate a mini CSS abstract representation of the template
-  switch (id) {
-    case "executive":
-      return (
-        <div className="w-full h-full bg-white rounded-md flex overflow-hidden border border-slate-200">
-          <div className="w-1/3 h-full bg-slate-800 p-1 flex flex-col gap-0.5">
-            <div className="w-full h-1 bg-slate-600 rounded-sm" />
-            <div className="w-2/3 h-0.5 bg-slate-700 rounded-sm" />
-          </div>
-          <div className="w-2/3 h-full p-1.5 flex flex-col gap-1">
-            <div className="w-full h-1 bg-slate-200 rounded-sm" />
-            <div className="w-full h-1 bg-slate-200 rounded-sm" />
-            <div className="w-3/4 h-1 bg-slate-200 rounded-sm" />
-          </div>
-        </div>
-      );
-    case "noir":
-    case "cipher":
-    case "pinnacle":
-      return (
-        <div className="w-full h-full bg-slate-900 rounded-md p-1.5 flex flex-col gap-1 border border-slate-700">
-          <div className="w-1/2 h-1.5 bg-slate-500 rounded-sm mx-auto mb-1" />
-          <div className="w-full h-1 bg-slate-700 rounded-sm" />
-          <div className="w-full h-1 bg-slate-700 rounded-sm" />
-          <div className="w-4/5 h-1 bg-slate-700 rounded-sm" />
-        </div>
-      );
-    case "apex":
-      return (
-        <div className="w-full h-full bg-white rounded-md flex flex-col overflow-hidden border border-slate-200">
-          <div className="w-full h-4 bg-slate-800 p-1 flex flex-col justify-center items-center">
-            <div className="w-1/2 h-1 bg-slate-500 rounded-sm" />
-          </div>
-          <div className="p-1 flex flex-col gap-1 flex-1">
-            <div className="w-full h-1 bg-slate-200 rounded-sm" />
-            <div className="w-3/4 h-1 bg-slate-200 rounded-sm" />
-          </div>
-        </div>
-      );
-    case "nexus":
-    case "orbit":
-    case "prism":
-      return (
-        <div className="w-full h-full bg-slate-50 rounded-md p-1.5 flex flex-col gap-1 border border-slate-200 relative overflow-hidden">
-          <div className="absolute top-1 right-1 w-3 h-3 rounded-full border border-blue-400 opacity-50" />
-          <div className="w-1/2 h-1.5 bg-blue-500 rounded-sm mb-1" />
-          <div className="w-full h-1 bg-slate-200 rounded-sm" />
-          <div className="w-4/5 h-1 bg-slate-200 rounded-sm" />
-        </div>
-      );
-    case "carbon":
-      return (
-        <div className="w-full h-full bg-white rounded-md flex overflow-hidden border border-slate-200">
-          <div className="w-1 h-full bg-slate-900" />
-          <div className="w-1/3 h-full bg-slate-100 p-1 flex flex-col gap-0.5">
-            <div className="w-3 h-3 rounded-sm bg-slate-300 mb-1" />
-            <div className="w-full h-0.5 bg-slate-400 rounded-sm" />
-          </div>
-          <div className="flex-1 h-full p-1 flex flex-col gap-0.5">
-            <div className="w-full h-0.5 bg-slate-200 rounded-sm" />
-            <div className="w-full h-0.5 bg-slate-200 rounded-sm" />
-          </div>
-        </div>
-      );
-    case "atlas":
-      return (
-        <div className="w-full h-full bg-white rounded-md flex flex-col overflow-hidden border border-slate-200">
-          <div className="w-full h-5 bg-slate-900 p-1 flex items-center gap-1">
-            <div className="w-3 h-3 rounded-sm bg-slate-600" />
-            <div className="w-1/2 h-1 bg-slate-600 rounded-sm" />
-          </div>
-          <div className="flex flex-1 p-1 gap-1">
-            <div className="flex-1 flex flex-col gap-0.5">
-              <div className="w-full h-0.5 bg-slate-200 rounded-sm" />
-              <div className="w-full h-0.5 bg-slate-200 rounded-sm" />
-            </div>
-            <div className="w-1/3 flex flex-col gap-0.5">
-              <div className="w-full h-0.5 bg-slate-300 rounded-sm" />
-              <div className="w-full h-0.5 bg-slate-300 rounded-sm" />
-            </div>
-          </div>
-        </div>
-      );
-    case "forge":
-      return (
-        <div className="w-full h-full bg-white rounded-md p-1.5 flex flex-col gap-1 border border-slate-200">
-          <div className="w-full border-b-2 border-slate-900 pb-1 mb-0.5 flex justify-between">
-            <div className="w-1/3 h-1.5 bg-slate-900 rounded-sm" />
-            <div className="w-1/4 h-1 bg-slate-400 rounded-sm" />
-          </div>
-          <div className="flex gap-0.5">
-            <div className="w-0.5 h-6 bg-slate-900 shrink-0" />
-            <div className="flex flex-col gap-0.5 flex-1">
-              <div className="w-full h-0.5 bg-slate-200 rounded-sm" />
-              <div className="w-3/4 h-0.5 bg-slate-200 rounded-sm" />
-            </div>
-          </div>
-        </div>
-      );
-    case "zenith":
-      return (
-        <div className="w-full h-full bg-white rounded-md p-1 flex flex-col items-center gap-1 border border-slate-200">
-          <div className="w-4 h-4 rounded-full bg-slate-200 mt-0.5" />
-          <div className="w-1/2 h-1 bg-slate-900 rounded-sm" />
-          <div className="w-1/3 h-0.5 bg-yellow-600 rounded-sm" />
-          <div className="w-full h-0.5 bg-slate-100 rounded-sm" />
-          <div className="w-full h-0.5 bg-slate-100 rounded-sm" />
-        </div>
-      );
-    case "vector":
-      return (
-        <div className="w-full h-full bg-slate-950 rounded-md flex flex-col overflow-hidden border border-slate-700">
-          <div className="w-full bg-slate-900 p-1 border-b border-slate-700">
-            <div className="w-1/2 h-1 bg-blue-400 rounded-sm" />
-          </div>
-          <div className="flex flex-1 p-1 gap-1">
-            <div className="flex-1 flex flex-col gap-0.5">
-              <div className="w-full h-0.5 bg-slate-700 rounded-sm" />
-              <div className="w-3/4 h-0.5 bg-slate-700 rounded-sm" />
-            </div>
-            <div className="w-1/3 flex flex-col gap-0.5">
-              <div className="w-full h-0.5 bg-blue-900 rounded-sm" />
-              <div className="w-full h-0.5 bg-blue-900 rounded-sm" />
-            </div>
-          </div>
-        </div>
-      );
-    case "new-sleek":
-      return (
-        <div className="w-full h-full bg-white rounded-md p-1.5 flex flex-col gap-1 border border-slate-200">
-          <div className="flex items-start justify-between gap-1 border-b border-slate-200 pb-1">
-            <div className="space-y-0.5">
-              <div className="w-8 h-1.5 bg-slate-900 rounded-sm" />
-              <div className="w-10 h-0.5 bg-slate-300 rounded-sm" />
-            </div>
-            <div className="h-4 w-4 rounded-md bg-slate-200" />
-          </div>
-          <div className="grid grid-cols-[1fr_0.45fr] gap-1 flex-1">
-            <div className="space-y-0.5 pt-1">
-              <div className="w-full h-0.5 bg-slate-200 rounded-sm" />
-              <div className="w-full h-0.5 bg-slate-200 rounded-sm" />
-              <div className="w-4/5 h-0.5 bg-slate-200 rounded-sm" />
-            </div>
-            <div className="space-y-0.5 border-l border-slate-100 pl-1 pt-1">
-              <div className="w-full h-0.5 bg-slate-300 rounded-sm" />
-              <div className="w-3/4 h-0.5 bg-slate-300 rounded-sm" />
-            </div>
-          </div>
-        </div>
-      );
-    case "new-professional":
-      return (
-        <div className="w-full h-full bg-white rounded-md flex overflow-hidden border border-slate-200">
-          <div className="w-1/3 h-full bg-slate-950 p-1">
-            <div className="w-4 h-4 rounded-full bg-slate-600 mb-1" />
-            <div className="w-full h-0.5 bg-cyan-200 rounded-sm" />
-            <div className="w-2/3 h-0.5 bg-slate-600 rounded-sm mt-0.5" />
-          </div>
-          <div className="flex-1 p-1.5 space-y-1">
-            <div className="w-full h-3 bg-slate-100 rounded-sm" />
-            <div className="w-full h-0.5 bg-slate-200 rounded-sm" />
-            <div className="w-5/6 h-0.5 bg-slate-200 rounded-sm" />
-          </div>
-        </div>
-      );
-    case "new-academic":
-      return (
-        <div className="w-full h-full bg-white rounded-md p-1.5 flex flex-col gap-1 border border-slate-200">
-          <div className="flex gap-1 border-b-2 border-slate-900 pb-1">
-            <div className="h-4 w-3 rounded-t-full bg-slate-200" />
-            <div className="flex-1 space-y-0.5">
-              <div className="w-2/3 h-1 bg-slate-900 rounded-sm" />
-              <div className="w-1/2 h-0.5 bg-slate-400 rounded-sm" />
-            </div>
-          </div>
-          <div className="grid grid-cols-[1fr_0.4fr] gap-1 pt-1">
-            <div className="space-y-0.5">
-              <div className="w-full h-0.5 bg-slate-200 rounded-sm" />
-              <div className="w-full h-0.5 bg-slate-200 rounded-sm" />
-              <div className="w-3/4 h-0.5 bg-slate-200 rounded-sm" />
-            </div>
-            <div className="space-y-0.5">
-              <div className="w-full h-0.5 bg-slate-300 rounded-sm" />
-              <div className="w-2/3 h-0.5 bg-slate-300 rounded-sm" />
-            </div>
-          </div>
-        </div>
-      );
-    case "ref-torres":
-      return (
-        <div className="w-full h-full bg-white rounded-md overflow-hidden border border-slate-200">
-          <div className="h-5 bg-[#315b74]" />
-          <div className="flex h-full">
-            <div className="w-1/3 bg-slate-100 p-1">
-              <div className="mx-auto -mt-3 mb-1 h-7 w-7 rounded-full border-2 border-slate-300 bg-slate-300" />
-              <div className="h-1 w-full bg-[#1d3f59] rounded-sm" />
-              <div className="mt-1 h-0.5 w-2/3 bg-slate-300 rounded-sm" />
-            </div>
-            <div className="flex-1 p-1.5 space-y-1">
-              <div className="h-1 w-1/2 bg-[#1d3f59] rounded-sm" />
-              <div className="h-0.5 w-full bg-slate-200 rounded-sm" />
-              <div className="h-0.5 w-4/5 bg-slate-200 rounded-sm" />
-            </div>
-          </div>
-        </div>
-      );
-    case "ref-silva":
-      return (
-        <div className="w-full h-full bg-white rounded-md overflow-hidden border border-slate-200">
-          <div className="flex h-6 items-center gap-1 bg-[#342820] p-1">
-            <div className="h-4 w-4 rounded-full bg-stone-300" />
-            <div className="h-4 w-0.5 bg-white" />
-            <div className="h-1 w-1/2 bg-white rounded-sm" />
-          </div>
-          <div className="flex h-full">
-            <div className="w-1/3 bg-[#fff0e3] p-1 space-y-1">
-              <div className="h-0.5 w-full bg-stone-300 rounded-sm" />
-              <div className="h-0.5 w-3/4 bg-stone-300 rounded-sm" />
-            </div>
-            <div className="flex-1 p-1.5 space-y-1">
-              <div className="h-1 w-1/2 bg-stone-800 rounded-sm" />
-              <div className="h-0.5 w-full bg-stone-200 rounded-sm" />
-              <div className="h-0.5 w-5/6 bg-stone-200 rounded-sm" />
-            </div>
-          </div>
-        </div>
-      );
-    case "ref-schumacher":
-      return (
-        <div className="w-full h-full bg-white rounded-md p-1.5 border-2 border-[#7c3cff]">
-          <div className="grid grid-cols-[0.45fr_1fr] gap-1">
-            <div className="h-4 w-full bg-slate-900 rounded-sm" />
-            <div className="grid grid-cols-2 gap-1">
-              <div className="h-0.5 w-full bg-slate-400 mt-1" />
-              <div className="h-0.5 w-full bg-slate-400 mt-1" />
-            </div>
-          </div>
-          <div className="mt-2 grid grid-cols-[0.45fr_1fr] gap-1">
-            <div className="space-y-0.5">
-              <div className="h-1 w-2/3 bg-slate-900 rounded-sm" />
-              <div className="h-0.5 w-full bg-slate-200 rounded-sm" />
-              <div className="h-0.5 w-4/5 bg-slate-200 rounded-sm" />
-            </div>
-            <div className="grid grid-cols-2 gap-1">
-              {[1, 2, 3, 4].map((item) => (
-                <div key={item}>
-                  <div className="h-0.5 w-3/4 bg-slate-900 rounded-sm" />
-                  <div className="mt-0.5 h-1.5 bg-slate-300"><div className="h-full w-2/3 bg-[#ff8a22]" /></div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      );
-    case "ref-palmerston":
-      return (
-        <div className="w-full h-full bg-white rounded-md overflow-hidden border border-slate-200">
-          <div className="relative h-7">
-            <div className="absolute left-0 top-0 h-5 w-1/3 rounded-br-lg bg-[#303b4e]" />
-            <div className="ml-[40%] pt-1 space-y-0.5">
-              <div className="h-1.5 w-2/3 bg-[#223a59] rounded-sm" />
-              <div className="h-0.5 w-1/2 bg-[#223a59] rounded-sm" />
-            </div>
-            <div className="absolute bottom-0 left-1 right-1 h-2 rounded-full bg-[#303b4e]" />
-          </div>
-          <div className="flex h-full">
-            <div className="w-1/3 bg-[#303b4e] p-1 space-y-1">
-              <div className="h-0.5 w-full bg-white/50 rounded-sm" />
-              <div className="h-0.5 w-4/5 bg-white/40 rounded-sm" />
-              <div className="mt-1 h-1 bg-white/20"><div className="h-full w-2/3 bg-white" /></div>
-            </div>
-            <div className="flex-1 p-1.5 space-y-1">
-              <div className="h-1 w-1/2 bg-[#223a59] rounded-sm" />
-              <div className="h-0.5 w-full bg-slate-200 rounded-sm" />
-              <div className="h-0.5 w-5/6 bg-slate-200 rounded-sm" />
-            </div>
-          </div>
-        </div>
-      );
-    case "ref-sanchez":
-      return (
-        <div className="w-full h-full bg-white rounded-md overflow-hidden border border-slate-200">
-          <div className="relative h-7 bg-[#303b4e]">
-            <div className="absolute left-1 top-3 h-5 w-5 rounded-full border-2 border-white bg-slate-300" />
-            <div className="ml-9 pt-2 space-y-0.5">
-              <div className="h-1.5 w-1/2 bg-white rounded-sm" />
-              <div className="h-0.5 w-1/3 bg-white/70 rounded-sm" />
-            </div>
-          </div>
-          <div className="flex h-full">
-            <div className="w-1/3 bg-slate-200 p-1 pt-3 space-y-1">
-              <div className="h-0.5 w-full bg-slate-500 rounded-sm" />
-              <div className="flex gap-0.5">{[1,2,3,4,5].map(i => <span key={i} className="h-1 w-1 rounded-full bg-[#303b4e]" />)}</div>
-            </div>
-            <div className="flex-1 p-1.5 space-y-1">
-              <div className="h-1 w-1/2 bg-[#303b4e] rounded-sm" />
-              <div className="h-0.5 w-full bg-slate-200 rounded-sm" />
-              <div className="h-0.5 w-4/5 bg-slate-200 rounded-sm" />
-            </div>
-          </div>
-        </div>
-      );
-    case "mercer":
-      return (
-        <div className="w-full h-full bg-white rounded-md overflow-hidden border border-slate-200">
-          <div className="flex h-full">
-            <div className="w-[35%] bg-[#305178] p-1 pt-3">
-              <div className="h-0.5 w-full bg-white/40 rounded-sm mb-1 mt-4" />
-              <div className="h-0.5 w-4/5 bg-white/40 rounded-sm" />
-            </div>
-            <div className="flex-1 p-1.5 pt-2 space-y-1 relative">
-              <div className="absolute -left-3 top-2 h-5 w-5 rounded-full border-2 border-white bg-slate-200" />
-              <div className="h-1.5 w-2/3 bg-[#305178] rounded-sm ml-2" />
-              <div className="h-0.5 w-1/3 bg-slate-900 rounded-sm mb-2 ml-2" />
-              <div className="h-1 w-1/2 bg-[#305178] rounded-sm mt-1" />
-              <div className="h-0.5 w-full bg-slate-200 rounded-sm" />
-              <div className="h-0.5 w-5/6 bg-slate-200 rounded-sm" />
-            </div>
-          </div>
-        </div>
-      );
-    default:
-      // Minimal and others
-      return (
-        <div className="w-full h-full bg-white rounded-md p-1.5 flex flex-col gap-1 border border-slate-200">
-          <div className="w-1/2 h-1.5 bg-slate-300 rounded-sm mb-1" />
-          <div className="w-full h-1 bg-slate-100 rounded-sm" />
-          <div className="w-full h-1 bg-slate-100 rounded-sm" />
-          <div className="w-3/4 h-1 bg-slate-100 rounded-sm" />
-        </div>
-      );
-  }
+  return (
+    <div className="absolute inset-0 bg-white overflow-hidden flex items-start justify-center">
+      <div 
+        className="origin-top pointer-events-none mt-2"
+        style={{
+          width: '794px',
+          height: '1123px',
+          transform: 'scale(0.18)',
+        }}
+      >
+        <ResumePreview data={MINI_SAMPLE} template={id} />
+      </div>
+    </div>
+  );
 }
 
 function TemplatesPage() {
@@ -630,7 +344,10 @@ function TemplatesPage() {
                 return (
                   <button
                     key={id}
-                    onClick={() => setActive(id)}
+                    onClick={() => {
+                      setActive(id);
+                      setIsSidebarOpen(false);
+                    }}
                     className={`group relative flex flex-col items-center gap-2 rounded-[1rem] p-2 transition-all duration-300 text-center ${
                       isActive 
                         ? "bg-blue-600 shadow-[0_8px_20px_rgba(37,99,235,0.2)] border-transparent scale-[1.02]" 
@@ -641,7 +358,7 @@ function TemplatesPage() {
                     <div className="w-full aspect-[1/1.2] rounded-lg overflow-hidden relative shadow-[0_2px_10px_rgba(0,0,0,0.05)] bg-slate-100">
                       <Thumbnail id={id} />
                       {isActive && (
-                        <div className="absolute inset-0 bg-blue-600/10 flex items-center justify-center backdrop-blur-[1px]">
+                        <div className="absolute inset-0 bg-blue-600/10 flex items-center justify-center backdrop-blur-[1px] z-10">
                           <CheckCircle2 className="w-8 h-8 text-blue-600 drop-shadow-md bg-white rounded-full" />
                         </div>
                       )}
@@ -675,9 +392,10 @@ function TemplatesPage() {
               <div className="flex items-center gap-3">
                 <button 
                   onClick={() => setIsSidebarOpen(true)}
-                  className="lg:hidden p-2 rounded-full bg-white/80 border border-slate-200 text-slate-700 shadow-sm hover:bg-white active:scale-95 transition-all"
+                  className="lg:hidden flex items-center gap-2 px-4 py-2.5 rounded-xl bg-blue-600 text-white shadow-[0_4px_12px_rgba(37,99,235,0.3)] hover:bg-blue-700 active:scale-95 transition-all font-bold text-sm"
                 >
-                  <LayoutTemplate className="w-5 h-5" />
+                  <LayoutTemplate className="w-4 h-4" />
+                  Select Template
                 </button>
                 <div className="hidden sm:flex items-center gap-3 bg-white/60 backdrop-blur-md px-3 py-1.5 rounded-full border border-white shadow-sm">
                   <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
@@ -687,29 +405,26 @@ function TemplatesPage() {
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => setSoraniMode((value) => !value)}
-                  className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-bold tracking-wide shadow-sm transition-all active:scale-[0.98] ${
+                  className={`flex items-center gap-1.5 rounded-xl border px-3 py-2.5 text-xs font-bold tracking-wide shadow-sm transition-all active:scale-[0.98] ${
                     soraniMode
                       ? "border-slate-800 bg-slate-900 text-white"
                       : "border-white bg-white/80 text-slate-700 hover:bg-white"
                   }`}
                 >
-                  <Languages className="h-3.5 w-3.5" />
-                  {soraniMode ? "کوردی" : "Kurdish RTL"}
+                  <Languages className="h-4 w-4" />
+                  <span className="hidden sm:inline">{soraniMode ? "کوردی" : "Kurdish RTL"}</span>
+                  <span className="sm:hidden">{soraniMode ? "KU" : "EN"}</span>
                 </button>
-                <div className="flex items-center rounded-full border border-slate-200 bg-white/80 shadow-sm overflow-hidden hidden sm:flex">
-                  <button onClick={() => setZoom(z => Math.max(0.5, z - 0.25))} className="p-1.5 hover:bg-slate-100 text-slate-600 transition-colors" title="Zoom Out">
+                <div className="flex items-center rounded-xl border border-slate-200 bg-white/80 shadow-sm overflow-hidden">
+                  <button onClick={() => setZoom(z => Math.max(0.5, z - 0.25))} className="p-1.5 sm:p-2 hover:bg-slate-100 text-slate-600 transition-colors" title="Zoom Out">
                     <ZoomOut className="w-4 h-4" />
                   </button>
-                  <span className="text-xs font-bold text-slate-700 w-10 text-center">{Math.round(zoom * 100)}%</span>
-                  <button onClick={() => setZoom(z => Math.min(2, z + 0.25))} className="p-1.5 hover:bg-slate-100 text-slate-600 transition-colors" title="Zoom In">
+                  <span className="text-[10px] sm:text-xs font-bold text-slate-700 w-8 sm:w-10 text-center">{Math.round(zoom * 100)}%</span>
+                  <button onClick={() => setZoom(z => Math.min(2, z + 0.25))} className="p-1.5 sm:p-2 hover:bg-slate-100 text-slate-600 transition-colors" title="Zoom In">
                     <ZoomIn className="w-4 h-4" />
                   </button>
                 </div>
-                <div className="hidden sm:block">
-                  <ExportButtons data={previewData} template={active} name={previewData.name} previewRef={previewRef} />
-                </div>
-                <div className="sm:hidden">
-                  {/* Minimal export button for mobile */}
+                <div className="flex items-center gap-2">
                   <ExportButtons data={previewData} template={active} name={previewData.name} previewRef={previewRef} />
                 </div>
               </div>
@@ -750,23 +465,22 @@ function ExportButtons({ data, template, name, previewRef }: { data: ResumeData;
 
   return (
     <>
-      {!rtlExport && (
-        <button
-          onClick={handleDocx}
-          disabled={docxLoading}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/80 backdrop-blur-md border border-white text-xs font-bold tracking-wide text-slate-700 shadow-sm hover:bg-white hover:shadow-md transition-all disabled:opacity-50"
-        >
-          <FileText className="w-3.5 h-3.5" />
-          {docxLoading ? "..." : "DOCX"}
-        </button>
-      )}
+      <button
+        onClick={handleDocx}
+        disabled={docxLoading}
+        className="flex items-center gap-1.5 px-3 py-2.5 sm:py-1.5 rounded-xl sm:rounded-full bg-white/80 backdrop-blur-md border border-white text-xs font-bold tracking-wide text-slate-700 shadow-sm hover:bg-white hover:shadow-md transition-all disabled:opacity-50"
+      >
+        <FileText className="w-4 h-4 sm:w-3.5 sm:h-3.5" />
+        <span className="hidden sm:inline">{docxLoading ? "..." : "DOCX"}</span>
+      </button>
       <button
         onClick={handlePDF}
         disabled={pdfLoading}
-        className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-blue-600 backdrop-blur-md border border-blue-500 text-xs font-bold tracking-wide text-white shadow-sm hover:bg-blue-700 hover:shadow-md transition-all disabled:opacity-50"
+        className="flex items-center gap-1.5 px-4 py-2.5 sm:py-1.5 rounded-xl sm:rounded-full bg-blue-600 backdrop-blur-md border border-blue-500 text-xs font-bold tracking-wide text-white shadow-sm hover:bg-blue-700 hover:shadow-md transition-all disabled:opacity-50"
       >
-        <Download className="w-3.5 h-3.5" />
-        {pdfLoading ? "..." : rtlExport ? "Canvas PDF" : "PDF"}
+        <Download className="w-4 h-4 sm:w-3.5 sm:h-3.5" />
+        <span className="hidden sm:inline">{pdfLoading ? "..." : rtlExport ? "Canvas PDF" : "PDF"}</span>
+        <span className="sm:hidden font-bold">{pdfLoading ? "..." : "PDF"}</span>
       </button>
     </>
   );

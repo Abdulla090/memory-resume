@@ -988,7 +988,7 @@ export function MercerTemplate({ data }: { data: ResumeData }) {
 
            {/* Header Area */}
            <div className="ml-20 pt-4 rtl:ml-0 rtl:mr-20">
-              <h1 className="text-6xl font-black text-[#305178] leading-[0.85] tracking-tighter uppercase break-words w-min">
+              <h1 className="text-6xl font-black text-[#305178] leading-[0.85] tracking-tighter rtl:tracking-normal uppercase w-fit">
                 {c.name.split(/\s+/).map((word, idx) => (
                   <div key={idx}>{word}</div>
                 ))}

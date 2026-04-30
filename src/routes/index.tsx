@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { animate, motion, useMotionValue, useScroll, useSpring, useTransform, AnimatePresence } from "framer-motion";
+import { TrustedMarquee } from "../components/TrustedMarquee";
 import {
   ArrowLeft,
   ArrowRight,
@@ -281,7 +282,7 @@ export function Header({ language, onToggleLanguage }: { language: Language; onT
                 <Link
                   to={item.to}
                   className="rounded-lg font-semibold text-slate-600 transition-colors hover:text-slate-900"
-                  style={{ fontSize: navFontSize } as React.CSSProperties}
+                  style={{ fontSize: navFontSize } as unknown as React.CSSProperties}
                   dir={t.dir}
                 >
                   {item.label}
@@ -295,7 +296,7 @@ export function Header({ language, onToggleLanguage }: { language: Language; onT
             <button
               onClick={onToggleLanguage}
               className="hidden items-center gap-1.5 rounded-lg font-semibold text-slate-600 transition-colors hover:text-slate-900 md:flex"
-              style={{ fontSize: navFontSize } as React.CSSProperties}
+              style={{ fontSize: navFontSize } as unknown as React.CSSProperties}
               aria-label="Change language"
               dir={t.dir}
             >
@@ -308,7 +309,7 @@ export function Header({ language, onToggleLanguage }: { language: Language; onT
                 to="/onboarding"
                 id="nav-free-trial"
                 className="block whitespace-nowrap font-bold text-white"
-                style={{ fontSize: ctaFontSize } as React.CSSProperties}
+                style={{ fontSize: ctaFontSize } as unknown as React.CSSProperties}
                 dir={t.dir}
               >
                 {t.navCta}
@@ -588,19 +589,19 @@ export function StatsSection({ language }: { language: Language }) {
       <div className="absolute right-10 top-20 -z-10 h-96 w-96 rounded-full bg-blue-100/40 blur-3xl" />
       <div className="absolute bottom-10 left-10 -z-10 h-80 w-80 rounded-full bg-sky-100/40 blur-3xl" />
 
-      <div className="mb-10 flex flex-col items-start justify-between gap-6 sm:mb-16 md:flex-row md:items-center">
+      <div className="mb-10 flex flex-col items-center justify-between gap-6 sm:mb-16 sm:items-start md:flex-row md:items-center">
         <motion.h2
           initial={{ opacity: 0, x: 20 }}
           whileInView={{ opacity: 1, x: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.55 }}
-          className="text-[clamp(1.75rem,6vw,3.75rem)] font-extrabold leading-[1.18] tracking-tight text-slate-900"
+          className="text-center text-[clamp(1.75rem,6vw,3.75rem)] font-extrabold leading-[1.18] tracking-tight text-slate-900 sm:text-left"
           dir={t.dir}
         >
           {t.statsTitleA}<br />
           <span className="text-blue-600">{t.statsTitleB}</span>
         </motion.h2>
-        <motion.div initial={{ opacity: 0, x: -20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.55 }} className="shrink-0">
+        <motion.div initial={{ opacity: 0, x: -20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.55 }} className="hidden shrink-0 sm:flex">
           <Link
             to="/onboarding"
             id="stats-free-trial"
@@ -622,7 +623,7 @@ export function StatsSection({ language }: { language: Language }) {
             viewport={{ once: true }}
             transition={{ delay: i * 0.15, duration: 0.6, ease: "easeOut" }}
             whileHover={{ y: -6, boxShadow: "0 25px 50px -12px rgba(37,99,235,0.15)" }}
-            className={`group relative flex cursor-pointer flex-col items-start overflow-hidden rounded-[1.5rem] border border-slate-100 bg-white/80 p-6 ${textAlign} shadow-lg backdrop-blur-xl sm:rounded-[2rem] sm:p-10`}
+            className={`group relative flex cursor-pointer flex-col items-center overflow-hidden rounded-[1.5rem] border border-slate-100 bg-white/80 p-6 text-center shadow-lg backdrop-blur-xl sm:items-start sm:rounded-[2rem] sm:p-10 sm:text-left`}
             dir={t.dir}
           >
             <div className="absolute inset-0 bg-gradient-to-bl from-blue-50/0 to-blue-50/50 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
@@ -630,7 +631,7 @@ export function StatsSection({ language }: { language: Language }) {
               <s.icon className="h-6 w-6 text-white" />
             </div>
             <div className="relative z-10">
-              <div className="flex items-baseline text-4xl font-black tracking-tight text-slate-900">
+              <div className="flex items-baseline justify-center text-4xl font-black tracking-tight text-slate-900 sm:justify-start">
                 <Counter to={s.value} suffix={s.suffix} />
               </div>
               <div className="mt-2 text-sm font-semibold text-slate-500">{s.label}</div>
@@ -783,8 +784,8 @@ const BentoSecurityCard = ({ language }: { language: Language }) => {
 
     {/* Image: right for EN, left for KU */}
     <div
-      className="pointer-events-none absolute bottom-[16px] z-10 flex h-[220px] w-[220px] items-center justify-center"
-      style={{ [isRtl ? "left" : "right"]: "-8px" }}
+      className="pointer-events-none absolute bottom-[12px] z-10 flex h-[150px] w-[150px] items-center justify-center sm:h-[190px] sm:w-[190px]"
+      style={{ [isRtl ? "left" : "right"]: "-4px" }}
       dir="ltr"
     >
       <motion.img
@@ -954,8 +955,25 @@ function Landing() {
       <Header language={language} onToggleLanguage={() => setLanguage((current) => (current === "en" ? "ku" : "en"))} />
       <main>
         <HeroV2 language={language} />
-        <StatsSection language={language} />
-        <BentoGridSection language={language} />
+        <TrustedMarquee />
+        
+        <motion.div
+          initial={{ opacity: 0, y: 40 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-20px" }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
+        >
+          <StatsSection language={language} />
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 60 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-100px" }}
+          transition={{ duration: 0.8, ease: "easeOut", delay: 0.2 }}
+        >
+          <BentoGridSection language={language} />
+        </motion.div>
       </main>
     </div>
   );
