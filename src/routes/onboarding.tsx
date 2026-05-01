@@ -276,8 +276,8 @@ function ChatOnboarding() {
 
       {/* ── Header ── */}
       <header className="relative z-10 px-6 py-5 flex items-center gap-3 shrink-0">
-        <img src="/logo/MemoryCV Logo Icon Only.png" alt="MemoryCV" className="h-12 w-12 rounded-xl object-contain" />
-        <span className="text-[1.1rem] font-bold text-slate-900 tracking-tight">MemoryCV</span>
+        <img src="/logo/MemoryCV Logo Icon Only.png" alt="MemoryCV" className="h-16 w-16 rounded-xl object-contain" />
+        <span className="text-2xl font-bold text-slate-900 tracking-tight">MemoryCV</span>
       </header>
 
       {/* ── INTAKE ── */}
