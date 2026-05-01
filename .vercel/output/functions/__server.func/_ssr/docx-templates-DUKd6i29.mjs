@@ -2,7 +2,7 @@ import { j as jsxRuntimeExports } from "../_libs/react.mjs";
 import { o as optimizeResumeForOnePage } from "./resume-utils-BBQwWAqL.mjs";
 import { P as Packer, a as Paragraph, T as TextRun, b as Table, c as TableRow, W as WidthType, d as TableCell, S as ShadingType, e as convertInchesToTwip, F as File, B as BorderStyle, A as AlignmentType } from "../_libs/docx.mjs";
 import { f as fileSaverPkg } from "../_libs/file-saver.mjs";
-import { Q as Phone, V as Mail, G as Globe, Y as MapPin } from "../_libs/lucide-react.mjs";
+import { y as Phone, z as Mail, G as Globe, E as MapPin } from "../_libs/lucide-react.mjs";
 const rtlPattern$2 = /[\u0600-\u06ff\u0750-\u077f\u08a0-\u08ff]/;
 function isRTL$2(data) {
   return rtlPattern$2.test(

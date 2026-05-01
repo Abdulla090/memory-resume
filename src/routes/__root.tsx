@@ -33,7 +33,7 @@ export const Route = createRootRoute({
   head: () => ({
     meta: [
       { charSet: "utf-8" },
-      { name: "viewport", content: "width=device-width, initial-scale=1" },
+      { name: "viewport", content: "width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" },
       { title: "MemoryCV — Your memory. Your career. Infinite resumes." },
       {
         name: "description",
@@ -78,7 +78,7 @@ function RootShell({ children }: { children: React.ReactNode }) {
       <head>
         <HeadContent />
       </head>
-      <body>
+      <body style={{ overflowX: "hidden", minHeight: "100dvh" }}>
         {children}
         <Scripts />
       </body>
