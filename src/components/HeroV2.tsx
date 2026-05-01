@@ -96,14 +96,14 @@ function MarqueeColumns() {
             className="flex flex-col gap-2 sm:gap-4"
             style={{ animation: "marquee-down 22s linear infinite" }}
           >
-            {leftCards.map((Card, i) => (
+            {leftCards.map((id, i) => (
               <div key={`l-${i}`} className="shrink-0 overflow-hidden rounded-lg shadow-[0_6px_20px_rgba(0,0,0,0.12)] sm:rounded-xl">
-                <Card />
+                <ThumbnailCard id={id} />
               </div>
             ))}
-            {leftCards.map((Card, i) => (
+            {leftCards.map((id, i) => (
               <div key={`l2-${i}`} className="shrink-0 overflow-hidden rounded-lg shadow-[0_6px_20px_rgba(0,0,0,0.12)] sm:rounded-xl">
-                <Card />
+                <ThumbnailCard id={id} />
               </div>
             ))}
           </div>
@@ -118,14 +118,14 @@ function MarqueeColumns() {
             className="flex flex-col gap-2 sm:gap-4"
             style={{ animation: "marquee-up 20s linear infinite" }}
           >
-            {rightCards.map((Card, i) => (
+            {rightCards.map((id, i) => (
               <div key={`r-${i}`} className="shrink-0 overflow-hidden rounded-lg shadow-[0_6px_20px_rgba(0,0,0,0.12)] sm:rounded-xl">
-                <Card />
+                <ThumbnailCard id={id} />
               </div>
             ))}
-            {rightCards.map((Card, i) => (
+            {rightCards.map((id, i) => (
               <div key={`r2-${i}`} className="shrink-0 overflow-hidden rounded-lg shadow-[0_6px_20px_rgba(0,0,0,0.12)] sm:rounded-xl">
-                <Card />
+                <ThumbnailCard id={id} />
               </div>
             ))}
           </div>
