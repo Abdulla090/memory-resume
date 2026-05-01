@@ -150,8 +150,26 @@ export function HeroV2({ language }: { language: Language }) {
             >
               {t.heroTitle}
               <br />
-              <span className="bg-gradient-to-r from-blue-200 to-blue-100 bg-clip-text text-transparent">
-                {t.heroTitleAccent}
+              <span className="relative inline-block whitespace-nowrap pr-2">
+                <span className="relative z-10 text-white drop-shadow-sm">{t.heroTitleAccent}</span>
+                {/* Hand-drawn underline SVG */}
+                <svg
+                  className="absolute -bottom-2 left-0 w-full h-[0.3em] text-cyan-300 drop-shadow-md pointer-events-none"
+                  viewBox="0 0 100 10"
+                  preserveAspectRatio="none"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="3.5"
+                  strokeLinecap="round"
+                >
+                  <path d="M 2 8 C 30 1, 70 1, 98 8" />
+                </svg>
+                {/* Sleek CV icon SVG */}
+                <div className={`absolute top-1/2 -translate-y-1/2 ${language === "ku" ? "-left-11" : "-right-11"} hidden sm:flex h-10 w-10 items-center justify-center rounded-[12px] bg-white/20 backdrop-blur-md shadow-xl border border-white/30 rotate-6`}>
+                  <svg className="w-5 h-5 text-cyan-200 drop-shadow-md" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h2m-2 4h4" />
+                  </svg>
+                </div>
               </span>
             </motion.h1>
 
