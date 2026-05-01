@@ -816,7 +816,13 @@ Use the save_resume tool. The 'resume' parameter should contain the ACTUALLY FIX
   });
 
 export const generateCoverLetter = createServerFn({ method: "POST" })
-  .validator((d: { apiKey?: string; resume: ResumeData; language: "en" | "ku" }) => d)
+  .inputValidator(
+    z.object({
+      apiKey: z.string().optional(),
+      resume: z.any(),
+      language: z.enum(["en", "ku"]),
+    }),
+  )
   .handler(async ({ data }): Promise<{ coverLetter: string }> => {
     const json = await callGateway({
       apiKey: data.apiKey,
