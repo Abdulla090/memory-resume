@@ -2,6 +2,50 @@
 @source "../src";
 @import "tw-animate-css";
 
+/* ── Doran Kurdish Font ─────────────────────────────── */
+@font-face {
+  font-family: 'Doran';
+  src: url('/KUFONT/Doran-Thin.ttf') format('truetype');
+  font-weight: 100;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Doran';
+  src: url('/KUFONT/Doran-Light.ttf') format('truetype');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Doran';
+  src: url('/KUFONT/Doran-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Doran';
+  src: url('/KUFONT/Doran-Medium.ttf') format('truetype');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Doran';
+  src: url('/KUFONT/Doran-Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Doran';
+  src: url('/KUFONT/Doran-ExtraBold.ttf') format('truetype');
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
+
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
@@ -120,6 +164,13 @@
 
   ::selection {
     background: rgba(37,99,235,0.15);
+  }
+
+  /* ── Apply Doran font for all RTL (Kurdish) content ── */
+  [dir="rtl"],
+  [dir="rtl"] * {
+    font-family: 'Doran', 'Segoe UI', Tahoma, sans-serif !important;
+    letter-spacing: 0 !important;
   }
 }
 
