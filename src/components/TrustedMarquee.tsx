@@ -77,6 +77,9 @@ const companies = [
   }
 ];
 
+import type { Language } from "@/routes/index";
+import { copy } from "@/routes/index";
+
 /* Pill chip per company */
 function Chip({ name, svg }: { name: string; svg: React.ReactNode }) {
   return (
@@ -91,18 +94,20 @@ function Chip({ name, svg }: { name: string; svg: React.ReactNode }) {
   );
 }
 
-export function TrustedMarquee() {
+export function TrustedMarquee({ language }: { language: Language }) {
+  const t = copy[language];
+  
   return (
-    <section className="relative overflow-hidden py-16 sm:py-20">
+    <section className="relative overflow-hidden py-16 sm:py-20" dir="ltr">
       <style>{marqueeX}</style>
 
       {/* Label */}
-      <div className="mb-10 text-center">
+      <div className="mb-10 text-center" dir={t.dir}>
         <span className="inline-block px-4 py-1.5 rounded-full bg-blue-50 text-blue-600 text-[10px] sm:text-xs font-bold uppercase tracking-[0.2em] mb-4">
-          Industry Leaders
+          {t.trustedLabel}
         </span>
         <h3 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
-          Trusted by the world's best
+          {t.trustedTitle}
         </h3>
       </div>
 

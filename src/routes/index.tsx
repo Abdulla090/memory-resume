@@ -87,6 +87,8 @@ export const copy = {
     ctaPrimary: "Get started",
     ctaSecondary: "View templates",
     trust: ["No credit card required", "Free start", "Edit anytime"],
+    trustedLabel: "Industry Leaders",
+    trustedTitle: "Trusted by the world's best",
     faqTitle: "Frequently Asked Questions",
     faqItems: [
       {
@@ -158,6 +160,8 @@ export const copy = {
     ctaPrimary: "کردنەوەی پرۆسە",
     ctaSecondary: "بینینی قاڵبەکان",
     trust: ["پێویست بە کارتی بانکی ناکات", "دەستپێکردنی خۆڕایی", "هەر کات دەتوانیت بگۆڕیت"],
+    trustedLabel: "پێشەنگەکانی پیشەسازی",
+    trustedTitle: "متمانە پێکراو لەلایەن باشترینەکانی جیهانەوە",
     faqTitle: "پرسیارە باوەکان",
     faqItems: [
       {
@@ -606,7 +610,7 @@ export function StatsSection({ language }: { language: Language }) {
           whileInView={{ opacity: 1, x: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.55 }}
-          className="text-center text-[clamp(1.75rem,6vw,3.75rem)] font-extrabold leading-[1.18] tracking-tight text-slate-900 sm:text-left"
+          className={`text-center text-[clamp(1.75rem,6vw,3.75rem)] font-extrabold ${language === "ku" ? "leading-[1.4]" : "leading-[1.18]"} tracking-tight text-slate-900 sm:text-left`}
           dir={t.dir}
         >
           {t.statsTitleA}<br />
@@ -964,7 +968,7 @@ function Landing() {
       <Header language={language} onToggleLanguage={() => setLanguage(language === "en" ? "ku" : "en")} />
       <main>
         <HeroV2 language={language} />
-        <TrustedMarquee />
+        <TrustedMarquee language={language} />
         
         <motion.div
           initial={{ opacity: 0, y: 40 }}
