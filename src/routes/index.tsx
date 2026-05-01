@@ -357,7 +357,7 @@ export function Header({ language, onToggleLanguage }: { language: Language; onT
 
       {/* ── MOBILE solid header (md:hidden) ── */}
       <header
-        className="fixed left-0 right-0 top-0 z-50 flex items-center justify-between px-4 md:hidden"
+        className="fixed left-0 right-0 top-0 z-50 items-center justify-between px-4 hidden"
         style={{ height: "56px", backgroundColor: "rgba(255,255,255,0.97)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)", borderBottom: "1px solid rgba(226,232,240,0.8)" }}
         dir="ltr"
       >
