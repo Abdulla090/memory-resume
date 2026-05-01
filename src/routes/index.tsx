@@ -49,7 +49,10 @@ export const copy = {
       { label: "FAQ", to: "/", hash: "faq" },
     ],
     navCta: "Get started",
-    heroTitle: "Turn your professional memory into a resume ready for work",
+    badge: "Memory to Resume Generation",
+    badgeMobile: "AI · Free",
+    heroTitle: "Turn your professional memory into a resume",
+    heroTitleAccent: "ready for work.",
     heroBody:
       "MemoryCV gathers your experience, skills, and achievements, extracts a clean profile, tailors your resume for each role, and lets you download a polished document.",
     heroCta: "Get started",
@@ -122,7 +125,10 @@ export const copy = {
       { label: "پرسیارە باوەکان", to: "/", hash: "faq" },
     ],
     navCta: "دەست پێبکە",
-    heroTitle: "بیرەوەرییە پیشەییەکانت بگۆڕە بۆ سیڤییەکی ئامادەی کار",
+    badge: "گەڕاندنەوەی یادەوەری بۆ سیڤی",
+    badgeMobile: "زیرەکی دەستکرد · خۆڕایی",
+    heroTitle: "بیرەوەرییە پیشەییەکانت،",
+    heroTitleAccent: "بگۆڕە بۆ سیڤی.",
     heroBody:
       "زانیاری، ئەزموون و تواناکانت کۆدەکاتەوە، پڕۆفایلێکی ڕێک دەردەهێنێت، سیڤییەکەت بۆ هەر کارێک دەگونجێنێت و بە شێوەیەکی پاک دەتوانیت دایبگریت.",
     heroCta: "ئێستا سیڤییەکەم دروست بکە",
@@ -682,7 +688,7 @@ const BentoHeroCard = ({ language }: { language: Language }) => {
           <span className="text-sm font-semibold text-blue-700">{t.bentoBadge}</span>
         </div>
 
-        <h2 className="mb-5 text-[clamp(1.6rem,5vw,3rem)] font-extrabold leading-[1.15] tracking-tight text-slate-900">
+        <h2 className={`mb-5 text-[clamp(1.6rem,5vw,3rem)] font-extrabold ${language === "ku" ? "leading-[1.45]" : "leading-[1.15]"} tracking-tight text-slate-900`}>
           {t.bentoTitleA}<br />
           <span className="text-blue-600">{t.bentoTitleB}</span>
         </h2>
@@ -730,7 +736,7 @@ const BentoStandOutCard = ({ language }: { language: Language }) => {
     <div className={`pointer-events-none absolute top-0 z-0 h-full w-1/2 ${isRtl ? "right-0 bg-gradient-to-l" : "left-0 bg-gradient-to-r"} from-[#f0f7ff] to-transparent`} />
 
     <div className="relative z-10 max-w-[230px]" dir={t.dir}>
-      <h3 className="mb-2 text-[clamp(1.5rem,4vw,1.875rem)] font-extrabold leading-[1.18] tracking-tight text-slate-900">
+      <h3 className={`mb-2 text-[clamp(1.5rem,4vw,1.875rem)] font-extrabold ${language === "ku" ? "leading-[1.45]" : "leading-[1.18]"} tracking-tight text-slate-900`}>
         {t.standTitleA}<br />
         <span className="text-blue-500">{t.standTitleB}</span>
       </h3>
@@ -779,7 +785,7 @@ const BentoSecurityCard = ({ language }: { language: Language }) => {
     <div className={`pointer-events-none absolute top-0 z-0 h-full w-2/3 ${isRtl ? "right-0 bg-gradient-to-l" : "left-0 bg-gradient-to-r"} from-[#f0f7ff] to-transparent`} />
 
     <div className="relative z-10 max-w-[240px]" dir={t.dir}>
-      <h3 className="mb-2 text-[clamp(1.5rem,4vw,1.875rem)] font-extrabold leading-[1.18] tracking-tight text-slate-900">
+      <h3 className={`mb-2 text-[clamp(1.5rem,4vw,1.875rem)] font-extrabold ${language === "ku" ? "leading-[1.45]" : "leading-[1.18]"} tracking-tight text-slate-900`}>
         {t.securityTitleA}<br />
         <span className="text-blue-500">{t.securityTitleB}</span>
       </h3>
@@ -830,7 +836,7 @@ const BentoCreateWinCard = ({ language }: { language: Language }) => {
       <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-600 text-white">
         <Download className="h-5 w-5" />
       </div>
-      <h3 className="text-3xl font-extrabold leading-[1.18] tracking-tight text-slate-900">
+      <h3 className={`text-3xl font-extrabold ${language === "ku" ? "leading-[1.45]" : "leading-[1.18]"} tracking-tight text-slate-900`}>
         {t.downloadTitle}
       </h3>
       <p className="mt-4 max-w-[34ch] text-sm font-medium leading-7 text-slate-500">

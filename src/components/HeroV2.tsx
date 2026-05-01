@@ -137,7 +137,7 @@ export function HeroV2({ language }: { language: Language }) {
               <span className="inline-flex items-center gap-1 rounded-full border border-blue-400/30 bg-blue-500/20 px-2.5 py-1 text-[9px] font-semibold text-blue-100 shadow-[0_0_15px_rgba(59,130,246,0.2)] backdrop-blur-sm sm:gap-2 sm:px-4 sm:py-1.5 sm:text-xs">
                 <Sparkles className="h-2.5 w-2.5 text-blue-200 sm:h-3.5 sm:w-3.5" />
                 <span className="hidden xs:inline">{t.badge}</span>
-                <span className="xs:hidden">AI · Free</span>
+                <span className="xs:hidden">{t.badgeMobile}</span>
               </span>
             </motion.div>
 
@@ -146,7 +146,7 @@ export function HeroV2({ language }: { language: Language }) {
               initial={{ opacity: 0, y: 28 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.1 }}
-              className="text-[clamp(1.8rem,5.8vw,4rem)] font-extrabold leading-[1.08] tracking-tight text-white sm:text-[clamp(2rem,5.5vw,4rem)]"
+              className={`text-[clamp(1.8rem,5.8vw,4rem)] font-extrabold ${language === "ku" ? "leading-[1.6]" : "leading-[1.08]"} tracking-tight text-white sm:text-[clamp(2rem,5.5vw,4rem)]`}
             >
               {t.heroTitle}
               <br />
