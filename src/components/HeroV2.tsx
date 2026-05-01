@@ -1,8 +1,12 @@
 import { Link } from "@tanstack/react-router";
 import { motion } from "framer-motion";
 import { ArrowLeft, ArrowRight, ArrowUpRight, Sparkles } from "lucide-react";
-import { ResumePreview } from "@/components/resume/templates";
-import type { TemplateId } from "@/lib/types";
+import {
+  LeftCardSVG,
+  CenterCardSVG,
+  RightCardSVG,
+} from "../routes/index";
+import { CVCard1, CVCard2, CVCard3, CVCard4, CVCard5 } from "./CVCards";
 
 type Language = "en" | "ku";
 
@@ -45,53 +49,9 @@ const marqueeCSS = `
 }
 `;
 
-/* ── Unified marquee: adapts column widths via responsive classes ── */
-const MINI_SAMPLE: any = {
-  name: "Jane Doe",
-  title: "Product Designer",
-  email: "jane@example.com",
-  phone: "+1 234 567 890",
-  photoUrl: "https://picsum.photos/seed/maya-okafor-headshot/240/240",
-  location: "New York, NY",
-  summary: "Creative designer focusing on UI/UX and visual storytelling.",
-  experience: [
-    { title: "Lead Designer", company: "Creative Studio", duration: "2020 — Present", description: "Leading design team for major client projects.", achievements: [] },
-    { title: "UX Designer", company: "Tech Startup", duration: "2018 — 2020", description: "Designed core application interfaces.", achievements: [] }
-  ],
-  projects: [],
-  education: [{ degree: "BFA Design", institution: "Design School", year: "2018" }],
-  skills: ["Figma", "UI/UX", "Prototyping"],
-  certifications: [],
-};
-
-const ThumbnailCard = ({ id }: { id: TemplateId }) => (
-  <div className="w-full aspect-[1/1.414] relative overflow-hidden rounded-[16px] shadow-[0_8px_24px_rgba(0,0,0,0.06)] border border-slate-200/80 bg-white flex items-center justify-center">
-    <svg viewBox="0 0 794 1123" className="w-full h-full pointer-events-none">
-      <foreignObject width="794" height="1123">
-        <div className="w-[794px] h-[1123px] bg-white text-left overflow-hidden">
-          <ResumePreview data={MINI_SAMPLE} template={id} />
-        </div>
-      </foreignObject>
-    </svg>
-  </div>
-);
-
-/* Card arrays using real templates */
-const leftCards: TemplateId[]  = [
-  "new-sleek", 
-  "ref-torres", 
-  "ref-schumacher", 
-  "mercer", 
-  "executive", 
-  "ref-sanchez"
-];
-const rightCards: TemplateId[] = [
-  "new-professional", 
-  "ref-silva", 
-  "ref-palmerston", 
-  "new-academic", 
-  "nexus"
-];
+/* Card arrays */
+const leftCards  = [LeftCardSVG, CVCard1, CVCard3, CenterCardSVG, CVCard5];
+const rightCards = [CVCard2, RightCardSVG, CVCard4, LeftCardSVG, CVCard3];
 
 /* ── Unified marquee: adapts column widths via responsive classes ── */
 function MarqueeColumns() {
@@ -109,14 +69,14 @@ function MarqueeColumns() {
             className="flex flex-col gap-2 sm:gap-4"
             style={{ animation: "marquee-down 22s linear infinite" }}
           >
-            {leftCards.map((id, i) => (
+            {leftCards.map((Card, i) => (
               <div key={`l-${i}`} className="shrink-0 overflow-hidden rounded-lg shadow-[0_6px_20px_rgba(0,0,0,0.12)] sm:rounded-xl">
-                <ThumbnailCard id={id} />
+                <Card />
               </div>
             ))}
-            {leftCards.map((id, i) => (
+            {leftCards.map((Card, i) => (
               <div key={`l2-${i}`} className="shrink-0 overflow-hidden rounded-lg shadow-[0_6px_20px_rgba(0,0,0,0.12)] sm:rounded-xl">
-                <ThumbnailCard id={id} />
+                <Card />
               </div>
             ))}
           </div>
@@ -131,14 +91,14 @@ function MarqueeColumns() {
             className="flex flex-col gap-2 sm:gap-4"
             style={{ animation: "marquee-up 20s linear infinite" }}
           >
-            {rightCards.map((id, i) => (
+            {rightCards.map((Card, i) => (
               <div key={`r-${i}`} className="shrink-0 overflow-hidden rounded-lg shadow-[0_6px_20px_rgba(0,0,0,0.12)] sm:rounded-xl">
-                <ThumbnailCard id={id} />
+                <Card />
               </div>
             ))}
-            {rightCards.map((id, i) => (
+            {rightCards.map((Card, i) => (
               <div key={`r2-${i}`} className="shrink-0 overflow-hidden rounded-lg shadow-[0_6px_20px_rgba(0,0,0,0.12)] sm:rounded-xl">
-                <ThumbnailCard id={id} />
+                <Card />
               </div>
             ))}
           </div>
@@ -253,7 +213,7 @@ export function HeroV2({ language }: { language: Language }) {
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2, duration: 0.5 }}
-              className="mt-2 hidden text-[11px] font-medium leading-5 text-blue-100/75 sm:mt-5 sm:block sm:max-w-[36ch] sm:text-lg sm:leading-8"
+              className="mt-2 hidden text-[11px] font-semibold leading-5 text-white/95 drop-shadow-sm sm:mt-5 sm:block sm:max-w-[36ch] sm:text-lg sm:leading-8"
             >
               {t.heroBody}
             </motion.p>
