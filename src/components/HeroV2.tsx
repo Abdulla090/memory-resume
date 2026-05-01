@@ -14,8 +14,9 @@ const copy = {
   en: {
     dir: "ltr" as const,
     badge: "AI-powered · Free to start",
+    badgeMobile: "AI · Free",
     heroTitle: "Your career memory,",
-    heroTitleAccent: "turned into a resume.",
+    heroTitleAccent: "turned into a CV.",
     heroBody: "Tell us your story. We build the resume.",
     heroCta: "Get started",
     heroSecondary: "Browse templates",
@@ -23,6 +24,7 @@ const copy = {
   ku: {
     dir: "rtl" as const,
     badge: "زیرەکی دەستکرد · دەستپێکردنی خۆڕایی",
+    badgeMobile: "زیرەکی دەستکرد · خۆڕایی",
     heroTitle: "بیرەوەرییەکانت،",
     heroTitleAccent: "بگۆڕە بۆ سیڤی.",
     heroBody: "چیرۆکەکەت بگێڕە. ئێمە سیڤییەکەت دادەمەزرێنین.",
