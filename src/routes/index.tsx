@@ -81,7 +81,8 @@ export const copy = {
     securityBody:
       "Your private career information is used only to build your resume, and you can edit it whenever you need.",
     securityBadge: "Privacy comes first",
-    downloadTitle: "Create, review, download.",
+    downloadTitlePrefix: "Create, review, ",
+    downloadTitleHighlight: "download.",
     downloadBody:
       "After your profile is organized, you can preview a clean resume layout that is ready to send.",
     downloadAlt: "Resume download preview",
@@ -157,7 +158,8 @@ export const copy = {
     securityBody:
       "زانیارییە تایبەتییەکانت تەنها بۆ دروستکردنی سیڤی بەکاردێن و دەتوانیت هەمیشە دەستیان بگۆڕیت.",
     securityBadge: "تایبەتمەندی لە پێشەوەیە",
-    downloadTitle: "دروست بکە، وردبینی بکە، دایبگرە.",
+    downloadTitlePrefix: "دروست بکە، وردبینی بکە، ",
+    downloadTitleHighlight: "دایبگرە.",
     downloadBody:
       "دوای ڕێکخستنی پڕۆفایل، سیڤییەکەت بە قاڵبی پاک و ئامادەی ناردن دەبینیت.",
     downloadAlt: "پێشبینی دابەزاندنی سیڤی",
@@ -817,7 +819,7 @@ const BentoStandOutCard = ({ language }: { language: Language }) => {
 
     <div className="relative z-10 max-w-[230px]" dir={t.dir}>
       <h3 className={`mb-2 text-[clamp(1.5rem,4vw,1.875rem)] font-extrabold ${language === "ku" ? "leading-[1.45]" : "leading-[1.18]"} tracking-tight text-slate-900`}>
-        {t.standTitleA}<br />
+        <span className="whitespace-nowrap">{t.standTitleA}</span><br />
         <span className="text-blue-500">{t.standTitleB}</span>
       </h3>
       <p className="mt-4 text-sm font-medium leading-7 text-slate-500">
@@ -917,7 +919,8 @@ const BentoCreateWinCard = ({ language }: { language: Language }) => {
         <Download className="h-5 w-5" />
       </div>
       <h3 className={`text-3xl font-extrabold ${language === "ku" ? "leading-[1.45]" : "leading-[1.18]"} tracking-tight text-slate-900`}>
-        {t.downloadTitle}
+        {t.downloadTitlePrefix}
+        <span className="text-blue-500">{t.downloadTitleHighlight}</span>
       </h3>
       <p className="mt-4 max-w-[34ch] text-sm font-medium leading-7 text-slate-500">
         {t.downloadBody}
