@@ -275,9 +275,7 @@ export function Header({ language, onToggleLanguage }: { language: Language; onT
           }}
         >
           <Link to="/" className="flex shrink-0 items-center gap-2 cursor-pointer" id="nav-logo">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600 shadow-sm">
-              <Sparkles className="h-4 w-4 text-white" />
-            </div>
+            <img src="/logo/MemoryCV Logo Icon Only.png" alt="MemoryCV" className="h-8 w-8 rounded-lg object-contain" />
             <span className="text-sm font-bold tracking-tight text-slate-900">MemoryCV</span>
           </Link>
 
@@ -362,9 +360,7 @@ export function Header({ language, onToggleLanguage }: { language: Language; onT
         dir="ltr"
       >
         <Link to="/" className="flex shrink-0 items-center gap-2" id="nav-logo-mobile">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600 shadow-sm">
-            <Sparkles className="h-4 w-4 text-white" />
-          </div>
+          <img src="/logo/MemoryCV Logo Icon Only.png" alt="MemoryCV" className="h-8 w-8 rounded-lg object-contain" />
           <span className="text-sm font-bold tracking-tight text-slate-900">MemoryCV</span>
         </Link>
         <button
@@ -403,9 +399,7 @@ export function Header({ language, onToggleLanguage }: { language: Language; onT
             <div className="relative z-10 flex h-full flex-col items-center justify-center gap-3 px-8" dir={t.dir}>
 
               <motion.div initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05, duration: 0.25 }} className="mb-8 flex items-center gap-2.5">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-600 shadow-lg">
-                  <Sparkles className="h-5 w-5 text-white" />
-                </div>
+                <img src="/logo/MemoryCV Logo Icon Only.png" alt="MemoryCV" className="h-10 w-10 rounded-xl object-contain" />
                 <span className="text-xl font-bold tracking-tight text-slate-900">MemoryCV</span>
               </motion.div>
 

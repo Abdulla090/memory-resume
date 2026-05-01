@@ -103,9 +103,7 @@ function TemplatesGalleryPage() {
         <div className="max-w-[1600px] mx-auto px-4 sm:px-6">
           <div className="flex h-16 items-center justify-between">
             <Link to="/" className="flex items-center gap-2.5 cursor-pointer group">
-              <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center shadow-[0_4px_12px_rgba(37,99,235,0.3)] group-hover:shadow-[0_4px_16px_rgba(37,99,235,0.4)] transition-all duration-300 group-hover:scale-105">
-                <Sparkles className="w-4 h-4 text-white" />
-              </div>
+              <img src="/logo/MemoryCV Logo Icon Only.png" alt="MemoryCV" className="w-8 h-8 rounded-xl object-contain group-hover:scale-105 transition-transform duration-300" />
               <span className="text-[1.05rem] font-bold tracking-tight text-slate-900 group-hover:text-blue-950 transition-colors">
                 MemoryCV
               </span>

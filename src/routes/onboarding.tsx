@@ -276,9 +276,7 @@ function ChatOnboarding() {
 
       {/* ── Header ── */}
       <header className="relative z-10 px-6 py-5 flex items-center gap-3 shrink-0">
-        <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-500/20">
-          <Sparkles className="w-4 h-4 text-white" />
-        </div>
+        <img src="/logo/MemoryCV Logo Icon Only.png" alt="MemoryCV" className="h-8 w-8 rounded-xl object-contain" />
         <span className="text-[1.1rem] font-bold text-slate-900 tracking-tight">MemoryCV</span>
       </header>
 
