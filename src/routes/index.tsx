@@ -696,7 +696,7 @@ export function StatsSection({ language }: { language: Language }) {
           whileInView={{ opacity: 1, x: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.55 }}
-          className={`text-center text-[clamp(1.75rem,6vw,3.75rem)] font-extrabold ${language === "ku" ? "leading-[1.4]" : "leading-[1.18]"} tracking-tight text-slate-900 sm:text-left`}
+          className={`text-center text-[clamp(1.75rem,6vw,3.75rem)] font-extrabold ${language === "ku" ? "leading-[1.4]" : "leading-[1.18]"} tracking-tight text-slate-900 sm:${textAlign}`}
           dir={t.dir}
         >
           {t.statsTitleA}<br />
@@ -724,7 +724,7 @@ export function StatsSection({ language }: { language: Language }) {
             viewport={{ once: true }}
             transition={{ delay: i * 0.15, duration: 0.6, ease: "easeOut" }}
             whileHover={{ y: -6, boxShadow: "0 25px 50px -12px rgba(37,99,235,0.15)" }}
-            className={`group relative flex cursor-pointer flex-col items-center overflow-hidden rounded-[1.5rem] border border-slate-100 bg-white/80 p-6 text-center shadow-lg backdrop-blur-xl sm:items-start sm:rounded-[2rem] sm:p-10 sm:text-left`}
+            className={`group relative flex cursor-pointer flex-col items-center overflow-hidden rounded-[1.5rem] border border-slate-100 bg-white/80 p-6 text-center shadow-lg backdrop-blur-xl sm:items-start sm:rounded-[2rem] sm:p-10 sm:${textAlign}`}
             dir={t.dir}
           >
             <div className="absolute inset-0 bg-gradient-to-bl from-blue-50/0 to-blue-50/50 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
