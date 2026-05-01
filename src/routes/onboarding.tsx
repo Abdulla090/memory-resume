@@ -6,7 +6,7 @@ import { parseMemory, generateResume, getFollowUpQuestions, patchProfileWithAnsw
 import { useAppStore } from "@/lib/store";
 import type { SavedResume, FollowUpQuestion, FollowUpAnswer } from "@/lib/types";
 import {
-  FileText, Loader2, ArrowUp, SkipForward, Paperclip, Sparkles, CheckCircle2, ImagePlus, Star
+  FileText, Loader2, ArrowUp, SkipForward, Paperclip, Sparkles, CheckCircle2, ImagePlus, Star, Bot
 } from "lucide-react";
 import { toast } from "sonner";
 import { SAMPLE_MEMORIES } from "@/lib/sample-memories";
@@ -226,221 +226,230 @@ function ChatOnboarding() {
       <div className="absolute bottom-[-100px] left-[-60px] w-[400px] h-[400px] bg-sky-300/30 rounded-full blur-[90px] pointer-events-none z-0" />
 
       {/* Giant Fluffy Cloud (Top Left) */}
-      <div className="absolute top-[-80px] left-[-50px] w-[600px] h-[300px] pointer-events-none z-0 opacity-95">
+      <motion.div 
+        animate={{ x: [0, 20, 0] }} transition={{ repeat: Infinity, duration: 25, ease: "easeInOut" }}
+        className="absolute top-[-80px] left-[-50px] w-[600px] h-[300px] pointer-events-none z-0 opacity-95"
+      >
         <div className="absolute top-16 left-10 w-48 h-48 bg-white rounded-full blur-[4px] drop-shadow-sm" />
         <div className="absolute top-[-20px] left-32 w-64 h-64 bg-white rounded-full blur-[4px] drop-shadow-sm" />
         <div className="absolute top-20 left-72 w-48 h-48 bg-white rounded-full blur-[4px] drop-shadow-sm" />
         <div className="absolute top-32 left-0 w-[500px] h-40 bg-white rounded-full blur-[4px]" />
-      </div>
+      </motion.div>
 
       {/* Giant Fluffy Cloud (Top Right) */}
-      <div className="absolute top-[-100px] right-[-100px] w-[700px] h-[350px] pointer-events-none z-0 opacity-90">
+      <motion.div 
+        animate={{ x: [0, -25, 0] }} transition={{ repeat: Infinity, duration: 30, ease: "easeInOut", delay: 2 }}
+        className="absolute top-[-100px] right-[-100px] w-[700px] h-[350px] pointer-events-none z-0 opacity-90"
+      >
         <div className="absolute top-20 right-10 w-56 h-56 bg-white rounded-full blur-[4px] drop-shadow-sm" />
         <div className="absolute top-[-40px] right-40 w-80 h-80 bg-white rounded-full blur-[4px] drop-shadow-sm" />
         <div className="absolute top-16 right-96 w-64 h-64 bg-white rounded-full blur-[4px] drop-shadow-sm" />
         <div className="absolute top-40 right-0 w-[700px] h-48 bg-white rounded-full blur-[4px]" />
-      </div>
+      </motion.div>
 
       {/* Small Floating Cloud (Mid Left) */}
-      <div className="absolute top-[25%] left-[5%] w-[250px] h-[100px] pointer-events-none z-0 opacity-70">
+      <motion.div 
+        animate={{ x: [0, 30, 0] }} transition={{ repeat: Infinity, duration: 22, ease: "easeInOut", delay: 1 }}
+        className="absolute top-[25%] left-[5%] w-[250px] h-[100px] pointer-events-none z-0 opacity-70"
+      >
         <div className="absolute top-0 left-10 w-24 h-24 bg-white rounded-full blur-[3px]" />
         <div className="absolute top-[-10px] left-24 w-28 h-28 bg-white rounded-full blur-[3px]" />
         <div className="absolute top-8 left-0 w-[200px] h-16 bg-white rounded-full blur-[3px]" />
-      </div>
+      </motion.div>
 
       {/* Small Floating Cloud (Right side below header) */}
-      <div className="absolute top-[30%] right-[10%] w-[300px] h-[120px] pointer-events-none z-0 opacity-60">
+      <motion.div 
+        animate={{ x: [0, -15, 0] }} transition={{ repeat: Infinity, duration: 18, ease: "easeInOut", delay: 3 }}
+        className="absolute top-[30%] right-[10%] w-[300px] h-[120px] pointer-events-none z-0 opacity-60"
+      >
         <div className="absolute top-0 right-16 w-24 h-24 bg-white rounded-full blur-[4px]" />
         <div className="absolute top-[-20px] right-32 w-32 h-32 bg-white rounded-full blur-[4px]" />
         <div className="absolute top-10 right-0 w-[250px] h-20 bg-white rounded-full blur-[4px]" />
-      </div>
+      </motion.div>
 
       {/* ── Full-screen generating loader ── */}
-      {showLoader && loaderResumeId && (
-        <GeneratingLoader onDone={() => navigate({ to: "/editor/$id", params: { id: loaderResumeId } })} />
-      )}
+      <AnimatePresence>
+        {showLoader && loaderResumeId && (
+          <GeneratingLoader onDone={() => navigate({ to: "/editor/$id", params: { id: loaderResumeId } })} />
+        )}
+      </AnimatePresence>
 
       {/* ── Header ── */}
-      <header className="relative z-10 px-6 py-4 flex items-center gap-2 shrink-0">
-        <div className="w-7 h-7 rounded-full bg-blue-600 flex items-center justify-center shadow-md">
-          <Sparkles className="w-3.5 h-3.5 text-white" />
+      <header className="relative z-10 px-6 py-5 flex items-center gap-3 shrink-0">
+        <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-500/20">
+          <Sparkles className="w-4 h-4 text-white" />
         </div>
-        <span className="text-[1.05rem] font-semibold text-slate-800 tracking-tight">MemoryCV</span>
+        <span className="text-[1.1rem] font-bold text-slate-900 tracking-tight">MemoryCV</span>
       </header>
 
-
-      {/* ── INTAKE — centered big textarea ── */}
+      {/* ── INTAKE ── */}
       {!inChat && (
-        <div className="relative z-10 flex-1 flex flex-col items-center justify-center px-4 pb-8">
+        <div className="relative z-10 flex-1 flex flex-col items-center justify-center px-4 pb-12">
           <motion.h1
             initial={{ opacity: 0, y: -12 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-3xl font-bold text-slate-950 tracking-tight mb-2 text-center drop-shadow-sm"
+            className="text-4xl sm:text-5xl font-extrabold text-slate-900 tracking-tight mb-4 text-center"
           >
             {isKu ? "دەربارەی خۆتم پێ بڵێ." : "Tell me about yourself."}
           </motion.h1>
-          <p className="text-slate-700 font-semibold text-sm mb-8 text-center max-w-sm drop-shadow-sm">
+          <motion.p 
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.1 }}
+            className="text-slate-500 font-medium text-base sm:text-lg mb-10 text-center max-w-md"
+          >
             {isKu ? "سیڤییەکەت، بایۆی لینکدین، مێژووی کارکردنت دابنێ - یان تەنها بە ئازادی بنووسە." : "Paste your resume, LinkedIn bio, career history — or just write freely."}
-          </p>
+          </motion.p>
 
-          {/* Big intake card */}
           <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className="w-full max-w-[44rem] rounded-3xl overflow-hidden shadow-[0_30px_70px_-10px_rgba(2,132,199,0.45)] border-2 border-white/80 ring-1 ring-blue-200"
-            style={{ background: "rgba(255,255,255,0.97)", backdropFilter: "blur(28px)" }}
+            initial={{ opacity: 0, scale: 0.96, y: 16 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            transition={{ delay: 0.15, type: "spring", stiffness: 200, damping: 20 }}
+            className="w-full max-w-2xl bg-white/70 backdrop-blur-xl rounded-[28px] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-200/60 ring-4 ring-transparent focus-within:ring-blue-500/10 focus-within:bg-white transition-all duration-300 overflow-hidden"
           >
             <textarea
               ref={inputRef}
               value={inputText}
               onChange={(e) => setInputText(e.target.value)}
               placeholder={isKu ? "سیڤییەکەت، پوختەی لینکدین، مێژووی کارکردن دابنێ، یان تەنها دەربارەی خۆت بنووسە..." : "Paste your resume, LinkedIn summary, career history, or just write about yourself..."}
-              className="w-full bg-transparent resize-none outline-none text-slate-900 text-[15.5px] font-semibold leading-relaxed placeholder:text-slate-500 px-6 pt-6 pb-3"
-              style={{ minHeight: "200px" }}
+              className="w-full bg-transparent resize-none outline-none text-slate-800 text-[16px] leading-relaxed placeholder:text-slate-400 px-6 pt-6 pb-4"
+              style={{ minHeight: "220px" }}
               onKeyDown={(e) => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) handleExtract(); }}
             />
 
-            {/* Toolbar */}
-            <div className="flex items-center justify-between px-4 py-3 border-t border-blue-100 bg-slate-50/60">
-              <div className="flex items-center gap-2">
+            <div className="flex flex-col sm:flex-row items-center justify-between px-4 py-3 bg-slate-50/50 border-t border-slate-100 gap-3 sm:gap-0">
+              <div className="flex items-center gap-2 w-full sm:w-auto justify-center sm:justify-start">
                 <input type="file" ref={fileInputRef} onChange={handleFileUpload} className="hidden" accept=".txt,.md,.pdf,.docx,.doc,.rtf" />
                 <button
                   onClick={() => fileInputRef.current?.click()}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12.5px] font-semibold text-slate-700 hover:bg-blue-50 hover:text-blue-700 transition-colors border border-slate-300 bg-white shadow-sm"
+                  className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 rounded-xl text-[13px] font-semibold text-slate-600 hover:bg-white hover:text-blue-600 hover:shadow-sm transition-all border border-transparent hover:border-slate-200"
                 >
-                  <Paperclip className="w-3.5 h-3.5" /> {isKu ? "بارکردن" : "Upload"}
+                  <Paperclip className="w-4 h-4" /> {isKu ? "بارکردن" : "Upload"}
                 </button>
                 {SAMPLE_MEMORIES[0] && (
                   <button
                     onClick={() => { setInputText(SAMPLE_MEMORIES[0].text); toast.success(isKu ? "نموونە بارکرا" : "Sample loaded"); }}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12.5px] font-semibold text-slate-700 hover:bg-blue-50 hover:text-blue-700 transition-colors border border-slate-300 bg-white shadow-sm"
+                    className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 rounded-xl text-[13px] font-semibold text-slate-600 hover:bg-white hover:text-blue-600 hover:shadow-sm transition-all border border-transparent hover:border-slate-200"
                   >
-                    <FileText className="w-3.5 h-3.5" /> {isKu ? "نموونە تاقی بکەرەوە" : "Try Sample"}
+                    <FileText className="w-4 h-4" /> <span className="hidden sm:inline">{isKu ? "نموونە تاقی بکەرەوە" : "Try Sample"}</span><span className="sm:hidden">{isKu ? "نموونە" : "Sample"}</span>
                   </button>
                 )}
               </div>
               <button
                 onClick={handleExtract}
                 disabled={inputText.trim().length < 20}
-                className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white px-5 py-2.5 rounded-full text-[14px] font-semibold shadow-md shadow-blue-200 transition-all active:scale-95"
+                className="w-full sm:w-auto flex items-center justify-center gap-2 bg-slate-900 hover:bg-blue-600 disabled:bg-slate-200 disabled:text-slate-400 disabled:cursor-not-allowed text-white px-6 py-2.5 rounded-xl text-[14px] font-semibold transition-all active:scale-95 shadow-sm"
               >
-                {isKu ? "شیکارم بکە" : "Analyze Me"}
+                {isKu ? "شیکارم بکە" : "Analyze"}
                 <ArrowUp className="w-4 h-4" />
               </button>
             </div>
           </motion.div>
 
-          <p className="text-center text-[12px] font-semibold text-slate-600 mt-4">{isKu ? "بۆ ناردن ⌘ + Enter" : "⌘ + Enter to submit"}</p>
+          <p className="text-center text-[13px] font-medium text-slate-400 mt-6 tracking-wide">
+            {isKu ? "بۆ ناردن ⌘ + Enter" : "Press ⌘ + Enter to submit"}
+          </p>
         </div>
       )}
 
       {/* ── CHAT VIEW ── */}
       {inChat && (
         <div className="relative z-10 flex-1 flex flex-col min-h-0">
-          {/* Messages — takes all remaining space, scrolls naturally */}
-          <div className="flex-1 overflow-y-auto px-4 pt-2 pb-4" style={{ scrollbarWidth: "none" }}>
-            <div className="max-w-[42rem] mx-auto flex flex-col gap-4">
-              {messages.map((msg) => (
-                <motion.div
-                  key={msg.id}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.22 }}
-                  className={`flex gap-3 ${msg.from === "user" ? "justify-end" : "justify-start"}`}
-                >
-                  {msg.from === "ai" && (
-                    <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center shrink-0 mt-0.5 shadow-md shadow-blue-200">
-                      <Sparkles className="w-3.5 h-3.5 text-white" />
-                    </div>
-                  )}
-                  <div
-                    className={`max-w-[75%] rounded-2xl px-4 py-3 text-[14.5px] leading-relaxed shadow-sm ${
-                      msg.from === "user"
-                        ? "bg-blue-600 text-white rounded-br-md shadow-blue-200"
-                        : "bg-white text-slate-900 font-medium rounded-bl-md border border-blue-100 shadow-[0_2px_12px_rgba(0,0,0,0.07)]"
-                    }`}
+          <div className="flex-1 overflow-y-auto px-4 pt-6 pb-4 scroll-smooth" style={{ scrollbarWidth: "none" }}>
+            <div className="max-w-3xl mx-auto flex flex-col gap-6">
+              <AnimatePresence initial={false}>
+                {messages.map((msg) => (
+                  <motion.div
+                    key={msg.id}
+                    layout="position"
+                    initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    transition={{ type: "spring", stiffness: 300, damping: 25 }}
+                    className={`flex gap-3 w-full ${msg.from === "user" ? "justify-end" : "justify-start"}`}
                   >
-                    {msg.content}
-                  </div>
-                </motion.div>
-              ))}
+                    {msg.from === "ai" && (
+                      <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center shrink-0 mt-0.5 shadow-md shadow-blue-500/20">
+                        <Sparkles className="w-4 h-4 text-white" />
+                      </div>
+                    )}
+                    <div
+                      className={`max-w-[80%] rounded-[24px] px-5 py-3.5 text-[15px] leading-relaxed shadow-sm ${
+                        msg.from === "user"
+                          ? "bg-blue-600 text-white rounded-br-sm font-medium shadow-blue-200"
+                          : "bg-white text-slate-800 rounded-bl-sm border border-slate-100 shadow-[0_4px_20px_rgba(0,0,0,0.03)]"
+                      }`}
+                    >
+                      {msg.content}
+                    </div>
+                  </motion.div>
+                ))}
 
-              {/* Thinking indicator */}
-              <AnimatePresence>
                 {isThinking && (
                   <motion.div
-                    initial={{ opacity: 0, y: 8 }}
+                    layout="position"
+                    initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0 }}
-                    className="flex gap-3"
+                    exit={{ opacity: 0, scale: 0.9 }}
+                    className="flex gap-3 w-full justify-start"
                   >
-                    <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center shrink-0 shadow-md shadow-blue-200">
-                      <Sparkles className="w-3.5 h-3.5 text-white" />
+                    <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-slate-200 to-slate-300 flex items-center justify-center shrink-0 shadow-sm mt-0.5">
+                      <Bot className="w-4 h-4 text-slate-500" />
                     </div>
-                    <div className="bg-white border border-blue-100 rounded-2xl rounded-bl-md px-5 py-3.5 flex gap-1.5 items-center shadow-sm">
+                    <div className="bg-white border border-slate-100 rounded-[24px] rounded-bl-sm px-5 py-4 flex gap-1.5 items-center shadow-[0_4px_20px_rgba(0,0,0,0.03)] h-[52px]">
                       {[0, 1, 2].map((i) => (
                         <motion.div
                           key={i}
-                          className="w-2 h-2 rounded-full bg-blue-400"
-                          animate={{ scale: [1, 1.5, 1], opacity: [0.4, 1, 0.4] }}
-                          transition={{ repeat: Infinity, duration: 1.1, delay: i * 0.18 }}
+                          className="w-2 h-2 rounded-full bg-slate-300"
+                          animate={{ y: ["0%", "-40%", "0%"] }}
+                          transition={{ repeat: Infinity, duration: 0.8, delay: i * 0.15, ease: "easeInOut" }}
                         />
                       ))}
                     </div>
                   </motion.div>
                 )}
               </AnimatePresence>
-
-              <div ref={messagesEndRef} />
+              <div ref={messagesEndRef} className="h-32" />
             </div>
           </div>
 
-          {/* ── Sticky bottom input ── */}
-          <div
-            className="shrink-0 border-t border-blue-200 px-4 pt-3 pb-safe-4"
-            style={{ background: "rgba(255,255,255,0.96)", backdropFilter: "blur(28px)", paddingBottom: "max(16px, env(safe-area-inset-bottom))" }}
-          >
-            <div className="max-w-[42rem] mx-auto">
-              {/* Q&A chips — shown above input */}
+          {/* ── Sticky Bottom Input ── */}
+          <div className="fixed bottom-0 left-0 right-0 px-4 pt-2 pb-6 sm:pb-12 flex justify-center z-40 pointer-events-none">
+            <div className="max-w-3xl w-full pointer-events-auto">
+              {/* Q&A Choices */}
               <AnimatePresence mode="wait">
                 {inQA && curQ && (
                   <motion.div
                     key={curQ.id}
-                    initial={{ opacity: 0, y: 8 }}
+                    layout="position"
+                    initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -8 }}
-                    className="mb-3"
+                    exit={{ opacity: 0, y: -10 }}
+                    className="mb-4 ml-2"
                   >
-                    {/* Helper */}
-                    <p className="text-[11.5px] text-slate-400 mb-2 ml-1">{curQ.helperText}</p>
+                    <p className="text-[12px] font-semibold text-slate-400 mb-2.5 uppercase tracking-wider">{curQ.helperText}</p>
                     
-                    {/* Rating Stars */}
                     {curQ.inputType === "rating" && (
-                      <div className="flex gap-2 mb-3 ml-1">
+                      <div className="flex gap-2 mb-3">
                         {[1, 2, 3, 4, 5].map((star) => (
                           <motion.button
                             key={star}
-                            whileHover={{ scale: 1.15 }}
+                            whileHover={{ scale: 1.1 }}
                             whileTap={{ scale: 0.9 }}
                             onClick={() => handleAnswer(star.toString(), qIdx)}
-                            className="p-1 rounded-full text-slate-300 hover:text-amber-400 transition-colors"
+                            className="p-1 rounded-full text-slate-200 hover:text-amber-400 transition-colors drop-shadow-sm"
                           >
-                            <Star className="w-8 h-8 fill-current drop-shadow-sm" />
+                            <Star className="w-9 h-9 fill-current" />
                           </motion.button>
                         ))}
                       </div>
                     )}
 
-                    {/* Chips */}
                     {curQ.inputType !== "rating" && curQ.options.length > 0 && (
-                      <div className="flex flex-wrap gap-2 mb-3">
+                      <div className="flex flex-wrap gap-2.5 mb-3">
                         {curQ.options.map((opt) => {
                           const sel = selectedOpts.includes(opt);
                           return (
                             <motion.button
                               key={opt}
-                              whileTap={{ scale: 0.94 }}
+                              whileTap={{ scale: 0.95 }}
                               onClick={() => {
                                 if (curQ.inputType === "multiselect") {
                                   setSelectedOpts((p) => p.includes(opt) ? p.filter((o) => o !== opt) : [...p, opt]);
@@ -448,119 +457,103 @@ function ChatOnboarding() {
                                   handleAnswer(opt, qIdx);
                                 }
                               }}
-                              className={`px-3.5 py-2 rounded-full text-[13px] font-medium border transition-all ${
+                              className={`px-4 py-2.5 rounded-full text-[14px] font-medium transition-all duration-200 border ${
                                 sel
-                                  ? "bg-blue-600 text-white border-blue-600 shadow-sm shadow-blue-200"
-                                  : "bg-white/90 text-slate-700 border-slate-200 hover:border-blue-400 hover:bg-blue-50"
+                                  ? "bg-slate-900 text-white border-slate-900 shadow-md shadow-slate-900/20"
+                                  : "bg-white text-slate-700 border-slate-200 hover:border-slate-400 hover:shadow-sm"
                               }`}
                             >
-                              {sel && <CheckCircle2 className="w-3.5 h-3.5 inline mr-1.5 -mt-0.5" />}
+                              {sel && <CheckCircle2 className="w-4 h-4 inline mr-1.5 -mt-0.5 text-blue-400" />}
                               {opt}
                             </motion.button>
                           );
                         })}
                       </div>
                     )}
-                    {/* Confirm multiselect */}
                     {curQ.inputType === "multiselect" && selectedOpts.length > 0 && (
                       <button
                         onClick={() => handleAnswer(selectedOpts.join(", "), qIdx)}
-                        className="mb-2 text-sm font-semibold text-blue-600 hover:text-blue-800 flex items-center gap-1"
+                        className="mt-1 text-sm font-bold text-blue-600 hover:text-blue-800 flex items-center gap-1 transition-colors"
                       >
-                        {isKu ? "پشتڕاستکردنەوە" : "Confirm"} <ArrowUp className={`w-3.5 h-3.5 ${isKu ? '-rotate-90' : 'rotate-90'}`} />
+                        {isKu ? "پشتڕاستکردنەوە" : "Confirm"} <ArrowUp className={`w-4 h-4 ${isKu ? '-rotate-90' : 'rotate-90'}`} />
                       </button>
                     )}
                   </motion.div>
                 )}
               </AnimatePresence>
 
-              {/* Input row */}
-              <div
-                className="flex items-center gap-3 rounded-2xl px-4 py-3 border-2 border-blue-200 shadow-[0_20px_40px_-10px_rgba(2,132,199,0.4)] ring-1 ring-blue-100"
-                style={{ background: "rgba(255,255,255,1)" }}
+              {/* Input Bar */}
+              <motion.div
+                layout="position"
+                className="flex items-center gap-2 sm:gap-3 rounded-full px-1.5 sm:px-2 py-1.5 sm:py-2 bg-white/80 backdrop-blur-2xl border border-slate-200 shadow-[0_8px_30px_rgb(0,0,0,0.06)] ring-4 ring-transparent focus-within:ring-blue-500/10 focus-within:bg-white focus-within:border-blue-300 transition-all duration-300"
               >
-                {/* Q&A text input */}
                 {inQA && curQ && (
                   <input
                     ref={chatInputRef}
                     value={customInput}
                     onChange={(e) => setCustomInput(e.target.value)}
-                    placeholder={curQ.placeholder || (isKu ? "وەڵامەکەت بنووسە یان لە سەرەوە هەڵبژێرە..." : "Type your answer or pick above...")}
-                    className="flex-1 bg-transparent outline-none text-slate-900 font-medium text-[15px] placeholder:text-slate-500"
+                    placeholder={curQ.placeholder || (isKu ? "وەڵامەکەت بنووسە..." : "Type your answer...")}
+                    className="flex-1 bg-transparent outline-none text-slate-800 font-medium text-[15px] placeholder:text-slate-400 pl-4"
                     onKeyDown={(e) => { if (e.key === "Enter" && customInput.trim()) handleAnswer(customInput.trim(), qIdx); }}
                   />
                 )}
 
-                {/* Builder target */}
                 {inBuild && (
                   <input
                     value={jobTarget}
                     onChange={(e) => setJobTarget(e.target.value)}
-                    placeholder={isKu ? "چ ڕۆڵێک دەکەیتە ئامانج؟ نموونە: بەڕێوەبەری پرۆژە..." : "What role are you targeting? e.g. Senior PM at a startup..."}
-                    className="flex-1 bg-transparent outline-none text-slate-900 font-medium text-[15px] placeholder:text-slate-500"
+                    placeholder={isKu ? "چ ڕۆڵێک دەکەیتە ئامانج؟" : "What role are you targeting? e.g. Senior PM..."}
+                    className="flex-1 bg-transparent outline-none text-slate-800 font-medium text-[15px] placeholder:text-slate-400 pl-4"
                     onKeyDown={(e) => { if (e.key === "Enter") handleBuild(); }}
                     autoFocus
                   />
                 )}
 
-                {/* Placeholder while AI is thinking */}
                 {!inQA && !inBuild && (
-                  <span className="flex-1 text-slate-400 text-[15px] select-none">
+                  <span className="flex-1 text-slate-400 font-medium text-[14px] select-none pl-4">
                     {stage === "generating" ? (isKu ? "خەریکی دروستکردنی سیڤییەکەت..." : "Generating your resume...") : (isKu ? "کەمێک چاوەڕێ بکە..." : "Hang on a second...")}
                   </span>
                 )}
 
-                {/* Right actions */}
-                <div className="flex items-center gap-2 shrink-0">
+                <div className="flex items-center gap-1.5 pr-1 shrink-0">
                   <input type="file" ref={chatPhotoInputRef} onChange={handleChatPhotoUpload} className="hidden" accept="image/*" />
                   {(inQA || inBuild) && (
                     <button
                       onClick={() => chatPhotoInputRef.current?.click()}
-                      className={`w-8 h-8 rounded-full flex items-center justify-center transition-all shadow-sm ${profile?.photoUrl ? 'border border-green-200' : 'bg-slate-100 hover:bg-blue-50 text-slate-500 hover:text-blue-600'}`}
-                      title={profile?.photoUrl ? (isKu ? "وێنەکە هاوپێچ کراوە! کلیک بکە بۆ گۆڕین." : "Photo attached! Click to change.") : (isKu ? "وێنەیەک هاوپێچ بکە (ئارەزوومەندانە)" : "Attach a photo (optional)")}
+                      className={`w-9 h-9 rounded-full flex items-center justify-center transition-all ${profile?.photoUrl ? 'ring-2 ring-blue-500 ring-offset-1 p-0.5' : 'bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-700'}`}
+                      title={profile?.photoUrl ? "Change photo" : "Attach a photo"}
                     >
-                      {profile?.photoUrl ? <img src={profile.photoUrl} className="w-8 h-8 rounded-full object-cover" alt="Profile" /> : <ImagePlus className="w-4 h-4" />}
+                      {profile?.photoUrl ? <img src={profile.photoUrl} className="w-full h-full rounded-full object-cover" alt="Profile" /> : <ImagePlus className="w-4 h-4" />}
                     </button>
                   )}
                   {inQA && (
                     <>
-                      {/* Progress dots */}
-                      <div className="flex gap-1 mr-1">
-                        {pendingQs.map((_, i) => (
-                          <div
-                            key={i}
-                            className={`h-1.5 rounded-full transition-all duration-300 ${
-                              i < qIdx ? "bg-blue-500 w-1.5" : i === qIdx ? "bg-blue-600 w-4" : "bg-slate-200 w-1.5"
-                            }`}
-                          />
-                        ))}
-                      </div>
                       <button
                         onClick={handleSkip}
-                        className="flex items-center gap-1 text-[12px] font-medium text-slate-400 hover:text-slate-700 transition-colors px-2 py-1 rounded-lg hover:bg-slate-100"
+                        className="flex items-center gap-1 text-[13px] font-semibold text-slate-400 hover:text-slate-600 transition-colors px-2 sm:px-3 h-8 sm:h-9 rounded-full hover:bg-slate-100"
                       >
-                        <SkipForward className="w-3.5 h-3.5" /> {isKu ? "بازدان" : "Skip"}
+                        {isKu ? "بازدان" : "Skip"}
                       </button>
-                      {customInput.trim() && (
-                        <button
-                          onClick={() => handleAnswer(customInput.trim(), qIdx)}
-                          className="w-8 h-8 rounded-full bg-blue-600 hover:bg-blue-700 flex items-center justify-center shadow-md shadow-blue-200 transition-all active:scale-95"
-                        >
-                          <ArrowUp className="w-4 h-4 text-white" />
-                        </button>
-                      )}
+                      <button
+                        onClick={() => { if(customInput.trim()) handleAnswer(customInput.trim(), qIdx); }}
+                        disabled={!customInput.trim()}
+                        className="w-9 h-9 rounded-full bg-slate-900 disabled:bg-slate-200 hover:bg-blue-600 flex items-center justify-center transition-all disabled:text-slate-400 text-white shadow-sm"
+                      >
+                        <ArrowUp className="w-4 h-4" />
+                      </button>
                     </>
                   )}
-                  {inBuild && jobTarget.trim().length >= 2 && (
+                  {inBuild && (
                     <button
                       onClick={handleBuild}
-                      className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-full text-[13px] font-semibold shadow-md shadow-blue-200 transition-all active:scale-95"
+                      disabled={jobTarget.trim().length < 2}
+                      className="flex items-center gap-2 bg-slate-900 hover:bg-blue-600 disabled:bg-slate-200 disabled:text-slate-400 disabled:cursor-not-allowed text-white px-5 h-9 rounded-full text-[13.5px] font-bold transition-all active:scale-95 shadow-sm"
                     >
                       {isKu ? "دروستکردن" : "Generate"} <Sparkles className="w-3.5 h-3.5" />
                     </button>
                   )}
                 </div>
-              </div>
+              </motion.div>
             </div>
           </div>
         </div>

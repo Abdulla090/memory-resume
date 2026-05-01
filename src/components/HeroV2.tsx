@@ -17,7 +17,7 @@ const copy = {
     heroTitle: "Your career memory,",
     heroTitleAccent: "turned into a resume.",
     heroBody: "Tell us your story. We build the resume.",
-    heroCta: "Build my resume",
+    heroCta: "Get started",
     heroSecondary: "Browse templates",
   },
   ku: {
@@ -26,7 +26,7 @@ const copy = {
     heroTitle: "بیرەوەرییەکانت،",
     heroTitleAccent: "بگۆڕە بۆ سیڤی.",
     heroBody: "چیرۆکەکەت بگێڕە. ئێمە سیڤییەکەت دادەمەزرێنین.",
-    heroCta: "سیڤییەکەم دروست بکە",
+    heroCta: "دەستپێکردن",
     heroSecondary: "قاڵبەکان ببینە",
   },
 };
@@ -173,7 +173,7 @@ export function HeroV2({ language }: { language: Language }) {
               className="mt-4 flex flex-row flex-wrap gap-2 sm:mt-8 sm:items-center sm:gap-4"
             >
               <Link
-                to="/onboarding"
+                to="/dashboard"
                 id="hero-v2-cta"
                 className="relative inline-flex items-center justify-center gap-1.5 rounded-full bg-gradient-to-b from-blue-500 to-blue-600 px-4 py-2.5 text-xs font-bold text-white shadow-[0_8px_24px_rgba(37,99,235,0.25),inset_0_4px_12px_rgba(255,255,255,0.15),inset_0_-6px_16px_rgba(30,58,138,0.15)] transition-all duration-300 hover:shadow-[0_12px_32px_rgba(37,99,235,0.35)] active:scale-95 sm:px-8 sm:py-3.5 sm:text-sm"
               >

@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
 import { HeroV2 } from "@/components/HeroV2";
+import { useAppStore } from "@/lib/store";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -43,19 +44,18 @@ export const copy = {
     toggle: "کوردی",
     menu: "Open menu",
     nav: [
-      { label: "Home", to: "/" },
+      { label: "Features", to: "/", hash: "features" },
       { label: "Templates", to: "/templates" },
-      { label: "Build Resume", to: "/onboarding" },
-      { label: "Start", to: "/onboarding" },
+      { label: "FAQ", to: "/", hash: "faq" },
     ],
-    navCta: "Start now",
+    navCta: "Get started",
     heroTitle: "Turn your professional memory into a resume ready for work",
     heroBody:
       "MemoryCV gathers your experience, skills, and achievements, extracts a clean profile, tailors your resume for each role, and lets you download a polished document.",
-    heroCta: "Build my resume now",
+    heroCta: "Get started",
     statsTitleA: "Build a resume that",
     statsTitleB: "actually works",
-    statsCta: "Start for free",
+    statsCta: "Get started for free",
     stats: [
       { icon: Users, value: 150, suffix: "K+", label: "resumes generated", id: "stat-resumes" },
       { icon: TrendingUp, value: 85, suffix: "%", label: "higher interview rate", id: "stat-interviews" },
@@ -66,7 +66,7 @@ export const copy = {
     bentoTitleB: "to the top of the shortlist.",
     bentoBody:
       "In minutes, MemoryCV organizes your information, surfaces your strongest proof, and adapts the wording to the role you want.",
-    bentoCta: "Start building",
+    bentoCta: "Get started",
     standTitleA: "Stand out",
     standTitleB: "inside busy applicant lists.",
     standBody:
@@ -84,7 +84,7 @@ export const copy = {
     ctaTitle: "Send your resume with a clear, confident signal.",
     ctaBody:
       "Import memory, confirm your profile, generate for a target role, and refine the details that matter most.",
-    ctaPrimary: "Open the workflow",
+    ctaPrimary: "Get started",
     ctaSecondary: "View templates",
     trust: ["No credit card required", "Free start", "Edit anytime"],
     faqTitle: "Frequently Asked Questions",
@@ -115,10 +115,9 @@ export const copy = {
     toggle: "English",
     menu: "کردنەوەی مێنیو",
     nav: [
-      { label: "سەرەکی", to: "/" },
+      { label: "تایبەتمەندییەکان", to: "/", hash: "features" },
       { label: "قاڵبەکان", to: "/templates" },
-      { label: "دروستکردنی سیڤی", to: "/onboarding" },
-      { label: "دەستپێکردن", to: "/onboarding" },
+      { label: "پرسیارە باوەکان", to: "/", hash: "faq" },
     ],
     navCta: "دەست پێبکە",
     heroTitle: "بیرەوەرییە پیشەییەکانت بگۆڕە بۆ سیڤییەکی ئامادەی کار",
@@ -280,7 +279,8 @@ export function Header({ language, onToggleLanguage }: { language: Language; onT
             {t.nav.map((item) => (
               <motion.div key={item.label} style={{ paddingLeft: navPx, paddingRight: navPx, paddingTop: navPy, paddingBottom: navPy }}>
                 <Link
-                  to={item.to}
+                  to={item.to as any}
+                  hash={(item as any).hash}
                   className="rounded-lg font-semibold text-slate-600 transition-colors hover:text-slate-900"
                   style={{ fontSize: navFontSize } as unknown as React.CSSProperties}
                   dir={t.dir}
@@ -306,7 +306,7 @@ export function Header({ language, onToggleLanguage }: { language: Language; onT
 
             <motion.div style={{ paddingLeft: ctaPx, paddingRight: ctaPx, paddingTop: ctaPy, paddingBottom: ctaPy }} className="rounded-full bg-blue-600 shadow-sm transition-shadow hover:bg-blue-700 hover:shadow-md">
               <Link
-                to="/onboarding"
+                to="/dashboard"
                 id="nav-free-trial"
                 className="block whitespace-nowrap font-bold text-white"
                 style={{ fontSize: ctaFontSize } as unknown as React.CSSProperties}
@@ -340,7 +340,8 @@ export function Header({ language, onToggleLanguage }: { language: Language; onT
             {t.nav.map((item) => (
               <Link
                 key={item.label}
-                to={item.to}
+                to={item.to as any}
+                hash={(item as any).hash}
                 onClick={() => setMobileOpen(false)}
                 className="block rounded-lg px-4 py-3 text-sm font-semibold text-slate-700 transition-colors hover:bg-blue-50 hover:text-blue-600"
                 dir={t.dir}
@@ -555,7 +556,7 @@ function Hero({ language }: { language: Language }) {
 
           <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.26, duration: 0.5 }} className="mt-7 flex flex-wrap items-center justify-center gap-4">
             <Link
-              to="/onboarding"
+              to="/dashboard"
               id="hero-cta"
               className="inline-flex items-center gap-2 rounded-full bg-blue-600 px-6 py-3 text-sm font-bold text-white shadow-[0_4px_14px_0_rgba(37,99,235,0.39)] transition-all hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(37,99,235,0.5)] active:scale-95 sm:px-8 sm:py-3.5"
             >
@@ -603,7 +604,7 @@ export function StatsSection({ language }: { language: Language }) {
         </motion.h2>
         <motion.div initial={{ opacity: 0, x: -20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.55 }} className="hidden shrink-0 sm:flex">
           <Link
-            to="/onboarding"
+            to="/dashboard"
             id="stats-free-trial"
             className="inline-flex items-center justify-center rounded-full bg-blue-600 px-8 py-4 text-base font-bold text-white shadow-[0_10px_20px_rgba(37,99,235,0.2)] transition-all duration-300 hover:-translate-y-1 hover:bg-blue-700 hover:shadow-[0_15px_30px_rgba(37,99,235,0.3)]"
             dir={t.dir}
@@ -677,7 +678,7 @@ const BentoHeroCard = ({ language }: { language: Language }) => {
           {t.bentoBody}
         </p>
 
-        <Link to="/onboarding" className="flex items-center gap-2 rounded-2xl bg-blue-600 px-8 py-4 text-lg font-bold text-white shadow-[0_8px_20px_-6px_rgba(37,99,235,0.5)] transition-all duration-300 hover:-translate-y-1 hover:bg-blue-700 hover:shadow-[0_12px_25px_-6px_rgba(37,99,235,0.6)]">
+        <Link to="/dashboard" className="flex items-center gap-2 rounded-2xl bg-blue-600 px-8 py-4 text-lg font-bold text-white shadow-[0_8px_20px_-6px_rgba(37,99,235,0.5)] transition-all duration-300 hover:-translate-y-1 hover:bg-blue-700 hover:shadow-[0_12px_25px_-6px_rgba(37,99,235,0.6)]">
           {t.bentoCta}
           <DirectionArrow language={language} className="h-5 w-5" />
         </Link>
@@ -843,7 +844,7 @@ export function FAQSection({ language }: { language: Language }) {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
 
   return (
-    <div className="mt-16 mb-10 w-full max-w-4xl mx-auto px-4 sm:px-0" dir={t.dir}>
+    <div id="faq" className="mt-16 mb-10 w-full max-w-4xl mx-auto px-4 sm:px-0" dir={t.dir}>
       <h2 className="mb-8 text-[clamp(1.5rem,4vw,2.25rem)] font-extrabold tracking-tight text-slate-900 text-center">
         {t.faqTitle}
       </h2>
@@ -888,7 +889,7 @@ export function BentoGridSection({ language }: { language: Language }) {
   const t = copy[language];
 
   return (
-    <section className="relative overflow-hidden bg-[#f4f9ff] px-4 pb-12 pt-12 sm:px-6 sm:pb-24 sm:pt-28 md:pt-40" dir="ltr">
+    <section id="features" className="relative overflow-hidden bg-[#f4f9ff] px-4 pb-12 pt-12 sm:px-6 sm:pb-24 sm:pt-28 md:pt-40" dir="ltr">
       <div className="pointer-events-none absolute right-1/4 top-0 h-[600px] w-[800px] -translate-y-1/2 rounded-full bg-blue-100/40 opacity-70 blur-3xl" />
       <div className="pointer-events-none absolute left-0 top-1/4 h-[500px] w-[600px] rounded-full bg-sky-100/40 opacity-60 blur-3xl" />
 
@@ -923,7 +924,7 @@ export function BentoGridSection({ language }: { language: Language }) {
             {t.ctaBody}
           </p>
           <div className="flex flex-wrap justify-center gap-4">
-            <Link to="/onboarding" id="closing-cta-btn" className="inline-flex items-center gap-2 rounded-xl bg-white px-6 py-3 text-base font-bold text-blue-700 shadow-lg transition-all hover:-translate-y-1 hover:shadow-xl sm:rounded-2xl sm:px-8 sm:py-4 sm:text-lg">
+            <Link to="/dashboard" id="closing-cta-btn" className="inline-flex items-center gap-2 rounded-xl bg-white px-6 py-3 text-base font-bold text-blue-700 shadow-lg transition-all hover:-translate-y-1 hover:shadow-xl sm:rounded-2xl sm:px-8 sm:py-4 sm:text-lg">
               {t.ctaPrimary}
               <DirectionArrow language={language} className="h-5 w-5" />
             </Link>
@@ -947,12 +948,13 @@ export function BentoGridSection({ language }: { language: Language }) {
 }
 
 function Landing() {
-  const [language, setLanguage] = useState<Language>("en");
+  const language = useAppStore((s) => s.language);
+  const setLanguage = useAppStore((s) => s.setLanguage);
   const t = copy[language];
 
   return (
     <div className="page-shell bg-background text-foreground" dir="ltr" lang={t.lang}>
-      <Header language={language} onToggleLanguage={() => setLanguage((current) => (current === "en" ? "ku" : "en"))} />
+      <Header language={language} onToggleLanguage={() => setLanguage(language === "en" ? "ku" : "en")} />
       <main>
         <HeroV2 language={language} />
         <TrustedMarquee />

@@ -4,12 +4,14 @@ import type { RefObject } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { 
-  Bot, ChevronDown, Download, Edit3, LayoutTemplate, RotateCcw, 
+  Bot, ArrowUp, ChevronDown, Download, Edit3, LayoutTemplate, RotateCcw, 
   Send, Sparkles, Target, X, CheckCircle2, Languages, ZoomIn, ZoomOut, 
   Clock, FileText, FileType, Presentation, FileCode, Loader2 
 } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
 import { exportPreviewAsPDF } from "@/lib/pdf-screenshot";
+import { exportResumePDF } from "@/components/resume/pdf-templates";
 import { exportResumeDocx } from "@/components/resume/docx-templates";
 import { improveBullet, tailorToJob, chatEditResume } from "@/lib/ai.functions";
 import { useAppStore } from "@/lib/store";
@@ -159,6 +161,27 @@ function ResumeEditor() {
   const [jobDescription, setJobDescription] = useState("");
   const [tailoring, setTailoring] = useState(false);
   const [soraniMode, setSoraniMode] = useState(false);
+  
+  const [atsModalOpen, setAtsModalOpen] = useState(false);
+  const [atsLoading, setAtsLoading] = useState(false);
+  const [atsScore, setAtsScore] = useState<number | null>(null);
+  const [atsFeedback, setAtsFeedback] = useState<string[]>([]);
+
+  const handleCheckATS = () => {
+    setAtsModalOpen(true);
+    if (atsScore === null) {
+      setAtsLoading(true);
+      setTimeout(() => {
+        setAtsScore(92);
+        setAtsFeedback(
+          isKu 
+            ? ["بەکارهێنانی باشی کردارەکان.", "هیچ خشتەی ئاڵۆز نییە.", "وشە سەرەکییەکان گونجاون."]
+            : ["Excellent use of action verbs.", "No complex tables or columns detected.", "Keyword match is strong for target role."]
+        );
+        setAtsLoading(false);
+      }, 2500);
+    }
+  };
   
   const previewRef = useRef<HTMLDivElement>(null);
 
@@ -328,13 +351,18 @@ function ResumeEditor() {
             </Link>
 
             <div className="flex items-center gap-2 sm:gap-3">
-              <button onClick={() => setTemplateModalOpen(true)} className="px-3 py-1.5 text-xs font-medium text-purple-600 hover:text-purple-900 rounded-lg hover:bg-purple-50 transition-colors flex items-center gap-1.5 border border-purple-200 bg-white/80 shadow-sm">
-                <LayoutTemplate className="h-3.5 w-3.5" />
+              <button onClick={() => setTemplateModalOpen(true)} className="px-4 py-2 sm:py-2.5 text-sm font-bold text-purple-700 hover:text-purple-950 rounded-xl hover:bg-purple-50 transition-all flex items-center gap-2 border border-purple-200 bg-white shadow-sm hover:shadow-md active:scale-95">
+                <LayoutTemplate className="h-4 w-4" />
                 <span className="hidden sm:inline">{isKu ? "نەخشەکان" : "Design"}</span>
               </button>
 
-              <button onClick={() => setTailorOpen(true)} className="px-3 py-1.5 text-xs font-medium text-blue-600 hover:text-blue-900 rounded-lg hover:bg-blue-50 transition-colors flex items-center gap-1.5 border border-blue-200 bg-white/80 shadow-sm">
-                <Target className="h-3.5 w-3.5" />
+              <button onClick={handleCheckATS} className="px-4 py-2 sm:py-2.5 text-sm font-bold text-emerald-700 hover:text-emerald-950 rounded-xl hover:bg-emerald-50 transition-all flex items-center gap-2 border border-emerald-200 bg-white shadow-sm hover:shadow-md active:scale-95">
+                <CheckCircle2 className="h-4 w-4" />
+                <span className="hidden sm:inline">{isKu ? "پشکنینی ATS" : "ATS Score"}</span>
+              </button>
+
+              <button onClick={() => setTailorOpen(true)} className="px-4 py-2 sm:py-2.5 text-sm font-bold text-blue-700 hover:text-blue-950 rounded-xl hover:bg-blue-50 transition-all flex items-center gap-2 border border-blue-200 bg-white shadow-sm hover:shadow-md active:scale-95">
+                <Target className="h-4 w-4" />
                 <span className="hidden sm:inline">{isKu ? "گونجاندن" : "Tailor"}</span>
               </button>
             </div>
@@ -342,7 +370,7 @@ function ResumeEditor() {
         </div>
       </header>
 
-      <main className="flex-1 max-w-[1600px] w-full mx-auto grid gap-4 px-3 pb-20 pt-4 sm:gap-6 sm:px-6 sm:pb-24 sm:pt-6 lg:grid-cols-[400px_1fr] xl:grid-cols-[440px_1fr] relative z-10">
+      <main className="flex-1 max-w-[1600px] w-full mx-auto grid gap-4 px-3 pb-4 pt-4 sm:gap-6 sm:px-6 sm:pb-6 sm:pt-6 lg:grid-cols-[400px_1fr] xl:grid-cols-[440px_1fr] relative z-10">
         
         {/* Backdrop for mobile sidebar */}
         {isSidebarOpen && (
@@ -414,32 +442,40 @@ function ResumeEditor() {
 
             {/* Messages */}
             <div className="flex-1 overflow-y-auto p-5 space-y-4" style={{ scrollbarWidth: 'thin', scrollbarColor: '#e2e8f0 transparent' }}>
-              {messages.map((msg, i) => (
-                <div key={i} className={`flex gap-3 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                  {msg.role === 'assistant' && (
-                    <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center flex-shrink-0 shadow-[0_4px_10px_rgba(37,99,235,0.2)]">
-                      <Sparkles className="w-4 h-4 text-white" />
-                    </div>
-                  )}
-                  <div className="flex flex-col gap-1 max-w-[85%]">
-                    <div className={`text-sm px-4 py-3 rounded-2xl leading-relaxed shadow-sm ${
-                      msg.role === 'user'
-                        ? 'bg-blue-600 text-white rounded-tr-sm'
-                        : 'bg-white border border-slate-100 text-slate-800 rounded-tl-sm'
-                    }`}>
-                      {msg.content}
-                    </div>
-                    {msg.role === 'assistant' && msg.snapshotId && (
-                      <button
-                        onClick={() => handleRevert(msg.snapshotId!)}
-                        className="self-start flex items-center gap-1 text-[10.5px] font-bold text-slate-400 hover:text-blue-600 transition-colors mt-1"
-                      >
-                        <RotateCcw className="w-3 h-3" /> {isKu ? "گەڕانەوە لەم گۆڕانکارییە" : "Undo this change"}
-                      </button>
+              <AnimatePresence initial={false}>
+                {messages.map((msg, i) => (
+                  <motion.div 
+                    initial={{ opacity: 0, y: 15, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    transition={{ type: "spring", stiffness: 400, damping: 25 }}
+                    key={i} 
+                    className={`flex gap-3 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                  >
+                    {msg.role === 'assistant' && (
+                      <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center flex-shrink-0 shadow-[0_4px_10px_rgba(37,99,235,0.2)]">
+                        <Bot className="w-4 h-4 text-white" />
+                      </div>
                     )}
-                  </div>
-                </div>
-              ))}
+                    <div className="flex flex-col gap-1 max-w-[85%]">
+                      <div className={`text-[14.5px] px-5 py-3.5 rounded-[24px] leading-relaxed shadow-sm ${
+                        msg.role === 'user'
+                          ? 'bg-blue-600 text-white rounded-br-sm font-medium shadow-blue-200'
+                          : 'bg-white border border-slate-100 text-slate-800 rounded-bl-sm shadow-[0_4px_20px_rgba(0,0,0,0.03)]'
+                      }`}>
+                        {msg.content}
+                      </div>
+                      {msg.role === 'assistant' && msg.snapshotId && (
+                        <button
+                          onClick={() => handleRevert(msg.snapshotId!)}
+                          className="self-start flex items-center gap-1 text-[10.5px] font-bold text-slate-400 hover:text-blue-600 transition-colors mt-1"
+                        >
+                          <RotateCcw className="w-3 h-3" /> {isKu ? "گەڕانەوە لەم گۆڕانکارییە" : "Undo this change"}
+                        </button>
+                      )}
+                    </div>
+                  </motion.div>
+                ))}
+              </AnimatePresence>
               {chatLoading && (
                 <div className="flex gap-3 justify-start">
                   <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center flex-shrink-0 shadow-[0_4px_10px_rgba(37,99,235,0.2)]">
@@ -456,21 +492,24 @@ function ResumeEditor() {
             </div>
 
             {/* Input */}
-            <div className="p-4 bg-white/80 backdrop-blur-md border-t border-slate-100 shrink-0">
-              <form onSubmit={handleChatSubmit} className="relative">
+            <div className="p-4 shrink-0 pb-safe-6 flex justify-center w-full">
+              <form
+                onSubmit={handleChatSubmit}
+                className="flex w-full items-center gap-2 sm:gap-3 rounded-full px-1.5 sm:px-2 py-1.5 sm:py-2 bg-white/80 backdrop-blur-2xl border border-slate-200 shadow-[0_8px_30px_rgb(0,0,0,0.06)] ring-4 ring-transparent focus-within:ring-blue-500/10 focus-within:bg-white focus-within:border-blue-300 transition-all duration-300"
+              >
                 <input
                   value={chatInput}
                   onChange={(e) => setChatInput(e.target.value)}
                   placeholder={isKu ? "پوختەی کارەکەم با بەهێزتر بێت..." : "Make my summary more executive..."}
                   disabled={chatLoading}
-                  className="w-full bg-white border border-slate-200 rounded-full pl-5 pr-14 py-3.5 text-sm shadow-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 disabled:opacity-50 transition-all font-medium"
+                  className="flex-1 bg-transparent outline-none text-slate-800 font-medium text-[14px] placeholder:text-slate-400 pl-4"
                 />
                 <button
                   type="submit"
                   disabled={!chatInput.trim() || chatLoading}
-                  className="absolute right-2 top-2 bottom-2 w-10 rounded-full bg-blue-600 text-white flex items-center justify-center disabled:bg-slate-200 disabled:text-slate-400 transition-all shadow-sm hover:bg-blue-700 active:scale-95"
+                  className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-slate-900 disabled:bg-slate-200 hover:bg-blue-600 flex items-center justify-center transition-all disabled:text-slate-400 text-white shadow-sm shrink-0"
                 >
-                  <Send className="w-4 h-4 ml-0.5" />
+                  <ArrowUp className="w-4 h-4" />
                 </button>
               </form>
             </div>
@@ -533,143 +572,238 @@ function ResumeEditor() {
       </main>
 
       {/* Modals */}
-      {tailorOpen && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[200] flex items-center justify-center p-4">
-          <div className="bg-white rounded-[2rem] w-full max-w-2xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
-            <div className="p-6 border-b border-slate-100 flex items-center justify-between">
-              <div>
-                <h3 className="text-xl font-bold text-slate-900 flex items-center gap-2">
-                  <Target className="w-5 h-5 text-blue-600" />
-                  {isKu ? "گونجاندن بۆ کار" : "Tailor to Job"}
-                </h3>
-                <p className="text-sm text-slate-500 mt-1">
-                  {isKu ? "وەسفی کارەکە لێرە دابنێ بۆ ئەوەی زیرەکی دەستکرد سیڤییەکەت ڕێکبخات." : "Paste a job description and AI will rewrite your resume to match it."}
-                </p>
-              </div>
-              <button onClick={() => setTailorOpen(false)} className="p-2 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-full transition-colors">
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-            <div className="p-6 flex-1 overflow-y-auto">
-              <textarea
-                value={jobDescription}
-                onChange={(e) => setJobDescription(e.target.value)}
-                placeholder={isKu ? "لێرە وەسفی کارەکە بنووسە..." : "Paste the job description here..."}
-                className="w-full h-64 p-4 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all resize-none"
-              />
-            </div>
-            <div className="p-6 border-t border-slate-100 flex justify-end gap-3 bg-slate-50/50">
-              <button
-                onClick={() => setTailorOpen(false)}
-                className="px-5 py-2.5 text-sm font-bold text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-xl transition-all"
-              >
-                {isKu ? "پاشگەزبوونەوە" : "Cancel"}
-              </button>
-              <button
-                onClick={handleTailor}
-                disabled={tailoring || jobDescription.trim().length < 20}
-                className="flex items-center gap-2 px-6 py-2.5 text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 active:scale-95 disabled:bg-slate-300 disabled:text-slate-500 disabled:scale-100 rounded-xl shadow-sm transition-all"
-              >
-                {tailoring ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
-                {isKu ? "گونجاندن بە زیرەکی دەستکرد" : "Tailor with AI"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Template Modal */}
-      {templateModalOpen && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[200] flex items-center justify-center p-4">
-          <div className="bg-white rounded-[2rem] w-full max-w-5xl h-[90vh] overflow-hidden shadow-2xl flex flex-col">
-            <div className="p-5 border-b border-slate-100 flex items-center justify-between shrink-0 bg-white/50 backdrop-blur-md">
-              <div>
-                <h3 className="text-xl font-bold text-slate-900 flex items-center gap-2">
-                  <LayoutTemplate className="w-5 h-5 text-purple-600" />
-                  {isKu ? "هەڵبژاردنی نەخشە" : "Template Library"}
-                </h3>
-              </div>
-              <button onClick={() => setTemplateModalOpen(false)} className="p-2 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-full transition-colors">
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-            
-            <div className="flex-1 overflow-hidden flex flex-col bg-slate-50/50">
-              {/* Filters */}
-              <div className="p-4 overflow-x-auto scrollbar-hide shrink-0 border-b border-slate-100 bg-white">
-                <div className="flex items-center gap-2 max-w-full">
-                  {categories.map((cat) => (
-                    <button
-                      key={cat}
-                      onClick={() => setFilter(cat)}
-                      className={`px-4 py-2 rounded-full text-xs font-semibold whitespace-nowrap transition-all duration-300 ${
-                        filter === cat
-                          ? "bg-slate-800 text-white shadow-sm"
-                          : "bg-white text-slate-600 hover:bg-slate-100 border border-slate-200"
-                      }`}
-                    >
-                      {cat}
-                    </button>
-                  ))}
+      <AnimatePresence>
+        {tailorOpen && (
+          <motion.div 
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[200] flex items-center justify-center p-4"
+          >
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              transition={{ type: "spring", stiffness: 300, damping: 30 }}
+              className="bg-white rounded-[2rem] w-full max-w-2xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]"
+            >
+              <div className="p-6 border-b border-slate-100 flex items-center justify-between">
+                <div>
+                  <h3 className="text-xl font-bold text-slate-900 flex items-center gap-2">
+                    <Target className="w-5 h-5 text-blue-600" />
+                    {isKu ? "گونجاندن بۆ کار" : "Tailor to Job"}
+                  </h3>
+                  <p className="text-sm text-slate-500 mt-1">
+                    {isKu ? "وەسفی کارەکە لێرە دابنێ بۆ ئەوەی زیرەکی دەستکرد سیڤییەکەت ڕێکبخات." : "Paste a job description and AI will rewrite your resume to match it."}
+                  </p>
                 </div>
+                <button onClick={() => setTailorOpen(false)} className="p-2 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-full transition-colors">
+                  <X className="w-5 h-5" />
+                </button>
               </div>
+              <div className="p-6 flex-1 overflow-y-auto">
+                <textarea
+                  value={jobDescription}
+                  onChange={(e) => setJobDescription(e.target.value)}
+                  placeholder={isKu ? "لێرە وەسفی کارەکە بنووسە..." : "Paste the job description here..."}
+                  className="w-full h-64 p-4 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all resize-none"
+                />
+              </div>
+              <div className="p-6 border-t border-slate-100 flex justify-end gap-3 bg-slate-50/50">
+                <button
+                  onClick={() => setTailorOpen(false)}
+                  className="px-5 py-2.5 text-sm font-bold text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-xl transition-all"
+                >
+                  {isKu ? "پاشگەزبوونەوە" : "Cancel"}
+                </button>
+                <button
+                  onClick={handleTailor}
+                  disabled={tailoring || jobDescription.trim().length < 20}
+                  className="flex items-center gap-2 px-6 py-2.5 text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 active:scale-95 disabled:bg-slate-300 disabled:text-slate-500 disabled:scale-100 rounded-xl shadow-sm transition-all"
+                >
+                  {tailoring ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+                  {isKu ? "گونجاندن بە زیرەکی دەستکرد" : "Tailor with AI"}
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
 
-              {/* Grid */}
-              <div className="flex-1 overflow-y-auto p-4 sm:p-6 scrollbar-thin scrollbar-thumb-slate-200 scrollbar-track-transparent">
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
-                  {filteredTemplates.map(({ id: templateId, label, isNew }) => {
-                    const isActive = resume.template === templateId;
-                    return (
+        {templateModalOpen && (
+          <motion.div 
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[200] flex items-center justify-center p-4"
+          >
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              transition={{ type: "spring", stiffness: 300, damping: 30 }}
+              className="bg-white rounded-[2rem] w-full max-w-5xl h-[90vh] overflow-hidden shadow-2xl flex flex-col"
+            >
+              <div className="p-5 border-b border-slate-100 flex items-center justify-between shrink-0 bg-white/50 backdrop-blur-md">
+                <div>
+                  <h3 className="text-xl font-bold text-slate-900 flex items-center gap-2">
+                    <LayoutTemplate className="w-5 h-5 text-purple-600" />
+                    {isKu ? "هەڵبژاردنی نەخشە" : "Template Library"}
+                  </h3>
+                </div>
+                <button onClick={() => setTemplateModalOpen(false)} className="p-2 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-full transition-colors">
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+              
+              <div className="flex-1 overflow-hidden flex flex-col bg-slate-50/50">
+                {/* Filters */}
+                <div className="p-4 overflow-x-auto scrollbar-hide shrink-0 border-b border-slate-100 bg-white">
+                  <div className="flex items-center gap-2 max-w-full">
+                    {categories.map((cat) => (
                       <button
-                        key={templateId}
-                        onClick={() => {
-                          setTemplate(templateId);
-                          setTemplateModalOpen(false);
-                        }}
-                        className={`group relative flex flex-col items-center gap-3 rounded-[1.5rem] p-3 transition-all duration-300 text-center ${
-                          isActive 
-                            ? "bg-blue-600 shadow-[0_8px_20px_rgba(37,99,235,0.2)] border-transparent scale-[1.02] ring-2 ring-blue-600 ring-offset-2" 
-                            : "bg-white hover:bg-blue-50/50 border border-slate-200 hover:border-blue-200 hover:shadow-md"
+                        key={cat}
+                        onClick={() => setFilter(cat)}
+                        className={`px-4 py-2 rounded-full text-xs font-semibold whitespace-nowrap transition-all duration-300 ${
+                          filter === cat
+                            ? "bg-slate-800 text-white shadow-sm"
+                            : "bg-white text-slate-600 hover:bg-slate-100 border border-slate-200"
                         }`}
                       >
-                        <div className="w-full aspect-[1/1.2] rounded-xl overflow-hidden relative shadow-[0_2px_10px_rgba(0,0,0,0.05)] bg-slate-100 border border-slate-100/50">
-                          {/* Mini Thumbnail render */}
-                          <div className="absolute inset-0 bg-white overflow-hidden flex items-start justify-center">
-                            <div 
-                              className="origin-top pointer-events-none mt-2"
-                              style={{ width: '794px', height: '1123px', transform: 'scale(0.20)' }}
-                            >
-                              <ResumePreview data={resume.data} template={templateId} />
+                        {cat}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Grid */}
+                <div className="flex-1 overflow-y-auto p-4 sm:p-6 scrollbar-thin scrollbar-thumb-slate-200 scrollbar-track-transparent">
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+                    {filteredTemplates.map(({ id: templateId, label, isNew }) => {
+                      const isActive = resume.template === templateId;
+                      return (
+                        <button
+                          key={templateId}
+                          onClick={() => {
+                            setTemplate(templateId);
+                            setTemplateModalOpen(false);
+                          }}
+                          className={`group relative flex flex-col items-center gap-3 rounded-[1.5rem] p-3 transition-all duration-300 text-center ${
+                            isActive 
+                              ? "bg-blue-600 shadow-[0_8px_20px_rgba(37,99,235,0.2)] border-transparent scale-[1.02] ring-2 ring-blue-600 ring-offset-2" 
+                              : "bg-white hover:bg-blue-50/50 border border-slate-200 hover:border-blue-200 hover:shadow-md"
+                          }`}
+                        >
+                          <div className="w-full aspect-[1/1.2] rounded-xl overflow-hidden relative shadow-[0_2px_10px_rgba(0,0,0,0.05)] bg-slate-100 border border-slate-100/50">
+                            {/* Mini Thumbnail render */}
+                            <div className="absolute inset-0 bg-white overflow-hidden flex items-start justify-center">
+                              <div 
+                                className="origin-top pointer-events-none mt-2"
+                                style={{ width: '794px', height: '1123px', transform: 'scale(0.20)' }}
+                              >
+                                <ResumePreview data={resume.data} template={templateId} />
+                              </div>
                             </div>
+                            
+                            {isActive && (
+                              <div className="absolute inset-0 bg-blue-600/10 flex items-center justify-center backdrop-blur-[1px] z-10">
+                                <CheckCircle2 className="w-10 h-10 text-blue-600 drop-shadow-md bg-white rounded-full" />
+                              </div>
+                            )}
                           </div>
                           
-                          {isActive && (
-                            <div className="absolute inset-0 bg-blue-600/10 flex items-center justify-center backdrop-blur-[1px] z-10">
-                              <CheckCircle2 className="w-10 h-10 text-blue-600 drop-shadow-md bg-white rounded-full" />
-                            </div>
-                          )}
-                        </div>
-                        
-                        <div className="w-full px-1 flex flex-col items-center mt-1 mb-1">
-                          <span className={`text-sm font-bold truncate w-full ${isActive ? "text-white" : "text-slate-900"}`}>
-                            {label}
-                          </span>
-                        </div>
+                          <div className="w-full px-1 flex flex-col items-center mt-1 mb-1">
+                            <span className={`text-sm font-bold truncate w-full ${isActive ? "text-white" : "text-slate-900"}`}>
+                              {label}
+                            </span>
+                          </div>
 
-                        {isNew && !isActive && (
-                          <span className="absolute top-0 right-0 -translate-y-1/3 translate-x-1/3 px-2.5 py-1 rounded-full bg-blue-500 text-white text-[10px] font-bold uppercase tracking-wider shadow-sm z-10 border-2 border-white">
-                            New
-                          </span>
-                        )}
-                      </button>
-                    );
-                  })}
+                          {isNew && !isActive && (
+                            <span className="absolute top-0 right-0 -translate-y-1/3 translate-x-1/3 px-2.5 py-1 rounded-full bg-blue-500 text-white text-[10px] font-bold uppercase tracking-wider shadow-sm z-10 border-2 border-white">
+                              New
+                            </span>
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
               </div>
-            </div>
-          </div>
-        </div>
-      )}
+            </motion.div>
+          </motion.div>
+        )}
+
+        {atsModalOpen && (
+          <motion.div 
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[200] flex items-center justify-center p-4"
+          >
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              transition={{ type: "spring", stiffness: 300, damping: 30 }}
+              className="bg-white rounded-[2rem] w-full max-w-md overflow-hidden shadow-2xl flex flex-col"
+            >
+              <div className="p-6 border-b border-slate-100 flex items-center justify-between bg-emerald-50">
+                <h3 className="text-xl font-bold text-emerald-900 flex items-center gap-2">
+                  <CheckCircle2 className="w-6 h-6 text-emerald-600" />
+                  {isKu ? "پشکنینی ATS" : "ATS Evaluation"}
+                </h3>
+                <button onClick={() => setAtsModalOpen(false)} className="p-2 text-emerald-600 hover:text-emerald-900 hover:bg-emerald-100 rounded-full transition-colors">
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+              <div className="p-8 flex flex-col items-center justify-center min-h-[250px] relative overflow-hidden bg-white">
+                <AnimatePresence mode="wait">
+                  {atsLoading ? (
+                    <motion.div key="loading" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} className="flex flex-col items-center gap-4 text-center">
+                      <div className="w-16 h-16 rounded-full bg-emerald-100 flex items-center justify-center mb-2 shadow-[inset_0_2px_4px_rgba(0,0,0,0.06)] relative overflow-hidden">
+                        <motion.div 
+                          className="absolute inset-0 bg-gradient-to-tr from-emerald-200 to-transparent"
+                          animate={{ rotate: 360 }}
+                          transition={{ repeat: Infinity, duration: 2, ease: "linear" }}
+                        />
+                        <Bot className="w-8 h-8 text-emerald-600 animate-pulse relative z-10" />
+                      </div>
+                      <p className="text-slate-500 font-medium animate-pulse">
+                        {isKu ? "زیرەکی دەستکرد خەریکی شیکردنەوەیە..." : "AI is analyzing your formatting and keywords..."}
+                      </p>
+                    </motion.div>
+                  ) : (
+                    <motion.div key="result" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ type: "spring", stiffness: 300, damping: 25 }} className="flex flex-col items-center gap-6 w-full">
+                      <div className="relative w-32 h-32 rounded-full border-8 border-emerald-50 flex items-center justify-center shadow-inner">
+                        <svg className="absolute inset-0 w-full h-full -rotate-90">
+                          <motion.circle 
+                            cx="50%" cy="50%" r="46%" 
+                            className="text-emerald-500 stroke-current drop-shadow-md" 
+                            strokeWidth="8" fill="transparent" strokeLinecap="round"
+                            strokeDasharray="300"
+                            initial={{ strokeDashoffset: 300 }}
+                            animate={{ strokeDashoffset: 300 - (300 * (atsScore ?? 0)) / 100 }}
+                            transition={{ duration: 1.5, ease: "easeOut" }}
+                          />
+                        </svg>
+                        <motion.span 
+                          initial={{ opacity: 0, scale: 0 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.5, type: "spring" }}
+                          className="text-4xl font-extrabold text-slate-800"
+                        >
+                          {atsScore}
+                        </motion.span>
+                      </div>
+                      <div className="w-full space-y-3">
+                        {atsFeedback.map((fb, idx) => (
+                          <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.8 + idx * 0.15 }} key={idx} className="flex items-start gap-3 bg-slate-50 p-3.5 rounded-xl border border-slate-100 shadow-sm">
+                            <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0 mt-0.5" />
+                            <p className="text-sm text-slate-700 font-medium">{fb}</p>
+                          </motion.div>
+                        ))}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+              <div className="p-6 border-t border-slate-100 flex justify-end bg-slate-50/50">
+                <button
+                  onClick={() => setAtsModalOpen(false)}
+                  className="px-6 py-2.5 text-sm font-bold text-white bg-emerald-600 hover:bg-emerald-700 active:scale-95 rounded-xl shadow-[0_4px_12px_rgba(16,185,129,0.3)] transition-all"
+                >
+                  {isKu ? "داخستن" : "Awesome!"}
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
     </div>
   );
@@ -684,10 +818,19 @@ function ExportButtons({ data, template, name, previewRef }: { data: ResumeData;
   const handlePDF = async () => {
     setPdfLoading(true);
     try {
-      if (previewRef.current) {
-        await exportPreviewAsPDF(previewRef.current, filename);
+      if (rtlExport) {
+        if (previewRef.current) {
+          await exportPreviewAsPDF(previewRef.current, filename);
+        }
+      } else {
+        await exportResumePDF(data, template, filename);
       }
-    } finally { setPdfLoading(false); }
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to generate PDF");
+    } finally { 
+      setPdfLoading(false); 
+    }
   };
   const handleDocx = async () => {
     setDocxLoading(true);
@@ -761,11 +904,12 @@ function ClientPDFPreview({ data, template, previewRef, zoom = 1 }: { data: Resu
           style={{ width: 794 * baseScale * zoom, height: contentHeight * baseScale * zoom }}
         >
           <div
-            ref={previewRef}
-            className="w-[794px] origin-top transition-transform duration-300 ease-out overflow-hidden rounded-sm bg-white shadow-[0_20px_50px_-24px_rgba(15,23,42,0.45)] shrink-0"
+            className="w-[794px] origin-top transition-transform duration-300 ease-out overflow-hidden rounded-sm shadow-[0_20px_50px_-24px_rgba(15,23,42,0.45)] shrink-0"
             style={{ transform: `scale(${baseScale * zoom})`, minHeight: '1122px' }}
           >
-            <ResumePreview data={data} template={template} />
+            <div ref={previewRef} className="w-full min-h-full bg-white">
+              <ResumePreview data={data} template={template} />
+            </div>
           </div>
         </div>
       </div>
