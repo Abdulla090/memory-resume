@@ -13,7 +13,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { exportPreviewAsPDF } from "@/lib/pdf-screenshot";
 import { exportResumePDF } from "@/components/resume/pdf-templates";
 import { exportResumeDocx } from "@/components/resume/docx-templates";
-import { improveBullet, tailorToJob, chatEditResume } from "@/lib/ai.functions";
+import { improveBullet, tailorToJob, chatEditResume, fixResumeErrors } from "@/lib/ai.functions";
 import { useAppStore } from "@/lib/store";
 import type { ExperienceItem, ResumeData, TemplateId } from "@/lib/types";
 import { ResumePreview } from "@/components/resume/templates";
@@ -154,6 +154,7 @@ function ResumeEditor() {
   
   const tailorFn = useServerFn(tailorToJob);
   const chatEditFn = useServerFn(chatEditResume);
+  const fixErrorsFn = useServerFn(fixResumeErrors);
 
   const [templateModalOpen, setTemplateModalOpen] = useState(false);
   const [tailorOpen, setTailorOpen] = useState(false);
@@ -324,6 +325,33 @@ function ResumeEditor() {
     }
   };
 
+  const handleFixErrors = async () => {
+    if (chatLoading) return;
+    setIsSidebarOpen(true);
+    const userMsg = isKu ? "تکایە هەموو هەڵەکانی سیڤییەکەم چاک بکە و هەڵسەنگاندنێکی تەواوم پێ بدە بەپێی ڕێنماییەکان." : "Please fix all errors in my resume and give me a full HR evaluation.";
+    setMessages(prev => [...prev, { role: 'user', content: userMsg }]);
+    setChatLoading(true);
+
+    const snapshotId = crypto.randomUUID();
+    const snapshot = { ...data, experience: data.experience.map(e => ({ ...e, achievements: [...e.achievements] })) };
+    setHistory(prev => [{ id: snapshotId, label: "Before Auto-Fix", timestamp: Date.now(), snapshot }, ...prev]);
+
+    try {
+      const { resume: updatedResume, reply } = await fixErrorsFn({
+        data: { apiKey, resume: data }
+      });
+      updateData(updatedResume);
+      setMessages(prev => [...prev, { role: 'assistant', content: reply, snapshotId }]);
+      toast.success(isKu ? "سیڤییەکە چاککرا و هەڵسەنگێندرا" : "Resume fixed and evaluated");
+    } catch (error) {
+      setHistory(prev => prev.filter(h => h.id !== snapshotId));
+      toast.error(error instanceof Error ? error.message : (isKu ? "چاککردنی سیڤی سەرکەوتوو نەبوو." : "Failed to fix resume."));
+      setMessages(prev => [...prev, { role: 'assistant', content: isKu ? "کێشەیەکم بۆ دروست بوو لە کاتی چاککردن. تکایە دووبارە هەوڵ بدەرەوە." : "I ran into an issue fixing the resume. Please try again." }]);
+    } finally {
+      setChatLoading(false);
+    }
+  };
+
   const handleRevert = (snapshotId: string) => {
     const entry = history.find(h => h.id === snapshotId);
     if (!entry) return;
@@ -362,6 +390,11 @@ function ResumeEditor() {
               <button onClick={() => setTailorOpen(true)} className="px-4 py-2 sm:py-2.5 text-sm font-bold text-blue-700 hover:text-blue-950 rounded-xl hover:bg-blue-50 transition-all flex items-center gap-2 border border-blue-200 bg-white shadow-sm hover:shadow-md active:scale-95">
                 <Target className="h-4 w-4" />
                 <span className="hidden sm:inline">{isKu ? "گونجاندن" : "Tailor"}</span>
+              </button>
+
+              <button onClick={handleFixErrors} disabled={chatLoading} className="px-4 py-2 sm:py-2.5 text-sm font-bold text-amber-700 hover:text-amber-950 rounded-xl hover:bg-amber-50 transition-all flex items-center gap-2 border border-amber-200 bg-white shadow-sm hover:shadow-md active:scale-95 disabled:opacity-50 disabled:active:scale-100">
+                <Wand2 className="h-4 w-4" />
+                <span className="hidden sm:inline">{isKu ? "چاککردنی هەڵەکان" : "Fix Errors"}</span>
               </button>
             </div>
           </div>

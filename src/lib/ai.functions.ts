@@ -747,3 +747,70 @@ export const tailorToJob = createServerFn({ method: "POST" })
     });
     return { resume: optimizeResumeForOnePage(extractToolArgs<ResumeData>(json)) };
   });
+
+// ───────────────── fixResumeErrors ─────────────────
+
+export const fixResumeErrors = createServerFn({ method: "POST" })
+  .inputValidator(
+    z.object({
+      apiKey: z.string().optional(),
+      resume: z.any(),
+    }),
+  )
+  .handler(async ({ data }): Promise<{ resume: ResumeData; reply: string }> => {
+    const json = await callGateway({
+      apiKey: data.apiKey,
+      model: "gemini-3.1-flash-lite-preview",
+      messages: [
+        {
+          role: "system",
+          content: `You are an elite Senior HR Executive and Expert Talent Acquisition Specialist for a top-tier multinational corporation. You possess deep expertise in Applicant Tracking Systems (ATS) optimization, professional branding, and rigorous CV/Resume auditing.
+# Primary Objective
+Analyze the provided CV comprehensively. You must automatically deduce the candidate's target department/industry, identify all structural, grammatical, and strategic flaws, and provide actionable, high-impact solutions to elevate the CV to a top-1% standard. AND most importantly, YOU MUST ACTUALLY FIX THE CV BY RETURNING THE UPDATED RESUME JSON alongside your analysis.
+# Core Directives & Constraints (Strictly Enforced)
+1. **Absolute Truth & Zero Hallucination:** Do not fabricate information, skills, or experiences. Base your entire analysis strictly on the provided text. Do not imagine details.
+2. **Context Isolation:** Treat this analysis in absolute isolation. Do not mix, reference, or incorporate any data or topics from previous chats.
+3. **Language Mandate:** Your entire response (the 'reply' field), including all analysis, explanations, and feedback, MUST be delivered in the original, fluent Kurdish language. (Even if the CV is English, your analysis reply must be Kurdish).
+4. **Proactive Enhancement:** Anticipate what makes a perfect CV. If the candidate forgot essential elements (e.g., quantifiable metrics, soft skills, specific technical stack), explicitly point them out and suggest additions.
+5. **Maximum Capability:** Operate at your highest level of analytical reasoning, critical thinking, and HR expertise.
+# Execution Steps
+Please evaluate the uploaded CV by following these exact steps for your text reply:
+1. **Auto-Detect Department:** Read the CV and immediately explicitly state the primary department, industry, and seniority level the candidate belongs to (e.g., Senior Mobile Development, Entry-Level Marketing, Cybersecurity).
+2. **Initial Impression & ATS Compatibility:** Give a brief summary of how a recruiter and an ATS bot would currently view this CV.
+3. **Critical Flaw Analysis (Mistakes):** Deep-dive into the CV's mistakes. Categorize them by:
+- Formatting & Structure
+- Grammar, Spelling, & Phrasing
+- Missing Information / Weak Points
+4. **Strategic Solutions & Rewrites:** For every mistake identified in Step 3, provide a direct, optimized solution. Provide exact examples of how weak sentences should be rewritten using strong action verbs.
+5. **Final Verdict:** Give a score out of 10 for the current CV, and an estimated score if your changes are applied.
+
+Use the save_resume tool. The 'resume' parameter should contain the ACTUALLY FIXED AND IMPROVED RESUME based on your analysis. The 'reply' parameter should contain your detailed Kurdish analysis following the Execution Steps.`,
+        },
+        {
+          role: "user",
+          content: \`Here is the current CV data:\\n\${JSON.stringify(data.resume)}\`,
+        },
+      ],
+      tools: [
+        {
+          type: "function",
+          function: {
+            name: "save_resume",
+            description: "Save the fixed, optimized resume data alongside your evaluation reply.",
+            parameters: {
+              type: "object",
+              properties: {
+                resume: resumeSchema,
+                reply: { type: "string", description: "The detailed Kurdish analysis following the Execution Steps." }
+              },
+              required: ["resume", "reply"]
+            },
+          },
+        },
+      ],
+      toolChoice: { type: "function", function: { name: "save_resume" } },
+    });
+
+    const result = extractToolArgs<{ resume: ResumeData; reply: string }>(json);
+    return { resume: optimizeResumeForOnePage(result.resume), reply: result.reply };
+  });
