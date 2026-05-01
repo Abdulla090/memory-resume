@@ -16,7 +16,8 @@ const copy = {
     badge: "AI-powered · Free to start",
     badgeMobile: "AI · Free",
     heroTitle: "Your career memory,",
-    heroTitleAccent: "turned into a CV.",
+    heroTitleAccentPrefix: "turned into ",
+    heroTitleAccentHighlight: "a CV.",
     heroBody: "Tell us your story. We build the resume.",
     heroCta: "Get started",
     heroSecondary: "Browse templates",
@@ -26,7 +27,8 @@ const copy = {
     badge: "زیرەکی دەستکرد · دەستپێکردنی خۆڕایی",
     badgeMobile: "زیرەکی دەستکرد · خۆڕایی",
     heroTitle: "بیرەوەرییەکانت،",
-    heroTitleAccent: "بگۆڕە بۆ سیڤی.",
+    heroTitleAccentPrefix: "بگۆڕە بۆ ",
+    heroTitleAccentHighlight: "سیڤی.",
     heroBody: "چیرۆکەکەت بگێڕە. ئێمە سیڤییەکەت دادەمەزرێنین.",
     heroCta: "دەستپێکردن",
     heroSecondary: "قاڵبەکان ببینە",
@@ -152,11 +154,12 @@ export function HeroV2({ language }: { language: Language }) {
             >
               {t.heroTitle}
               <br />
+              {t.heroTitleAccentPrefix}
               <span className="relative inline-block whitespace-nowrap pr-2">
-                <span className="relative z-10 text-white drop-shadow-sm">{t.heroTitleAccent}</span>
-                {/* Hand-drawn underline SVG - VIBRANT RED, NO GLOW */}
+                <span className="relative z-10 text-white drop-shadow-sm">{t.heroTitleAccentHighlight}</span>
+                {/* Hand-drawn underline SVG - GREEN */}
                 <svg
-                  className="absolute -bottom-2 left-0 w-full h-[0.35em] text-[#ff3333] pointer-events-none"
+                  className="absolute -bottom-2 left-0 w-full h-[0.35em] text-[#22c55e] pointer-events-none"
                   viewBox="0 0 100 10"
                   preserveAspectRatio="none"
                   fill="none"
@@ -166,7 +169,6 @@ export function HeroV2({ language }: { language: Language }) {
                 >
                   <path d="M 2 8 C 30 1, 70 1, 98 8" />
                 </svg>
-
               </span>
             </motion.h1>
 
