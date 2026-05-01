@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import { 
   Bot, ArrowUp, ChevronDown, Download, Edit3, LayoutTemplate, RotateCcw, 
   Send, Sparkles, Target, X, CheckCircle2, Languages, ZoomIn, ZoomOut, 
-  Clock, FileText, FileType, Presentation, FileCode, Loader2 
+  Clock, FileText, FileType, Presentation, FileCode, Loader2, Wand2
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 

@@ -788,7 +788,7 @@ Use the save_resume tool. The 'resume' parameter should contain the ACTUALLY FIX
         },
         {
           role: "user",
-          content: \`Here is the current CV data:\\n\${JSON.stringify(data.resume)}\`,
+          content: `Here is the current CV data:\n${JSON.stringify(data.resume)}`,
         },
       ],
       tools: [
