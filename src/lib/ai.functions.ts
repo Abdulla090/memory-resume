@@ -33,7 +33,7 @@ async function callGateway(opts: {
   model?: string;
   apiKey?: string;
 }) {
-  const authKey = opts.apiKey ?? B_AI_KEY;
+  const authKey = opts.apiKey ?? GEMINI_KEY;
   const modelName = opts.model ?? DEFAULT_MODEL;
 
   if (!authKey) throw new Error('No API key configured.');
