@@ -77,8 +77,21 @@ const ThumbnailCard = ({ id }: { id: TemplateId }) => (
 );
 
 /* Card arrays using real templates */
-const leftCards: TemplateId[]  = ["minimal", "ref-torres", "carbon", "executive", "nexus"];
-const rightCards: TemplateId[] = ["slate", "vanguard", "ref-schumacher", "apex", "orbit"];
+const leftCards: TemplateId[]  = [
+  "new-sleek", 
+  "ref-torres", 
+  "ref-schumacher", 
+  "mercer", 
+  "executive", 
+  "ref-sanchez"
+];
+const rightCards: TemplateId[] = [
+  "new-professional", 
+  "ref-silva", 
+  "ref-palmerston", 
+  "new-academic", 
+  "nexus"
+];
 
 /* ── Unified marquee: adapts column widths via responsive classes ── */
 function MarqueeColumns() {
