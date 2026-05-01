@@ -10,7 +10,6 @@ import { optimizeResumeForOnePage } from "./resume-utils";
 
 const AI_ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions";
 const DEFAULT_MODEL = "gemini-3.1-flash-lite-preview";
-const GEMINI_KEY = "AIzaSyC31fuY4cGzHyTrCaP3yMe9NJoPrqkXXJo";
 
 interface GatewayMessage {
   role: "system" | "user" | "assistant";
@@ -33,7 +32,7 @@ async function callGateway(opts: {
   model?: string;
   apiKey?: string;
 }) {
-  const authKey = opts.apiKey ?? GEMINI_KEY;
+  const authKey = opts.apiKey || process.env.GEMINI_API_KEY;
   const modelName = opts.model ?? DEFAULT_MODEL;
 
   if (!authKey) throw new Error('No API key configured.');
