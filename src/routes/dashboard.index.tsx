@@ -2,6 +2,7 @@ import { createFileRoute, Link, useNavigate } from '@tanstack/react-router';
 import { Plus, Upload, BrainCircuit, FileText, CheckCircle2, LayoutTemplate, PenTool, Briefcase, BarChart2, Sun, ArrowRight, MoreVertical, Settings, Wand2, Clock } from 'lucide-react';
 import { LeftCardSVG, CenterCardSVG } from './index';
 import { useAppStore } from '@/lib/store';
+import { motion } from 'framer-motion';
 
 export const Route = createFileRoute('/dashboard/')({
   component: DashboardIndex,
@@ -14,11 +15,40 @@ function DashboardIndex() {
   const resumes = useAppStore((state) => state.resumes);
   const recentCVs = resumes.slice(0, 3);
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+      },
+    },
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { 
+      opacity: 1, 
+      y: 0,
+      transition: { 
+        type: "spring",
+        stiffness: 100,
+        damping: 15,
+        mass: 1
+      }
+    },
+  };
+
   return (
-    <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6 pb-10">
+    <motion.div 
+      className="max-w-7xl mx-auto space-y-4 sm:space-y-6 pb-10"
+      variants={containerVariants}
+      initial="hidden"
+      animate="visible"
+    >
       
       {/* Top Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
+      <motion.div variants={itemVariants} className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
         
         {/* Hero Banner */}
         <div className="lg:col-span-2 rounded-[2rem] bg-gradient-to-br from-[#e6f2ff] to-[#f0f7ff] p-6 sm:p-10 relative overflow-hidden border border-white shadow-sm flex flex-col justify-center min-h-[280px] sm:min-h-[300px]">
@@ -117,7 +147,7 @@ function DashboardIndex() {
       </div>
 
       {/* Middle Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
+      <motion.div variants={itemVariants} className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
         
         {/* My CVs */}
         <div className="rounded-[2rem] bg-white border border-slate-100 p-8 shadow-sm">
@@ -238,10 +268,10 @@ function DashboardIndex() {
           </div>
         </div>
 
-      </div>
+      </motion.div>
 
       {/* Bottom Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
+      <motion.div variants={itemVariants} className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
         
         {/* AI Writer */}
         <div className="rounded-[2rem] bg-white border border-slate-100 p-8 shadow-sm">
@@ -370,10 +400,10 @@ function DashboardIndex() {
           </div>
         </div>
 
-      </div>
+      </motion.div>
 
       {/* Tip of the day */}
-      <div className="rounded-[2rem] bg-gradient-to-r from-blue-50 to-[#e0f2fe] border border-blue-100 p-5 sm:p-6 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      <motion.div variants={itemVariants} className="rounded-[2rem] bg-gradient-to-r from-blue-50 to-[#e0f2fe] border border-blue-100 p-5 sm:p-6 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
          <div className="flex items-center gap-4">
             <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-sm shrink-0">
                <Sun className="w-6 h-6 text-amber-400" />
@@ -386,8 +416,8 @@ function DashboardIndex() {
          <button className="bg-white text-blue-600 text-xs font-bold px-4 py-2.5 rounded-xl shadow-sm hover:shadow border border-blue-100 transition-all flex items-center gap-1 shrink-0">
             {isKu ? "نموونە ببینە" : "See Example"} <ArrowRight className={`w-3 h-3 ${isKu ? 'rotate-180' : ''}`} />
          </button>
-      </div>
+      </motion.div>
       
-    </div>
+    </motion.div>
   );
 }
