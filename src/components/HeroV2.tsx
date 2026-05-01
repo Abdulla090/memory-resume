@@ -112,7 +112,7 @@ export function HeroV2({ language }: { language: Language }) {
   const t = copy[language];
 
   return (
-    <section className="flex-1 max-w-[1600px] w-full mx-auto px-3 sm:px-6 relative z-10 pt-4 sm:pt-6" dir="ltr">
+    <section className="flex-1 max-w-[1600px] w-full mx-auto px-3 sm:px-6 relative z-10 pt-4 sm:pt-6">
       {/* HERO SECTION */}
       <div className="relative overflow-hidden hero-gradient rounded-[2rem] sm:rounded-[2.5rem]">
         {/*

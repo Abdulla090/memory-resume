@@ -293,16 +293,26 @@ export function Header({ language, onToggleLanguage }: { language: Language; onT
 
           {/* Right actions */}
           <div className="flex shrink-0 items-center gap-2">
-            <button
+            <motion.button
               onClick={onToggleLanguage}
-              className="hidden items-center gap-1.5 rounded-lg font-semibold text-slate-600 transition-colors hover:text-slate-900 md:flex"
+              className="hidden items-center gap-1.5 rounded-lg font-semibold text-slate-600 transition-colors hover:text-slate-900 md:flex overflow-hidden"
               style={{ fontSize: navFontSize } as unknown as React.CSSProperties}
               aria-label="Change language"
-              dir={t.dir}
+              dir="ltr"
             >
               <Globe className="h-4 w-4 shrink-0" />
-              {t.toggle}
-            </button>
+              <motion.span
+                style={{
+                  maxWidth: useTransform(progress, [0.6, 1], ["80px", "0px"]),
+                  opacity: useTransform(progress, [0.5, 0.9], [1, 0]),
+                  overflow: "hidden",
+                  whiteSpace: "nowrap",
+                  display: "inline-block",
+                }}
+              >
+                {t.toggle}
+              </motion.span>
+            </motion.button>
 
             <motion.div style={{ paddingLeft: ctaPx, paddingRight: ctaPx, paddingTop: ctaPy, paddingBottom: ctaPy }} className="rounded-full bg-blue-600 shadow-sm transition-shadow hover:bg-blue-700 hover:shadow-md">
               <Link
@@ -527,7 +537,7 @@ function Hero({ language }: { language: Language }) {
   const t = copy[language];
 
   return (
-    <section className="app-frame px-3 pb-0 pt-4 sm:px-6 sm:pt-6" dir="ltr">
+    <section className="app-frame px-3 pb-0 pt-4 sm:px-6 sm:pt-6">
       <div className="hero-gradient relative pb-16 sm:pb-20">
         <div className="relative px-4 pb-4 pt-8 text-center sm:px-6 sm:pt-16">
           <motion.h1
@@ -586,7 +596,7 @@ export function StatsSection({ language }: { language: Language }) {
   const textAlign = language === "ku" ? "text-right" : "text-left";
 
   return (
-    <section className="app-frame relative px-4 pb-12 sm:px-6 sm:pb-24" style={{ paddingTop: "clamp(60px,10vw,140px)" }} dir="ltr">
+    <section className="app-frame relative px-4 pb-12 sm:px-6 sm:pb-24" style={{ paddingTop: "clamp(60px,10vw,140px)" }}>
       <div className="absolute right-10 top-20 -z-10 h-96 w-96 rounded-full bg-blue-100/40 blur-3xl" />
       <div className="absolute bottom-10 left-10 -z-10 h-80 w-80 rounded-full bg-sky-100/40 blur-3xl" />
 
@@ -655,7 +665,6 @@ const BentoHeroCard = ({ language }: { language: Language }) => {
     viewport={{ once: true }}
     whileHover={{ y: -5, boxShadow: "0 20px 40px -10px rgba(37,99,235,0.15)" }}
     className="group relative w-full overflow-hidden rounded-[2rem] border border-white/50 bg-gradient-to-br from-[#e8f3ff] to-[#cce4ff] shadow-xl"
-    dir="ltr"
   >
     <div className="pointer-events-none absolute inset-0">
       <div className="absolute bottom-[-10%] right-[10%] h-[200px] w-[400px] rounded-full bg-white/60 blur-2xl" />
@@ -712,7 +721,6 @@ const BentoStandOutCard = ({ language }: { language: Language }) => {
     viewport={{ once: true }}
     whileHover={{ y: -5, boxShadow: "0 20px 40px -10px rgba(37,99,235,0.1)" }}
     className={`group relative flex min-h-[300px] w-full flex-col justify-between overflow-hidden rounded-[1.5rem] border border-slate-100 bg-white p-6 ${textAlign} shadow-xl sm:min-h-[380px] sm:rounded-[2rem] sm:p-10`}
-    dir="ltr"
   >
     {/* Subtle gradient wash on the text side */}
     <div className={`pointer-events-none absolute top-0 z-0 h-full w-1/2 ${isRtl ? "right-0 bg-gradient-to-l" : "left-0 bg-gradient-to-r"} from-[#f0f7ff] to-transparent`} />
@@ -762,7 +770,6 @@ const BentoSecurityCard = ({ language }: { language: Language }) => {
     transition={{ delay: 0.1 }}
     whileHover={{ y: -5, boxShadow: "0 20px 40px -10px rgba(37,99,235,0.1)" }}
     className={`group relative flex min-h-[300px] w-full flex-col justify-between overflow-hidden rounded-[1.5rem] border border-slate-100 bg-white p-6 ${textAlign} shadow-xl sm:min-h-[380px] sm:rounded-[2rem] sm:p-10`}
-    dir="ltr"
   >
     {/* Gradient on text side */}
     <div className={`pointer-events-none absolute top-0 z-0 h-full w-2/3 ${isRtl ? "right-0 bg-gradient-to-l" : "left-0 bg-gradient-to-r"} from-[#f0f7ff] to-transparent`} />
@@ -814,7 +821,6 @@ const BentoCreateWinCard = ({ language }: { language: Language }) => {
     viewport={{ once: true }}
     transition={{ delay: 0.2 }}
     className="relative grid min-h-[280px] overflow-hidden rounded-[1.5rem] border border-blue-100 bg-white shadow-xl sm:rounded-[2rem] md:grid-cols-[0.8fr_1.2fr]"
-    dir="ltr"
   >
     <div className={`relative z-10 flex flex-col justify-center p-8 ${textAlign} sm:p-10`} dir={t.dir}>
       <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-600 text-white">
@@ -889,7 +895,7 @@ export function BentoGridSection({ language }: { language: Language }) {
   const t = copy[language];
 
   return (
-    <section id="features" className="relative overflow-hidden bg-[#f4f9ff] px-4 pb-12 pt-12 sm:px-6 sm:pb-24 sm:pt-28 md:pt-40" dir="ltr">
+    <section id="features" className="relative overflow-hidden bg-[#f4f9ff] px-4 pb-12 pt-12 sm:px-6 sm:pb-24 sm:pt-28 md:pt-40">
       <div className="pointer-events-none absolute right-1/4 top-0 h-[600px] w-[800px] -translate-y-1/2 rounded-full bg-blue-100/40 opacity-70 blur-3xl" />
       <div className="pointer-events-none absolute left-0 top-1/4 h-[500px] w-[600px] rounded-full bg-sky-100/40 opacity-60 blur-3xl" />
 
@@ -951,9 +957,10 @@ function Landing() {
   const language = useAppStore((s) => s.language);
   const setLanguage = useAppStore((s) => s.setLanguage);
   const t = copy[language];
+  const isRTL = language === "ku";
 
   return (
-    <div className="page-shell bg-background text-foreground" dir="ltr" lang={t.lang}>
+    <div className="page-shell bg-background text-foreground" dir={t.dir} lang={t.lang}>
       <Header language={language} onToggleLanguage={() => setLanguage(language === "en" ? "ku" : "en")} />
       <main>
         <HeroV2 language={language} />
