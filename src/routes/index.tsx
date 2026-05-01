@@ -755,8 +755,7 @@ const BentoHeroCard = ({ language }: { language: Language }) => {
     initial={{ opacity: 0, y: 20 }}
     whileInView={{ opacity: 1, y: 0 }}
     viewport={{ once: true }}
-    whileHover={{ y: -5, boxShadow: "0 20px 40px -10px rgba(37,99,235,0.15)" }}
-    className="group relative w-full overflow-hidden rounded-[2rem] border border-white/50 bg-gradient-to-br from-[#e8f3ff] to-[#cce4ff] shadow-xl"
+    className="relative w-full overflow-hidden rounded-[2rem] border border-white/50 bg-gradient-to-br from-[#e8f3ff] to-[#cce4ff] shadow-xl"
   >
     <div className="pointer-events-none absolute inset-0">
       <div className="absolute bottom-[-10%] right-[10%] h-[200px] w-[400px] rounded-full bg-white/60 blur-2xl" />
@@ -811,8 +810,7 @@ const BentoStandOutCard = ({ language }: { language: Language }) => {
     initial={{ opacity: 0, y: 20 }}
     whileInView={{ opacity: 1, y: 0 }}
     viewport={{ once: true }}
-    whileHover={{ y: -5, boxShadow: "0 20px 40px -10px rgba(37,99,235,0.1)" }}
-    className={`group relative flex min-h-[300px] w-full flex-col justify-between overflow-hidden rounded-[1.5rem] border border-slate-100 bg-white p-6 ${textAlign} shadow-xl sm:min-h-[380px] sm:rounded-[2rem] sm:p-10`}
+    className={`relative flex min-h-[300px] w-full flex-col justify-between overflow-hidden rounded-[1.5rem] border border-slate-100 bg-white p-6 ${textAlign} shadow-xl sm:min-h-[380px] sm:rounded-[2rem] sm:p-10`}
   >
     {/* Subtle gradient wash on the text side */}
     <div className={`pointer-events-none absolute top-0 z-0 h-full w-1/2 ${isRtl ? "right-0 bg-gradient-to-l" : "left-0 bg-gradient-to-r"} from-[#f0f7ff] to-transparent`} />
@@ -860,8 +858,7 @@ const BentoSecurityCard = ({ language }: { language: Language }) => {
     whileInView={{ opacity: 1, y: 0 }}
     viewport={{ once: true }}
     transition={{ delay: 0.1 }}
-    whileHover={{ y: -5, boxShadow: "0 20px 40px -10px rgba(37,99,235,0.1)" }}
-    className={`group relative flex min-h-[300px] w-full flex-col justify-between overflow-hidden rounded-[1.5rem] border border-slate-100 bg-white p-6 ${textAlign} shadow-xl sm:min-h-[380px] sm:rounded-[2rem] sm:p-10`}
+    className={`relative flex min-h-[300px] w-full flex-col justify-between overflow-hidden rounded-[1.5rem] border border-slate-100 bg-white p-6 ${textAlign} shadow-xl sm:min-h-[380px] sm:rounded-[2rem] sm:p-10`}
   >
     {/* Gradient on text side */}
     <div className={`pointer-events-none absolute top-0 z-0 h-full w-2/3 ${isRtl ? "right-0 bg-gradient-to-l" : "left-0 bg-gradient-to-r"} from-[#f0f7ff] to-transparent`} />
@@ -876,7 +873,7 @@ const BentoSecurityCard = ({ language }: { language: Language }) => {
       </p>
     </div>
     <div className="relative z-10 mt-auto pt-8" dir={t.dir}>
-      <div className="inline-flex items-center gap-2 rounded-xl border border-slate-100 bg-white px-4 py-2 text-xs font-bold text-blue-600 shadow-sm transition-shadow group-hover:shadow-md">
+      <div className="inline-flex items-center gap-2 rounded-xl border border-slate-100 bg-white px-4 py-2 text-xs font-bold text-blue-600 shadow-sm">
         <LockKeyhole className="h-4 w-4 text-blue-500" />
         {t.securityBadge}
       </div>
