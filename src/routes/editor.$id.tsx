@@ -370,7 +370,7 @@ function ResumeEditor() {
         <div className="max-w-[1600px] mx-auto px-4 sm:px-6">
           <div className="flex h-16 items-center justify-between">
             <Link to="/" className="flex items-center gap-2.5 cursor-pointer group">
-              <img src="/logo/MemoryCV Logo Icon Only.png" alt="MemoryCV" className="w-8 h-8 rounded-xl object-contain group-hover:scale-105 transition-transform duration-300" />
+              <img src="/logo/MemoryCV Logo Icon Only.png" alt="MemoryCV" className="w-12 h-12 rounded-xl object-contain group-hover:scale-105 transition-transform duration-300" />
               <span className="text-[1.05rem] font-bold tracking-tight text-slate-900 group-hover:text-blue-950 transition-colors">
                 MemoryCV
               </span>
