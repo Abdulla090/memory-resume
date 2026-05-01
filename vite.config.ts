@@ -8,9 +8,15 @@ import { nitro } from "nitro/vite";
 
 export default defineConfig(async ({ command, mode }) => {
   const envDefine: Record<string, string> = {};
+  // Load VITE_ prefixed vars for client
   const loadedEnv = loadEnv(mode, process.cwd(), "VITE_");
   for (const [key, value] of Object.entries(loadedEnv)) {
     envDefine[`import.meta.env.${key}`] = JSON.stringify(value);
+  }
+  // Expose server-side env vars via process.env at build time (fallback for local dev)
+  const allEnv = loadEnv(mode, process.cwd(), "");
+  if (allEnv.GEMINI_API_KEY) {
+    envDefine["process.env.GEMINI_API_KEY"] = JSON.stringify(allEnv.GEMINI_API_KEY);
   }
 
   return {
