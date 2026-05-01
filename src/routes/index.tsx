@@ -690,13 +690,13 @@ export function StatsSection({ language }: { language: Language }) {
       <div className="absolute right-10 top-20 -z-10 h-96 w-96 rounded-full bg-blue-100/40 blur-3xl" />
       <div className="absolute bottom-10 left-10 -z-10 h-80 w-80 rounded-full bg-sky-100/40 blur-3xl" />
 
-      <div className="mb-10 flex flex-col items-center justify-between gap-6 sm:mb-16 sm:items-start md:flex-row md:items-center">
+      <div className="mb-10 flex flex-col items-start justify-between gap-6 sm:mb-16 md:flex-row md:items-center">
         <motion.h2
           initial={{ opacity: 0, x: 20 }}
           whileInView={{ opacity: 1, x: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.55 }}
-          className={`text-center text-[clamp(1.75rem,6vw,3.75rem)] font-extrabold ${language === "ku" ? "leading-[1.4]" : "leading-[1.18]"} tracking-tight text-slate-900 sm:${textAlign}`}
+          className={`text-[clamp(1.75rem,6vw,3.75rem)] font-extrabold ${language === "ku" ? "leading-[1.4]" : "leading-[1.18]"} tracking-tight text-slate-900 ${textAlign}`}
           dir={t.dir}
         >
           {t.statsTitleA}<br />
