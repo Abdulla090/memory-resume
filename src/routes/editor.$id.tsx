@@ -13,7 +13,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { exportPreviewAsPDF } from "@/lib/pdf-screenshot";
 import { exportResumePDF } from "@/components/resume/pdf-templates";
 import { exportResumeDocx } from "@/components/resume/docx-templates";
-import { improveBullet, tailorToJob, chatEditResume, fixResumeErrors } from "@/lib/ai.functions";
+import { improveBullet, tailorToJob, chatEditResume, fixResumeErrors, generateCoverLetter } from "@/lib/ai.functions";
 import { useAppStore } from "@/lib/store";
 import type { ExperienceItem, ResumeData, TemplateId } from "@/lib/types";
 import { ResumePreview } from "@/components/resume/templates";
@@ -155,6 +155,11 @@ function ResumeEditor() {
   const tailorFn = useServerFn(tailorToJob);
   const chatEditFn = useServerFn(chatEditResume);
   const fixErrorsFn = useServerFn(fixResumeErrors);
+  const generateCoverLetterFn = useServerFn(generateCoverLetter);
+
+  const [coverLetterModalOpen, setCoverLetterModalOpen] = useState(false);
+  const [coverLetterContent, setCoverLetterContent] = useState("");
+  const [coverLetterLoading, setCoverLetterLoading] = useState(false);
 
   const [templateModalOpen, setTemplateModalOpen] = useState(false);
   const [tailorOpen, setTailorOpen] = useState(false);
@@ -352,6 +357,22 @@ function ResumeEditor() {
     }
   };
 
+  const handleGenerateCoverLetter = async () => {
+    if (coverLetterLoading) return;
+    setCoverLetterModalOpen(true);
+    setCoverLetterLoading(true);
+    try {
+      const { coverLetter } = await generateCoverLetterFn({
+        data: { apiKey, resume: data, language: isKu ? "ku" : "en" }
+      });
+      setCoverLetterContent(coverLetter);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : (isKu ? "دروستکردنی نامەی داواکاری سەرکەوتوو نەبوو." : "Failed to generate cover letter."));
+    } finally {
+      setCoverLetterLoading(false);
+    }
+  };
+
   const handleRevert = (snapshotId: string) => {
     const entry = history.find(h => h.id === snapshotId);
     if (!entry) return;
@@ -395,6 +416,11 @@ function ResumeEditor() {
               <button onClick={handleFixErrors} disabled={chatLoading} className="px-4 py-2 sm:py-2.5 text-sm font-bold text-amber-700 hover:text-amber-950 rounded-xl hover:bg-amber-50 transition-all flex items-center gap-2 border border-amber-200 bg-white shadow-sm hover:shadow-md active:scale-95 disabled:opacity-50 disabled:active:scale-100">
                 <Wand2 className="h-4 w-4" />
                 <span className="hidden sm:inline">{isKu ? "چاککردنی هەڵەکان" : "Fix Errors"}</span>
+              </button>
+
+              <button onClick={handleGenerateCoverLetter} className="px-4 py-2 sm:py-2.5 text-sm font-bold text-indigo-700 hover:text-indigo-950 rounded-xl hover:bg-indigo-50 transition-all flex items-center gap-2 border border-indigo-200 bg-white shadow-sm hover:shadow-md active:scale-95">
+                <FileText className="h-4 w-4" />
+                <span className="hidden sm:inline">{isKu ? "نامەی داواکاری" : "Cover Letter"}</span>
               </button>
             </div>
           </div>
@@ -651,6 +677,40 @@ function ResumeEditor() {
                   {tailoring ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
                   {isKu ? "گونجاندن بە زیرەکی دەستکرد" : "Tailor with AI"}
                 </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+
+        {coverLetterModalOpen && (
+          <motion.div 
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[200] flex items-center justify-center p-4"
+          >
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="bg-white rounded-[2rem] w-full max-w-2xl overflow-hidden shadow-2xl flex flex-col"
+            >
+              <div className="p-5 border-b border-slate-100 flex items-center justify-between shrink-0 bg-white/50 backdrop-blur-md">
+                <h3 className="text-xl font-bold text-slate-900 flex items-center gap-2">
+                  <FileText className="w-5 h-5 text-indigo-600" />
+                  {isKu ? "نامەی داواکاری (Cover Letter)" : "Cover Letter"}
+                </h3>
+                <button onClick={() => setCoverLetterModalOpen(false)} className="p-2 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-full transition-colors">
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+              <div className="p-6 bg-slate-50/50 max-h-[60vh] overflow-y-auto">
+                {coverLetterLoading ? (
+                  <div className="flex flex-col items-center justify-center py-10 gap-3">
+                    <Loader2 className="w-8 h-8 animate-spin text-indigo-600" />
+                    <p className="text-sm font-medium text-slate-500">{isKu ? "لە دروستکردندایە بە زیرەکی دەستکرد..." : "Generating with AI..."}</p>
+                  </div>
+                ) : (
+                  <div className="whitespace-pre-wrap text-sm text-slate-700 leading-relaxed font-medium bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                    {coverLetterContent || (isKu ? "هیچ نەدۆزرایەوە." : "Nothing generated yet.")}
+                  </div>
+                )}
               </div>
             </motion.div>
           </motion.div>

@@ -814,3 +814,54 @@ Use the save_resume tool. The 'resume' parameter should contain the ACTUALLY FIX
     const result = extractToolArgs<{ resume: ResumeData; reply: string }>(json);
     return { resume: optimizeResumeForOnePage(result.resume), reply: result.reply };
   });
+
+export const generateCoverLetter = createServerFn({ method: "POST" })
+  .validator((d: { apiKey?: string; resume: ResumeData; language: "en" | "ku" }) => d)
+  .handler(async ({ data }): Promise<{ coverLetter: string }> => {
+    const json = await callGateway({
+      apiKey: data.apiKey,
+      model: "gemini-3.1-flash-lite-preview",
+      messages: [
+        {
+          role: "system",
+          content: `You are an expert Career Coach and Talent Acquisition Specialist. 
+Your goal is to write a highly professional, engaging, and persuasive Cover Letter based on the provided Resume Data.
+The Cover Letter must be written in ${data.language === "ku" ? "fluent Kurdish (Sorani)" : "English"}.
+
+# Guidelines
+1. Do not repeat the resume. Tell a compelling story about the candidate's core strengths and how they align with the industry.
+2. Structure: 
+   - A strong opening that states the candidate's target role.
+   - 1 or 2 body paragraphs highlighting major achievements or specific skills.
+   - A confident closing with a call to action.
+3. Keep it under one page (approx 300-400 words).
+4. Use standard cover letter format with placeholders like [Date], [Hiring Manager Name], [Company Name] where appropriate.
+5. If the language is Kurdish, ensure the tone is professional, respectful, and uses proper Sorani terminology for business/HR.`,
+        },
+        {
+          role: "user",
+          content: `Here is the candidate's Resume Data:\n${JSON.stringify(data.resume, null, 2)}\n\nPlease generate the Cover Letter.`,
+        },
+      ],
+      tools: [
+        {
+          type: "function",
+          function: {
+            name: "return_cover_letter",
+            description: "Return the generated cover letter.",
+            parameters: {
+              type: "object",
+              properties: {
+                coverLetter: { type: "string", description: "The generated cover letter text in markdown format." }
+              },
+              required: ["coverLetter"]
+            },
+          },
+        },
+      ],
+      toolChoice: { type: "function", function: { name: "return_cover_letter" } },
+    });
+
+    const result = extractToolArgs<{ coverLetter: string }>(json);
+    return { coverLetter: result.coverLetter };
+  });
