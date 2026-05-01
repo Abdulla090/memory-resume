@@ -166,46 +166,7 @@ export function HeroV2({ language }: { language: Language }) {
                 >
                   <path d="M 2 8 C 30 1, 70 1, 98 8" />
                 </svg>
-                {/* REALISTIC MINI CV */}
-                <div className={`absolute top-1/2 -translate-y-1/2 ${language === "ku" ? "-left-16 sm:-left-20" : "-right-16 sm:-right-20"} hidden sm:flex h-16 w-12 sm:h-20 sm:w-14 flex-col rounded-[6px] sm:rounded-[8px] bg-white shadow-[0_12px_40px_rgba(0,0,0,0.18)] border border-slate-100 rotate-6 transition-transform duration-500 hover:rotate-12 hover:scale-110 overflow-hidden ring-1 ring-slate-900/5`}>
-                  {/* CV Header */}
-                  <div className="h-3 sm:h-4 w-full bg-blue-600 shrink-0 relative overflow-hidden">
-                    <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-cyan-500 opacity-90" />
-                  </div>
-                  {/* CV Content */}
-                  <div className="flex-1 p-1.5 sm:p-2 flex flex-col gap-1.5 sm:gap-2 bg-slate-50">
-                    {/* Top Row: Avatar + Title */}
-                    <div className="flex items-center gap-1.5 sm:gap-2">
-                      <div className="h-3 w-3 sm:h-4 sm:w-4 rounded-full bg-slate-300 shrink-0 shadow-sm border border-white" />
-                      <div className="flex flex-col gap-0.5 sm:gap-[3px] w-full">
-                        <div className="h-[3px] sm:h-[4px] w-full rounded-full bg-slate-400" />
-                        <div className="h-[2px] sm:h-[3px] w-2/3 rounded-full bg-blue-400/60" />
-                      </div>
-                    </div>
-                    {/* Columns */}
-                    <div className="flex gap-1.5 sm:gap-2 h-full">
-                      {/* Left col */}
-                      <div className="flex flex-col gap-[3px] sm:gap-1 w-1/3">
-                        <div className="h-[2px] sm:h-[3px] w-full rounded-full bg-slate-300" />
-                        <div className="h-[2px] sm:h-[3px] w-full rounded-full bg-slate-300" />
-                        <div className="h-[2px] sm:h-[3px] w-4/5 rounded-full bg-slate-300" />
-                        <div className="h-[2px] sm:h-[3px] w-[90%] rounded-full bg-slate-300 mt-0.5 sm:mt-1" />
-                        <div className="h-[2px] sm:h-[3px] w-[70%] rounded-full bg-slate-300" />
-                      </div>
-                      {/* Right col */}
-                      <div className="flex flex-col gap-[3px] sm:gap-1 w-2/3">
-                        <div className="h-[3px] sm:h-[4px] w-full rounded-full bg-slate-400/80 mb-[1px]" />
-                        <div className="h-[2px] sm:h-[3px] w-full rounded-full bg-slate-300" />
-                        <div className="h-[2px] sm:h-[3px] w-[90%] rounded-full bg-slate-300" />
-                        <div className="h-[2px] sm:h-[3px] w-full rounded-full bg-slate-300" />
-                        
-                        <div className="h-[3px] sm:h-[4px] w-full rounded-full bg-slate-400/80 mt-[2px] sm:mt-[3px] mb-[1px]" />
-                        <div className="h-[2px] sm:h-[3px] w-[95%] rounded-full bg-slate-300" />
-                        <div className="h-[2px] sm:h-[3px] w-full rounded-full bg-slate-300" />
-                      </div>
-                    </div>
-                  </div>
-                </div>
+
               </span>
             </motion.h1>
 
