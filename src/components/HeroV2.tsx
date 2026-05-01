@@ -154,22 +154,27 @@ export function HeroV2({ language }: { language: Language }) {
               <br />
               <span className="relative inline-block whitespace-nowrap pr-2">
                 <span className="relative z-10 text-white drop-shadow-sm">{t.heroTitleAccent}</span>
-                {/* Hand-drawn underline SVG */}
+                {/* Hand-drawn underline SVG - VIBRANT RED */}
                 <svg
-                  className="absolute -bottom-2 left-0 w-full h-[0.3em] text-cyan-300 drop-shadow-md pointer-events-none"
+                  className="absolute -bottom-2 left-0 w-full h-[0.35em] text-[#ff3333] drop-shadow-[0_4px_12px_rgba(255,51,51,0.6)] pointer-events-none"
                   viewBox="0 0 100 10"
                   preserveAspectRatio="none"
                   fill="none"
                   stroke="currentColor"
-                  strokeWidth="3.5"
+                  strokeWidth="4"
                   strokeLinecap="round"
                 >
                   <path d="M 2 8 C 30 1, 70 1, 98 8" />
                 </svg>
-                {/* Sleek CV icon SVG */}
-                <div className={`absolute top-1/2 -translate-y-1/2 ${language === "ku" ? "-left-11" : "-right-11"} hidden sm:flex h-10 w-10 items-center justify-center rounded-[12px] bg-white/20 backdrop-blur-md shadow-xl border border-white/30 rotate-6`}>
-                  <svg className="w-5 h-5 text-cyan-200 drop-shadow-md" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h2m-2 4h4" />
+                {/* SUPER SLEEK CV ICON */}
+                <div className={`absolute top-1/2 -translate-y-1/2 ${language === "ku" ? "-left-14 sm:-left-20" : "-right-14 sm:-right-20"} hidden sm:flex h-12 w-12 sm:h-16 sm:w-16 items-center justify-center rounded-[16px] sm:rounded-[20px] bg-gradient-to-br from-white/40 to-white/10 backdrop-blur-xl shadow-[0_8px_32px_rgba(0,0,0,0.15)] border border-white/50 rotate-6 transition-transform duration-500 hover:rotate-12 hover:scale-110`}>
+                  <svg className="w-6 h-6 sm:w-8 sm:h-8 text-white drop-shadow-md" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                    {/* Document Base */}
+                    <rect x="4" y="2" width="16" height="20" rx="3" stroke="currentColor" fill="rgba(255,255,255,0.15)" />
+                    {/* User Profile */}
+                    <circle cx="12" cy="8" r="3" stroke="currentColor" fill="rgba(255,255,255,0.25)" />
+                    {/* Text Lines */}
+                    <path d="M8 15h8M8 18h5" strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" />
                   </svg>
                 </div>
               </span>
