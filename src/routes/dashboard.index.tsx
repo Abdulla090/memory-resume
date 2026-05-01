@@ -27,7 +27,7 @@ function DashboardIndex() {
           <div className={`absolute bottom-[-30%] w-[300px] h-[200px] bg-blue-200/20 blur-3xl rounded-full pointer-events-none ${isKu ? 'left-[15%]' : 'right-[15%]'}`} />
           
           {/* Two Sleek Resume Mockups */}
-          <div className={`absolute top-1/2 -translate-y-1/2 w-[220px] sm:w-[280px] h-[260px] sm:h-[320px] pointer-events-none select-none hidden sm:block ${isKu ? 'left-6 lg:left-12' : 'right-6 lg:right-12'}`}>
+          <div dir="ltr" className={`absolute top-1/2 -translate-y-1/2 w-[220px] sm:w-[280px] h-[260px] sm:h-[320px] pointer-events-none select-none hidden sm:block ${isKu ? 'left-6 lg:left-12' : 'right-6 lg:right-12'}`}>
             
             {/* Back Resume — rotated right, shifted up */}
             <div 
