@@ -2,7 +2,7 @@ import { createFileRoute, Link, useNavigate } from '@tanstack/react-router';
 import { Plus, Upload, BrainCircuit, FileText, CheckCircle2, LayoutTemplate, PenTool, Briefcase, BarChart2, Sun, ArrowRight, MoreVertical, Settings, Wand2, Clock } from 'lucide-react';
 import { LeftCardSVG, CenterCardSVG } from './index';
 import { useAppStore } from '@/lib/store';
-import { motion } from 'framer-motion';
+import { motion, Variants } from 'framer-motion';
 
 export const Route = createFileRoute('/dashboard/')({
   component: DashboardIndex,
@@ -15,7 +15,7 @@ function DashboardIndex() {
   const resumes = useAppStore((state) => state.resumes);
   const recentCVs = resumes.slice(0, 3);
 
-  const containerVariants = {
+  const containerVariants: Variants = {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
@@ -25,7 +25,7 @@ function DashboardIndex() {
     },
   };
 
-  const itemVariants = {
+  const itemVariants: Variants = {
     hidden: { opacity: 0, y: 20 },
     visible: { 
       opacity: 1, 
@@ -144,7 +144,7 @@ function DashboardIndex() {
           </div>
         </div>
 
-      </div>
+      </motion.div>
 
       {/* Middle Row */}
       <motion.div variants={itemVariants} className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
