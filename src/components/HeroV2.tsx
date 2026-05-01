@@ -154,28 +154,49 @@ export function HeroV2({ language }: { language: Language }) {
               <br />
               <span className="relative inline-block whitespace-nowrap pr-2">
                 <span className="relative z-10 text-white drop-shadow-sm">{t.heroTitleAccent}</span>
-                {/* Hand-drawn underline SVG - VIBRANT RED */}
+                {/* Hand-drawn underline SVG - VIBRANT RED, NO GLOW */}
                 <svg
-                  className="absolute -bottom-2 left-0 w-full h-[0.35em] text-[#ff3333] drop-shadow-[0_4px_12px_rgba(255,51,51,0.6)] pointer-events-none"
+                  className="absolute -bottom-2 left-0 w-full h-[0.35em] text-[#ff3333] pointer-events-none"
                   viewBox="0 0 100 10"
                   preserveAspectRatio="none"
                   fill="none"
                   stroke="currentColor"
-                  strokeWidth="4"
+                  strokeWidth="2.5"
                   strokeLinecap="round"
                 >
                   <path d="M 2 8 C 30 1, 70 1, 98 8" />
                 </svg>
-                {/* SUPER SLEEK CV ICON */}
-                <div className={`absolute top-1/2 -translate-y-1/2 ${language === "ku" ? "-left-14 sm:-left-20" : "-right-14 sm:-right-20"} hidden sm:flex h-12 w-12 sm:h-16 sm:w-16 items-center justify-center rounded-[16px] sm:rounded-[20px] bg-gradient-to-br from-white/40 to-white/10 backdrop-blur-xl shadow-[0_8px_32px_rgba(0,0,0,0.15)] border border-white/50 rotate-6 transition-transform duration-500 hover:rotate-12 hover:scale-110`}>
-                  <svg className="w-6 h-6 sm:w-8 sm:h-8 text-white drop-shadow-md" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                    {/* Document Base */}
-                    <rect x="4" y="2" width="16" height="20" rx="3" stroke="currentColor" fill="rgba(255,255,255,0.15)" />
-                    {/* User Profile */}
-                    <circle cx="12" cy="8" r="3" stroke="currentColor" fill="rgba(255,255,255,0.25)" />
-                    {/* Text Lines */}
-                    <path d="M8 15h8M8 18h5" strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" />
-                  </svg>
+                {/* REALISTIC MINI CV */}
+                <div className={`absolute top-1/2 -translate-y-1/2 ${language === "ku" ? "-left-16 sm:-left-20" : "-right-16 sm:-right-20"} hidden sm:flex h-16 w-12 sm:h-20 sm:w-14 flex-col rounded-[6px] sm:rounded-[8px] bg-white shadow-[0_10px_40px_rgba(0,0,0,0.2)] border border-slate-200 rotate-6 transition-transform duration-500 hover:rotate-12 hover:scale-110 overflow-hidden`}>
+                  {/* CV Header */}
+                  <div className="h-3 sm:h-4 w-full bg-blue-600 shrink-0" />
+                  {/* CV Content */}
+                  <div className="flex-1 p-1.5 sm:p-2 flex flex-col gap-1.5 sm:gap-2">
+                    {/* Top Row: Avatar + Title */}
+                    <div className="flex items-center gap-1.5 sm:gap-2">
+                      <div className="h-3 w-3 sm:h-4 sm:w-4 rounded-full bg-slate-200 shrink-0" />
+                      <div className="flex flex-col gap-0.5 sm:gap-1 w-full">
+                        <div className="h-1 w-full rounded-full bg-slate-300" />
+                        <div className="h-1 w-2/3 rounded-full bg-slate-200" />
+                      </div>
+                    </div>
+                    {/* Columns */}
+                    <div className="flex gap-1.5 sm:gap-2 h-full">
+                      {/* Left col */}
+                      <div className="flex flex-col gap-0.5 sm:gap-1 w-1/3">
+                        <div className="h-0.5 sm:h-1 w-full rounded-full bg-slate-200" />
+                        <div className="h-0.5 sm:h-1 w-full rounded-full bg-slate-200" />
+                        <div className="h-0.5 sm:h-1 w-4/5 rounded-full bg-slate-200" />
+                      </div>
+                      {/* Right col */}
+                      <div className="flex flex-col gap-0.5 sm:gap-1 w-2/3">
+                        <div className="h-1 w-full rounded-full bg-slate-200" />
+                        <div className="h-1 w-full rounded-full bg-slate-200" />
+                        <div className="h-1 w-[90%] rounded-full bg-slate-200" />
+                        <div className="h-1 w-full rounded-full bg-slate-200" />
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </span>
             </motion.h1>
