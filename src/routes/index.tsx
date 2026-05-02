@@ -357,13 +357,13 @@ export function Header({ language, onToggleLanguage }: { language: Language; onT
 
       {/* ── MOBILE solid header (md:hidden) ── */}
       <header
-        className="fixed left-0 right-0 top-0 z-50 items-center justify-between px-4 hidden"
-        style={{ height: "56px", backgroundColor: "rgba(255,255,255,0.97)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)", borderBottom: "1px solid rgba(226,232,240,0.8)" }}
+        className="fixed left-0 right-0 top-0 z-50 flex items-center justify-between px-4 md:hidden"
+        style={{ height: "60px", backgroundColor: "rgba(255,255,255,0.97)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)", borderBottom: "1px solid rgba(226,232,240,0.8)" }}
         dir="ltr"
       >
         <Link to="/" className="flex shrink-0 items-center gap-2" id="nav-logo-mobile">
-          <img src="/logo/MemoryCV Logo Icon Only.png" alt="MemoryCV" className="h-16 w-16 rounded-lg object-contain" />
-          <span className="text-xl font-bold tracking-tight text-slate-900">MemoryCV</span>
+          <img src="/logo/MemoryCV Logo Icon Only.png" alt="MemoryCV" className="h-12 w-12 rounded-lg object-contain" />
+          <span className="text-lg font-bold tracking-tight text-slate-900">MemoryCV</span>
         </Link>
         <button
           className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 transition-colors hover:bg-slate-50"
@@ -455,8 +455,8 @@ export function Header({ language, onToggleLanguage }: { language: Language; onT
         )}
       </AnimatePresence>
 
-      {/* Spacer */}
-      <div className="h-14 md:h-16 w-full flex-none" />
+      {/* Spacer - taller to match restored mobile header */}
+      <div className="h-[60px] md:h-16 w-full flex-none" />
     </>
   );
 }
