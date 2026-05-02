@@ -31,22 +31,22 @@ function DashboardLayout() {
       {/* Mobile overlay */}
       {isSidebarOpen && (
         <div
-          className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm md:hidden"
+          className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm lg:hidden"
           onClick={() => setIsSidebarOpen(false)}
         />
       )}
 
       {/* Sidebar — slide-over on mobile, collapsed icon-bar on desktop */}
       <aside className={`
-        fixed md:relative z-50 md:z-auto
+        fixed lg:relative z-50 lg:z-auto inset-y-0 ${isKu ? 'right-0' : 'left-0'}
         bg-white border-x border-slate-100 flex flex-col justify-between py-6 shrink-0 h-full overflow-y-auto
         transition-all duration-300 ease-in-out
         ${isSidebarOpen
           ? 'w-[280px] translate-x-0'
-          : `${isKu ? 'translate-x-full md:translate-x-0' : '-translate-x-full md:translate-x-0'} md:w-[80px] w-[280px]`}
+          : `${isKu ? 'translate-x-full lg:translate-x-0' : '-translate-x-full lg:translate-x-0'} lg:w-[80px] w-[280px]`}
       `}>
         <div>
-          <div className={`flex items-center px-4 mb-10 ${isSidebarOpen ? 'gap-3' : 'md:justify-center'}`}>
+          <div className={`flex items-center px-4 mb-10 ${isSidebarOpen ? 'gap-3' : 'lg:justify-center'}`}>
             <button
               onClick={() => setIsSidebarOpen(!isSidebarOpen)}
               className="w-10 h-10 rounded-xl bg-blue-500 flex items-center justify-center shadow-lg shadow-blue-500/30 text-white shrink-0 cursor-pointer hover:bg-blue-600 transition-colors"
@@ -67,12 +67,12 @@ function DashboardLayout() {
                   title={item.name}
                   onClick={() => setIsSidebarOpen(false)}
                   className={`flex items-center gap-3 py-3.5 rounded-2xl font-bold transition-all
-                    ${isSidebarOpen ? 'px-4' : 'md:justify-center md:px-0 px-4'}
+                    ${isSidebarOpen ? 'px-4' : 'lg:justify-center lg:px-0 px-4'}
                     ${isActive ? 'bg-[#f4f9ff] text-blue-600' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900'}`}
                 >
                   <item.icon className="w-5 h-5 shrink-0" />
                   {isSidebarOpen && <span className="truncate">{item.name}</span>}
-                  {!isSidebarOpen && <span className="truncate md:hidden">{item.name}</span>}
+                  {!isSidebarOpen && <span className="truncate lg:hidden">{item.name}</span>}
                 </Link>
               );
             })}
@@ -111,7 +111,7 @@ function DashboardLayout() {
       <main className="flex-1 h-full overflow-y-auto p-4 sm:p-6 lg:p-10 relative min-w-0">
         {/* Mobile hamburger */}
         <button
-          className="md:hidden mb-4 w-10 h-10 rounded-xl bg-blue-500 flex items-center justify-center shadow-lg shadow-blue-500/30 text-white cursor-pointer hover:bg-blue-600 transition-colors"
+          className="lg:hidden mb-4 w-10 h-10 rounded-xl bg-white border border-slate-200 flex items-center justify-center shadow-sm text-slate-700 cursor-pointer hover:bg-slate-50 transition-colors"
           onClick={() => setIsSidebarOpen(true)}
         >
           <Menu className="w-5 h-5" />

@@ -4183,7 +4183,6 @@ export {
   executeRewriteInput as E,
   defaultSerovalPlugins as F,
   makeSerovalPlugin as G,
-  redirect as H,
   RouterCore as R,
   isDangerousProtocol as a,
   BaseRoute as b,

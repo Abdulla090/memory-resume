@@ -120,7 +120,12 @@ function ChatOnboarding() {
       }
     } catch (err) {
       setIsThinking(false);
-      toast.error(err instanceof Error ? err.message : (isKu ? "شیکردنەوەکە سەرکەوتوو نەبوو. دووبارە هەوڵ بدەرەوە." : "Failed to analyze. Try again."));
+      const errorMsg = err instanceof Error ? err.message : String(err);
+      if (errorMsg.includes("500") || errorMsg.includes("HTTPError") || errorMsg.includes("MISSING_API_KEY")) {
+        toast.error(isKu ? "تکایە کلیلی API لە Vercel دابنێ" : "Please configure your GEMINI_API_KEY in Vercel settings.");
+      } else {
+        toast.error(errorMsg || (isKu ? "شیکردنەوەکە سەرکەوتوو نەبوو. دووبارە هەوڵ بدەرەوە." : "Failed to analyze. Try again."));
+      }
       setStage("intake");
     }
   };
@@ -167,10 +172,16 @@ function ChatOnboarding() {
       setIsThinking(false);
       addMsg({ from: "ai", content: isKu ? `هەمووی تەواو بوو! پرۆفایلەکەت ئامادەیە، ${patched.name || "بەڕێز"}. چ ڕۆڵێک دەکەیتە ئامانج؟` : `All done! Your profile is ready, ${patched.name || "there"}. What role are you targeting?` });
       setStage("builder");
-    } catch {
+    } catch (err) {
       setIsThinking(false);
-      addMsg({ from: "ai", content: isKu ? "پرۆفایلەکە نوێکرایەوە! چ ڕۆڵێک دەکەیتە ئامانج؟" : "Profile updated! What role are you targeting?" });
-      setStage("builder");
+      const errorMsg = err instanceof Error ? err.message : String(err);
+      if (errorMsg.includes("500") || errorMsg.includes("HTTPError") || errorMsg.includes("MISSING_API_KEY")) {
+        toast.error(isKu ? "تکایە کلیلی API لە Vercel دابنێ" : "Please configure your GEMINI_API_KEY in Vercel settings.");
+        setStage("questions");
+      } else {
+        addMsg({ from: "ai", content: isKu ? "پرۆفایلەکە نوێکرایەوە! چ ڕۆڵێک دەکەیتە ئامانج؟" : "Profile updated! What role are you targeting?" });
+        setStage("builder");
+      }
     }
   };
 
@@ -198,7 +209,12 @@ function ChatOnboarding() {
       setLoaderResumeId(saved.id);
     } catch (e) {
       setIsThinking(false);
-      toast.error(e instanceof Error ? e.message : (isKu ? "دروستکردنەکە سەرکەوتوو نەبوو." : "Generation failed."));
+      const errorMsg = e instanceof Error ? e.message : String(e);
+      if (errorMsg.includes("500") || errorMsg.includes("HTTPError") || errorMsg.includes("MISSING_API_KEY")) {
+        toast.error(isKu ? "تکایە کلیلی API لە Vercel دابنێ" : "Please configure your GEMINI_API_KEY in Vercel settings.");
+      } else {
+        toast.error(errorMsg || (isKu ? "دروستکردنەکە سەرکەوتوو نەبوو." : "Generation failed."));
+      }
       setStage("builder");
     }
   };

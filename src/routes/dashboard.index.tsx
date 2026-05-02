@@ -247,7 +247,7 @@ function DashboardIndex() {
             <Link to="/templates" className="text-blue-600 text-xs font-bold flex items-center gap-1 hover:underline">{isKu ? "هەمووی ببینە" : "Browse all"} <ArrowRight className={`w-3 h-3 ${isKu ? 'rotate-180' : ''}`} /></Link>
           </div>
           
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
              {['Modern', 'Professional', 'Creative'].map((name) => (
                 <div key={name} className="flex flex-col items-center gap-3">
                    <div className="w-full aspect-[1/1.414] bg-slate-100 rounded-xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-md transition-all cursor-pointer group">
@@ -362,9 +362,9 @@ function DashboardIndex() {
             <Link to="/dashboard/analytics" className="text-blue-600 text-xs font-bold flex items-center gap-1 hover:underline">{isKu ? "هەمووی ببینە" : "View all"} <ArrowRight className={`w-3 h-3 ${isKu ? 'rotate-180' : ''}`} /></Link>
           </div>
           
-          <div className="flex gap-4 h-[140px]">
+          <div className="flex flex-col sm:flex-row gap-4 h-auto sm:h-[140px]">
              {/* Views Chart */}
-             <div className="flex-1 border border-slate-100 rounded-2xl p-4 flex flex-col justify-between">
+             <div className="flex-1 border border-slate-100 rounded-2xl p-4 flex flex-col justify-between min-h-[140px] sm:min-h-0">
                 <div className="text-[10px] font-bold text-slate-500">{isKu ? "بینینی پرۆفایل" : "Profile Views"}</div>
                 <div className="flex items-end gap-2 mt-1">
                   <div className="text-3xl font-black text-slate-900 leading-none">247</div>
@@ -384,7 +384,7 @@ function DashboardIndex() {
              </div>
              
              {/* Match Score */}
-             <div className="w-2/5 border border-slate-100 rounded-2xl p-4 flex flex-col items-center justify-center text-center">
+             <div className="w-full sm:w-2/5 border border-slate-100 rounded-2xl p-4 flex flex-col items-center justify-center text-center min-h-[140px] sm:min-h-0">
                 <div className="text-[10px] font-bold text-slate-500 mb-3">{isKu ? "ڕێژەی گونجان" : "Match Score"}</div>
                 <div className="relative w-16 h-16 flex items-center justify-center">
                    <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">

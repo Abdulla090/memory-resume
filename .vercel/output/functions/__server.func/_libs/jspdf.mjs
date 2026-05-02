@@ -1,8 +1,8 @@
-import require$$2 from "fs";
-import require$$3 from "path";
 import { c as commonjsGlobal, g as getDefaultExportFromCjs } from "./react.mjs";
 import { r as requireNode } from "./fflate.mjs";
 import { r as require$$1 } from "./fast-png.mjs";
+import fs from "fs";
+import path from "path";
 import { r as require$$4 } from "./html2canvas.mjs";
 import { r as requirePurify_cjs } from "./dompurify.mjs";
 import { r as requireLib } from "./canvg.mjs";
@@ -1352,7 +1352,7 @@ function requireJspdf_node_min() {
         return { x: e3.x, y: e3.y, width: e3.width, height: e3.height, matrix: e3.matrix };
       }, v2.save = function(t3, e3) {
         t3 = t3 || "generated.pdf", (e3 = e3 || {}).returnPromise = e3.returnPromise || false;
-        var r2 = require$$2, n2 = Buffer.from(lt2(Se()));
+        var r2 = fs, n2 = Buffer.from(lt2(Se()));
         if (false !== e3.returnPromise) return new Promise(function(e4, i3) {
           r2.writeFile(t3, n2, function(t4) {
             t4 ? i3(t4) : e4();
@@ -5760,7 +5760,7 @@ function requireJspdf_node_min() {
     (function(t2) {
       function e2(t3, e3, r2) {
         e3 = false !== e3;
-        var n2 = void 0, i2 = require$$2, a2 = require$$3;
+        var n2 = void 0, i2 = fs, a2 = path;
         if (!process.permission && !this.allowFsRead) throw new Error("Trying to read a file from local file system. To enable this feature either run node with the --permission and --allow-fs-read flags or set the jsPDF.allowFsRead property.");
         try {
           t3 = i2.realpathSync(a2.resolve(t3));

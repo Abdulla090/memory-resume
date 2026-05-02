@@ -15,10 +15,8 @@ export default defineConfig(async ({ command, mode }) => {
   }
   // Expose server-side env vars via process.env at build time (fallback for local dev)
   const allEnv = loadEnv(mode, process.cwd(), "");
-  if (allEnv.GEMINI_API_KEY) {
-    envDefine["process.env.GEMINI_API_KEY"] = JSON.stringify(allEnv.GEMINI_API_KEY);
-  }
-
+  // REMOVED: Do not hardcode the GEMINI_API_KEY at build time to prevent accidental client exposure.
+  // Instead, rely on Node.js process.env at runtime on the server.
   return {
     define: envDefine,
     resolve: {
@@ -43,6 +41,9 @@ export default defineConfig(async ({ command, mode }) => {
       tailwindcss(),
       tsconfigPaths({ projects: ["./tsconfig.json"] }),
     ],
+    build: {
+      sourcemap: false, // ENSURE NO SOURCE MAPS ARE LEAKED IN PRODUCTION
+    },
     server: {
       host: "::",
       port: 3000,

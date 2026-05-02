@@ -1,5 +1,5 @@
 import { j as jsxRuntimeExports } from "../_libs/react.mjs";
-import { B as Briefcase } from "../_libs/lucide-react.mjs";
+import { f as Briefcase } from "../_libs/lucide-react.mjs";
 function JobTrackerPage() {
   return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "h-full flex flex-col items-center justify-center text-center", children: [
     /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "w-16 h-16 bg-blue-50 text-blue-500 rounded-2xl flex items-center justify-center mb-6 shadow-sm", children: /* @__PURE__ */ jsxRuntimeExports.jsx(Briefcase, { className: "w-8 h-8" }) }),

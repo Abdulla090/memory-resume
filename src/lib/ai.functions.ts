@@ -35,7 +35,9 @@ async function callGateway(opts: {
   const authKey = process.env.GEMINI_API_KEY || opts.apiKey;
   const modelName = opts.model ?? DEFAULT_MODEL;
 
-  if (!authKey) throw new Error('No API key configured.');
+  if (!authKey) {
+    throw new Error('MISSING_API_KEY');
+  }
 
   const body: Record<string, unknown> = { model: modelName, messages: opts.messages };
   if (opts.tools) body.tools = opts.tools;

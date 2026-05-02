@@ -92,8 +92,8 @@ function MyCvsPage() {
             key={cv.id}
             className="group bg-white rounded-2xl border border-slate-100 hover:border-blue-200 shadow-sm hover:shadow-md transition-all overflow-hidden"
           >
-            <div className="flex items-center justify-between p-5">
-              <div className="flex items-center gap-4 min-w-0">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 sm:p-5 gap-4 sm:gap-0">
+              <div className="flex items-center gap-3 sm:gap-4 min-w-0 w-full sm:w-auto">
                 <div className="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center text-blue-500 shrink-0 group-hover:bg-blue-100 transition-colors">
                   <FileText className="w-6 h-6" />
                 </div>
@@ -117,7 +117,7 @@ function MyCvsPage() {
                 </div>
               </div>
 
-              <div className="flex items-center gap-2 shrink-0 ml-4">
+              <div className="flex items-center gap-2 shrink-0 self-end sm:self-auto sm:ml-4">
                 {confirmDelete === cv.id ? (
                   <>
                     <button
