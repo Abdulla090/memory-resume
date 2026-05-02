@@ -173,15 +173,16 @@ export function HeroV2({ language }: { language: Language }) {
               {t.heroTitleAccentPrefix}
               <span className="relative inline-block whitespace-nowrap pr-2">
                 <span className="relative z-10 text-white drop-shadow-sm">{t.heroTitleAccentHighlight}</span>
-                {/* Hand-drawn underline SVG - GREEN */}
+                {/* Hand-drawn underline SVG - GREEN, bolder on mobile */}
                 <svg
-                  className="absolute -bottom-2 left-0 w-full h-[0.35em] text-[#22c55e] pointer-events-none"
+                  className="absolute -bottom-2 left-0 w-full h-[0.45em] sm:h-[0.38em] text-[#22c55e] pointer-events-none"
                   viewBox="0 0 100 10"
                   preserveAspectRatio="none"
                   fill="none"
                   stroke="currentColor"
-                  strokeWidth="2.5"
+                  strokeWidth="4"
                   strokeLinecap="round"
+                  style={{ filter: "drop-shadow(0 1px 3px rgba(34,197,94,0.5))" }}
                 >
                   <path d="M 2 8 C 30 1, 70 1, 98 8" />
                 </svg>
