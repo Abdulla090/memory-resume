@@ -124,11 +124,23 @@ export function HeroV2({ language }: { language: Language }) {
           - Mobile:  text takes ~58%, marquee takes ~42% (narrower cards)
           - Desktop: text takes ~55%, marquee takes ~45% (wider cards)
         */}
-        <div className="relative grid grid-cols-[58%_42%] items-center md:grid-cols-[1.1fr_0.9fr] md:gap-4" dir="ltr">
+        {/* Mobile Kurdish: stacked. Desktop: two-col side-by-side */}
+        <div
+          className={`relative ${
+            language === "ku"
+              ? "flex flex-col md:grid md:grid-cols-[1.1fr_0.9fr] md:items-center md:gap-4"
+              : "grid grid-cols-[58%_42%] items-center md:grid-cols-[1.1fr_0.9fr] md:gap-4"
+          }`}
+          dir="ltr"
+        >
 
           {/* ── Left: text content ── */}
           <div
-            className={`relative z-10 flex flex-col py-8 sm:py-14 md:py-20 lg:py-24 ${language === "ku" ? "order-2 pr-4 pl-3 sm:px-10 md:px-14 lg:px-16" : "order-1 pl-4 pr-3 sm:px-10 md:px-14 lg:px-16"}`}
+            className={`relative z-10 flex flex-col overflow-hidden ${
+              language === "ku"
+                ? "order-1 py-8 pr-4 pl-4 sm:px-10 sm:py-14 md:order-2 md:py-20 lg:px-16 lg:py-24"
+                : "order-1 py-8 pl-4 pr-3 sm:px-10 sm:py-14 md:px-14 md:py-20 lg:px-16 lg:py-24"
+            }`}
             dir={t.dir}
           >
             {/* Badge */}
@@ -150,7 +162,11 @@ export function HeroV2({ language }: { language: Language }) {
               initial={{ opacity: 0, y: 28 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.1 }}
-              className={`text-[clamp(1.8rem,5.8vw,4rem)] font-extrabold ${language === "ku" ? "leading-[1.6]" : "leading-[1.08]"} tracking-tight text-white sm:text-[clamp(2rem,5.5vw,4rem)]`}
+              className={`font-extrabold tracking-tight text-white ${
+                language === "ku"
+                  ? "text-[clamp(1.55rem,7.5vw,4rem)] leading-[1.5] sm:text-[clamp(1.8rem,5.5vw,4rem)] sm:leading-[1.6]"
+                  : "text-[clamp(1.8rem,5.8vw,4rem)] leading-[1.08] sm:text-[clamp(2rem,5.5vw,4rem)]"
+              }`}
             >
               {t.heroTitle}
               <br />
@@ -208,7 +224,11 @@ export function HeroV2({ language }: { language: Language }) {
 
           {/* ── Right: marquee columns (all screen sizes, smaller on mobile) ── */}
           <div
-            className={`relative z-10 h-[300px] overflow-hidden sm:h-[420px] md:h-[520px] lg:h-[620px] ${language === "ku" ? "order-1" : "order-2"}`}
+            className={`relative z-10 overflow-hidden ${
+              language === "ku"
+                ? "order-2 h-[180px] sm:h-[420px] md:order-1 md:h-[520px] lg:h-[620px]"
+                : "order-2 h-[300px] sm:h-[420px] md:h-[520px] lg:h-[620px]"
+            }`}
             style={{
               maskImage: "linear-gradient(to bottom, transparent 0%, black 8%, black 92%, transparent 100%)",
               WebkitMaskImage: "linear-gradient(to bottom, transparent 0%, black 8%, black 92%, transparent 100%)",
