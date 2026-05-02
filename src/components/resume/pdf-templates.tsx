@@ -7,6 +7,7 @@ import {
   StyleSheet,
   pdf, Svg, Path, Circle, Polygon, Rect,
 } from "@react-pdf/renderer";
+import type { ReactNode } from "react";
 import type { ResumeData, TemplateId } from "@/lib/types";
 import { optimizeResumeForOnePage } from "@/lib/resume-utils";
 import { NoirPDF, PrismDarkPDF, PinnaclePDF, CipherPDF, VanguardPDF, SlatePDF, AvantPDF } from "./pdf-templates-extra";
@@ -1125,6 +1126,380 @@ function NewAcademicPDF({ data }: { data: ResumeData }) {
   );
 }
 
+const gallego = StyleSheet.create({
+  page: { fontSize: 9, fontFamily: "Helvetica", color: "#17465a", backgroundColor: "#ffffff", position: "relative" },
+  paleTriangle: { position: "absolute", right: 0, bottom: 0, width: 250, height: 250 },
+  topDots: { position: "absolute", right: 14, top: 10, flexDirection: "row", gap: 8 },
+  topDot: { width: 10, height: 10, borderRadius: 5, borderWidth: 2.5, borderColor: "#073f57" },
+  side: { position: "absolute", left: 0, top: 0, width: 244, height: 842, backgroundColor: "#073f57", paddingTop: 49, paddingHorizontal: 22, color: "#ffffff" },
+  photo: { width: 158, height: 158, borderRadius: 79, borderWidth: 5, borderColor: "#d9e2e6", objectFit: "cover", marginLeft: 21 },
+  photoFallback: { width: 158, height: 158, borderRadius: 79, borderWidth: 5, borderColor: "#d9e2e6", backgroundColor: "#d8e0e5", marginLeft: 21 },
+  sideSection: { marginTop: 33 },
+  sideTitle: { height: 32, borderRadius: 16, borderWidth: 2, borderColor: "#ffffff90", color: "#ffffff", fontSize: 15, fontWeight: 700, textAlign: "center", paddingTop: 7, marginBottom: 12 },
+  contactLine: { flexDirection: "row", gap: 8, alignItems: "center", marginBottom: 9 },
+  contactIcon: { width: 15, height: 15, borderRadius: 7.5, backgroundColor: "#ffffff", color: "#073f57", fontSize: 7, fontWeight: 700, textAlign: "center", paddingTop: 4 },
+  sideText: { color: "#ffffff", fontSize: 9.5, fontWeight: 700, lineHeight: 1.15 },
+  refTitle: { color: "#ffffff", fontSize: 9.7, fontWeight: 700, marginBottom: 1 },
+  refBody: { color: "#ffffffd8", fontSize: 9.2, fontWeight: 700, lineHeight: 1.15, marginBottom: 8 },
+  bulletRow: { flexDirection: "row", gap: 6, marginBottom: 3 },
+  bulletDot: { width: 3, height: 3, borderRadius: 1.5, backgroundColor: "#ffffff", marginTop: 4 },
+  main: { position: "absolute", left: 244, top: 0, right: 0, bottom: 0, paddingTop: 48, paddingRight: 22 },
+  nameBox: { marginLeft: -21, height: 153, backgroundColor: "#075a7c", paddingTop: 29, paddingLeft: 31, color: "#ffffff" },
+  name: { color: "#ffffff", fontSize: 27, fontWeight: 700, lineHeight: 1.03 },
+  role: { color: "#ffffffee", fontSize: 13, fontWeight: 700, lineHeight: 1.16, marginTop: 10, width: 260 },
+  content: { paddingTop: 21 },
+  ribbon: { marginLeft: -18, width: 294, height: 36, backgroundColor: "#075a7c", color: "#ffffff", flexDirection: "row", alignItems: "center", gap: 9, paddingLeft: 22, marginBottom: 16 },
+  ribbonIcon: { width: 20, height: 20, borderRadius: 10, backgroundColor: "#ffffff", color: "#075a7c", fontSize: 10, fontWeight: 700, textAlign: "center", paddingTop: 5 },
+  ribbonText: { color: "#ffffff", fontSize: 16, fontWeight: 700 },
+  section: { marginBottom: 21 },
+  sectionBody: { paddingLeft: 27 },
+  body: { fontSize: 10.2, lineHeight: 1.35, color: "#4d6b77", fontWeight: 700, width: 225 },
+  itemTitle: { fontSize: 9.8, color: "#15495f", fontWeight: 700, lineHeight: 1.1 },
+  itemMeta: { fontSize: 9.4, color: "#4f6c78", fontWeight: 700, lineHeight: 1.12 },
+  blueBullet: { flexDirection: "row", gap: 6, marginTop: 2 },
+  blueBulletDot: { width: 3.5, height: 3.5, borderRadius: 1.75, backgroundColor: "#15495f", marginTop: 4 },
+});
+
+function GallegoPDF({ data }: { data: ResumeData }) {
+  const c = optimizeResumeForOnePage(data);
+  const refs = c.projects.length > 0
+    ? c.projects.slice(0, 2).map((project) => ({ name: project.name, meta: project.impact || project.description }))
+    : c.education.slice(0, 2).map((item) => ({ name: item.degree, meta: item.institution }));
+  const languageItems = (c.certifications.length > 0 ? c.certifications : c.skills).slice(0, 4);
+  const contacts = [c.phone, c.email, c.location].filter(Boolean);
+
+  return (
+    <Document>
+      <Page size="A4" style={gallego.page}>
+        <Svg style={gallego.paleTriangle} viewBox="0 0 250 250">
+          <Polygon points="250,0 250,250 0,250" fill="#ececec" />
+        </Svg>
+        <View style={gallego.topDots}>
+          {[0, 1, 2, 3].map((item) => <View key={item} style={gallego.topDot} />)}
+        </View>
+
+        <View style={gallego.side}>
+          {c.photoUrl ? <Image src={c.photoUrl} style={gallego.photo} /> : <View style={gallego.photoFallback} />}
+
+          <View style={gallego.sideSection}>
+            <Text style={gallego.sideTitle}>Contact</Text>
+            {contacts.map((item, index) => (
+              <View key={item} style={gallego.contactLine}>
+                <Text style={gallego.contactIcon}>{["P", "M", "L"][index] ?? "C"}</Text>
+                <Text style={{ ...gallego.sideText, width: 162 }}>{item}</Text>
+              </View>
+            ))}
+          </View>
+
+          <View style={{ ...gallego.sideSection, marginTop: 39 }}>
+            <Text style={gallego.sideTitle}>References</Text>
+            {refs.map((item, index) => (
+              <View key={`${item.name}-${index}`}>
+                <Text style={gallego.refTitle}>{item.name}</Text>
+                <Text style={gallego.refBody}>{item.meta}</Text>
+              </View>
+            ))}
+          </View>
+
+          <View style={{ ...gallego.sideSection, marginTop: 39 }}>
+            <Text style={gallego.sideTitle}>Languages</Text>
+            {languageItems.map((item) => (
+              <View key={item} style={gallego.bulletRow}>
+                <View style={gallego.bulletDot} />
+                <Text style={gallego.sideText}>{item}</Text>
+              </View>
+            ))}
+          </View>
+        </View>
+
+        <View style={gallego.main}>
+          <View style={gallego.nameBox}>
+            <Text style={gallego.name}>{c.name}</Text>
+            <Text style={gallego.role}>{c.title}</Text>
+          </View>
+
+          <View style={gallego.content}>
+            <View style={gallego.section}>
+              <View style={gallego.ribbon}>
+                <Text style={gallego.ribbonIcon}>i</Text>
+                <Text style={gallego.ribbonText}>Profile</Text>
+              </View>
+              <View style={gallego.sectionBody}>
+                <Text style={gallego.body}>{c.summary}</Text>
+              </View>
+            </View>
+
+            {c.education.length > 0 ? (
+              <View style={gallego.section}>
+                <View style={gallego.ribbon}>
+                  <Text style={gallego.ribbonIcon}>E</Text>
+                  <Text style={gallego.ribbonText}>Education</Text>
+                </View>
+                <View style={gallego.sectionBody}>
+                  {c.education.slice(0, 2).map((item, index) => (
+                    <View key={`${item.institution}-${index}`} style={{ marginBottom: 8 }}>
+                      <Text style={gallego.itemTitle}>{item.degree}</Text>
+                      <Text style={gallego.itemMeta}>{item.institution}</Text>
+                      <Text style={gallego.itemTitle}>• {item.year}</Text>
+                    </View>
+                  ))}
+                </View>
+              </View>
+            ) : null}
+
+            {c.experience.length > 0 ? (
+              <View style={gallego.section}>
+                <View style={gallego.ribbon}>
+                  <Text style={gallego.ribbonIcon}>W</Text>
+                  <Text style={gallego.ribbonText}>Experience</Text>
+                </View>
+                <View style={gallego.sectionBody}>
+                  {c.experience.slice(0, 2).map((item, index) => (
+                    <View key={`${item.company}-${index}`} style={{ marginBottom: 10, width: 238 }}>
+                      <Text style={gallego.itemTitle}>{item.company}</Text>
+                      <Text style={gallego.itemMeta}>{item.title}</Text>
+                      {(item.achievements.length ? item.achievements : [item.description]).slice(0, 3).map((achievement, achievementIndex) => (
+                        <View key={achievementIndex} style={gallego.blueBullet}>
+                          <View style={gallego.blueBulletDot} />
+                          <Text style={{ ...gallego.itemMeta, flex: 1 }}>{achievement}</Text>
+                        </View>
+                      ))}
+                    </View>
+                  ))}
+                </View>
+              </View>
+            ) : null}
+          </View>
+        </View>
+      </Page>
+    </Document>
+  );
+}
+
+const leroy = StyleSheet.create({
+  page: { fontSize: 9, fontFamily: "Helvetica", color: "#050b14", backgroundColor: "#ffffff", position: "relative" },
+  topBar: { position: "absolute", left: 0, top: 57, width: 595, height: 84, backgroundColor: "#6f7e84" },
+  banner: { position: "absolute", left: 35, top: 0, width: 219, height: 456 },
+  bannerName: { position: "absolute", left: 35, top: 64, width: 219, color: "#ffffff", fontSize: 25, fontWeight: 700, textAlign: "center", lineHeight: 0.98, fontFamily: "Times-Roman" },
+  photo: { position: "absolute", left: 75, top: 109, width: 152, height: 152, borderRadius: 76, objectFit: "cover" },
+  photoFallback: { position: "absolute", left: 75, top: 109, width: 152, height: 152, borderRadius: 76, backgroundColor: "#d8e0e5" },
+  contactBlock: { position: "absolute", left: 77, top: 253, width: 142, color: "#ffffff" },
+  age: { color: "#ffffff", fontSize: 10.5, fontWeight: 700, textAlign: "center", marginBottom: 8 },
+  contactRow: { flexDirection: "row", alignItems: "center", gap: 7, marginBottom: 8 },
+  contactIcon: { width: 14, height: 14, borderRadius: 7, borderWidth: 1.5, borderColor: "#ffffff", color: "#ffffff", fontSize: 7.5, fontWeight: 700, textAlign: "center", paddingTop: 3 },
+  contactText: { color: "#ffffff", fontSize: 9.3, fontWeight: 700, lineHeight: 1.1, width: 122 },
+  title: { position: "absolute", left: 313, top: 69, width: 220, color: "#ffffff", fontFamily: "Times-Roman", fontSize: 27, fontWeight: 700, lineHeight: 1.05 },
+  panel: { backgroundColor: "#f8f7f4", paddingHorizontal: 28, paddingVertical: 20 },
+  panelTitle: { fontFamily: "Times-Roman", fontSize: 25.5, fontWeight: 700, textTransform: "uppercase", color: "#142033", lineHeight: 1, marginBottom: 9 },
+  bullet: { flexDirection: "row", gap: 6, marginBottom: 2 },
+  bulletDot: { width: 3, height: 3, borderRadius: 1.5, backgroundColor: "#050b14", marginTop: 5 },
+  bulletText: { fontSize: 10.7, fontWeight: 700, lineHeight: 1.1, flex: 1 },
+  formation: { position: "absolute", left: 35, top: 471, width: 219, height: 266 },
+  skills: { position: "absolute", left: 285, top: 172, width: 286, minHeight: 210 },
+  experience: { position: "absolute", left: 285, top: 392, width: 286, minHeight: 207 },
+  languages: { position: "absolute", left: 285, top: 614, width: 286, minHeight: 124 },
+  bottom: { position: "absolute", left: 0, bottom: 0, width: 595, height: 49, backgroundColor: "#6f7e84", flexDirection: "row", alignItems: "center", paddingLeft: 69 },
+  bottomTitle: { color: "#ffffff", fontFamily: "Times-Roman", fontSize: 23, fontWeight: 700, textTransform: "uppercase" },
+  bottomText: { color: "#ffffff", fontSize: 10.5, fontWeight: 700, marginLeft: 42, width: 340 },
+});
+
+function LeroyPDF({ data }: { data: ResumeData }) {
+  const c = optimizeResumeForOnePage(data);
+  const competenceItems = c.skills.slice(0, 6);
+  const languageItems = (c.certifications.length > 0 ? c.certifications : c.skills).slice(0, 3);
+  const leisureText = c.projects.length > 0
+    ? c.projects.slice(0, 3).map((project) => project.name).join(" - ")
+    : c.skills.slice(0, 3).join(" - ");
+  const nameParts = c.name.split(/\s+/).filter(Boolean);
+  const mid = Math.ceil(nameParts.length / 2);
+  const displayName = `${nameParts.slice(0, mid).join(" ") || c.name}\n${nameParts.slice(mid).join(" ")}`.trim();
+
+  const Panel = ({ title, children, style }: { title: string; children: ReactNode; style: any }) => (
+    <View style={[leroy.panel, style]}>
+      <Text style={leroy.panelTitle}>{title}</Text>
+      {children}
+    </View>
+  );
+  const BulletList = ({ items }: { items: string[] }) => (
+    <View>
+      {items.map((item) => (
+        <View key={item} style={leroy.bullet}>
+          <View style={leroy.bulletDot} />
+          <Text style={leroy.bulletText}>{item}</Text>
+        </View>
+      ))}
+    </View>
+  );
+
+  return (
+    <Document>
+      <Page size="A4" style={leroy.page}>
+        <View style={leroy.topBar} />
+        <Svg style={leroy.banner} viewBox="0 0 219 456">
+          <Polygon points="0,0 219,0 219,412 109.5,456 0,412" fill="#202a3a" />
+        </Svg>
+        <Text style={leroy.bannerName}>{displayName.toUpperCase()}</Text>
+        {c.photoUrl ? <Image src={c.photoUrl} style={leroy.photo} /> : <View style={leroy.photoFallback} />}
+        <View style={leroy.contactBlock}>
+          <Text style={leroy.age}>30 ans - permis B</Text>
+          {c.phone ? <View style={leroy.contactRow}><Text style={leroy.contactIcon}>P</Text><Text style={leroy.contactText}>{c.phone}</Text></View> : null}
+          {c.email ? <View style={leroy.contactRow}><Text style={leroy.contactIcon}>@</Text><Text style={leroy.contactText}>{c.email}</Text></View> : null}
+          {c.location ? <View style={leroy.contactRow}><Text style={leroy.contactIcon}>L</Text><Text style={leroy.contactText}>{c.location}</Text></View> : null}
+        </View>
+
+        <Text style={leroy.title}>{c.title.toUpperCase()}</Text>
+
+        <Panel title="Formation" style={leroy.formation}>
+          <BulletList items={c.education.slice(0, 3).map((item) => `${item.year}: ${item.degree} - ${item.institution}`)} />
+        </Panel>
+        <Panel title="Competences" style={leroy.skills}>
+          <BulletList items={competenceItems} />
+        </Panel>
+        <Panel title="Experience" style={leroy.experience}>
+          <BulletList items={c.experience.slice(0, 3).map((item) => `${item.duration}: ${item.title} - ${item.company}`)} />
+        </Panel>
+        <Panel title="Langues" style={leroy.languages}>
+          <BulletList items={languageItems} />
+        </Panel>
+
+        <View style={leroy.bottom}>
+          <Text style={leroy.bottomTitle}>Loisirs</Text>
+          <Text style={leroy.bottomText}>{leisureText}</Text>
+        </View>
+      </Page>
+    </Document>
+  );
+}
+
+const dubois = StyleSheet.create({
+  page: { fontSize: 9, fontFamily: "Helvetica", color: "#153f68", backgroundColor: "#ffffff", position: "relative" },
+  side: { position: "absolute", left: 0, top: 0, width: 195, height: 842, backgroundColor: "#dcdfe5", paddingTop: 20, paddingLeft: 31, paddingRight: 24 },
+  photo: { width: 129, height: 183, borderWidth: 3, borderColor: "#ffffff", objectFit: "cover" },
+  photoFallback: { width: 129, height: 183, borderWidth: 3, borderColor: "#ffffff", backgroundColor: "#d8e0e5" },
+  sideTitle: { fontSize: 12.5, fontWeight: 700, color: "#153f68", marginTop: 34, marginBottom: 13 },
+  contactRow: { flexDirection: "row", gap: 10, alignItems: "center", marginBottom: 16 },
+  contactIcon: { width: 17, fontSize: 12, fontWeight: 700, color: "#153f68" },
+  sideText: { fontSize: 8.5, fontWeight: 700, color: "#245b90", flex: 1 },
+  langRow: { flexDirection: "row", alignItems: "center", marginBottom: 7 },
+  langLabel: { width: 58, fontSize: 9.5, fontWeight: 700, color: "#245b90" },
+  langBar: { width: 30, height: 4, borderRadius: 2, backgroundColor: "#ffffff" },
+  langFill: { height: 4, borderRadius: 2, backgroundColor: "#245b90" },
+  sideList: { fontSize: 9.5, fontWeight: 700, color: "#245b90", lineHeight: 1.45, marginBottom: 2 },
+  header: { position: "absolute", left: 158, top: 38, right: 10, height: 108, backgroundColor: "#153f68", paddingLeft: 86, paddingTop: 25 },
+  name: { color: "#ffffff", fontSize: 28, fontWeight: 700, lineHeight: 1 },
+  role: { color: "#ffffff", fontSize: 17, fontStyle: "italic", marginTop: 8 },
+  main: { position: "absolute", left: 243, right: 36, top: 195 },
+  sectionTitle: { fontSize: 15.5, fontWeight: 700, color: "#153f68", marginBottom: 15 },
+  eduRow: { flexDirection: "row", gap: 18, marginBottom: 17 },
+  title: { fontSize: 11, fontWeight: 700, color: "#245b90", lineHeight: 1.15 },
+  meta: { fontSize: 10.5, fontStyle: "italic", color: "#245b90", lineHeight: 1.15 },
+  date: { width: 68, fontSize: 8.3, fontStyle: "italic", color: "#245b90", textAlign: "right", paddingTop: 1 },
+  timeline: { marginTop: 40, borderLeftWidth: 2, borderLeftColor: "#245b90", paddingLeft: 16 },
+  dot: { position: "absolute", left: -21, top: 4, width: 7, height: 7, borderRadius: 3.5, backgroundColor: "#153f68" },
+  exp: { position: "relative", marginBottom: 25 },
+  bullet: { flexDirection: "row", gap: 6, marginTop: 2 },
+  bulletDot: { width: 3, height: 3, borderRadius: 1.5, backgroundColor: "#245b90", marginTop: 5 },
+  bulletText: { fontSize: 9.5, fontWeight: 700, color: "#245b90", lineHeight: 1.22, flex: 1 },
+});
+
+function DuboisPDF({ data }: { data: ResumeData }) {
+  const c = optimizeResumeForOnePage(data);
+  const languages = (c.certifications.length > 0 ? c.certifications : c.skills).slice(0, 2);
+  const interests = c.projects.length > 0 ? c.projects.slice(0, 4).map((p) => p.name) : c.skills.slice(0, 4);
+  return (
+    <Document>
+      <Page size="A4" style={dubois.page}>
+        <View style={dubois.side}>
+          {c.photoUrl ? <Image src={c.photoUrl} style={dubois.photo} /> : <View style={dubois.photoFallback} />}
+          <Text style={dubois.sideTitle}>Coordonnees</Text>
+          {c.phone ? <View style={dubois.contactRow}><Text style={dubois.contactIcon}>P</Text><Text style={dubois.sideText}>{c.phone}</Text></View> : null}
+          {c.email ? <View style={dubois.contactRow}><Text style={dubois.contactIcon}>M</Text><Text style={dubois.sideText}>{c.email}</Text></View> : null}
+          {c.location ? <View style={dubois.contactRow}><Text style={dubois.contactIcon}>L</Text><Text style={dubois.sideText}>{c.location}</Text></View> : null}
+          <Text style={dubois.sideTitle}>Langues</Text>
+          {languages.map((item, index) => <View key={item} style={dubois.langRow}><Text style={dubois.langLabel}>{item}</Text><View style={dubois.langBar}><View style={{ ...dubois.langFill, width: index === 0 ? 26 : 20 }} /></View></View>)}
+          <Text style={dubois.sideTitle}>Competences</Text>
+          {c.skills.slice(0, 6).map((item) => <Text key={item} style={dubois.sideList}>{item}</Text>)}
+          <Text style={dubois.sideTitle}>Centres d'interet</Text>
+          {interests.map((item) => <Text key={item} style={dubois.sideList}>{item}</Text>)}
+        </View>
+        <View style={dubois.header}>
+          <Text style={dubois.name}>{c.name}</Text>
+          <Text style={dubois.role}>{c.title}</Text>
+        </View>
+        <View style={dubois.main}>
+          <Text style={dubois.sectionTitle}>Formation</Text>
+          {c.education.slice(0, 2).map((item, index) => <View key={`${item.institution}-${index}`} style={dubois.eduRow}><View style={{ flex: 1 }}><Text style={dubois.title}>{item.degree}</Text><Text style={dubois.meta}>{item.institution}</Text></View><Text style={dubois.date}>{item.year}</Text></View>)}
+          <View style={dubois.timeline}>
+            <Text style={{ ...dubois.sectionTitle, marginLeft: -18 }}>Experience Professionnelle</Text>
+            {c.experience.slice(0, 3).map((item, index) => <View key={`${item.company}-${index}`} style={dubois.exp}><View style={dubois.dot} /><View style={{ flexDirection: "row", gap: 14 }}><View style={{ flex: 1 }}><Text style={dubois.title}>{item.title}</Text><Text style={dubois.meta}>{item.company}</Text></View><Text style={dubois.date}>{item.duration}</Text></View>{(item.achievements.length ? item.achievements : [item.description]).slice(0, 3).map((achievement, achievementIndex) => <View key={achievementIndex} style={dubois.bullet}><View style={dubois.bulletDot} /><Text style={dubois.bulletText}>{achievement}</Text></View>)}</View>)}
+          </View>
+        </View>
+      </Page>
+    </Document>
+  );
+}
+
+const palmerstonExact = StyleSheet.create({
+  page: { fontSize: 9, fontFamily: "Helvetica", color: "#111827", backgroundColor: "#ffffff", position: "relative" },
+  photoBlock: { position: "absolute", left: 0, top: 0, width: 214, height: 154, backgroundColor: "#303b4e", borderBottomRightRadius: 36 },
+  photo: { position: "absolute", left: 44, top: 25, width: 113, height: 113, borderRadius: 56.5, borderWidth: 4, borderColor: "#b9b4ad", objectFit: "cover" },
+  photoFallback: { position: "absolute", left: 44, top: 25, width: 113, height: 113, borderRadius: 56.5, borderWidth: 4, borderColor: "#b9b4ad", backgroundColor: "#d8e0e5" },
+  name: { position: "absolute", left: 247, top: 49, width: 310, fontSize: 27, fontWeight: 700, color: "#1f3148", lineHeight: 0.98 },
+  role: { position: "absolute", left: 247, top: 111, fontSize: 9.8, letterSpacing: 4, color: "#1f3148" },
+  contactBar: { position: "absolute", left: 17, top: 169, width: 561, height: 41, borderRadius: 20.5, backgroundColor: "#303b4e", flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: 17 },
+  contactItem: { flexDirection: "row", alignItems: "center", gap: 5, minWidth: 0 },
+  contactIcon: { color: "#ffffff", fontSize: 8, fontWeight: 700, width: 10 },
+  contactText: { color: "#ffffff", fontSize: 6.6, fontWeight: 700 },
+  side: { position: "absolute", left: 0, top: 223, bottom: 0, width: 214, backgroundColor: "#303b4e", paddingTop: 38, paddingHorizontal: 36 },
+  sideHead: { color: "#ffffff", fontSize: 20, fontWeight: 700, letterSpacing: 2.5, borderBottomWidth: 1, borderBottomColor: "#ffffff90", paddingBottom: 5, marginBottom: 14 },
+  sideTitle: { color: "#ffffff", fontSize: 8.6, fontWeight: 700, lineHeight: 1.25 },
+  sideText: { color: "#ffffff", fontSize: 8.4, lineHeight: 1.25, marginTop: 4 },
+  sideSection: { marginBottom: 24 },
+  bullet: { flexDirection: "row", gap: 5, marginBottom: 3 },
+  bulletDot: { width: 2.6, height: 2.6, borderRadius: 1.3, backgroundColor: "#ffffff", marginTop: 4 },
+  bulletText: { color: "#ffffff", fontSize: 8.3, lineHeight: 1.25, flex: 1 },
+  main: { position: "absolute", left: 246, right: 24, top: 260, bottom: 25 },
+  mainHead: { fontSize: 16.5, fontWeight: 700, letterSpacing: 3, color: "#1f3148", borderBottomWidth: 1, borderBottomColor: "#8b929b", paddingBottom: 5, marginBottom: 10 },
+  body: { fontSize: 8.3, lineHeight: 1.35, color: "#000000" },
+  expTitle: { fontSize: 12, fontWeight: 700, color: "#000000" },
+  expDate: { fontSize: 8.2, color: "#000000" },
+  expMeta: { fontSize: 8.8, fontWeight: 700, color: "#000000", marginTop: 2 },
+});
+
+function PalmerstonExactPDF({ data }: { data: ResumeData }) {
+  const c = optimizeResumeForOnePage(data);
+  const refs = c.projects.length > 0
+    ? c.projects.slice(0, 2).map((p) => ({ name: p.name, role: p.tech[0] || c.title, meta: p.impact || p.description }))
+    : c.education.slice(0, 2).map((e) => ({ name: e.institution, role: e.degree, meta: e.year }));
+  return (
+    <Document>
+      <Page size="A4" style={palmerstonExact.page}>
+        <View style={palmerstonExact.photoBlock} />
+        {c.photoUrl ? <Image src={c.photoUrl} style={palmerstonExact.photo} /> : <View style={palmerstonExact.photoFallback} />}
+        <Text style={palmerstonExact.name}>{c.name.toUpperCase()}</Text>
+        <Text style={palmerstonExact.role}>{c.title.toUpperCase()}</Text>
+        <View style={palmerstonExact.contactBar}>
+          {[["P", c.phone], ["M", c.email], ["W", "www.reallygreatsite.com"], ["H", c.location]].filter((x) => x[1]).map(([icon, text]) => <View key={String(icon)} style={palmerstonExact.contactItem}><Text style={palmerstonExact.contactIcon}>{icon}</Text><Text style={palmerstonExact.contactText}>{text}</Text></View>)}
+        </View>
+        <View style={palmerstonExact.side}>
+          <View style={palmerstonExact.sideSection}><Text style={palmerstonExact.sideHead}>Education</Text>{c.education.slice(0, 2).map((e) => <View key={e.degree} style={{ marginBottom: 12 }}><Text style={palmerstonExact.sideTitle}>{e.degree}</Text><Text style={palmerstonExact.sideText}>{e.institution}{"\n"}{e.year}{"\n"}{c.location || ""}</Text></View>)}</View>
+          <View style={palmerstonExact.sideSection}><Text style={palmerstonExact.sideHead}>Certifications</Text>{c.certifications.slice(0, 3).map((cert) => <View key={cert} style={palmerstonExact.bullet}><View style={palmerstonExact.bulletDot} /><Text style={palmerstonExact.bulletText}>{cert}</Text></View>)}</View>
+          <View style={palmerstonExact.sideSection}><Text style={palmerstonExact.sideHead}>Skills</Text>{c.skills.slice(0, 6).map((skill) => <Text key={skill} style={{ ...palmerstonExact.sideText, marginTop: 0, marginBottom: 5 }}>{skill}</Text>)}</View>
+          <View><Text style={palmerstonExact.sideHead}>Language</Text>{(c.certifications.length ? c.certifications : c.skills).slice(0, 3).map((lang) => <Text key={lang} style={{ ...palmerstonExact.sideText, marginTop: 0, marginBottom: 4 }}>{lang}</Text>)}</View>
+        </View>
+        <View style={palmerstonExact.main}>
+          <Text style={palmerstonExact.mainHead}>About me</Text>
+          <Text style={palmerstonExact.body}>{c.summary}</Text>
+          <Text style={{ ...palmerstonExact.mainHead, marginTop: 20 }}>Experience</Text>
+          {c.experience.slice(0, 3).map((e) => <View key={`${e.company}-${e.title}`} style={{ marginBottom: 14 }}><View style={{ flexDirection: "row", justifyContent: "space-between" }}><Text style={palmerstonExact.expTitle}>{e.title}</Text><Text style={palmerstonExact.expDate}>{e.duration}</Text></View><Text style={palmerstonExact.expMeta}>{e.company}</Text><Text style={{ ...palmerstonExact.body, marginTop: 6 }}>{[e.description, ...e.achievements.slice(0, 2)].filter(Boolean).join(" ")}</Text></View>)}
+          <Text style={{ ...palmerstonExact.mainHead, marginTop: 10 }}>Reference</Text>
+          <View style={{ flexDirection: "row", gap: 36 }}>{refs.map((r) => <View key={r.name} style={{ flex: 1 }}><Text style={palmerstonExact.body}>{r.name} | {r.role}</Text><Text style={{ ...palmerstonExact.body, marginTop: 6 }}>{r.meta}</Text><Text style={{ ...palmerstonExact.body, marginTop: 6 }}>{c.phone || "+123-456-7890"}</Text></View>)}</View>
+        </View>
+      </Page>
+    </Document>
+  );
+}
+
 export function GetPDFDocument({ data, template }: { data: ResumeData; template: TemplateId }) {
   switch (template) {
     case 'executive': return <ExecutivePDF data={data} />;
@@ -1143,8 +1518,11 @@ export function GetPDFDocument({ data, template }: { data: ResumeData; template:
     case 'ref-torres': return <AtlasPDF data={data} />;
     case 'ref-silva': return <ExecutivePDF data={data} />;
     case 'ref-schumacher': return <ForgePDF data={data} />;
-    case 'ref-palmerston': return <AtlasPDF data={data} />;
+    case 'ref-palmerston': return <PalmerstonExactPDF data={data} />;
     case 'ref-sanchez': return <CarbonPDF data={data} />;
+    case 'gallego': return <GallegoPDF data={data} />;
+    case 'leroy': return <LeroyPDF data={data} />;
+    case 'dubois': return <DuboisPDF data={data} />;
     // Dedicated renderers matching live preview designs
     case 'noir': return <NoirPDF data={data} />;
     case 'apex': return <AtlasPDF data={data} />;

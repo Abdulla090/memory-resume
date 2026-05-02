@@ -340,6 +340,9 @@ const DOCX_BUILDERS: Record<string, (data: ResumeData) => Document> = {
   "ref-schumacher": buildForgeDocx,
   "ref-palmerston": buildExecutiveDocx,
   "ref-sanchez": buildExecutiveDocx,
+  gallego: buildExecutiveDocx,
+  leroy: buildExecutiveDocx,
+  dubois: buildExecutiveDocx,
 };
 
 export async function exportResumeDocx(data: ResumeData, template: string, filename: string) {

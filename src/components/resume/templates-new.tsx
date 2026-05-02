@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { StarRating, BarRating } from "./templates";
-import { Phone, Mail, Globe, MapPin } from "lucide-react";
+import { BriefcaseBusiness, Globe, GraduationCap, Mail, MapPin, Phone, UserRound } from "lucide-react";
 import type { ResumeData } from "@/lib/types";
 import { optimizeResumeForOnePage } from "@/lib/resume-utils";
 
@@ -724,125 +724,137 @@ export function RefSchumacherTemplate({ data }: { data: ResumeData }) {
 export function RefPalmerstonTemplate({ data }: { data: ResumeData }) {
   const c = optimizeResumeForOnePage(data);
   const rtl = isRTL(c);
-  const l = labels(rtl);
-  const contacts = [c.phone, c.email, c.location].filter(Boolean);
+  const referenceItems = c.projects.length > 0
+    ? c.projects.slice(0, 2).map((project) => ({
+        name: project.name,
+        role: project.tech[0] || c.title,
+        meta: project.impact || project.description,
+      }))
+    : c.education.slice(0, 2).map((item) => ({
+        name: item.institution,
+        role: item.degree,
+        meta: item.year,
+      }));
+  const languageItems = (c.certifications.length > 0 ? c.certifications : c.skills).slice(0, 3);
+
+  const SidebarHeading = ({ children }: { children: ReactNode }) => (
+    <h2 className="border-b border-white/55 pb-2 text-[28px] font-black leading-none tracking-[0.14em] text-white">{children}</h2>
+  );
 
   return (
-    <div dir={rtl ? "rtl" : "ltr"} className="bg-white font-sans text-[#121923]" style={{ minHeight: "1122px", width: "100%" }}>
-      <header className="relative h-[326px] bg-white">
-        <div className="absolute left-0 top-0 h-[230px] w-[280px] rounded-br-[52px] bg-[#303b4e] rtl:left-auto rtl:right-0 rtl:rounded-bl-[52px] rtl:rounded-br-none">
-          <div className="absolute left-[58px] top-[30px] h-[138px] w-[138px] overflow-hidden rounded-full border-[6px] border-[#b7b2ad] bg-slate-200 rtl:left-auto rtl:right-[58px]">
+    <div dir={rtl ? "rtl" : "ltr"} className="relative overflow-hidden bg-white font-sans text-[#111827]" style={{ height: "1122px", minHeight: "1122px", width: "794px", maxWidth: "100%" }}>
+      <header className="absolute left-0 top-0 h-[208px] w-full bg-white">
+        <div className="absolute left-0 top-0 h-[205px] w-[285px] rounded-br-[48px] bg-[#303b4e]">
+          <div className="absolute left-[59px] top-[34px] h-[151px] w-[151px] overflow-hidden rounded-full border-[5px] border-[#b9b4ad] bg-slate-200">
             {c.photoUrl ? <img src={c.photoUrl} alt={c.name} className="h-full w-full object-cover" /> : <div className="flex h-full w-full items-center justify-center text-4xl font-black text-slate-500">{initials(c.name)}</div>}
           </div>
         </div>
-        <div className="ml-[325px] pt-[66px] rtl:ml-0 rtl:mr-[325px]">
-          <h1 className="max-w-[420px] text-[43px] font-black uppercase leading-[1.03] tracking-[0.02em] rtl:tracking-normal text-[#223a59]">{c.name}</h1>
-          <p className="mt-3 text-[17px] uppercase tracking-[0.22em] rtl:tracking-normal text-[#223a59]">{c.title}</p>
-        </div>
-        <div className="absolute bottom-[22px] left-[22px] right-[16px] flex h-[55px] items-center justify-around gap-4 rounded-full bg-[#303b4e] px-7 text-[11px] font-bold text-white">
-          {contacts.slice(0, 4).map((item, index) => (
-            <div key={item} className="flex min-w-0 items-center gap-2">
-              <span className="grid h-4 w-4 shrink-0 place-items-center rounded-full bg-white/15 text-[9px]">{["P", "M", "L", "W"][index]}</span>
-              <span className="truncate">{item}</span>
-            </div>
-          ))}
+        <div className="ml-[330px] pt-[64px]">
+          <h1 className="max-w-[420px] text-[43px] font-black uppercase leading-[0.98] tracking-[0.02em] text-[#1f3148]">{c.name}</h1>
+          <p className="mt-3 text-[16px] font-semibold uppercase tracking-[0.38em] text-[#1f3148]">{c.title}</p>
         </div>
       </header>
 
-      <div className="grid grid-cols-[285px_1fr] ">
-        <aside className="min-h-[796px] bg-[#303b4e] px-12 py-12 text-white ">
-          {c.education.length > 0 && (
-            <section>
-              <h2 className="mb-4 border-b border-white/50 pb-2 text-[22px] font-black tracking-[0.12em] rtl:tracking-normal">{l.education}</h2>
-              <div className="space-y-4">
-                {c.education.slice(0, 3).map((item, index) => (
-                  <div key={`${item.institution}-${index}`} className="text-[12px] leading-5">
-                    <div className="font-black">{item.degree}</div>
-                    <div className="font-semibold">{item.institution}</div>
-                    <div>{item.year}</div>
-                  </div>
-                ))}
-              </div>
-            </section>
-          )}
-          {c.certifications.length > 0 && (
-            <section className="mt-8">
-              <h2 className="mb-4 border-b border-white/50 pb-2 text-[22px] font-black tracking-[0.12em] rtl:tracking-normal">{l.certifications}</h2>
-              <ul className="list-disc space-y-2 pl-4 text-[12px] font-semibold leading-5 rtl:pl-0 rtl:pr-4">
-                {c.certifications.slice(0, 3).map((item) => <li key={item}>{item}</li>)}
-              </ul>
-            </section>
-          )}
-          {(c.skillItems?.length ? c.skillItems.length > 0 : c.skills.length > 0) && (
-            <section className="mt-8">
-              <h2 className="mb-4 border-b border-white/50 pb-2 text-[22px] font-black tracking-[0.12em] rtl:tracking-normal">{l.skills}</h2>
-              <div className="space-y-3">
-                {c.skillItems && c.skillItems.length > 0 ? (
-                  c.skillItems.slice(0, 7).map((s, index) => (
-                    <div key={s.name}>
-                      <div className="text-[12px] font-bold">{s.name}</div>
-                      <div className="mt-1 h-[5px] bg-white/25">
-                        <div className="h-full bg-white rtl:mr-auto" style={{ width: `${s.level * 20}%` }} />
-                      </div>
-                    </div>
-                  ))
-                ) : (
-                  c.skills.slice(0, 7).map((skill, index) => (
-                    <div key={skill}>
-                      <div className="text-[12px] font-bold">{skill}</div>
-                      <div className="mt-1 h-[5px] bg-white/25">
-                        <div className="h-full bg-white rtl:mr-auto" style={{ width: skillLevel(c, skill, index) }} />
-                      </div>
-                    </div>
-                  ))
-                )}
-              </div>
-            </section>
-          )}
-          <section className="mt-8">
-            <h2 className="mb-4 border-b border-white/50 pb-2 text-[22px] font-black tracking-[0.12em] rtl:tracking-normal">{rtl ? "زمان" : "Language"}</h2>
-            <div className="space-y-2 text-[12px] font-semibold">
-              {(rtl ? ["کوردی", "ئینگلیزی"] : ["English", "Kurdish"]).map((item) => <p key={item}>{item}</p>)}
+      <div className="absolute left-[22px] right-[14px] top-[225px] z-20 flex h-[55px] items-center justify-between gap-5 rounded-full bg-[#303b4e] px-7 text-[11px] font-black text-white">
+        {[
+          { icon: <Phone size={15} fill="currentColor" strokeWidth={3} />, text: c.phone },
+          { icon: <Mail size={15} fill="currentColor" strokeWidth={3} />, text: c.email },
+          { icon: <Globe size={15} strokeWidth={3} />, text: c.location ? "www.reallygreatsite.com" : undefined },
+          { icon: <MapPin size={15} fill="currentColor" strokeWidth={3} />, text: c.location },
+        ].filter((item) => item.text).map((item, index) => (
+          <div key={index} className="flex min-w-0 items-center gap-2">
+            <span className="grid h-5 w-5 shrink-0 place-items-center text-white">{item.icon}</span>
+            <span className="truncate">{item.text}</span>
+          </div>
+        ))}
+      </div>
+
+      <aside className="absolute bottom-0 left-0 top-[296px] w-[286px] bg-[#303b4e] px-[49px] py-[50px] text-white">
+        {c.education.length > 0 && (
+          <section>
+            <SidebarHeading>Education</SidebarHeading>
+            <div className="mt-5 space-y-5">
+              {c.education.slice(0, 2).map((item, index) => (
+                <div key={`${item.institution}-${index}`} className="text-[12px] leading-[1.35]">
+                  <div className="font-black">{item.degree}</div>
+                  <div className="mt-2 font-semibold">{item.institution}</div>
+                  <div className="font-semibold">{item.year}</div>
+                  {c.location && <div className="font-semibold">{c.location}</div>}
+                </div>
+              ))}
             </div>
           </section>
-        </aside>
+        )}
 
-        <main className="px-10 py-12 ">
-          <Section title={rtl ? "دەربارەی من" : "About me"} accent="border-[#9aa3ad] text-[#1f3148]">
-            <p className="text-[12px] leading-5">{c.summary}</p>
-          </Section>
-          {c.experience.length > 0 && (
-            <section className="mt-7">
-              <h2 className="mb-4 border-b border-[#9aa3ad] pb-2 text-[20px] font-black tracking-[0.18em] rtl:tracking-normal text-[#1f3148]">{l.experience}</h2>
-              <div className="space-y-5">
-                {c.experience.slice(0, 3).map((item, index) => (
-                  <article key={`${item.company}-${index}`}>
-                    <div className="flex justify-between gap-5">
-                      <h3 className="text-[14px] font-black">{item.title}</h3>
-                      <span className="shrink-0 text-[11px] font-semibold">{item.duration}</span>
-                    </div>
-                    <p className="text-[12px] font-bold">{item.company}</p>
-                    <p className="mt-2 text-[11px] leading-5 text-neutral-700">{item.description || item.achievements[0]}</p>
-                  </article>
-                ))}
+        {c.certifications.length > 0 && (
+          <section className="mt-9">
+            <SidebarHeading>Certifications</SidebarHeading>
+            <ul className="mt-5 list-disc space-y-2 pl-4 text-[12px] font-semibold leading-[1.35]">
+              {c.certifications.slice(0, 3).map((item) => <li key={item}>{item}</li>)}
+            </ul>
+          </section>
+        )}
+
+        <section className="mt-9">
+          <SidebarHeading>Skills</SidebarHeading>
+          <div className="mt-5 space-y-3 text-[12px] font-semibold leading-[1.25]">
+            {c.skills.slice(0, 6).map((skill) => <p key={skill}>{skill}</p>)}
+          </div>
+        </section>
+
+        <section className="mt-9">
+          <SidebarHeading>Language</SidebarHeading>
+          <div className="mt-5 space-y-2 text-[12px] font-semibold">
+            {languageItems.map((item) => <p key={item}>{item}</p>)}
+          </div>
+        </section>
+      </aside>
+
+      <main className="absolute bottom-[34px] left-[326px] right-[32px] top-[340px]">
+        <section>
+          <h2 className="border-b border-[#8b929b] pb-2 text-[23px] font-black tracking-[0.22em] text-[#1f3148]">About me</h2>
+          <p className="mt-4 text-[11px] font-medium leading-[1.35] text-black">{c.summary}</p>
+        </section>
+
+        <section className="mt-7">
+          <h2 className="border-b border-[#8b929b] pb-2 text-[23px] font-black tracking-[0.22em] text-[#1f3148]">Experience</h2>
+          <div className="mt-4 space-y-6">
+            {c.experience.slice(0, 3).map((item, index) => (
+              <article key={`${item.company}-${index}`} className="text-black">
+                <div className="flex items-baseline justify-between gap-4">
+                  <h3 className="text-[17px] font-black leading-tight">{item.title}</h3>
+                  <span className="shrink-0 text-[11px] font-semibold">{item.duration}</span>
+                </div>
+                <p className="mt-1 text-[12px] font-semibold">{item.company}</p>
+                <p className="mt-3 text-[11px] font-medium leading-[1.35]">{item.description || item.achievements[0]}</p>
+                {item.achievements.length > 0 && (
+                  <p className="mt-2 text-[11px] font-medium leading-[1.35]">{item.achievements.slice(0, 2).join(" ")}</p>
+                )}
+              </article>
+            ))}
+          </div>
+        </section>
+
+        <section className="mt-7">
+          <h2 className="border-b border-[#8b929b] pb-2 text-[23px] font-black tracking-[0.22em] text-[#1f3148]">Reference</h2>
+          <div className="mt-4 grid grid-cols-2 gap-10 text-[11px] text-black">
+            {referenceItems.map((item, index) => (
+              <div key={`${item.name}-${index}`}>
+                <p className="font-semibold">{item.name} | {item.role}</p>
+                <p className="mt-2 font-medium">{item.meta}</p>
+                <p className="mt-2 font-medium">{c.phone || "+123-456-7890"}</p>
               </div>
-            </section>
-          )}
-          {c.projects.length > 0 && (
-            <section className="mt-7">
-              <h2 className="mb-4 border-b border-[#9aa3ad] pb-2 text-[20px] font-black tracking-[0.18em] rtl:tracking-normal text-[#1f3148]">{rtl ? "سەرچاوە" : "Reference"}</h2>
-              <div className="grid grid-cols-2 gap-8 text-[12px]">
-                {c.projects.slice(0, 2).map((project) => (
-                  <div key={project.name}>
-                    <p className="font-bold">{project.name}</p>
-                    <p className="mt-1 leading-5">{project.description}</p>
-                  </div>
-                ))}
+            ))}
+            {referenceItems.length === 1 && (
+              <div>
+                <p className="font-semibold">{c.name} | {c.title}</p>
+                <p className="mt-2 font-medium">{c.email || "hello@reallygreatsite.com"}</p>
+                <p className="mt-2 font-medium">{c.phone || "+123-456-7890"}</p>
               </div>
-            </section>
-          )}
-        </main>
-      </div>
+            )}
+          </div>
+        </section>
+      </main>
     </div>
   );
 }
@@ -972,6 +984,370 @@ export function RefSanchezTemplate({ data }: { data: ResumeData }) {
           )}
         </main>
       </div>
+    </div>
+  );
+}
+
+export function LeroyTemplate({ data }: { data: ResumeData }) {
+  const c = optimizeResumeForOnePage(data);
+  const rtl = isRTL(c);
+  const competenceItems = c.skills.slice(0, 6);
+  const languageItems = (c.certifications.length > 0 ? c.certifications : c.skills).slice(0, 3);
+  const leisureText = c.projects.length > 0
+    ? c.projects.slice(0, 3).map((project) => project.name).join(" - ")
+    : c.skills.slice(0, 3).join(" - ");
+  const nameParts = c.name.split(/\s+/).filter(Boolean);
+  const firstLine = nameParts.slice(0, Math.ceil(nameParts.length / 2)).join(" ") || c.name;
+  const secondLine = nameParts.slice(Math.ceil(nameParts.length / 2)).join(" ");
+
+  const CreamPanel = ({ title, children, className = "" }: { title: string; children: ReactNode; className?: string }) => (
+    <section className={`bg-[#f8f7f4] px-[38px] py-[28px] text-[#050b14] ${className}`}>
+      <h2 className="mb-3 font-serif text-[34px] font-bold uppercase leading-none tracking-[0.02em] text-[#142033] rtl:tracking-normal">{title}</h2>
+      {children}
+    </section>
+  );
+
+  return (
+    <div dir={rtl ? "rtl" : "ltr"} className="relative overflow-hidden bg-white font-sans text-[#050b14]" style={{ height: "1122px", minHeight: "1122px", width: "794px", maxWidth: "100%" }}>
+      <div className="absolute left-0 top-[76px] h-[112px] w-full bg-[#6f7e84]" />
+
+      <div className="absolute left-[46px] top-0 z-20 h-[609px] w-[292px] bg-[#202a3a]" style={{ clipPath: "polygon(0 0, 100% 0, 100% 90%, 50% 100%, 0 90%)" }}>
+        <div className="pt-[86px] text-center font-serif text-[34px] font-bold uppercase leading-[0.98] tracking-[0.02em] text-white rtl:tracking-normal">
+          <div>{firstLine}</div>
+          {secondLine && <div>{secondLine}</div>}
+        </div>
+
+        <div className="mx-auto mt-[28px] h-[202px] w-[202px] overflow-hidden rounded-full bg-slate-200">
+          {c.photoUrl ? (
+            <img src={c.photoUrl} alt={c.name} className="h-full w-full object-cover" />
+          ) : (
+            <div className="flex h-full w-full items-center justify-center bg-slate-200 text-5xl font-black text-[#202a3a]">{initials(c.name)}</div>
+          )}
+        </div>
+
+        <div className="mt-[38px] px-[43px] text-[14px] font-black leading-[1.2] text-white">
+          <p className="text-center">30 ans - permis B</p>
+          <div className="mt-3 space-y-3">
+            {c.phone && (
+              <div className="flex min-w-0 items-center gap-3">
+                <span className="grid h-5 w-5 place-items-center rounded-full border-2 border-white text-[10px]">P</span>
+                <span className="truncate">{c.phone}</span>
+              </div>
+            )}
+            {c.email && (
+              <div className="flex min-w-0 items-center gap-3">
+                <span className="grid h-5 w-5 place-items-center rounded-full border-2 border-white text-[12px]">@</span>
+                <span className="truncate">{c.email}</span>
+              </div>
+            )}
+            {c.location && (
+              <div className="flex min-w-0 items-center gap-3">
+                <MapPin size={20} fill="currentColor" strokeWidth={3} className="shrink-0" />
+                <span className="truncate">{c.location}</span>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      <header className="absolute left-[338px] right-0 top-[76px] z-10 flex h-[112px] items-center px-[76px] font-serif text-[38px] font-bold uppercase leading-[1.02] tracking-[0.03em] text-white rtl:tracking-normal">
+        <div className="max-w-[440px]">{c.title}</div>
+      </header>
+
+      <div className="absolute left-[46px] top-[628px] z-10 w-[292px]">
+        <CreamPanel title="Formation" className="min-h-[355px] px-[34px] py-[26px]">
+          <ul className="list-disc space-y-[22px] pl-5 text-[15px] font-semibold leading-[1.16] rtl:pl-0 rtl:pr-5">
+            {c.education.slice(0, 3).map((item, index) => (
+              <li key={`${item.institution}-${index}`}>{item.year}: {item.degree} - {item.institution}</li>
+            ))}
+          </ul>
+        </CreamPanel>
+      </div>
+
+      <main className="absolute left-[378px] right-[42px] top-[228px] z-10 space-y-[18px]">
+        <CreamPanel title="Competences" className="min-h-[280px]">
+          <ul className="list-disc space-y-[3px] pl-5 text-[15px] font-semibold leading-[1.05] rtl:pl-0 rtl:pr-5">
+            {competenceItems.map((skill) => <li key={skill}>{skill}</li>)}
+          </ul>
+        </CreamPanel>
+
+        <CreamPanel title="Experience" className="min-h-[276px]">
+          <ul className="list-disc space-y-[22px] pl-5 text-[15px] font-semibold leading-[1.14] rtl:pl-0 rtl:pr-5">
+            {c.experience.slice(0, 3).map((item, index) => (
+              <li key={`${item.company}-${index}`}>{item.duration}: {item.title} - {item.company}</li>
+            ))}
+          </ul>
+        </CreamPanel>
+
+        <CreamPanel title="Langues" className="min-h-[166px] py-[25px]">
+          <ul className="list-disc space-y-[3px] pl-5 text-[15px] font-semibold leading-[1.05] rtl:pl-0 rtl:pr-5">
+            {languageItems.map((item) => <li key={item}>{item}</li>)}
+          </ul>
+        </CreamPanel>
+      </main>
+
+      <footer className="absolute bottom-0 left-0 right-0 flex h-[65px] items-center bg-[#6f7e84] px-[88px] text-white">
+        <div className="font-serif text-[31px] font-bold uppercase leading-none">Loisirs</div>
+        <div className="ml-[58px] min-w-0 truncate text-[15px] font-black">{leisureText}</div>
+      </footer>
+    </div>
+  );
+}
+
+export function DuboisTemplate({ data }: { data: ResumeData }) {
+  const c = optimizeResumeForOnePage(data);
+  const rtl = isRTL(c);
+  const blue = "#153f68";
+  const skills = c.skills.slice(0, 6);
+  const languages = (c.certifications.length > 0 ? c.certifications : c.skills).slice(0, 2);
+  const interests = c.projects.length > 0 ? c.projects.slice(0, 4).map((p) => p.name) : c.skills.slice(0, 4);
+
+  const SidebarTitle = ({ children }: { children: ReactNode }) => (
+    <h2 className="mb-5 text-[17px] font-black leading-none text-[#153f68]">{children}</h2>
+  );
+
+  return (
+    <div dir={rtl ? "rtl" : "ltr"} className="relative overflow-hidden bg-white font-sans text-[#153f68]" style={{ height: "1122px", minHeight: "1122px", width: "794px", maxWidth: "100%" }}>
+      <aside className="absolute left-0 top-0 h-full w-[260px] bg-[#dcdfe5] px-[41px] pt-[26px]">
+        <div className="h-[244px] w-[172px] overflow-hidden border-[4px] border-white bg-slate-200">
+          {c.photoUrl ? <img src={c.photoUrl} alt={c.name} className="h-full w-full object-cover" /> : <div className="flex h-full w-full items-center justify-center text-4xl font-black">{initials(c.name)}</div>}
+        </div>
+
+        <section className="mt-[45px]">
+          <SidebarTitle>Coordonnees</SidebarTitle>
+          <div className="space-y-[22px] text-[12px] font-bold">
+            {c.phone && <div className="flex items-center gap-4"><Phone size={24} fill="currentColor" strokeWidth={3} /><span>{c.phone}</span></div>}
+            {c.email && <div className="flex items-center gap-4"><Mail size={24} fill="currentColor" strokeWidth={3} /><span className="truncate">{c.email}</span></div>}
+            {c.location && <div className="flex items-center gap-4"><MapPin size={24} fill="currentColor" strokeWidth={3} /><span className="truncate">{c.location}</span></div>}
+          </div>
+        </section>
+
+        <section className="mt-[48px]">
+          <SidebarTitle>Langues</SidebarTitle>
+          <div className="space-y-3 text-[13px] font-bold">
+            {languages.map((item, index) => (
+              <div key={item} className="grid grid-cols-[76px_1fr] items-center">
+                <span>{item}</span>
+                <span className="h-[6px] rounded-full bg-white"><span className="block h-full rounded-full bg-[#245b90]" style={{ width: index === 0 ? "86%" : "68%" }} /></span>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section className="mt-[54px]">
+          <SidebarTitle>Competences</SidebarTitle>
+          <div className="space-y-2 text-[13px] font-bold leading-[1.35]">
+            {skills.map((skill) => <p key={skill}>{skill}</p>)}
+          </div>
+        </section>
+
+        <section className="mt-[58px]">
+          <SidebarTitle>Centres d'interet</SidebarTitle>
+          <div className="space-y-2 text-[13px] font-bold leading-[1.35]">
+            {interests.map((item) => <p key={item}>{item}</p>)}
+          </div>
+        </section>
+      </aside>
+
+      <header className="absolute left-[210px] right-[11px] top-[52px] h-[145px] bg-[#153f68] px-[65px] py-[38px] text-white">
+        <h1 className="text-[39px] font-black leading-none tracking-tight">{c.name}</h1>
+        <p className="mt-4 text-[25px] font-semibold italic leading-none">{c.title}</p>
+      </header>
+
+      <main className="absolute left-[306px] right-[39px] top-[255px]">
+        <section>
+          <h2 className="mb-6 text-[21px] font-black leading-none">Formation</h2>
+          <div className="space-y-6">
+            {c.education.slice(0, 2).map((item, index) => (
+              <div key={`${item.institution}-${index}`} className="grid grid-cols-[1fr_92px] gap-6">
+                <div>
+                  <h3 className="text-[16px] font-black leading-tight">{item.degree}</h3>
+                  <p className="text-[16px] font-semibold italic leading-tight text-[#2b6398]">{item.institution}</p>
+                </div>
+                <p className="pt-1 text-right text-[11px] font-semibold italic text-[#2b6398]">{item.year}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section className="mt-[64px]">
+          <h2 className="mb-7 text-[23px] font-black leading-none">Experience Professionnelle</h2>
+          <div className="relative border-l-[3px] border-[#245b90] pl-[22px]">
+            {c.experience.slice(0, 3).map((item, index) => (
+              <article key={`${item.company}-${index}`} className="relative mb-[36px]">
+                <span className="absolute -left-[29px] top-1.5 h-[10px] w-[10px] rounded-full bg-[#153f68]" />
+                <div className="grid grid-cols-[1fr_98px] gap-5">
+                  <div>
+                    <h3 className="text-[17px] font-black leading-tight">{item.title}</h3>
+                    <p className="text-[16px] font-semibold italic leading-tight text-[#2b6398]">{item.company}</p>
+                  </div>
+                  <p className="pt-1 text-right text-[11px] font-semibold italic leading-tight text-[#2b6398]">{item.duration}</p>
+                </div>
+                <ul className="mt-5 list-disc space-y-1 pl-6 text-[14px] font-semibold leading-[1.2]">
+                  {(item.achievements.length ? item.achievements : [item.description]).slice(0, 3).map((achievement, achievementIndex) => <li key={achievementIndex}>{achievement}</li>)}
+                </ul>
+              </article>
+            ))}
+          </div>
+        </section>
+      </main>
+    </div>
+  );
+}
+
+export function GallegoTemplate({ data }: { data: ResumeData }) {
+  const c = optimizeResumeForOnePage(data);
+  const rtl = isRTL(c);
+  const contact = [c.phone, c.email, c.location].filter(Boolean);
+  const referenceItems = c.projects.length > 0
+    ? c.projects.slice(0, 2).map((project) => ({
+        name: project.name,
+        meta: project.impact || project.description,
+      }))
+    : c.education.slice(0, 2).map((item) => ({
+        name: item.degree,
+        meta: item.institution,
+      }));
+  const languageItems = (c.certifications.length > 0 ? c.certifications : c.skills).slice(0, 4);
+
+  const SectionRibbon = ({
+    title,
+    icon,
+    className = "",
+  }: {
+    title: string;
+    icon: ReactNode;
+    className?: string;
+  }) => (
+    <div className={`relative -ml-6 h-[48px] w-[392px] bg-[#075a7c] text-white shadow-[0_4px_0_rgba(0,0,0,0.16)] rtl:-ml-0 rtl:-mr-6 ${className}`}>
+      <div className="flex h-full items-center gap-3 px-8 text-[22px] font-black leading-none tracking-tight rtl:flex-row-reverse rtl:tracking-normal">
+        <span className="grid h-7 w-7 place-items-center text-white">{icon}</span>
+        <span>{title}</span>
+      </div>
+    </div>
+  );
+
+  const SidebarTitle = ({ children }: { children: ReactNode }) => (
+    <div className="mb-4 h-[43px] rounded-full border-[3px] border-white/55 text-center text-[21px] font-black leading-[38px] tracking-tight text-white">
+      {children}
+    </div>
+  );
+
+  return (
+    <div
+      dir={rtl ? "rtl" : "ltr"}
+      className="relative overflow-hidden bg-[#f7f7f7] font-sans text-[#1e4a5f]"
+      style={{ height: "1122px", minHeight: "1122px", width: "794px", maxWidth: "100%" }}
+    >
+      <div className="absolute inset-0 bg-white" />
+      <div className="absolute right-0 top-0 h-full w-[420px] bg-[linear-gradient(135deg,transparent_0_70%,#ececec_70%_100%)] rtl:left-0 rtl:right-auto" />
+      <div className="absolute right-[18px] top-[12px] flex gap-4 rtl:left-[18px] rtl:right-auto">
+        {Array.from({ length: 4 }).map((_, index) => (
+          <span key={index} className="h-[14px] w-[14px] rounded-full border-[4px] border-[#073f57] bg-white" />
+        ))}
+      </div>
+
+      <aside className="absolute left-0 top-0 z-10 h-full w-[325px] bg-[#073f57] px-[30px] pt-[66px] text-white rtl:left-auto rtl:right-0">
+        <div className="mx-auto h-[210px] w-[210px] overflow-hidden rounded-full border-[7px] border-white/75 bg-slate-200">
+          {c.photoUrl ? (
+            <img src={c.photoUrl} alt={c.name} className="h-full w-full object-cover" />
+          ) : (
+            <div className="flex h-full w-full items-center justify-center bg-slate-200 text-5xl font-black text-[#073f57]">
+              {initials(c.name)}
+            </div>
+          )}
+        </div>
+
+        <section className="mt-[44px]">
+          <SidebarTitle>{rtl ? "پەیوەندی" : "Contact"}</SidebarTitle>
+          <div className="space-y-[13px] text-[13px] font-bold leading-none text-white">
+            {contact.map((item, index) => {
+              const icons = [
+                <Phone key="phone" size={18} fill="currentColor" strokeWidth={3} />,
+                <Mail key="mail" size={18} fill="currentColor" strokeWidth={3} />,
+                <MapPin key="pin" size={18} fill="currentColor" strokeWidth={3} />,
+              ];
+              return (
+                <div key={item} className="flex min-w-0 items-center gap-3 rtl:flex-row-reverse">
+                  <span className="grid h-5 w-5 shrink-0 place-items-center rounded-full bg-white text-[#073f57]">{icons[index] ?? icons[0]}</span>
+                  <span className="truncate">{item}</span>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+
+        <section className="mt-[52px]">
+          <SidebarTitle>{rtl ? "سەرچاوەکان" : "References"}</SidebarTitle>
+          <div className="space-y-3">
+            {referenceItems.slice(0, 2).map((item, index) => (
+              <div key={`${item.name}-${index}`} className="text-[13px] leading-[1.18]">
+                <div className="font-black text-white">{item.name}</div>
+                <div className="font-semibold text-white/85">{item.meta}</div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section className="mt-[52px]">
+          <SidebarTitle>{rtl ? "زمانەکان" : "Languages"}</SidebarTitle>
+          <ul className="list-disc space-y-1 pl-5 text-[13px] font-bold leading-[1.2] rtl:pl-0 rtl:pr-5">
+            {languageItems.map((item) => (
+              <li key={item}>{item}</li>
+            ))}
+          </ul>
+        </section>
+      </aside>
+
+      <main className="relative z-20 ml-[325px] min-h-[1122px] pb-10 pl-0 pr-[30px] pt-[64px] rtl:ml-0 rtl:mr-[325px] rtl:pl-[30px] rtl:pr-0">
+        <header className="ml-[-28px] h-[204px] bg-[#075a7c] px-[42px] pt-[38px] text-white shadow-[0_8px_0_rgba(0,0,0,0.14)] rtl:ml-0 rtl:mr-[-28px]">
+          <h1 className="max-w-[430px] text-[37px] font-black leading-[1.03] tracking-tight rtl:tracking-normal">{c.name}</h1>
+          <p className="mt-4 max-w-[360px] text-[18px] font-bold leading-[1.18] text-white/90">{c.title}</p>
+        </header>
+
+        <div className="space-y-[28px] pt-[28px]">
+          <section>
+            <SectionRibbon title={rtl ? "پڕۆفایل" : "Profile"} icon={<UserRound size={24} fill="currentColor" strokeWidth={3} />} />
+            <div className="px-[36px] pt-[22px]">
+              <p className="max-w-[300px] text-[14px] font-bold leading-[1.35] text-[#4d6b77]">{c.summary}</p>
+            </div>
+          </section>
+
+          {c.education.length > 0 && (
+            <section>
+              <SectionRibbon title={rtl ? "خوێندن" : "Education"} icon={<GraduationCap size={27} fill="currentColor" strokeWidth={3} />} />
+              <div className="space-y-3 px-[36px] pt-[22px]">
+                {c.education.slice(0, 2).map((item, index) => (
+                  <div key={`${item.institution}-${index}`} className="text-[13px] leading-[1.13]">
+                    <div className="font-black text-[#15495f]">{item.degree}</div>
+                    <div className="font-semibold text-[#4f6c78]">{item.institution}</div>
+                    <div className="font-bold text-[#15495f]">• {item.year}</div>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+
+          {c.experience.length > 0 && (
+            <section>
+              <SectionRibbon title={rtl ? "ئەزموون" : "Experience"} icon={<BriefcaseBusiness size={25} fill="currentColor" strokeWidth={3} />} />
+              <div className="space-y-4 px-[36px] pt-[22px]">
+                {c.experience.slice(0, 2).map((item, index) => (
+                  <article key={`${item.company}-${index}`} className="max-w-[320px] text-[13px] leading-[1.22]">
+                    <h3 className="font-black text-[#15495f]">{item.company}</h3>
+                    <p className="font-semibold text-[#4f6c78]">{item.title}</p>
+                    <ul className="mt-2 list-disc space-y-1 pl-5 text-[12px] font-semibold leading-[1.25] text-[#4f6c78] rtl:pl-0 rtl:pr-5">
+                      {(item.achievements.length ? item.achievements : [item.description]).slice(0, 3).map((achievement, achievementIndex) => (
+                        <li key={achievementIndex}>{achievement}</li>
+                      ))}
+                    </ul>
+                  </article>
+                ))}
+              </div>
+            </section>
+          )}
+        </div>
+      </main>
     </div>
   );
 }

@@ -326,6 +326,9 @@ import {
   RefSilvaTemplate,
   RefTorresTemplate,
   MercerTemplate,
+  GallegoTemplate,
+  LeroyTemplate,
+  DuboisTemplate,
 } from "./templates-new";
 
 export function ResumePreview({
@@ -360,6 +363,9 @@ export function ResumePreview({
     case "ref-palmerston": preview = <RefPalmerstonTemplate data={data} />; break;
     case "ref-sanchez": preview = <RefSanchezTemplate data={data} />; break;
     case "mercer": preview = <MercerTemplate data={data} />; break;
+    case "gallego": preview = <GallegoTemplate data={data} />; break;
+    case "leroy": preview = <LeroyTemplate data={data} />; break;
+    case "dubois": preview = <DuboisTemplate data={data} />; break;
     case "minimal":
     default: preview = <MinimalTemplate data={data} />;
   }
