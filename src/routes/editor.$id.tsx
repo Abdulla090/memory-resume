@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import { 
   Bot, ArrowUp, ChevronDown, Download, Edit3, LayoutTemplate, RotateCcw, 
   Send, Sparkles, Target, X, CheckCircle2, Languages, ZoomIn, ZoomOut, 
-  Clock, FileText, FileType, Presentation, FileCode, Loader2, Wand2
+  Clock, FileText, FileType, Presentation, FileCode, Loader2, Wand2, SlidersHorizontal
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -15,8 +15,10 @@ import { exportResumePDF } from "@/components/resume/pdf-templates";
 import { exportResumeDocx } from "@/components/resume/docx-templates";
 import { improveBullet, tailorToJob, chatEditResume, fixResumeErrors, generateCoverLetter } from "@/lib/ai.functions";
 import { useAppStore } from "@/lib/store";
-import type { ExperienceItem, ResumeData, TemplateId } from "@/lib/types";
+import type { ExperienceItem, ResumeData, TemplateId, DesignSettings } from "@/lib/types";
 import { ResumePreview } from "@/components/resume/templates";
+import { DesignContext, UpdateDataContext } from "@/components/resume/DesignContext";
+import { DesignPanel, DEFAULT_DESIGN, type SectionId } from "@/components/DesignPanel";
 
 const rtlTextPattern = /[\u0600-\u06ff\u0750-\u077f\u08a0-\u08ff]/;
 
@@ -207,7 +209,13 @@ function ResumeEditor() {
   const [showHistory, setShowHistory] = useState(false);
 
   const [zoom, setZoom] = useState(1);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false); // Mobile sidebar toggle
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isDesignOpen, setIsDesignOpen] = useState(false);
+  const [selectedSection, setSelectedSection] = useState<SectionId>("global");
+
+  const design: DesignSettings = (resume as any)?.design ?? DEFAULT_DESIGN;
+  const updateDesign = (patch: Partial<DesignSettings>) =>
+    updateResume(id, { design: { ...(resume as any)?.design ?? DEFAULT_DESIGN, ...patch } });
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -233,8 +241,25 @@ function ResumeEditor() {
   }
 
   const data = resume.data;
-  const updateData = (patch: Partial<ResumeData>) =>
-    updateResume(id, { data: { ...data, ...patch } });
+  const updateData = (patchOrPath: Partial<ResumeData> | string, value?: any) => {
+    if (typeof patchOrPath === 'string') {
+      const keys = patchOrPath.split('.');
+      const newData = JSON.parse(JSON.stringify(data));
+      let current = newData;
+      for (let i = 0; i < keys.length - 1; i++) {
+        const k = keys[i];
+        if (current[k] === undefined) {
+           const nextKey = keys[i+1];
+           current[k] = isNaN(Number(nextKey)) ? {} : [];
+        }
+        current = current[k];
+      }
+      current[keys[keys.length - 1]] = value;
+      updateResume(id, { data: newData });
+    } else {
+      updateResume(id, { data: { ...data, ...patchOrPath } });
+    }
+  };
 
   const setTemplate = (template: TemplateId) => updateResume(id, { template });
 
@@ -406,6 +431,18 @@ function ResumeEditor() {
                 <span className="hidden sm:inline">{isKu ? "نەخشەکان" : "Design"}</span>
               </button>
 
+              <button
+                onClick={() => setIsDesignOpen((o) => !o)}
+                className={`px-4 py-2 sm:py-2.5 text-sm font-bold rounded-xl transition-all flex items-center gap-2 border shadow-sm hover:shadow-md active:scale-95 ${
+                  isDesignOpen
+                    ? "bg-slate-900 border-slate-900 text-white"
+                    : "bg-white border-slate-200 text-slate-700 hover:bg-slate-50"
+                }`}
+              >
+                <SlidersHorizontal className="h-4 w-4" />
+                <span className="hidden sm:inline">{isKu ? "ستایل" : "Style"}</span>
+              </button>
+
               <button onClick={handleCheckATS} className="px-4 py-2 sm:py-2.5 text-sm font-bold text-emerald-700 hover:text-emerald-950 rounded-xl hover:bg-emerald-50 transition-all flex items-center gap-2 border border-emerald-200 bg-white shadow-sm hover:shadow-md active:scale-95">
                 <CheckCircle2 className="h-4 w-4" />
                 <span className="hidden sm:inline">{isKu ? "پشکنینی ATS" : "ATS Score"}</span>
@@ -430,7 +467,9 @@ function ResumeEditor() {
         </div>
       </header>
 
-      <main className="flex-1 max-w-[1600px] w-full mx-auto grid gap-4 px-3 pb-4 pt-4 sm:gap-6 sm:px-6 sm:pb-6 sm:pt-6 lg:grid-cols-[400px_1fr] xl:grid-cols-[440px_1fr] relative z-10">
+      <main className="flex-1 max-w-[1600px] w-full mx-auto grid gap-4 px-3 pb-4 pt-4 sm:gap-6 sm:px-6 sm:pb-6 sm:pt-6 relative z-10"
+        style={{ gridTemplateColumns: isDesignOpen ? "400px 1fr 280px" : "400px 1fr", transition: "grid-template-columns 0.3s ease" }}
+      >
         
         {/* Backdrop for mobile sidebar */}
         {isSidebarOpen && (
@@ -625,10 +664,37 @@ function ResumeEditor() {
 
             {/* Resume Container with smooth scroll */}
             <div className="flex-1 overflow-hidden rounded-[1rem] shadow-[0_0_0_1px_rgba(0,0,0,0.05),0_30px_60px_-20px_rgba(0,0,0,0.15)] bg-white relative @container">
-              <ClientPDFPreview data={previewData} template={resume.template} previewRef={previewRef} zoom={zoom} />
+              <ClientPDFPreview data={previewData} template={resume.template} previewRef={previewRef} zoom={zoom} design={design} updateData={updateData} onSectionClick={(s) => {
+                setSelectedSection(s);
+                if (!isDesignOpen) setIsDesignOpen(true);
+              }} />
             </div>
           </div>
         </section>
+
+        {/* Right pane: Design Panel */}
+        <AnimatePresence>
+          {isDesignOpen && (
+            <motion.aside
+              key="design-panel"
+              initial={{ opacity: 0, x: 24 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 24 }}
+              transition={{ type: "spring", stiffness: 400, damping: 35 }}
+              className="hidden lg:flex flex-col sticky top-24 h-[calc(100vh-8rem)] rounded-[1.5rem] border border-slate-200 bg-white shadow-[0_8px_30px_rgba(0,0,0,0.06)] overflow-hidden"
+            >
+              <DesignPanel
+                design={design}
+                data={data}
+                onChange={updateDesign}
+                updateData={updateData}
+                onClose={() => setIsDesignOpen(false)}
+                selected={selectedSection}
+                setSelected={setSelectedSection}
+              />
+            </motion.aside>
+          )}
+        </AnimatePresence>
       </main>
 
       {/* Modals */}
@@ -784,9 +850,9 @@ function ResumeEditor() {
                             <div className="absolute inset-0 bg-white overflow-hidden flex items-start justify-center">
                               <div 
                                 className="origin-top pointer-events-none mt-2"
-                                style={{ width: '794px', height: '1123px', transform: 'scale(0.20)' }}
+                                style={{ width: '794px', height: '1123px', zoom: 0.20 }}
                               >
-                                <ResumePreview data={resume.data} template={templateId} />
+                                <ResumePreview data={resume.data} template={templateId} design={design} />
                               </div>
                             </div>
                             
@@ -907,17 +973,12 @@ function ExportButtons({ data, template, name, previewRef }: { data: ResumeData;
   const [pdfLoading, setPdfLoading] = useState(false);
   const [docxLoading, setDocxLoading] = useState(false);
   const filename = name.replace(/\s+/g, "_") || "resume";
-  const rtlExport = hasRTLText(data);
 
   const handlePDF = async () => {
     setPdfLoading(true);
     try {
-      if (rtlExport) {
-        if (previewRef.current) {
-          await exportPreviewAsPDF(previewRef.current, filename);
-        }
-      } else {
-        await exportResumePDF(data, template, filename);
+      if (previewRef.current) {
+        await exportPreviewAsPDF(previewRef.current, filename);
       }
     } catch (err) {
       console.error(err);
@@ -926,6 +987,7 @@ function ExportButtons({ data, template, name, previewRef }: { data: ResumeData;
       setPdfLoading(false); 
     }
   };
+
   const handleDocx = async () => {
     setDocxLoading(true);
     try { await exportResumeDocx(data, template, filename); } finally { setDocxLoading(false); }
@@ -947,62 +1009,176 @@ function ExportButtons({ data, template, name, previewRef }: { data: ResumeData;
         className="flex items-center gap-1.5 px-4 py-2.5 sm:py-1.5 rounded-xl sm:rounded-full bg-blue-600 backdrop-blur-md border border-blue-500 text-xs font-bold tracking-wide text-white shadow-sm hover:bg-blue-700 hover:shadow-md transition-all disabled:opacity-50"
       >
         <Download className="w-4 h-4 sm:w-3.5 sm:h-3.5" />
-        <span className="hidden sm:inline">{pdfLoading ? "..." : rtlExport ? "Canvas PDF" : "PDF"}</span>
+        <span className="hidden sm:inline">{pdfLoading ? "..." : "PDF"}</span>
         <span className="sm:hidden font-bold">{pdfLoading ? "..." : "PDF"}</span>
       </button>
     </>
   );
 }
 
-function ClientPDFPreview({ data, template, previewRef, zoom = 1 }: { data: ResumeData; template: TemplateId; previewRef: RefObject<HTMLDivElement | null>; zoom?: number }) {
+import type { UpdateDataFn } from "@/components/resume/DesignContext";
+
+function ClientPDFPreview({ data, template, previewRef, zoom = 1, design, updateData, onSectionClick }: {
+  data: ResumeData; template: TemplateId;
+  previewRef: RefObject<HTMLDivElement | null>;
+  zoom?: number;
+  design?: DesignSettings;
+  updateData?: UpdateDataFn;
+  onSectionClick?: (s: SectionId) => void;
+}) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [baseScale, setBaseScale] = useState(0.5); // Default safe scale
+  const [baseScale, setBaseScale] = useState(0.5);
   const [contentHeight, setContentHeight] = useState(1122);
 
+  // Dynamically load Google Fonts
+  useEffect(() => {
+    if (!design) return;
+    [design.fontFamily, design.headingFontFamily].filter(Boolean).forEach((font) => {
+      const id = `gf-${font.replace(/\s+/g, "-")}`;
+      if (document.getElementById(id)) return;
+      const link = document.createElement("link");
+      link.id = id; link.rel = "stylesheet";
+      link.href = `https://fonts.googleapis.com/css2?family=${encodeURIComponent(font)}:wght@400;500;600;700;800&display=swap`;
+      document.head.appendChild(link);
+    });
+  }, [design?.fontFamily, design?.headingFontFamily]);
+
+  // Fit-to-container scaling
   useLayoutEffect(() => {
     const container = containerRef.current;
     const preview = previewRef.current;
     if (!container || !preview) return;
-
-    const updateScale = () => {
+    const update = () => {
       const parent = container.parentElement;
       if (!parent) return;
-      
-      const availableW = parent.clientWidth - 32; 
-      const availableH = parent.clientHeight - 32;
-      
-      const contentW = 794; 
-      const actualContentH = Math.max(preview.scrollHeight, 1122);
-      setContentHeight(actualContentH);
-      
-      const scaleW = availableW / contentW;
-      const scaleH = availableH / actualContentH;
-      
-      setBaseScale(Math.min(scaleW, scaleH));
+      const w = parent.clientWidth - 32;
+      const h = parent.clientHeight - 32;
+      const actualH = Math.max(preview.scrollHeight, 1122);
+      setContentHeight(actualH);
+      setBaseScale(Math.min(w / 794, h / actualH));
     };
-
-    const observer = new ResizeObserver(updateScale);
-    if (container.parentElement) observer.observe(container.parentElement);
-    observer.observe(preview);
-
-    updateScale();
-
-    return () => observer.disconnect();
+    const ro = new ResizeObserver(update);
+    if (container.parentElement) ro.observe(container.parentElement);
+    ro.observe(preview);
+    update();
+    return () => ro.disconnect();
   }, [data, template, previewRef]);
+
+  // ── Scoped CSS bridge ─────────────────────────────────────────────────────
+  // Injected INSIDE previewRef so html-to-image captures it → PDF is pixel-perfect.
+  const d = design;
+  const bullet = !d ? '' :
+    d.bulletStyle === 'dot'    ? '"\\2022 "' :
+    d.bulletStyle === 'dash'   ? '"\\2013 "' :
+    d.bulletStyle === 'square' ? '"\\25AA "' :
+    d.bulletStyle === 'arrow'  ? '"\\203A "' :
+    d.bulletStyle === 'star'   ? '"\\2605 "' : '""';
+
+  const css = d ? `
+.ds-live {
+  --color-text: ${d.textColor};
+  --color-heading: ${d.headingColor};
+  --color-accent: ${d.accentColor};
+  --color-bg: ${d.backgroundColor};
+  --color-sidebar: ${d.sidebarColor};
+  --font-base: '${d.fontFamily}', system-ui, sans-serif;
+  --font-heading: '${d.headingFontFamily}', system-ui, sans-serif;
+  --ds-photo-radius: ${d.photoShape === 'circle' ? '50%' : d.photoShape === 'rounded' ? '12px' : '0px'};
+  --ds-photo-size: ${d.photoShape === 'none' ? '0px' : (d.photoSize || 80) + 'px'};
+
+  font-family: var(--font-base) !important;
+  font-size: ${d.baseFontSize}px !important;
+  line-height: ${d.lineHeight} !important;
+  letter-spacing: ${d.letterSpacing}em !important;
+  color: var(--color-text) !important;
+  background-color: var(--color-bg) !important;
+}
+.ds-live > div:first-of-type,
+.ds-live > .bg-white,
+.ds-live [style*="minHeight"] {
+  padding: ${d.pagePaddingY}px ${d.pagePaddingX}px !important;
+}
+.ds-live h1 {
+  font-family: '${d.headingFontFamily}', system-ui, sans-serif !important;
+  font-size: ${(d.baseFontSize * d.headingScale * 1.6).toFixed(1)}px !important;
+  color: ${d.headingColor} !important;
+}
+.ds-live h2 {
+  font-family: '${d.headingFontFamily}', system-ui, sans-serif !important;
+  font-size: ${(d.baseFontSize * d.headingScale).toFixed(1)}px !important;
+  color: ${d.headingColor} !important;
+}
+.ds-live h3 {
+  font-family: '${d.headingFontFamily}', system-ui, sans-serif !important;
+  font-size: ${(d.baseFontSize * d.headingScale * 0.85).toFixed(1)}px !important;
+  color: ${d.headingColor} !important;
+}
+.ds-live section { margin-top: ${d.sectionGap}px !important; }
+.ds-live [class*="space-y"] > * + * { margin-top: ${d.itemGap}px !important; }
+.ds-live [class*="border-b"] {
+  border-bottom-style: ${d.showDividers ? d.dividerStyle : 'none'} !important;
+  border-bottom-color: ${d.accentColor}55 !important;
+}
+.ds-live [class*="border-t"] {
+  border-top-style: ${d.showDividers ? d.dividerStyle : 'none'} !important;
+  border-top-color: ${d.accentColor}55 !important;
+}
+.ds-live ul li::marker { content: ${bullet}; color: ${d.accentColor} !important; }
+.ds-live aside,
+.ds-live [class*="bg-neutral-900"],
+.ds-live [class*="bg-slate-900"],
+.ds-live [class*="bg-gray-900"],
+.ds-live [class*="bg-neutral-800"] { background-color: ${d.sidebarColor} !important; }
+` : '';
+
+  const handlePreviewClick = (e: React.MouseEvent) => {
+    if (!onSectionClick) return;
+    const text = (e.target as HTMLElement).innerText?.toLowerCase() || '';
+    const sectionNames = {
+      summary: ['summary', 'profile', 'پوختە', 'پڕۆفایل'],
+      experience: ['experience', 'ئەزموون'],
+      education: ['education', 'خوێندن'],
+      skills: ['skills', 'لێهاتووییەکان', 'expertise'],
+      projects: ['projects', 'پرۆژەکان'],
+      certifications: ['certifications', 'بڕوانامەکان']
+    };
+    
+    const sectionElement = (e.target as HTMLElement).closest('section, aside');
+    if (sectionElement) {
+       const sectionText = sectionElement.textContent?.toLowerCase() || '';
+       for (const [key, keywords] of Object.entries(sectionNames)) {
+         if (keywords.some(k => sectionText.includes(k))) {
+           onSectionClick(key as any);
+           return;
+         }
+       }
+    }
+    onSectionClick('global');
+  };
 
   return (
     <div ref={containerRef} className="absolute inset-0 overflow-auto bg-slate-100/50 p-2 sm:p-4">
       <div className="flex min-h-full min-w-full w-fit">
-        <div 
-          className="m-auto transition-all duration-300 ease-out shrink-0 flex justify-center" 
-          style={{ width: 794 * baseScale * zoom, height: contentHeight * baseScale * zoom }}
+        <div
+          className="m-auto transition-all duration-300 ease-out shrink-0 flex justify-center"
+          style={{ zoom: baseScale * zoom }}
         >
           <div
-            className="w-[794px] origin-top transition-transform duration-300 ease-out overflow-hidden rounded-sm shadow-[0_20px_50px_-24px_rgba(15,23,42,0.45)] shrink-0"
-            style={{ transform: `scale(${baseScale * zoom})`, minHeight: '1122px' }}
+            className="w-[794px] origin-top transition-all duration-300 ease-out overflow-hidden rounded-sm shadow-[0_20px_50px_-24px_rgba(15,23,42,0.45)] shrink-0"
+            style={{ minHeight: '1122px' }}
           >
-            <div ref={previewRef} className="w-full min-h-full bg-white">
-              <ResumePreview data={data} template={template} />
+            {/* previewRef is what html-to-image screenshots → PDF is always pixel-perfect */}
+            <div
+              ref={previewRef}
+              onClick={handlePreviewClick}
+              className="ds-live w-full min-h-full hover:ring-2 hover:ring-blue-400/50 transition-shadow"
+              style={d ? { backgroundColor: d.backgroundColor } : { backgroundColor: '#ffffff' }}
+            >
+              {/* Scoped style bridge — lives inside the screenshot boundary */}
+              {d && <style dangerouslySetInnerHTML={{ __html: css }} />}
+              <UpdateDataContext.Provider value={updateData}>
+                <ResumePreview data={data} template={template} design={design} />
+              </UpdateDataContext.Provider>
             </div>
           </div>
         </div>
@@ -1010,3 +1186,4 @@ function ClientPDFPreview({ data, template, previewRef, zoom = 1 }: { data: Resu
     </div>
   );
 }
+

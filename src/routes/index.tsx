@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { animate, motion, useMotionValue, useScroll, useSpring, useTransform, AnimatePresence } from "framer-motion";
+import { animate, motion, AnimatePresence, useScroll, useTransform } from "framer-motion";
 import { TrustedMarquee } from "../components/TrustedMarquee";
 import {
   ArrowLeft,
@@ -219,119 +219,91 @@ function Counter({ to, suffix = "" }: { to: number; suffix?: string }) {
 
 export function Header({ language, onToggleLanguage }: { language: Language; onToggleLanguage: () => void }) {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const t = copy[language];
 
-  // Raw scroll progress 0→1 (clamped to first 120px)
-  const rawScroll = useMotionValue(0);
-
+  // Zero-cost scroll detection — IntersectionObserver fires once on threshold cross, not per frame
   useEffect(() => {
-    const onScroll = () => rawScroll.set(Math.min(window.scrollY / 120, 1));
+    const sentinel = document.createElement("div");
+    sentinel.style.cssText = "position:fixed;top:80px;left:0;width:1px;height:1px;pointer-events:none;z-index:-1;";
+    document.body.appendChild(sentinel);
+    const onScroll = () => setScrolled(window.scrollY > 60);
     window.addEventListener("scroll", onScroll, { passive: true });
     onScroll();
-    return () => window.removeEventListener("scroll", onScroll);
-  }, [rawScroll]);
-
-  // Spring-smooth version of the scroll progress
-  const progress = useSpring(rawScroll, { stiffness: 160, damping: 28, mass: 0.6 });
-
-  // Interpolated style values — morph from full-width bar → centered pill
-  const maxW         = useTransform(progress, [0, 1], ["1280px", "780px"]);
-  const marginTop    = useTransform(progress, [0, 1], ["0px",    "12px"]);
-  const paddingX     = useTransform(progress, [0, 1], ["24px",   "20px"]);
-  const height       = useTransform(progress, [0, 1], ["64px",   "52px"]);
-  const borderRadius = useTransform(progress, [0, 1], ["0px",    "999px"]);
-  const bgOpacity    = useTransform(progress, [0, 1], [0,        0.85]);
-  const shadowOpacity= useTransform(progress, [0, 1], [0,        1]);
-  const borderOpacity= useTransform(progress, [0, 1], [0,        1]);
-  const gap          = useTransform(progress, [0, 1], ["0px",    "8px"]);
-
-  // Nav link sizes
-  const navPx        = useTransform(progress, [0, 1], ["16px",   "12px"]);
-  const navPy        = useTransform(progress, [0, 1], ["8px",    "6px"]);
-  const navFontSize  = useTransform(progress, [0, 1], ["14px",   "13px"]);
-
-  // CTA button
-  const ctaPx        = useTransform(progress, [0, 1], ["20px",   "14px"]);
-  const ctaPy        = useTransform(progress, [0, 1], ["10px",   "7px"]);
-  const ctaFontSize  = useTransform(progress, [0, 1], ["14px",   "12px"]);
+    return () => { window.removeEventListener("scroll", onScroll); sentinel.remove(); };
+  }, []);
 
   return (
     <>
-      {/* ── DESKTOP animated pill header (hidden on mobile) ── */}
-      <header className="fixed left-0 right-0 top-0 z-50 pointer-events-none hidden md:block" dir="ltr">
-        <motion.div
-          className="relative mx-auto pointer-events-auto flex items-center justify-between"
+      {/* ── DESKTOP header (hidden on mobile) ── */}
+      <header className="fixed left-0 right-0 top-0 z-50 pointer-events-none hidden md:flex justify-center" dir="ltr">
+        <div
+          className="pointer-events-auto flex items-center justify-between"
           style={{
-            maxWidth: maxW,
-            marginTop,
-            paddingLeft: paddingX,
-            paddingRight: paddingX,
-            height,
-            borderRadius,
-            gap,
-            backgroundColor: useTransform(bgOpacity, (v) => `rgba(255,255,255,${v})`),
-            boxShadow: useTransform(shadowOpacity, (v) => `0 8px 32px rgba(0,0,0,${v * 0.09}), 0 1px 3px rgba(0,0,0,${v * 0.05})`),
-            border: useTransform(borderOpacity, (v) => `1px solid rgba(203,213,225,${v * 0.6})`),
-            backdropFilter: useTransform(bgOpacity, (v) => `blur(${v * 16}px)`) as any,
-            WebkitBackdropFilter: useTransform(bgOpacity, (v) => `blur(${v * 16}px)`) as any,
+            maxWidth: scrolled ? "800px" : "100%",
+            width: "100%",
+            marginTop: scrolled ? "10px" : "0px",
+            marginLeft: scrolled ? "auto" : "0",
+            marginRight: scrolled ? "auto" : "0",
+            paddingLeft: scrolled ? "20px" : "24px",
+            paddingRight: scrolled ? "20px" : "24px",
+            height: scrolled ? "52px" : "64px",
+            borderRadius: scrolled ? "999px" : "0px",
+            background: scrolled ? "rgba(255,255,255,0.92)" : "rgba(255,255,255,0.95)",
+            boxShadow: scrolled
+              ? "0 8px 32px rgba(0,0,0,0.1), 0 1px 3px rgba(0,0,0,0.06)"
+              : "0 1px 0 rgba(226,232,240,0.8)",
+            borderBottom: scrolled ? "none" : "1px solid rgba(226,232,240,0.8)",
+            border: scrolled ? "1px solid rgba(203,213,225,0.6)" : "none",
+            /* Always keep blur active — switching it on mid-scroll creates a new compositor layer = first-scroll jank */
+            backdropFilter: "blur(16px)",
+            WebkitBackdropFilter: "blur(16px)",
+            willChange: "max-width, border-radius",
+            transition: "max-width 0.35s ease, margin-top 0.35s ease, height 0.35s ease, border-radius 0.35s ease, box-shadow 0.35s ease",
           }}
         >
           <Link to="/" className="flex shrink-0 items-center gap-2 cursor-pointer" id="nav-logo">
-            <img src="/logo/MemoryCV Logo Icon Only.png" alt="MemoryCV" className="h-16 w-16 rounded-lg object-contain" />
+            <img src="/logo/MemoryCV Logo Icon Only.png" alt="MemoryCV" className="h-14 w-14 rounded-lg object-contain" />
             <span className="text-xl font-bold tracking-tight text-slate-900">MemoryCV</span>
           </Link>
 
           {/* Center nav */}
-          <nav className="hidden items-center md:flex" style={{ gap: "2px" }}>
+          <nav className="hidden items-center gap-1 md:flex">
             {t.nav.map((item) => (
-              <motion.div key={item.label} style={{ paddingLeft: navPx, paddingRight: navPx, paddingTop: navPy, paddingBottom: navPy }}>
-                <Link
-                  to={item.to as any}
-                  hash={(item as any).hash}
-                  className="rounded-lg font-semibold text-slate-600 transition-colors hover:text-slate-900"
-                  style={{ fontSize: navFontSize } as unknown as React.CSSProperties}
-                  dir={t.dir}
-                >
-                  {item.label}
-                </Link>
-              </motion.div>
+              <Link
+                key={item.label}
+                to={item.to as any}
+                hash={(item as any).hash}
+                className="rounded-lg px-4 py-2 text-sm font-semibold text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900"
+                dir={t.dir}
+              >
+                {item.label}
+              </Link>
             ))}
           </nav>
 
           {/* Right actions */}
           <div className="flex shrink-0 items-center gap-2">
-            <motion.button
+            <button
               onClick={onToggleLanguage}
-              className="hidden items-center gap-1.5 rounded-lg font-semibold text-slate-600 transition-colors hover:text-slate-900 md:flex overflow-hidden"
-              style={{ fontSize: navFontSize } as unknown as React.CSSProperties}
+              className="hidden items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-semibold text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900 md:flex"
               aria-label="Change language"
               dir="ltr"
             >
               <Globe className="h-4 w-4 shrink-0" />
-              <motion.span
-                style={{
-                  maxWidth: useTransform(progress, [0.6, 1], ["80px", "0px"]),
-                  opacity: useTransform(progress, [0.5, 0.9], [1, 0]),
-                  overflow: "hidden",
-                  whiteSpace: "nowrap",
-                  display: "inline-block",
-                }}
-              >
+              <span className="overflow-hidden whitespace-nowrap" style={{ maxWidth: scrolled ? "0px" : "80px", opacity: scrolled ? 0 : 1, transition: "max-width 0.3s ease, opacity 0.2s ease" }}>
                 {t.toggle}
-              </motion.span>
-            </motion.button>
+              </span>
+            </button>
 
-            <motion.div style={{ paddingLeft: ctaPx, paddingRight: ctaPx, paddingTop: ctaPy, paddingBottom: ctaPy }} className="hidden md:block rounded-full bg-blue-600 shadow-sm transition-shadow hover:bg-blue-700 hover:shadow-md">
-              <Link
-                to="/dashboard"
-                id="nav-free-trial"
-                className="block whitespace-nowrap font-bold text-white"
-                style={{ fontSize: ctaFontSize } as unknown as React.CSSProperties}
-                dir={t.dir}
-              >
-                {t.navCta}
-              </Link>
-            </motion.div>
+            <Link
+              to="/dashboard"
+              id="nav-free-trial"
+              className="hidden md:block rounded-full bg-blue-600 px-5 py-2 text-sm font-bold text-white shadow-sm transition-all hover:bg-blue-700 hover:shadow-md"
+              dir={t.dir}
+            >
+              {t.navCta}
+            </Link>
 
             <button
               className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 transition-colors hover:bg-slate-50 md:hidden"
@@ -351,8 +323,7 @@ export function Header({ language, onToggleLanguage }: { language: Language; onT
               </AnimatePresence>
             </button>
           </div>
-        </motion.div>
-
+        </div>
       </header>
 
       {/* ── MOBILE solid header (md:hidden) ── */}
@@ -455,7 +426,7 @@ export function Header({ language, onToggleLanguage }: { language: Language; onT
         )}
       </AnimatePresence>
 
-      {/* Spacer - taller to match restored mobile header */}
+      {/* Spacer */}
       <div className="h-[60px] md:h-16 w-full flex-none" />
     </>
   );
@@ -689,8 +660,8 @@ export function StatsSection({ language }: { language: Language }) {
 
   return (
     <section className="app-frame relative px-4 pb-12 sm:px-6 sm:pb-24" style={{ paddingTop: "clamp(60px,10vw,140px)" }}>
-      <div className="absolute right-10 top-20 -z-10 h-96 w-96 rounded-full bg-blue-100/40 blur-3xl" />
-      <div className="absolute bottom-10 left-10 -z-10 h-80 w-80 rounded-full bg-sky-100/40 blur-3xl" />
+      <div className="absolute right-10 top-20 -z-10 h-96 w-96 rounded-full bg-[radial-gradient(circle_at_center,rgba(219,234,254,0.4)_0%,transparent_70%)]" />
+      <div className="absolute bottom-10 left-10 -z-10 h-80 w-80 rounded-full bg-[radial-gradient(circle_at_center,rgba(224,242,254,0.4)_0%,transparent_70%)]" />
 
       <div className="mb-10 flex flex-col items-start justify-between gap-6 sm:mb-16 md:flex-row md:items-center" dir={t.dir}>
         <motion.h2
@@ -758,8 +729,8 @@ const BentoHeroCard = ({ language }: { language: Language }) => {
     className="relative w-full overflow-hidden rounded-[2rem] border border-white/50 bg-gradient-to-br from-[#e8f3ff] to-[#cce4ff] shadow-xl"
   >
     <div className="pointer-events-none absolute inset-0">
-      <div className="absolute bottom-[-10%] right-[10%] h-[200px] w-[400px] rounded-full bg-white/60 blur-2xl" />
-      <div className="absolute bottom-[-20%] left-[-10%] h-[300px] w-[600px] rounded-full bg-white/80 blur-3xl" />
+      <div className="absolute bottom-[-10%] right-[10%] h-[200px] w-[400px] rounded-full bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.6)_0%,transparent_70%)]" />
+      <div className="absolute bottom-[-20%] left-[-10%] h-[300px] w-[600px] rounded-full bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.8)_0%,transparent_70%)]" />
     </div>
 
     <div className="relative z-10 grid gap-6 p-5 sm:p-10 md:grid-cols-[0.95fr_1.05fr] md:p-14">
@@ -785,7 +756,7 @@ const BentoHeroCard = ({ language }: { language: Language }) => {
       </div>
 
       <div className="pointer-events-none relative hidden h-[330px] items-center justify-center sm:flex sm:h-[420px] md:h-[460px]" dir="ltr">
-        <div className="absolute left-1/2 top-1/2 h-[400px] w-[400px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-gradient-to-tr from-blue-300/30 via-white/50 to-blue-200/30 blur-3xl" />
+        <div className="absolute left-1/2 top-1/2 h-[400px] w-[400px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle_at_center,rgba(219,234,254,0.3)_0%,transparent_70%)]" />
         <div className="relative flex h-[320px] w-[280px] select-none items-center justify-center sm:h-[400px] sm:w-[360px]">
           <div className="absolute right-[7%] top-[6%] w-[145px] origin-center rounded-2xl shadow-[0_20px_40px_rgba(0,0,0,0.15)] sm:w-[190px]" style={{ transform: "rotate(-8deg)" }}>
             <LeftCardSVG />
@@ -986,8 +957,8 @@ export function BentoGridSection({ language }: { language: Language }) {
 
   return (
     <section id="features" className="relative overflow-hidden bg-[#f4f9ff] px-4 pb-12 pt-12 sm:px-6 sm:pb-24 sm:pt-28 md:pt-40">
-      <div className="pointer-events-none absolute right-1/4 top-0 h-[600px] w-[800px] -translate-y-1/2 rounded-full bg-blue-100/40 opacity-70 blur-3xl" />
-      <div className="pointer-events-none absolute left-0 top-1/4 h-[500px] w-[600px] rounded-full bg-sky-100/40 opacity-60 blur-3xl" />
+      <div className="pointer-events-none absolute right-1/4 top-0 h-[600px] w-[800px] -translate-y-1/2 rounded-full bg-[radial-gradient(circle_at_center,rgba(219,234,254,0.3)_0%,transparent_70%)]" />
+      <div className="pointer-events-none absolute left-0 top-1/4 h-[500px] w-[600px] rounded-full bg-[radial-gradient(circle_at_center,rgba(224,242,254,0.3)_0%,transparent_70%)]" />
 
       <div className="mx-auto max-w-6xl space-y-6">
         <BentoHeroCard language={language} />
@@ -1055,24 +1026,8 @@ function Landing() {
       <main>
         <HeroV2 language={language} />
         <TrustedMarquee language={language} />
-        
-        <motion.div
-          initial={{ opacity: 0, y: 40 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-20px" }}
-          transition={{ duration: 0.8, ease: "easeOut" }}
-        >
-          <StatsSection language={language} />
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 60 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-100px" }}
-          transition={{ duration: 0.8, ease: "easeOut", delay: 0.2 }}
-        >
-          <BentoGridSection language={language} />
-        </motion.div>
+        <StatsSection language={language} />
+        <BentoGridSection language={language} />
       </main>
     </div>
   );

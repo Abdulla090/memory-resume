@@ -23,7 +23,7 @@ export const useAppStore = create<AppState>()(
     (set) => ({
       profile: null,
       resumes: [],
-      preferences: { defaultTemplate: "minimal" },
+      preferences: { defaultTemplate: "new-professional" },
       language: "en",
       apiKey: "AIzaSyC31fuY4cGzHyTrCaP3yMe9NJoPrqkXXJo",
       setProfile: (profile) => set({ profile }),

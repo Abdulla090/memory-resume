@@ -5,8 +5,8 @@
 
 const marqueeX = `
 @keyframes marquee-left {
-  0%   { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
+  0%   { transform: translate3d(0, 0, 0); }
+  100% { transform: translate3d(-50%, 0, 0); }
 }
 `;
 
@@ -122,7 +122,7 @@ export function TrustedMarquee({ language }: { language: Language }) {
         }}
       >
         {/* Row 1 — scrolls LEFT */}
-        <div className="flex py-4" style={{ animation: "marquee-left 14s linear infinite" }}>
+        <div className="flex py-4" style={{ animation: "marquee-left 14s linear infinite", willChange: "transform" }}>
           {[...companies, ...companies].map((c, i) => (
             <Chip key={`r1-${i}`} name={c.name} svg={c.svg} />
           ))}

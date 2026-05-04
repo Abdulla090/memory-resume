@@ -65,6 +65,49 @@ export interface ResumeData {
   certifications: string[];
 }
 
+// ── Design Control Panel Settings ────────────────────────────
+export interface DesignSettings {
+  // Typography
+  fontFamily: string;
+  headingFontFamily: string;
+  baseFontSize: number;        // px, 10-16
+  headingScale: number;        // multiplier, 1.0-2.0
+  lineHeight: number;          // 1.2-2.0
+  letterSpacing: number;       // em, -0.05 to 0.2
+
+  // Colors
+  accentColor: string;         // hex
+  textColor: string;           // hex
+  headingColor: string;        // hex
+  backgroundColor: string;     // hex
+  sidebarColor: string;        // hex (for sidebar templates)
+
+  // Spacing
+  pagePaddingX: number;        // px, 20-80
+  pagePaddingY: number;        // px, 20-80
+  sectionGap: number;          // px, 8-48
+  itemGap: number;             // px, 4-24
+
+  // Decorations - vectors
+  showDividers: boolean;
+  dividerStyle: "solid" | "dashed" | "dotted" | "none";
+  showSectionIcons: boolean;
+  headerShape: "none" | "bar" | "wave" | "diagonal" | "arch";
+  bulletStyle: "dot" | "dash" | "square" | "arrow" | "star" | "none";
+
+  // Skill bars
+  showSkillBars: boolean;
+  skillBarStyle: "filled" | "dots" | "circles" | "lines";
+
+  // Photo
+  photoShape: "circle" | "rounded" | "square" | "none";
+  photoSize: number;           // px, 60-140
+
+  // Layout
+  columnLayout: "single" | "two-col" | "sidebar-left" | "sidebar-right";
+  contentOrder: string[];      // section ordering
+}
+
 export type TemplateId = "minimal" | "executive" | "noir" | "apex" | "slate" | "cipher" | "monolith" | "pinnacle" | "avant" | "vanguard" | "nexus" | "orbit" | "metric" | "prism" | "carbon" | "atlas" | "forge" | "zenith" | "vector" | "new-sleek" | "new-professional" | "new-academic" | "ref-torres" | "ref-silva" | "ref-schumacher" | "ref-palmerston" | "ref-sanchez" | "mercer" | "gallego" | "leroy" | "dubois";
 
 export interface SavedResume {
@@ -74,6 +117,7 @@ export interface SavedResume {
   template: TemplateId;
   data: ResumeData;
   createdAt: number;
+  design?: DesignSettings;
 }
 
 export interface CareerPath {

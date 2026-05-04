@@ -1,4 +1,6 @@
-import type { ResumeData, TemplateId } from "@/lib/types";
+import React from 'react';
+import type { ResumeData, TemplateId, DesignSettings } from "@/lib/types";
+import { DesignContext } from "./DesignContext";
 
 const rtlPattern = /[\u0600-\u06ff\u0750-\u077f\u08a0-\u08ff]/;
 
@@ -334,9 +336,11 @@ import {
 export function ResumePreview({
   data,
   template,
+  design,
 }: {
   data: ResumeData;
   template: TemplateId;
+  design?: DesignSettings;
 }) {
   const rtl = isRTL(data);
   let preview: React.ReactNode;
@@ -371,8 +375,10 @@ export function ResumePreview({
   }
 
   return (
-    <div dir={rtl ? "rtl" : "ltr"} className="resume-rtl-scope h-full w-full [unicode-bidi:plaintext]">
-      {preview}
-    </div>
+    <DesignContext.Provider value={design}>
+      <div dir={rtl ? "rtl" : "ltr"} className="resume-rtl-scope h-full w-full [unicode-bidi:plaintext]">
+        {preview}
+      </div>
+    </DesignContext.Provider>
   );
 }

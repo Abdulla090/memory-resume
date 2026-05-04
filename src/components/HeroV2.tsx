@@ -42,12 +42,12 @@ function DirectionArrow({ language, className }: { language: Language; className
 /* ── Infinite marquee keyframes ─────────────────────────────── */
 const marqueeCSS = `
 @keyframes marquee-down {
-  0%   { transform: translateY(0); }
-  100% { transform: translateY(-50%); }
+  0%   { transform: translate3d(0, 0, 0); }
+  100% { transform: translate3d(0, -50%, 0); }
 }
 @keyframes marquee-up {
-  0%   { transform: translateY(-50%); }
-  100% { transform: translateY(0); }
+  0%   { transform: translate3d(0, -50%, 0); }
+  100% { transform: translate3d(0, 0, 0); }
 }
 `;
 
@@ -60,7 +60,7 @@ function MarqueeColumns() {
   return (
     <>
       <style>{marqueeCSS}</style>
-      <div className="relative flex h-full w-full items-start justify-center gap-2 overflow-hidden sm:gap-4" dir="ltr">
+      <div className="relative flex h-full w-full items-start justify-center gap-2 overflow-hidden sm:gap-4 pointer-events-none" dir="ltr">
 
         {/* Left column — scrolls DOWN */}
         <div
@@ -69,7 +69,7 @@ function MarqueeColumns() {
         >
           <div
             className="flex flex-col gap-2 sm:gap-4"
-            style={{ animation: "marquee-down 22s linear infinite" }}
+            style={{ animation: "marquee-down 22s linear infinite", willChange: "transform" }}
           >
             {leftCards.map((Card, i) => (
               <div key={`l-${i}`} className="shrink-0 overflow-hidden rounded-lg shadow-[0_6px_20px_rgba(0,0,0,0.12)] sm:rounded-xl">
@@ -91,7 +91,7 @@ function MarqueeColumns() {
         >
           <div
             className="flex flex-col gap-2 sm:gap-4"
-            style={{ animation: "marquee-up 20s linear infinite" }}
+            style={{ animation: "marquee-up 20s linear infinite", willChange: "transform" }}
           >
             {rightCards.map((Card, i) => (
               <div key={`r-${i}`} className="shrink-0 overflow-hidden rounded-lg shadow-[0_6px_20px_rgba(0,0,0,0.12)] sm:rounded-xl">

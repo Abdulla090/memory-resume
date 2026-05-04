@@ -1,4 +1,6 @@
-import type { ReactNode } from "react";
+import { ReactNode, useContext } from "react";
+import { DesignContext } from "./DesignContext";
+import { Editable } from "./Editable";
 import { StarRating, BarRating } from "./templates";
 import { BriefcaseBusiness, Globe, GraduationCap, Mail, MapPin, Phone, UserRound } from "lucide-react";
 import type { ResumeData } from "@/lib/types";
@@ -55,15 +57,24 @@ function initials(name: string) {
     .join("");
 }
 
-function PhotoBlock({ data, shape = "rounded" }: { data: ResumeData; shape?: "rounded" | "circle" | "arch" }) {
+function PhotoBlock({ data, shape = "rounded" }: { data: ResumeData; shape?: "rounded" | "circle" | "arch" | "none" }) {
+  if (shape === "none") return null;
   const radius = shape === "circle" ? "rounded-full" : shape === "arch" ? "rounded-t-full rounded-b-2xl" : "rounded-[1.4rem]";
 
   return (
-    <div className={`h-28 w-28 shrink-0 overflow-hidden border border-slate-200 bg-slate-100 ${radius}`}>
+    <div 
+      className={`shrink-0 overflow-hidden border border-slate-200 bg-slate-100 ${radius}`}
+      style={{ 
+        width: "var(--ds-photo-size, 112px)", 
+        height: "var(--ds-photo-size, 112px)", 
+        borderRadius: "var(--ds-photo-radius)",
+        display: "var(--ds-photo-size)" === "0px" ? "none" : "block"
+      }}
+    >
       {data.photoUrl ? (
         <img src={data.photoUrl} alt={data.name} className="h-full w-full object-cover" />
       ) : (
-        <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-slate-100 to-slate-200 text-2xl font-black tracking-tight rtl:tracking-normal text-slate-500">
+        <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-slate-100 to-slate-200 text-2xl font-black tracking-tight rtl:tracking-normal text-[var(--color-text)] opacity-80">
           {initials(data.name)}
         </div>
       )}
@@ -74,7 +85,7 @@ function PhotoBlock({ data, shape = "rounded" }: { data: ResumeData; shape?: "ro
 function Section({
   title,
   children,
-  accent = "border-slate-900 text-slate-950",
+  accent = "border-slate-900 text-[var(--color-heading)]",
 }: {
   title: string;
   children: ReactNode;
@@ -92,10 +103,10 @@ function Section({
 
 function ContactLines({ data }: { data: ResumeData }) {
   return (
-    <div className="space-y-1 text-[11px] font-semibold leading-5 text-slate-500">
-      {[data.location, data.email, data.phone].filter(Boolean).map((item) => (
-        <div key={item}>{item}</div>
-      ))}
+    <div className="space-y-1 text-[11px] font-semibold leading-5 text-[var(--color-text)] opacity-80">
+      {data.location && <Editable path="location" value={data.location} as="div" />}
+      {data.email && <Editable path="email" value={data.email} as="div" />}
+      {data.phone && <Editable path="phone" value={data.phone} as="div" />}
     </div>
   );
 }
@@ -107,21 +118,21 @@ function ExperienceList({ data, marker = "dot" }: { data: ResumeData; marker?: "
         <article key={`${item.company}-${index}`} className={marker === "rule" ? "border-l-2 border-slate-200 pl-4 rtl:border-l-0 rtl:border-r-2 rtl:pl-0 rtl:pr-4" : ""}>
           <div className="flex items-start justify-between gap-4">
             <div className="min-w-0">
-              <h3 className="text-[14px] font-extrabold leading-tight text-slate-950">{item.title}</h3>
-              <p className="mt-1 text-[12px] font-bold text-slate-600">{item.company}</p>
+              <Editable path={`experience.${index}.title`} value={item.title} as="h3" className="text-[1.1em] font-extrabold leading-tight text-[var(--color-heading)]" />
+              <Editable path={`experience.${index}.company`} value={item.company} as="p" className="mt-1 text-[0.9em] font-bold text-[var(--color-text)]" />
             </div>
-            <div className="shrink-0 text-[10px] font-black uppercase tracking-[0.12em] rtl:tracking-normal text-slate-400">{item.duration}</div>
+            <Editable path={`experience.${index}.duration`} value={item.duration} as="div" className="shrink-0 text-[0.75em] font-black uppercase tracking-[0.12em] rtl:tracking-normal text-[var(--color-text)] opacity-60" />
           </div>
-          {item.description && <p className="mt-2 text-[11px] leading-5 text-slate-600">{item.description}</p>}
+          {item.description && <Editable path={`experience.${index}.description`} value={item.description} as="p" className="mt-2 text-[0.85em] leading-5 text-[var(--color-text)]" />}
           <ul className="mt-2 space-y-1.5">
             {item.achievements.map((achievement, achievementIndex) => (
               <li key={achievementIndex} className="grid grid-cols-[14px_1fr] gap-2 text-[11px] leading-5 text-slate-700 ">
                 {marker === "index" ? (
-                  <span className="text-[9px] font-black text-slate-400">{String(achievementIndex + 1).padStart(2, "0")}</span>
+                  <span className="text-[9px] font-black text-[var(--color-text)] opacity-60">{String(achievementIndex + 1).padStart(2, "0")}</span>
                 ) : (
-                  <span className="mt-[7px] h-1.5 w-1.5 rounded-full bg-slate-950" />
+                  <span className="mt-[7px] h-1.5 w-1.5 rounded-full bg-[var(--color-sidebar)]" />
                 )}
-                <span>{achievement}</span>
+                <Editable path={`experience.${index}.achievements.${achievementIndex}`} value={achievement} as="span" />
               </li>
             ))}
           </ul>
@@ -135,25 +146,37 @@ export function NewSleekTemplate({ data }: { data: ResumeData }) {
   const c = optimizeResumeForOnePage(data);
   const rtl = isRTL(c);
   const l = labels(rtl);
+  const design = useContext(DesignContext);
+
+  const colLayout = design?.columnLayout || "sidebar-right";
+  const layoutClass = 
+    colLayout === "single" ? "grid-cols-1" :
+    colLayout === "two-col" ? "grid-cols-2" :
+    colLayout === "sidebar-left" ? "grid-cols-[260px_1fr]" : "grid-cols-[1fr_260px]";
+
+  const isLeftSidebar = colLayout === "sidebar-left";
+  
+  const skillBar = design?.skillBarStyle || "filled";
+  const photoShape = design?.photoShape || "circle";
 
   return (
-    <div dir={rtl ? "rtl" : "ltr"} className="bg-white p-10 font-sans text-slate-950" style={{ minHeight: "1122px", width: "100%" }}>
+    <div dir={rtl ? "rtl" : "ltr"} className="bg-white p-10 font-sans text-[var(--color-heading)]" style={{ minHeight: "1122px", width: "100%" }}>
       <header className="grid grid-cols-[1fr_auto] items-start gap-8 border-b border-slate-200 pb-8 ">
         <div>
-          <div className="mb-5 h-1.5 w-24 rounded-full bg-slate-950" />
-          <h1 className="max-w-[12ch] text-5xl font-black leading-[0.94] tracking-tight rtl:tracking-normal text-slate-950">{c.name}</h1>
-          <p className="mt-4 text-sm font-black uppercase tracking-[0.28em] rtl:tracking-normal text-slate-500">{c.title}</p>
+          <div className="mb-5 h-1.5 w-24 rounded-full bg-[var(--color-sidebar)]" />
+          <Editable path="name" value={c.name} as="h1" className="max-w-[12ch] text-5xl font-black leading-[0.94] tracking-tight rtl:tracking-normal text-[var(--color-heading)]" />
+          <Editable path="title" value={c.title} as="p" className="mt-4 text-sm font-black uppercase tracking-[0.28em] rtl:tracking-normal text-[var(--color-text)] opacity-80" />
         </div>
         <div className="flex flex-col items-end gap-5 rtl:items-start">
-          <PhotoBlock data={c} />
+          <PhotoBlock data={c} shape={photoShape === "square" ? "rounded" : photoShape as any} />
           <ContactLines data={c} />
         </div>
       </header>
 
-      <div className="grid grid-cols-[1fr_260px] gap-10 pt-8 ">
-        <main className="space-y-7">
+      <div className={`grid ${layoutClass} gap-10 pt-8`}>
+        <main className={`space-y-7 ${isLeftSidebar ? 'order-last' : ''}`}>
           <Section title={l.profile}>
-            <p className="text-[13px] leading-7 text-slate-700">{c.summary}</p>
+            <Editable path="summary" value={c.summary} as="p" className="text-[13px] leading-7 text-slate-700" />
           </Section>
           {c.experience.length > 0 && (
             <Section title={l.experience}>
@@ -165,9 +188,9 @@ export function NewSleekTemplate({ data }: { data: ResumeData }) {
               <div className="space-y-4">
                 {c.projects.map((project, index) => (
                   <article key={`${project.name}-${index}`}>
-                    <h3 className="text-[13px] font-extrabold text-slate-950">{project.name}</h3>
-                    <p className="mt-1 text-[11px] leading-5 text-slate-600">{project.description}</p>
-                    {project.tech.length > 0 && <p className="mt-1 text-[10px] font-black uppercase tracking-[0.16em] rtl:tracking-normal text-slate-400">{project.tech.join(" / ")}</p>}
+                    <Editable path={`projects.${index}.name`} value={project.name} as="h3" className="text-[13px] font-extrabold text-[var(--color-heading)]" />
+                    <Editable path={`projects.${index}.description`} value={project.description} as="p" className="mt-1 text-[11px] leading-5 text-[var(--color-text)]" />
+                    {project.tech.length > 0 && <Editable path={`projects.${index}.tech`} value={project.tech.join(" / ")} as="p" className="mt-1 text-[10px] font-black uppercase tracking-[0.16em] rtl:tracking-normal text-[var(--color-text)] opacity-60" />}
                   </article>
                 ))}
               </div>
@@ -175,22 +198,44 @@ export function NewSleekTemplate({ data }: { data: ResumeData }) {
           )}
         </main>
 
-        <aside className="space-y-7 border-l border-slate-200 pl-7 rtl:border-l-0 rtl:border-r rtl:pl-0 rtl:pr-7">
-          {(c.skillItems?.length ? c.skillItems.length > 0 : c.skills.length > 0) && (
+        <aside className={`space-y-7 ${
+          colLayout === "single" ? "" : 
+          isLeftSidebar 
+            ? "border-r border-slate-200 pr-7 rtl:border-r-0 rtl:border-l rtl:pr-0 rtl:pl-7" 
+            : "border-l border-slate-200 pl-7 rtl:border-l-0 rtl:border-r rtl:pl-0 rtl:pr-7"
+        }`}>
+          {design?.showSkillBars !== false && (c.skillItems?.length ? c.skillItems.length > 0 : c.skills.length > 0) && (
             <Section title={l.skills}>
               {c.skillItems && c.skillItems.length > 0 ? (
                 <div className="flex flex-col gap-3">
                   {c.skillItems.map((s, i) => (
                     <div key={i} className="flex flex-col">
                       <span className="text-[10px] font-black uppercase tracking-[0.1em] rtl:tracking-normal text-slate-700">{s.name}</span>
-                      <BarRating level={s.level} />
+                      {skillBar === "lines" && <BarRating level={s.level} />}
+                      {skillBar === "dots" && (
+                        <div className="flex gap-1 mt-1 rtl:flex-row-reverse">
+                          {Array.from({ length: 5 }).map((_, dot) => (
+                            <span key={dot} className={`h-1.5 w-1.5 rounded-full ${dot < s.level ? "bg-slate-800" : "bg-slate-200"}`} />
+                          ))}
+                        </div>
+                      )}
+                      {skillBar === "circles" && (
+                        <div className="flex gap-1 mt-1 rtl:flex-row-reverse">
+                          {Array.from({ length: 5 }).map((_, dot) => (
+                            <span key={dot} className={`h-2 w-2 rounded-full border border-slate-400 ${dot < s.level ? "bg-slate-600" : "bg-transparent"}`} />
+                          ))}
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>
               ) : (
                 <div className="flex flex-wrap gap-2">
                   {c.skills.map((skill) => (
-                    <span key={skill} className="rounded-full border border-slate-200 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.1em] rtl:tracking-normal text-slate-700">
+                    <span key={skill} className={`px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.1em] rtl:tracking-normal ${
+                      skillBar === "filled" ? "bg-slate-100 text-[var(--color-heading)] rounded-lg" :
+                      "border border-slate-200 text-slate-700 rounded-full"
+                    }`}>
                       {skill}
                     </span>
                   ))}
@@ -203,9 +248,9 @@ export function NewSleekTemplate({ data }: { data: ResumeData }) {
               <div className="space-y-4">
                 {c.education.map((item, index) => (
                   <div key={`${item.institution}-${index}`}>
-                    <div className="text-[12px] font-extrabold leading-5 text-slate-950">{item.degree}</div>
-                    <div className="mt-1 text-[11px] font-semibold text-slate-500">{item.institution}</div>
-                    <div className="mt-1 text-[10px] font-black text-slate-400">{item.year}</div>
+                    <div className="text-[12px] font-extrabold leading-5 text-[var(--color-heading)]">{item.degree}</div>
+                    <div className="mt-1 text-[11px] font-semibold text-[var(--color-text)] opacity-80">{item.institution}</div>
+                    <div className="mt-1 text-[10px] font-black text-[var(--color-text)] opacity-60">{item.year}</div>
                   </div>
                 ))}
               </div>
@@ -213,7 +258,7 @@ export function NewSleekTemplate({ data }: { data: ResumeData }) {
           )}
           {c.certifications.length > 0 && (
             <Section title={l.certifications}>
-              <div className="space-y-2 text-[11px] font-semibold leading-5 text-slate-600">
+              <div className="space-y-2 text-[11px] font-semibold leading-5 text-[var(--color-text)]">
                 {c.certifications.map((item) => <div key={item}>{item}</div>)}
               </div>
             </Section>
@@ -228,40 +273,69 @@ export function NewProfessionalTemplate({ data }: { data: ResumeData }) {
   const c = optimizeResumeForOnePage(data);
   const rtl = isRTL(c);
   const l = labels(rtl);
+  const design = useContext(DesignContext);
+
+  const colLayout = design?.columnLayout || "sidebar-left";
+  const isLeftSidebar = colLayout !== "sidebar-right";
+  const layoutClass = colLayout === "single" ? "grid-cols-1" :
+    colLayout === "two-col" ? "grid-cols-2" :
+    isLeftSidebar ? "grid-cols-[230px_1fr]" : "grid-cols-[1fr_230px]";
+    
+  const skillBar = design?.skillBarStyle || "dots";
+  const photoShape = design?.photoShape || "circle";
 
   return (
-    <div dir={rtl ? "rtl" : "ltr"} className="bg-[#fbfcfd] p-8 font-sans text-slate-950" style={{ minHeight: "1122px", width: "100%" }}>
-      <div className="grid min-h-[1058px] grid-cols-[230px_1fr] overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-[0_20px_70px_-45px_rgba(15,23,42,0.55)] ">
-        <aside className="bg-slate-950 p-7 text-white ">
-          <PhotoBlock data={c} shape="circle" />
-          <h1 className="mt-7 text-3xl font-black leading-[1] tracking-tight rtl:tracking-normal">{c.name}</h1>
-          <p className="mt-3 text-[11px] font-black uppercase leading-5 tracking-[0.2em] rtl:tracking-normal text-cyan-200">{c.title}</p>
+    <div dir={rtl ? "rtl" : "ltr"} className="bg-[#fbfcfd] p-8 font-sans text-[var(--color-heading)]" style={{ minHeight: "1122px", width: "100%" }}>
+      <div className={`grid min-h-[1058px] ${layoutClass} overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-[0_20px_70px_-45px_rgba(15,23,42,0.55)]`}>
+        <aside className={`bg-[var(--color-sidebar)] p-7 text-white ${!isLeftSidebar ? "order-last" : ""}`}>
+          <PhotoBlock data={c} shape={photoShape === "square" ? "rounded" : photoShape as any} />
+          <Editable path="name" value={c.name} as="h1" className="mt-7 text-[1.8em] font-black leading-[1] tracking-tight rtl:tracking-normal" />
+          <Editable path="title" value={c.title} as="p" className="mt-3 text-[11px] font-black uppercase leading-5 tracking-[0.2em] rtl:tracking-normal text-[var(--color-accent)]" />
           <div className="mt-8">
-            <h2 className="mb-3 text-[10px] font-black uppercase tracking-[0.22em] rtl:tracking-normal text-slate-400">{l.contact}</h2>
-            <div className="space-y-2 text-[11px] font-semibold leading-5 text-slate-300">
-              {[c.location, c.email, c.phone].filter(Boolean).map((item) => <div key={item}>{item}</div>)}
+            <h2 className="mb-3 text-[10px] font-black uppercase tracking-[0.22em] rtl:tracking-normal text-[var(--color-text)] opacity-60">{l.contact}</h2>
+            <div className="space-y-2 text-[11px] font-semibold leading-5 text-[var(--color-text)] opacity-50">
+              {c.location && <Editable path="location" value={c.location} as="div" />}
+              {c.email && <Editable path="email" value={c.email} as="div" />}
+              {c.phone && <Editable path="phone" value={c.phone} as="div" />}
             </div>
           </div>
-          {(c.skillItems?.length ? c.skillItems.length > 0 : c.skills.length > 0) && (
+          {design?.showSkillBars !== false && (c.skillItems?.length ? c.skillItems.length > 0 : c.skills.length > 0) && (
             <div className="mt-8">
-              <h2 className="mb-3 text-[10px] font-black uppercase tracking-[0.22em] rtl:tracking-normal text-slate-400">{l.skills}</h2>
+              <h2 className="mb-3 text-[10px] font-black uppercase tracking-[0.22em] rtl:tracking-normal text-[var(--color-text)] opacity-60">{l.skills}</h2>
               {c.skillItems && c.skillItems.length > 0 ? (
                 <div className="flex flex-col gap-3">
                   {c.skillItems.map((s, i) => (
                     <div key={i} className="flex flex-col">
                       <span className="text-[11px] font-bold text-slate-100 mb-1">{s.name}</span>
-                      <div className="flex gap-1 rtl:flex-row-reverse">
-                        {Array.from({ length: 5 }).map((_, dot) => (
-                          <span key={dot} className={`h-2 w-2 rounded-full ${dot < s.level ? "bg-white" : "bg-white/20"}`} />
-                        ))}
-                      </div>
+                      {skillBar === "lines" && (
+                        <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/20">
+                           <div className="h-full bg-white" style={{ width: `${s.level * 20}%` }} />
+                        </div>
+                      )}
+                      {skillBar === "dots" && (
+                        <div className="flex gap-1 rtl:flex-row-reverse">
+                          {Array.from({ length: 5 }).map((_, dot) => (
+                            <span key={dot} className={`h-2 w-2 rounded-full ${dot < s.level ? "bg-white" : "bg-white/20"}`} />
+                          ))}
+                        </div>
+                      )}
+                      {skillBar === "circles" && (
+                        <div className="flex gap-1 rtl:flex-row-reverse">
+                          {Array.from({ length: 5 }).map((_, dot) => (
+                            <span key={dot} className={`h-2 w-2 rounded-full border border-white/50 ${dot < s.level ? "bg-white" : "bg-transparent"}`} />
+                          ))}
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>
               ) : (
                 <div className="space-y-2">
                   {c.skills.map((skill) => (
-                    <div key={skill} className="rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2 text-[11px] font-bold text-slate-100">{skill}</div>
+                    <div key={skill} className={`px-3 py-2 text-[11px] font-bold text-slate-100 ${
+                      skillBar === "filled" ? "bg-white text-[var(--color-heading)] rounded-lg" :
+                      "rounded-xl border border-white/10 bg-white/[0.04]"
+                    }`}>{skill}</div>
                   ))}
                 </div>
               )}
@@ -269,10 +343,10 @@ export function NewProfessionalTemplate({ data }: { data: ResumeData }) {
           )}
         </aside>
 
-        <main className="space-y-7 p-9 ">
+        <main className="space-y-7 p-9">
           <section className="rounded-3xl border border-slate-200 bg-slate-50 p-6">
-            <h2 className="mb-3 text-[10px] font-black uppercase tracking-[0.22em] rtl:tracking-normal text-cyan-700">{l.profile}</h2>
-            <p className="text-[13px] leading-7 text-slate-700">{c.summary}</p>
+            <h2 className="mb-3 text-[10px] font-black uppercase tracking-[0.22em] rtl:tracking-normal text-[var(--color-accent)]">{l.profile}</h2>
+            <Editable path="summary" value={c.summary} as="p" className="text-[1em] leading-7 text-[var(--color-text)]" />
           </section>
           {c.experience.length > 0 && (
             <Section title={l.experience} accent="border-cyan-700 text-cyan-800">
@@ -285,8 +359,8 @@ export function NewProfessionalTemplate({ data }: { data: ResumeData }) {
                 <div className="space-y-4">
                   {c.projects.map((project, index) => (
                     <article key={`${project.name}-${index}`}>
-                      <h3 className="text-[12px] font-extrabold text-slate-950">{project.name}</h3>
-                      <p className="mt-1 text-[11px] leading-5 text-slate-600">{project.description}</p>
+                      <Editable path={`projects.${index}.name`} value={project.name} as="h3" className="text-[0.9em] font-extrabold text-[var(--color-heading)]" />
+                      <Editable path={`projects.${index}.description`} value={project.description} as="p" className="mt-1 text-[0.85em] leading-5 text-[var(--color-text)]" />
                     </article>
                   ))}
                 </div>
@@ -297,8 +371,12 @@ export function NewProfessionalTemplate({ data }: { data: ResumeData }) {
                 <div className="space-y-4">
                   {c.education.map((item, index) => (
                     <div key={`${item.institution}-${index}`}>
-                      <div className="text-[12px] font-extrabold text-slate-950">{item.degree}</div>
-                      <div className="mt-1 text-[11px] text-slate-600">{item.institution} · {item.year}</div>
+                      <Editable path={`education.${index}.degree`} value={item.degree} as="div" className="text-[0.9em] font-extrabold text-[var(--color-heading)]" />
+                      <div className="mt-1 text-[0.85em] text-[var(--color-text)] flex gap-1">
+                        <Editable path={`education.${index}.institution`} value={item.institution} as="span" />
+                        <span>·</span>
+                        <Editable path={`education.${index}.year`} value={item.year} as="span" />
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -315,39 +393,49 @@ export function NewAcademicTemplate({ data }: { data: ResumeData }) {
   const c = optimizeResumeForOnePage(data);
   const rtl = isRTL(c);
   const l = labels(rtl);
+  const design = useContext(DesignContext);
+
+  const colLayout = design?.columnLayout || "sidebar-right";
+  const isLeftSidebar = colLayout === "sidebar-left";
+  const layoutClass = colLayout === "single" ? "grid-cols-1" :
+    colLayout === "two-col" ? "grid-cols-2" :
+    isLeftSidebar ? "grid-cols-[235px_1fr]" : "grid-cols-[1fr_235px]";
+
+  const skillBar = design?.skillBarStyle || "lines";
+  const photoShape = design?.photoShape || "arch";
 
   return (
-    <div dir={rtl ? "rtl" : "ltr"} className="bg-white p-11 font-serif text-slate-950" style={{ minHeight: "1122px", width: "100%" }}>
-      <header className="grid grid-cols-[120px_1fr] gap-8 border-b-2 border-slate-950 pb-7 ">
-        <PhotoBlock data={c} shape="arch" />
+    <div dir={rtl ? "rtl" : "ltr"} className="bg-white p-11 font-serif text-[var(--color-heading)]" style={{ minHeight: "1122px", width: "100%" }}>
+      <header className={`grid ${colLayout === "single" ? "grid-cols-[120px_1fr]" : "grid-cols-[120px_1fr]"} gap-8 border-b-2 border-slate-950 pb-7`}>
+        <PhotoBlock data={c} shape={photoShape as any} />
         <div>
-          <p className="text-[11px] font-bold uppercase tracking-[0.3em] rtl:tracking-normal text-slate-500">{l.selected} Curriculum Vitae</p>
-          <h1 className="mt-4 text-4xl font-bold leading-tight tracking-tight rtl:tracking-normal">{c.name}</h1>
-          <p className="mt-2 text-[15px] font-semibold text-slate-700">{c.title}</p>
-          <div className="mt-4 flex flex-wrap gap-x-5 gap-y-1 text-[11px] font-semibold text-slate-500">
-            {[c.location, c.email, c.phone].filter(Boolean).map((item) => <span key={item}>{item}</span>)}
+          <p className="text-[11px] font-bold uppercase tracking-[0.3em] rtl:tracking-normal text-[var(--color-text)] opacity-80">{l.selected} Curriculum Vitae</p>
+          <Editable path="name" value={c.name} as="h1" className="mt-4 text-[2.2em] font-bold leading-tight tracking-tight rtl:tracking-normal" />
+          <Editable path="title" value={c.title} as="p" className="mt-2 text-[15px] font-semibold text-slate-700" />
+          <div className="mt-4 flex flex-wrap gap-x-5 gap-y-1 text-[11px] font-semibold text-[var(--color-text)] opacity-80">
+            <ContactLines data={c} />
           </div>
         </div>
       </header>
 
-      <div className="grid grid-cols-[1fr_235px] gap-10 pt-7 ">
-        <main className="space-y-7">
-          <Section title={l.profile} accent="border-slate-950 text-slate-950">
-            <p className="text-[13px] leading-7 text-slate-700">{c.summary}</p>
+      <div className={`grid ${layoutClass} gap-10 pt-7`}>
+        <main className={`space-y-7 ${isLeftSidebar ? 'order-last' : ''}`}>
+          <Section title={l.profile} accent="border-slate-950 text-[var(--color-heading)]">
+            <Editable path="summary" value={c.summary} as="p" className="text-[13px] leading-7 text-slate-700" />
           </Section>
           {c.experience.length > 0 && (
-            <Section title={l.experience} accent="border-slate-950 text-slate-950">
+            <Section title={l.experience} accent="border-slate-950 text-[var(--color-heading)]">
               <ExperienceList data={c} marker="dot" />
             </Section>
           )}
           {c.projects.length > 0 && (
-            <Section title={l.projects} accent="border-slate-950 text-slate-950">
+            <Section title={l.projects} accent="border-slate-950 text-[var(--color-heading)]">
               <div className="space-y-4">
                 {c.projects.map((project, index) => (
                   <article key={`${project.name}-${index}`}>
-                    <h3 className="text-[13px] font-bold text-slate-950">{project.name}</h3>
-                    <p className="mt-1 text-[11px] leading-5 text-slate-700">{project.description}</p>
-                    {project.impact && <p className="mt-1 text-[11px] italic text-slate-500">{project.impact}</p>}
+                    <Editable path={`projects.${index}.name`} value={project.name} as="h3" className="text-[13px] font-bold text-[var(--color-heading)]" />
+                    <Editable path={`projects.${index}.description`} value={project.description} as="p" className="mt-1 text-[11px] leading-5 text-slate-700" />
+                    {project.impact && <Editable path={`projects.${index}.impact`} value={project.impact} as="p" className="mt-1 text-[11px] italic text-[var(--color-text)] opacity-80" />}
                   </article>
                 ))}
               </div>
@@ -357,36 +445,56 @@ export function NewAcademicTemplate({ data }: { data: ResumeData }) {
 
         <aside className="space-y-7">
           {c.education.length > 0 && (
-            <Section title={l.education} accent="border-slate-950 text-slate-950">
+            <Section title={l.education} accent="border-slate-950 text-[var(--color-heading)]">
               <div className="space-y-4">
                 {c.education.map((item, index) => (
                   <div key={`${item.institution}-${index}`}>
-                    <div className="text-[12px] font-bold leading-5">{item.degree}</div>
-                    <div className="mt-1 text-[11px] text-slate-600">{item.institution}</div>
-                    <div className="mt-1 text-[10px] font-bold text-slate-400">{item.year}</div>
+                    <Editable path={`education.${index}.degree`} value={item.degree} as="div" className="text-[12px] font-bold leading-5" />
+                    <Editable path={`education.${index}.institution`} value={item.institution} as="div" className="mt-1 text-[11px] text-[var(--color-text)]" />
+                    <Editable path={`education.${index}.year`} value={item.year} as="div" className="mt-1 text-[10px] font-bold text-[var(--color-text)] opacity-60" />
                   </div>
                 ))}
               </div>
             </Section>
           )}
-          {(c.skillItems?.length ? c.skillItems.length > 0 : c.skills.length > 0) && (
-            <Section title={l.skills} accent="border-slate-950 text-slate-950">
+          {design?.showSkillBars !== false && (c.skillItems?.length ? c.skillItems.length > 0 : c.skills.length > 0) && (
+            <Section title={l.skills} accent="border-slate-950 text-[var(--color-heading)]">
               {c.skillItems && c.skillItems.length > 0 ? (
                 <div className="flex flex-col gap-3">
                   {c.skillItems.map((s, i) => (
                     <div key={i} className="flex flex-col">
                       <span className="text-[11px] font-semibold text-slate-700">{s.name}</span>
-                      <BarRating level={s.level} />
+                      {skillBar === "lines" && <BarRating level={s.level} />}
+                      {skillBar === "dots" && (
+                        <div className="flex gap-1 mt-1 rtl:flex-row-reverse">
+                          {Array.from({ length: 5 }).map((_, dot) => (
+                            <span key={dot} className={`h-1.5 w-1.5 rounded-full ${dot < s.level ? "bg-slate-800" : "bg-slate-200"}`} />
+                          ))}
+                        </div>
+                      )}
+                      {skillBar === "circles" && (
+                        <div className="flex gap-1 mt-1 rtl:flex-row-reverse">
+                          {Array.from({ length: 5 }).map((_, dot) => (
+                            <span key={dot} className={`h-2 w-2 rounded-full border border-slate-400 ${dot < s.level ? "bg-slate-600" : "bg-transparent"}`} />
+                          ))}
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>
               ) : (
-                <p className="text-[11px] font-semibold leading-6 text-slate-700">{c.skills.join(" · ")}</p>
+                <div className="space-y-1">
+                  {c.skills.map((skill) => (
+                    <div key={skill} className={`text-[11px] font-semibold text-slate-700 ${
+                      skillBar === "filled" ? "px-2 py-1 bg-slate-100 rounded" : ""
+                    }`}>• {skill}</div>
+                  ))}
+                </div>
               )}
             </Section>
           )}
           {c.certifications.length > 0 && (
-            <Section title={l.certifications} accent="border-slate-950 text-slate-950">
+            <Section title={l.certifications} accent="border-slate-950 text-[var(--color-heading)]">
               <div className="space-y-2 text-[11px] leading-5 text-slate-700">
                 {c.certifications.map((item) => <div key={item}>{item}</div>)}
               </div>
@@ -421,18 +529,17 @@ export function RefTorresTemplate({ data }: { data: ResumeData }) {
       <div className="grid grid-cols-[308px_1fr] ">
         <aside className="relative min-h-[954px] bg-[#f3f3f3] px-12 pb-10 pt-32 ">
           <div className="absolute -top-[105px] left-1/2 h-[220px] w-[220px] -translate-x-1/2 overflow-hidden rounded-full border-[5px] border-[#d8e2e9] bg-slate-200">
-            {c.photoUrl ? <img src={c.photoUrl} alt={c.name} className="h-full w-full object-cover" /> : <div className="flex h-full w-full items-center justify-center text-5xl font-black text-slate-500">{initials(c.name)}</div>}
+            {c.photoUrl ? <img src={c.photoUrl} alt={c.name} className="h-full w-full object-cover" /> : <div className="flex h-full w-full items-center justify-center text-5xl font-black text-[var(--color-text)] opacity-80">{initials(c.name)}</div>}
           </div>
-          <h1 className="mt-3 text-[42px] font-light uppercase leading-[1.02] tracking-[0.08em] rtl:tracking-normal text-[#1e405a]">
-            {c.name.split(/\s+/).slice(0, 1).join(" ")}<br />
-            <span className="font-black">{c.name.split(/\s+/).slice(1).join(" ") || c.name}</span>
-          </h1>
-          <p className="mt-3 border-b border-[#b8c5ce] pb-4 text-[15px] font-semibold uppercase tracking-[0.09em] rtl:tracking-normal text-neutral-800">{c.title}</p>
+          <Editable path="name" value={c.name} as="h1" className="mt-3 text-[42px] font-light uppercase leading-[1.02] tracking-[0.08em] rtl:tracking-normal text-[#1e405a]" />
+          <Editable path="title" value={c.title} as="p" className="mt-3 border-b border-[#b8c5ce] pb-4 text-[15px] font-semibold uppercase tracking-[0.09em] rtl:tracking-normal text-neutral-800" />
 
           <section className="mt-9">
             <h2 className="mb-5 text-[18px] font-black uppercase tracking-[0.2em] rtl:tracking-normal text-[#1d3f59]">{l.contact}</h2>
             <div className="space-y-3 text-[12px] font-semibold leading-5 text-neutral-700">
-              {sideItems.map((item) => <div key={item}>{item}</div>)}
+              {c.location && <Editable path="location" value={c.location} as="div" />}
+              {c.email && <Editable path="email" value={c.email} as="div" />}
+              {c.phone && <Editable path="phone" value={c.phone} as="div" />}
             </div>
           </section>
 
@@ -468,7 +575,7 @@ export function RefTorresTemplate({ data }: { data: ResumeData }) {
 
         <main className="px-11 pb-10 pt-7 text-neutral-800 ">
           <Section title={l.profile} accent="border-[#b8c5ce] text-[#1d3f59]">
-            <p className="text-[12px] leading-5">{c.summary}</p>
+            <Editable path="summary" value={c.summary} as="p" className="text-[12px] leading-5" />
           </Section>
           {c.experience.length > 0 && (
             <section className="mt-7">
@@ -478,12 +585,12 @@ export function RefTorresTemplate({ data }: { data: ResumeData }) {
                   <article key={`${item.company}-${index}`}>
                     <div className="flex items-start justify-between gap-5">
                       <div>
-                        <h3 className="text-[14px] font-black leading-tight">{item.title}</h3>
-                        <p className="text-[12px] font-bold text-neutral-600">{item.company}</p>
+                        <Editable path={`experience.${index}.title`} value={item.title} as="h3" className="text-[14px] font-black leading-tight" />
+                        <Editable path={`experience.${index}.company`} value={item.company} as="p" className="text-[12px] font-bold text-neutral-600" />
                       </div>
-                      <p className="shrink-0 text-[12px] text-neutral-600">{item.duration}</p>
+                      <Editable path={`experience.${index}.duration`} value={item.duration} as="p" className="shrink-0 text-[12px] text-neutral-600" />
                     </div>
-                    <p className="mt-1 text-[11px] leading-5 text-neutral-700">{item.description || item.achievements[0]}</p>
+                    <Editable path={`experience.${index}.description`} value={item.description || item.achievements[0] || ""} as="p" className="mt-1 text-[11px] leading-5 text-neutral-700" />
                   </article>
                 ))}
               </div>
@@ -495,8 +602,8 @@ export function RefTorresTemplate({ data }: { data: ResumeData }) {
               <div className="space-y-3">
                 {c.education.map((item, index) => (
                   <div key={`${item.institution}-${index}`} className="flex justify-between gap-5 text-[12px]">
-                    <div><div className="font-black">{item.institution}</div><div>{item.degree}</div></div>
-                    <div className="text-neutral-600">{item.year}</div>
+                    <div><Editable path={`education.${index}.institution`} value={item.institution} as="div" className="font-black" /><Editable path={`education.${index}.degree`} value={item.degree} as="div" /></div>
+                    <Editable path={`education.${index}.year`} value={item.year} as="div" className="text-neutral-600" />
                   </div>
                 ))}
               </div>
@@ -530,7 +637,7 @@ export function RefSilvaTemplate({ data }: { data: ResumeData }) {
     <div dir={rtl ? "rtl" : "ltr"} className="bg-white font-sans text-[#1f1b18]" style={{ minHeight: "1122px", width: "100%" }}>
       <header className="flex h-[190px] items-center gap-11 bg-[#342820] px-12 text-white rtl:flex-row-reverse">
         <div className="h-[135px] w-[135px] overflow-hidden rounded-full bg-stone-200">
-          {c.photoUrl ? <img src={c.photoUrl} alt={c.name} className="h-full w-full object-cover" /> : <div className="flex h-full w-full items-center justify-center text-4xl font-black text-stone-500">{initials(c.name)}</div>}
+          {c.photoUrl ? <img src={c.photoUrl} alt={c.name} className="h-full w-full object-cover" /> : <div className="flex h-full w-full items-center justify-center text-[2.2em] font-black text-stone-500">{initials(c.name)}</div>}
         </div>
         <div className="border-l-[7px] border-white pl-8 rtl:border-l-0 rtl:border-r-[7px] rtl:pl-0 rtl:pr-8">
           <h1 className="text-[45px] font-black leading-none tracking-tight rtl:tracking-normal">{c.name}</h1>
@@ -746,7 +853,7 @@ export function RefPalmerstonTemplate({ data }: { data: ResumeData }) {
       <header className="absolute left-0 top-0 h-[208px] w-full bg-white">
         <div className="absolute left-0 top-0 h-[205px] w-[285px] rounded-br-[48px] bg-[#303b4e]">
           <div className="absolute left-[59px] top-[34px] h-[151px] w-[151px] overflow-hidden rounded-full border-[5px] border-[#b9b4ad] bg-slate-200">
-            {c.photoUrl ? <img src={c.photoUrl} alt={c.name} className="h-full w-full object-cover" /> : <div className="flex h-full w-full items-center justify-center text-4xl font-black text-slate-500">{initials(c.name)}</div>}
+            {c.photoUrl ? <img src={c.photoUrl} alt={c.name} className="h-full w-full object-cover" /> : <div className="flex h-full w-full items-center justify-center text-[2.2em] font-black text-[var(--color-text)] opacity-80">{initials(c.name)}</div>}
           </div>
         </div>
         <div className="ml-[330px] pt-[64px]">
@@ -877,7 +984,7 @@ export function RefSanchezTemplate({ data }: { data: ResumeData }) {
     <div dir={rtl ? "rtl" : "ltr"} className="bg-white font-sans text-[#263241]" style={{ minHeight: "1122px", width: "100%" }}>
       <header className="relative h-[185px] bg-[#303b4e] text-white">
         <div className="absolute left-[28px] top-[78px] z-10 h-[170px] w-[170px] overflow-hidden rounded-full border-[7px] border-white bg-slate-200 rtl:left-auto rtl:right-[28px]">
-          {c.photoUrl ? <img src={c.photoUrl} alt={c.name} className="h-full w-full object-cover" /> : <div className="flex h-full w-full items-center justify-center text-4xl font-black text-slate-500">{initials(c.name)}</div>}
+          {c.photoUrl ? <img src={c.photoUrl} alt={c.name} className="h-full w-full object-cover" /> : <div className="flex h-full w-full items-center justify-center text-[2.2em] font-black text-[var(--color-text)] opacity-80">{initials(c.name)}</div>}
         </div>
         <div className="pl-[315px] pt-[62px] rtl:pl-0 rtl:pr-[315px]">
           <h1 className="text-[38px] font-black uppercase leading-none">{c.name}</h1>
@@ -1110,7 +1217,7 @@ export function DuboisTemplate({ data }: { data: ResumeData }) {
     <div dir={rtl ? "rtl" : "ltr"} className="relative overflow-hidden bg-white font-sans text-[#153f68]" style={{ height: "1122px", minHeight: "1122px", width: "794px", maxWidth: "100%" }}>
       <aside className="absolute left-0 top-0 h-full w-[260px] bg-[#dcdfe5] px-[41px] pt-[26px]">
         <div className="h-[244px] w-[172px] overflow-hidden border-[4px] border-white bg-slate-200">
-          {c.photoUrl ? <img src={c.photoUrl} alt={c.name} className="h-full w-full object-cover" /> : <div className="flex h-full w-full items-center justify-center text-4xl font-black">{initials(c.name)}</div>}
+          {c.photoUrl ? <img src={c.photoUrl} alt={c.name} className="h-full w-full object-cover" /> : <div className="flex h-full w-full items-center justify-center text-[2.2em] font-black">{initials(c.name)}</div>}
         </div>
 
         <section className="mt-[45px]">
@@ -1364,7 +1471,7 @@ export function MercerTemplate({ data }: { data: ResumeData }) {
   );
 
   return (
-    <div dir={rtl ? "rtl" : "ltr"} className="bg-white font-sans text-slate-900" style={{ minHeight: "1122px", width: "100%", position: "relative", overflow: "hidden" }}>
+    <div dir={rtl ? "rtl" : "ltr"} className="bg-white font-sans text-[var(--color-heading)]" style={{ minHeight: "1122px", width: "100%", position: "relative", overflow: "hidden" }}>
       <div className="grid grid-cols-[320px_1fr] min-h-[1122px] ">
         {/* Sidebar */}
         <aside className="bg-[#305178] p-10 pt-64 text-white flex flex-col gap-10 relative z-0">
@@ -1469,7 +1576,7 @@ export function MercerTemplate({ data }: { data: ResumeData }) {
               {c.photoUrl ? (
                 <img src={c.photoUrl} alt={c.name} className="w-full h-full object-cover" />
               ) : (
-                <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-slate-100 to-slate-200 text-6xl font-black text-slate-400">
+                <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-slate-100 to-slate-200 text-6xl font-black text-[var(--color-text)] opacity-60">
                   {initials(c.name)}
                 </div>
               )}
@@ -1482,14 +1589,14 @@ export function MercerTemplate({ data }: { data: ResumeData }) {
                   <div key={idx}>{word}</div>
                 ))}
               </h1>
-              <p className="text-[20px] font-black text-slate-950 mt-4 tracking-widest uppercase">{c.title}</p>
+              <p className="text-[20px] font-black text-[var(--color-heading)] mt-4 tracking-widest uppercase">{c.title}</p>
            </div>
 
            <div className="mt-4">
              {/* About Me */}
              <section className="mb-10">
                 <SectionHeader title={rtl ? "دەربارەی من" : "About Me"} />
-                <p className="text-[13px] leading-relaxed text-slate-800 font-medium px-1">{c.summary}</p>
+                <p className="text-[13px] leading-relaxed text-[var(--color-heading)] font-medium px-1">{c.summary}</p>
              </section>
 
              {/* Experience */}
@@ -1503,7 +1610,7 @@ export function MercerTemplate({ data }: { data: ResumeData }) {
                             <div className="w-4 h-4 rounded-full bg-[#305178]" />
                             <h3 className="font-light tracking-wide uppercase text-[16px] text-slate-700">{exp.title}</h3>
                          </div>
-                         <div className="font-black text-[13px] text-slate-900 ml-7 uppercase tracking-wider mb-2">
+                         <div className="font-black text-[13px] text-[var(--color-heading)] ml-7 uppercase tracking-wider mb-2">
                            {exp.duration} - {exp.company}
                          </div>
                          <p className="text-[12px] text-slate-700 ml-7 leading-relaxed font-medium">
@@ -1521,14 +1628,14 @@ export function MercerTemplate({ data }: { data: ResumeData }) {
                 <SectionHeader title={rtl ? "سەرچاوە" : "Reference"} />
                 <div className="grid grid-cols-2 gap-10 px-1 mt-2">
                    <div>
-                      <div className="font-bold text-[13px] text-slate-900">Juliana Silva</div>
-                      <div className="text-[12px] text-slate-800 font-bold mt-0.5">Rimberio / CTO</div>
-                      <div className="text-[12px] text-slate-600 mt-0.5 font-bold">+123-456-7890</div>
+                      <div className="font-bold text-[13px] text-[var(--color-heading)]">Juliana Silva</div>
+                      <div className="text-[12px] text-[var(--color-heading)] font-bold mt-0.5">Rimberio / CTO</div>
+                      <div className="text-[12px] text-[var(--color-text)] mt-0.5 font-bold">+123-456-7890</div>
                    </div>
                    <div>
-                      <div className="font-bold text-[13px] text-slate-900">Donna Stroupe</div>
-                      <div className="text-[12px] text-slate-800 font-bold mt-0.5">Borcelle / CEO</div>
-                      <div className="text-[12px] text-slate-600 mt-0.5 font-bold">+123-456-7890</div>
+                      <div className="font-bold text-[13px] text-[var(--color-heading)]">Donna Stroupe</div>
+                      <div className="text-[12px] text-[var(--color-heading)] font-bold mt-0.5">Borcelle / CEO</div>
+                      <div className="text-[12px] text-[var(--color-text)] mt-0.5 font-bold">+123-456-7890</div>
                    </div>
                 </div>
              </section>
