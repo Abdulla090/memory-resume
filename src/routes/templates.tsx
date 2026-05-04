@@ -33,6 +33,7 @@ const TEMPLATES: { id: TemplateId; label: string; desc: string; category: Catego
   { id: "ref-silva", label: "NEW Silva Exact", desc: "Brown account split", category: "Professional", isNew: true },
   { id: "ref-schumacher", label: "NEW Schumacher Exact", desc: "Orange skill bars", category: "Creative", isNew: true },
   { id: "ref-palmerston", label: "NEW Palmerston Exact", desc: "Slate graphic designer", category: "Professional", isNew: true },
+  { id: "ref-alvarado", label: "NEW Alvarado Exact", desc: "Two-tone classic profile", category: "Professional", isNew: true },
   { id: "ref-sanchez", label: "NEW Sanchez Exact", desc: "Timeline manager", category: "Professional", isNew: true },
   { id: "mercer", label: "NEW Mercer Exact", desc: "Navy structured dual-column", category: "Professional", isNew: true },
   { id: "gallego", label: "NEW Gallego Exact", desc: "Teal presentation designer", category: "Professional", isNew: true },

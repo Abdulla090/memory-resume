@@ -1,24 +1,6 @@
 import type { ResumeData } from "@/lib/types";
 import { StarRating, BarRating } from "./templates";
-
-
-const rtlPattern = /[\u0600-\u06ff\u0750-\u077f\u08a0-\u08ff]/;
-
-function isRTL(data: ResumeData) {
-  return rtlPattern.test(
-    [
-      data.name,
-      data.title,
-      data.location,
-      data.summary,
-      ...data.skills,
-      ...data.certifications,
-      ...data.experience.flatMap((item) => [item.title, item.company, item.description, ...item.achievements]),
-      ...data.projects.flatMap((item) => [item.name, item.description, item.impact, ...item.tech]),
-      ...data.education.flatMap((item) => [item.degree, item.institution]),
-    ].filter(Boolean).join(" "),
-  );
-}
+import { isRTL } from "./template-helpers";
 
 function label(data: ResumeData, key: "profile" | "executiveProfile" | "summary" | "experience" | "professionalExperience" | "projects" | "skills" | "keySkills" | "expertise" | "metrics" | "education" | "certifications" | "terminalExperience" | "terminalSkills" | "terminalEducation") {
   const rtl = isRTL(data);

@@ -339,6 +339,7 @@ const DOCX_BUILDERS: Record<string, (data: ResumeData) => Document> = {
   "ref-silva": buildExecutiveDocx,
   "ref-schumacher": buildForgeDocx,
   "ref-palmerston": buildExecutiveDocx,
+  "ref-alvarado": buildExecutiveDocx,
   "ref-sanchez": buildExecutiveDocx,
   gallego: buildExecutiveDocx,
   leroy: buildExecutiveDocx,

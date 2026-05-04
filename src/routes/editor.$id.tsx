@@ -1,6 +1,5 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useState, useMemo, useRef, useEffect, useLayoutEffect } from "react";
-import type { RefObject } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { 
@@ -10,33 +9,12 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
-import { exportPreviewAsPDF } from "@/lib/pdf-screenshot";
-import { exportResumePDF } from "@/components/resume/pdf-templates";
-import { exportResumeDocx } from "@/components/resume/docx-templates";
 import { improveBullet, tailorToJob, chatEditResume, fixResumeErrors, generateCoverLetter } from "@/lib/ai.functions";
 import { useAppStore } from "@/lib/store";
 import type { ExperienceItem, ResumeData, TemplateId, DesignSettings } from "@/lib/types";
-import { ResumePreview } from "@/components/resume/templates";
-import { DesignContext, UpdateDataContext } from "@/components/resume/DesignContext";
+import { DesignContext } from "@/components/resume/DesignContext";
 import { DesignPanel, DEFAULT_DESIGN, type SectionId } from "@/components/DesignPanel";
-
-const rtlTextPattern = /[\u0600-\u06ff\u0750-\u077f\u08a0-\u08ff]/;
-
-function hasRTLText(data: ResumeData) {
-  return rtlTextPattern.test(
-    [
-      data.name,
-      data.title,
-      data.location,
-      data.summary,
-      ...data.skills,
-      ...data.certifications,
-      ...data.experience.flatMap((item) => [item.title, item.company, item.description, ...item.achievements]),
-      ...data.projects.flatMap((item) => [item.name, item.description, item.impact, ...item.tech]),
-      ...data.education.flatMap((item) => [item.degree, item.institution]),
-    ].filter(Boolean).join(" "),
-  );
-}
+import { ExportButtons, ClientPDFPreview, getValueAtPath, isMultilinePath } from "@/components/resume/editor-helpers";
 
 const DEV_SAMPLE_ID = "dev";
 
@@ -114,6 +92,7 @@ const TEMPLATES: { id: TemplateId; label: string; desc: string; category: Catego
   { id: "ref-silva", label: "NEW Silva Exact", desc: "Brown account split", category: "Professional", isNew: true },
   { id: "ref-schumacher", label: "NEW Schumacher Exact", desc: "Orange skill bars", category: "Creative", isNew: true },
   { id: "ref-palmerston", label: "NEW Palmerston Exact", desc: "Slate graphic designer", category: "Professional", isNew: true },
+  { id: "ref-alvarado", label: "NEW Alvarado Exact", desc: "Two-tone classic profile", category: "Professional", isNew: true },
   { id: "ref-sanchez", label: "NEW Sanchez Exact", desc: "Timeline manager", category: "Professional", isNew: true },
   { id: "mercer", label: "NEW Mercer Exact", desc: "Navy structured dual-column", category: "Professional", isNew: true },
   { id: "gallego", label: "NEW Gallego Exact", desc: "Teal presentation designer", category: "Professional", isNew: true },
@@ -212,6 +191,8 @@ function ResumeEditor() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isDesignOpen, setIsDesignOpen] = useState(false);
   const [selectedSection, setSelectedSection] = useState<SectionId>("global");
+  const [focusedField, setFocusedField] = useState<string | null>(null);
+  const [inlineEdit, setInlineEdit] = useState<{ path: string; value: string; section: SectionId } | null>(null);
 
   const design: DesignSettings = (resume as any)?.design ?? DEFAULT_DESIGN;
   const updateDesign = (patch: Partial<DesignSettings>) =>
@@ -664,9 +645,15 @@ function ResumeEditor() {
 
             {/* Resume Container with smooth scroll */}
             <div className="flex-1 overflow-hidden rounded-[1rem] shadow-[0_0_0_1px_rgba(0,0,0,0.05),0_30px_60px_-20px_rgba(0,0,0,0.15)] bg-white relative @container">
-              <ClientPDFPreview data={previewData} template={resume.template} previewRef={previewRef} zoom={zoom} design={design} updateData={updateData} onSectionClick={(s) => {
+              <ClientPDFPreview data={previewData} template={resume.template} previewRef={previewRef} zoom={zoom} design={design} updateData={updateData} onSectionClick={(s, path) => {
                 setSelectedSection(s);
                 if (!isDesignOpen) setIsDesignOpen(true);
+                if (path) {
+                  setFocusedField(path);
+                  if (!soraniMode) {
+                    setInlineEdit({ path, value: getValueAtPath(data, path), section: s });
+                  }
+                }
               }} />
             </div>
           </div>
@@ -683,14 +670,15 @@ function ResumeEditor() {
               transition={{ type: "spring", stiffness: 400, damping: 35 }}
               className="hidden lg:flex flex-col sticky top-24 h-[calc(100vh-8rem)] rounded-[1.5rem] border border-slate-200 bg-white shadow-[0_8px_30px_rgba(0,0,0,0.06)] overflow-hidden"
             >
-              <DesignPanel
-                design={design}
-                data={data}
-                onChange={updateDesign}
-                updateData={updateData}
+                <DesignPanel
+                  design={design}
+                  data={data}
+                  onChange={updateDesign}
+                  updateData={updateData}
                 onClose={() => setIsDesignOpen(false)}
                 selected={selectedSection}
                 setSelected={setSelectedSection}
+                focusedField={focusedField}
               />
             </motion.aside>
           )}
@@ -965,225 +953,59 @@ function ResumeEditor() {
         )}
       </AnimatePresence>
 
-    </div>
-  );
-}
-
-function ExportButtons({ data, template, name, previewRef }: { data: ResumeData; template: TemplateId; name: string; previewRef: RefObject<HTMLDivElement | null> }) {
-  const [pdfLoading, setPdfLoading] = useState(false);
-  const [docxLoading, setDocxLoading] = useState(false);
-  const filename = name.replace(/\s+/g, "_") || "resume";
-
-  const handlePDF = async () => {
-    setPdfLoading(true);
-    try {
-      if (previewRef.current) {
-        await exportPreviewAsPDF(previewRef.current, filename);
-      }
-    } catch (err) {
-      console.error(err);
-      toast.error("Failed to generate PDF");
-    } finally { 
-      setPdfLoading(false); 
-    }
-  };
-
-  const handleDocx = async () => {
-    setDocxLoading(true);
-    try { await exportResumeDocx(data, template, filename); } finally { setDocxLoading(false); }
-  };
-
-  return (
-    <>
-      <button
-        onClick={handleDocx}
-        disabled={docxLoading}
-        className="flex items-center gap-1.5 px-3 py-2.5 sm:py-1.5 rounded-xl sm:rounded-full bg-white/80 backdrop-blur-md border border-white text-xs font-bold tracking-wide text-slate-700 shadow-sm hover:bg-white hover:shadow-md transition-all disabled:opacity-50"
-      >
-        <FileText className="w-4 h-4 sm:w-3.5 sm:h-3.5" />
-        <span className="hidden sm:inline">{docxLoading ? "..." : "DOCX"}</span>
-      </button>
-      <button
-        onClick={handlePDF}
-        disabled={pdfLoading}
-        className="flex items-center gap-1.5 px-4 py-2.5 sm:py-1.5 rounded-xl sm:rounded-full bg-blue-600 backdrop-blur-md border border-blue-500 text-xs font-bold tracking-wide text-white shadow-sm hover:bg-blue-700 hover:shadow-md transition-all disabled:opacity-50"
-      >
-        <Download className="w-4 h-4 sm:w-3.5 sm:h-3.5" />
-        <span className="hidden sm:inline">{pdfLoading ? "..." : "PDF"}</span>
-        <span className="sm:hidden font-bold">{pdfLoading ? "..." : "PDF"}</span>
-      </button>
-    </>
-  );
-}
-
-import type { UpdateDataFn } from "@/components/resume/DesignContext";
-
-function ClientPDFPreview({ data, template, previewRef, zoom = 1, design, updateData, onSectionClick }: {
-  data: ResumeData; template: TemplateId;
-  previewRef: RefObject<HTMLDivElement | null>;
-  zoom?: number;
-  design?: DesignSettings;
-  updateData?: UpdateDataFn;
-  onSectionClick?: (s: SectionId) => void;
-}) {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [baseScale, setBaseScale] = useState(0.5);
-  const [contentHeight, setContentHeight] = useState(1122);
-
-  // Dynamically load Google Fonts
-  useEffect(() => {
-    if (!design) return;
-    [design.fontFamily, design.headingFontFamily].filter(Boolean).forEach((font) => {
-      const id = `gf-${font.replace(/\s+/g, "-")}`;
-      if (document.getElementById(id)) return;
-      const link = document.createElement("link");
-      link.id = id; link.rel = "stylesheet";
-      link.href = `https://fonts.googleapis.com/css2?family=${encodeURIComponent(font)}:wght@400;500;600;700;800&display=swap`;
-      document.head.appendChild(link);
-    });
-  }, [design?.fontFamily, design?.headingFontFamily]);
-
-  // Fit-to-container scaling
-  useLayoutEffect(() => {
-    const container = containerRef.current;
-    const preview = previewRef.current;
-    if (!container || !preview) return;
-    const update = () => {
-      const parent = container.parentElement;
-      if (!parent) return;
-      const w = parent.clientWidth - 32;
-      const h = parent.clientHeight - 32;
-      const actualH = Math.max(preview.scrollHeight, 1122);
-      setContentHeight(actualH);
-      setBaseScale(Math.min(w / 794, h / actualH));
-    };
-    const ro = new ResizeObserver(update);
-    if (container.parentElement) ro.observe(container.parentElement);
-    ro.observe(preview);
-    update();
-    return () => ro.disconnect();
-  }, [data, template, previewRef]);
-
-  // ── Scoped CSS bridge ─────────────────────────────────────────────────────
-  // Injected INSIDE previewRef so html-to-image captures it → PDF is pixel-perfect.
-  const d = design;
-  const bullet = !d ? '' :
-    d.bulletStyle === 'dot'    ? '"\\2022 "' :
-    d.bulletStyle === 'dash'   ? '"\\2013 "' :
-    d.bulletStyle === 'square' ? '"\\25AA "' :
-    d.bulletStyle === 'arrow'  ? '"\\203A "' :
-    d.bulletStyle === 'star'   ? '"\\2605 "' : '""';
-
-  const css = d ? `
-.ds-live {
-  --color-text: ${d.textColor};
-  --color-heading: ${d.headingColor};
-  --color-accent: ${d.accentColor};
-  --color-bg: ${d.backgroundColor};
-  --color-sidebar: ${d.sidebarColor};
-  --font-base: '${d.fontFamily}', system-ui, sans-serif;
-  --font-heading: '${d.headingFontFamily}', system-ui, sans-serif;
-  --ds-photo-radius: ${d.photoShape === 'circle' ? '50%' : d.photoShape === 'rounded' ? '12px' : '0px'};
-  --ds-photo-size: ${d.photoShape === 'none' ? '0px' : (d.photoSize || 80) + 'px'};
-
-  font-family: var(--font-base) !important;
-  font-size: ${d.baseFontSize}px !important;
-  line-height: ${d.lineHeight} !important;
-  letter-spacing: ${d.letterSpacing}em !important;
-  color: var(--color-text) !important;
-  background-color: var(--color-bg) !important;
-}
-.ds-live > div:first-of-type,
-.ds-live > .bg-white,
-.ds-live [style*="minHeight"] {
-  padding: ${d.pagePaddingY}px ${d.pagePaddingX}px !important;
-}
-.ds-live h1 {
-  font-family: '${d.headingFontFamily}', system-ui, sans-serif !important;
-  font-size: ${(d.baseFontSize * d.headingScale * 1.6).toFixed(1)}px !important;
-  color: ${d.headingColor} !important;
-}
-.ds-live h2 {
-  font-family: '${d.headingFontFamily}', system-ui, sans-serif !important;
-  font-size: ${(d.baseFontSize * d.headingScale).toFixed(1)}px !important;
-  color: ${d.headingColor} !important;
-}
-.ds-live h3 {
-  font-family: '${d.headingFontFamily}', system-ui, sans-serif !important;
-  font-size: ${(d.baseFontSize * d.headingScale * 0.85).toFixed(1)}px !important;
-  color: ${d.headingColor} !important;
-}
-.ds-live section { margin-top: ${d.sectionGap}px !important; }
-.ds-live [class*="space-y"] > * + * { margin-top: ${d.itemGap}px !important; }
-.ds-live [class*="border-b"] {
-  border-bottom-style: ${d.showDividers ? d.dividerStyle : 'none'} !important;
-  border-bottom-color: ${d.accentColor}55 !important;
-}
-.ds-live [class*="border-t"] {
-  border-top-style: ${d.showDividers ? d.dividerStyle : 'none'} !important;
-  border-top-color: ${d.accentColor}55 !important;
-}
-.ds-live ul li::marker { content: ${bullet}; color: ${d.accentColor} !important; }
-.ds-live aside,
-.ds-live [class*="bg-neutral-900"],
-.ds-live [class*="bg-slate-900"],
-.ds-live [class*="bg-gray-900"],
-.ds-live [class*="bg-neutral-800"] { background-color: ${d.sidebarColor} !important; }
-` : '';
-
-  const handlePreviewClick = (e: React.MouseEvent) => {
-    if (!onSectionClick) return;
-    const text = (e.target as HTMLElement).innerText?.toLowerCase() || '';
-    const sectionNames = {
-      summary: ['summary', 'profile', 'پوختە', 'پڕۆفایل'],
-      experience: ['experience', 'ئەزموون'],
-      education: ['education', 'خوێندن'],
-      skills: ['skills', 'لێهاتووییەکان', 'expertise'],
-      projects: ['projects', 'پرۆژەکان'],
-      certifications: ['certifications', 'بڕوانامەکان']
-    };
-    
-    const sectionElement = (e.target as HTMLElement).closest('section, aside');
-    if (sectionElement) {
-       const sectionText = sectionElement.textContent?.toLowerCase() || '';
-       for (const [key, keywords] of Object.entries(sectionNames)) {
-         if (keywords.some(k => sectionText.includes(k))) {
-           onSectionClick(key as any);
-           return;
-         }
-       }
-    }
-    onSectionClick('global');
-  };
-
-  return (
-    <div ref={containerRef} className="absolute inset-0 overflow-auto bg-slate-100/50 p-2 sm:p-4">
-      <div className="flex min-h-full min-w-full w-fit">
-        <div
-          className="m-auto transition-all duration-300 ease-out shrink-0 flex justify-center"
-          style={{ zoom: baseScale * zoom }}
-        >
-          <div
-            className="w-[794px] origin-top transition-all duration-300 ease-out overflow-hidden rounded-sm shadow-[0_20px_50px_-24px_rgba(15,23,42,0.45)] shrink-0"
-            style={{ minHeight: '1122px' }}
-          >
-            {/* previewRef is what html-to-image screenshots → PDF is always pixel-perfect */}
-            <div
-              ref={previewRef}
-              onClick={handlePreviewClick}
-              className="ds-live w-full min-h-full hover:ring-2 hover:ring-blue-400/50 transition-shadow"
-              style={d ? { backgroundColor: d.backgroundColor } : { backgroundColor: '#ffffff' }}
-            >
-              {/* Scoped style bridge — lives inside the screenshot boundary */}
-              {d && <style dangerouslySetInnerHTML={{ __html: css }} />}
-              <UpdateDataContext.Provider value={updateData}>
-                <ResumePreview data={data} template={template} design={design} />
-              </UpdateDataContext.Provider>
+      {inlineEdit && (
+        <div className="fixed inset-0 z-[250] bg-slate-950/30 backdrop-blur-[2px] p-4 flex items-start justify-center pt-24" onClick={() => setInlineEdit(null)}>
+          <div className="w-full max-w-xl rounded-[24px] bg-white shadow-[0_30px_80px_rgba(15,23,42,0.22)] border border-slate-200 overflow-hidden" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100 bg-gradient-to-b from-white to-slate-50">
+              <div>
+                <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">Inline edit</p>
+                <p className="text-sm font-bold text-slate-900">{inlineEdit.path}</p>
+              </div>
+              <button onClick={() => setInlineEdit(null)} className="rounded-full p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition-colors">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <div className="p-5 space-y-3">
+              {isMultilinePath(inlineEdit.path) ? (
+                <textarea
+                  autoFocus
+                  value={inlineEdit.value}
+                  onChange={(e) => setInlineEdit((curr) => curr ? { ...curr, value: e.target.value } : curr)}
+                  className="h-44 w-full rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm outline-none focus:border-blue-500 focus:bg-white resize-none"
+                />
+              ) : (
+                <input
+                  autoFocus
+                  value={inlineEdit.value}
+                  onChange={(e) => setInlineEdit((curr) => curr ? { ...curr, value: e.target.value } : curr)}
+                  className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none focus:border-blue-500 focus:bg-white"
+                />
+              )}
+              <div className="flex items-center justify-between gap-3">
+                <button
+                  onClick={() => {
+                    updateData(inlineEdit.path, inlineEdit.value);
+                    setInlineEdit(null);
+                  }}
+                  className="rounded-full bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800"
+                >
+                  Save
+                </button>
+                <button
+                  onClick={() => {
+                    if (inlineEdit) updateData(inlineEdit.path, getValueAtPath(data, inlineEdit.path));
+                    setInlineEdit(null);
+                  }}
+                  className="rounded-full px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100"
+                >
+                  Cancel
+                </button>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      )}
+
     </div>
   );
 }
-

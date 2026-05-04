@@ -3,7 +3,7 @@
  * Click any section in the preview → highlights it → shows its controls here.
  * Tabs: Content · Style · Layout
  */
-import { useState, createContext, useContext } from "react";
+import { useState, useEffect, createContext, useContext } from "react";
 import type { ReactNode, FC } from "react";
 import type { DesignSettings, ResumeData } from "@/lib/types";
 import {
@@ -11,7 +11,7 @@ import {
   Minus, Circle, Square, ArrowRight, Star,
   GripVertical,
   Briefcase, GraduationCap, Award, FolderOpen,
-  BarChart3, AlignLeft, User,
+  BarChart3, AlignLeft, User, Globe,
 } from "lucide-react";
 
 // ─── Default design ──────────────────────────────────────────────────────────
@@ -41,13 +41,13 @@ export const DEFAULT_DESIGN: DesignSettings = {
   photoShape: "circle",
   photoSize: 80,
   columnLayout: "single",
-  contentOrder: ["summary", "experience", "education", "skills", "projects", "certifications"],
+  contentOrder: ["summary", "experience", "education", "skills", "projects", "certifications", "languages"],
 };
 
 // ─── Section registry ─────────────────────────────────────────────────────────
 export type SectionId =
   | "header" | "summary" | "experience" | "education"
-  | "skills" | "projects" | "certifications" | "global";
+  | "skills" | "projects" | "certifications" | "languages" | "global";
 
 export const SECTION_META: Record<SectionId, { label: string; icon: FC<{ className?: string }> }> = {
   global:       { label: "Global Style",    icon: Sliders },
@@ -58,6 +58,7 @@ export const SECTION_META: Record<SectionId, { label: string; icon: FC<{ classNa
   skills:       { label: "Skills",          icon: BarChart3 },
   projects:     { label: "Projects",        icon: FolderOpen },
   certifications:{ label: "Certifications", icon: Award },
+  languages:    { label: "Languages",       icon: Globe },
 };
 
 // ─── Selection context (shared with preview via prop-drilling or context) ──────
@@ -231,15 +232,27 @@ function IconRow<T extends string>({
 
 
 // ─── CONTENT TAB ─────────────────────────────────────────────────────────────
-function ContentTab({ selected, design, data, onChange, updateData }: {
+function ContentTab({ selected, design, data, onChange, updateData, focusedField }: {
   selected: SectionId;
   design: DesignSettings;
   data: ResumeData;
   onChange: (p: Partial<DesignSettings>) => void;
   updateData: (path: string, val: any) => void;
+  focusedField?: string | null;
 }) {
+  useEffect(() => {
+    if (!focusedField) return;
+    const escaped = (globalThis.CSS?.escape ? globalThis.CSS.escape(focusedField) : focusedField.replace(/\\/g, "\\\\").replace(/"/g, '\\"'));
+    const el = document.querySelector(`[data-panel-field="${escaped}"]`) as HTMLElement | null;
+    if (!el) return;
+    el.focus({ preventScroll: true });
+    el.scrollIntoView({ block: "center", behavior: "smooth" });
+  }, [focusedField, selected]);
+
+  const field = (path: string) => ({ "data-panel-field": path });
+
   // Show section-level visibility toggles
-  const sections: SectionId[] = ["summary", "experience", "education", "skills", "projects", "certifications"];
+  const sections: SectionId[] = ["summary", "experience", "education", "skills", "projects", "certifications", "languages"];
 
   if (selected === "header") {
     return (
@@ -248,23 +261,27 @@ function ContentTab({ selected, design, data, onChange, updateData }: {
         <div className="space-y-3">
           <div>
             <p className="text-[9px] mb-1" style={{ color: "#6e6e73" }}>Full Name</p>
-            <input type="text" className="w-full text-[11px] p-2 rounded-lg border border-slate-200 outline-none focus:border-blue-500 transition-colors" value={data.name || ""} onChange={(e) => updateData("name", e.target.value)} />
+            <input {...field("name")} type="text" className="w-full text-[11px] p-2 rounded-lg border border-slate-200 outline-none focus:border-blue-500 transition-colors" value={data.name || ""} onChange={(e) => updateData("name", e.target.value)} />
           </div>
           <div>
             <p className="text-[9px] mb-1" style={{ color: "#6e6e73" }}>Professional Title</p>
-            <input type="text" className="w-full text-[11px] p-2 rounded-lg border border-slate-200 outline-none focus:border-blue-500 transition-colors" value={data.title || ""} onChange={(e) => updateData("title", e.target.value)} />
+            <input {...field("title")} type="text" className="w-full text-[11px] p-2 rounded-lg border border-slate-200 outline-none focus:border-blue-500 transition-colors" value={data.title || ""} onChange={(e) => updateData("title", e.target.value)} />
           </div>
           <div>
             <p className="text-[9px] mb-1" style={{ color: "#6e6e73" }}>Email</p>
-            <input type="email" className="w-full text-[11px] p-2 rounded-lg border border-slate-200 outline-none focus:border-blue-500 transition-colors" value={data.email || ""} onChange={(e) => updateData("email", e.target.value)} />
+            <input {...field("email")} type="email" className="w-full text-[11px] p-2 rounded-lg border border-slate-200 outline-none focus:border-blue-500 transition-colors" value={data.email || ""} onChange={(e) => updateData("email", e.target.value)} />
           </div>
           <div>
             <p className="text-[9px] mb-1" style={{ color: "#6e6e73" }}>Phone</p>
-            <input type="tel" className="w-full text-[11px] p-2 rounded-lg border border-slate-200 outline-none focus:border-blue-500 transition-colors" value={data.phone || ""} onChange={(e) => updateData("phone", e.target.value)} />
+            <input {...field("phone")} type="tel" className="w-full text-[11px] p-2 rounded-lg border border-slate-200 outline-none focus:border-blue-500 transition-colors" value={data.phone || ""} onChange={(e) => updateData("phone", e.target.value)} />
           </div>
           <div>
             <p className="text-[9px] mb-1" style={{ color: "#6e6e73" }}>Location</p>
-            <input type="text" className="w-full text-[11px] p-2 rounded-lg border border-slate-200 outline-none focus:border-blue-500 transition-colors" value={data.location || ""} onChange={(e) => updateData("location", e.target.value)} />
+            <input {...field("location")} type="text" className="w-full text-[11px] p-2 rounded-lg border border-slate-200 outline-none focus:border-blue-500 transition-colors" value={data.location || ""} onChange={(e) => updateData("location", e.target.value)} />
+          </div>
+          <div>
+            <p className="text-[9px] mb-1" style={{ color: "#6e6e73" }}>Photo URL</p>
+            <input {...field("photoUrl")} type="url" className="w-full text-[11px] p-2 rounded-lg border border-slate-200 outline-none focus:border-blue-500 transition-colors" value={data.photoUrl || ""} onChange={(e) => updateData("photoUrl", e.target.value)} placeholder="https://..." />
           </div>
         </div>
       </div>
@@ -276,7 +293,7 @@ function ContentTab({ selected, design, data, onChange, updateData }: {
       <div className="space-y-4">
         <Label>Professional Summary</Label>
         <div>
-          <textarea className="w-full text-[11px] p-2 rounded-lg border border-slate-200 outline-none focus:border-blue-500 transition-colors h-40 resize-none" value={data.summary || ""} onChange={(e) => updateData("summary", e.target.value)} placeholder="A brief summary of your professional background..." />
+          <textarea {...field("summary")} className="w-full text-[11px] p-2 rounded-lg border border-slate-200 outline-none focus:border-blue-500 transition-colors h-40 resize-none" value={data.summary || ""} onChange={(e) => updateData("summary", e.target.value)} placeholder="A brief summary of your professional background..." />
         </div>
       </div>
     );
@@ -297,17 +314,17 @@ function ContentTab({ selected, design, data, onChange, updateData }: {
               </button>
               
               <div className="grid grid-cols-2 gap-2">
-                <input type="text" className="w-full text-[12px] p-2 rounded-xl border border-[#e5e5ea] outline-none focus:border-[#0071e3] transition-colors bg-[#f5f5f7] focus:bg-white" value={exp.title || ""} onChange={(e) => updateData(`experience.${idx}.title`, e.target.value)} placeholder="Job Title" />
-                <input type="text" className="w-full text-[12px] p-2 rounded-xl border border-[#e5e5ea] outline-none focus:border-[#0071e3] transition-colors bg-[#f5f5f7] focus:bg-white" value={exp.company || ""} onChange={(e) => updateData(`experience.${idx}.company`, e.target.value)} placeholder="Company" />
+                <input {...field(`experience.${idx}.title`)} type="text" className="w-full text-[12px] p-2 rounded-xl border border-[#e5e5ea] outline-none focus:border-[#0071e3] transition-colors bg-[#f5f5f7] focus:bg-white" value={exp.title || ""} onChange={(e) => updateData(`experience.${idx}.title`, e.target.value)} placeholder="Job Title" />
+                <input {...field(`experience.${idx}.company`)} type="text" className="w-full text-[12px] p-2 rounded-xl border border-[#e5e5ea] outline-none focus:border-[#0071e3] transition-colors bg-[#f5f5f7] focus:bg-white" value={exp.company || ""} onChange={(e) => updateData(`experience.${idx}.company`, e.target.value)} placeholder="Company" />
               </div>
-              <input type="text" className="w-full text-[12px] p-2 rounded-xl border border-[#e5e5ea] outline-none focus:border-[#0071e3] transition-colors bg-[#f5f5f7] focus:bg-white" value={exp.duration || ""} onChange={(e) => updateData(`experience.${idx}.duration`, e.target.value)} placeholder="Duration" />
-              <textarea className="w-full text-[12px] p-2 rounded-xl border border-[#e5e5ea] outline-none focus:border-[#0071e3] transition-colors bg-[#f5f5f7] focus:bg-white h-16 resize-none" value={exp.description || ""} onChange={(e) => updateData(`experience.${idx}.description`, e.target.value)} placeholder="Description" />
+              <input {...field(`experience.${idx}.duration`)} type="text" className="w-full text-[12px] p-2 rounded-xl border border-[#e5e5ea] outline-none focus:border-[#0071e3] transition-colors bg-[#f5f5f7] focus:bg-white" value={exp.duration || ""} onChange={(e) => updateData(`experience.${idx}.duration`, e.target.value)} placeholder="Duration" />
+              <textarea {...field(`experience.${idx}.description`)} className="w-full text-[12px] p-2 rounded-xl border border-[#e5e5ea] outline-none focus:border-[#0071e3] transition-colors bg-[#f5f5f7] focus:bg-white h-16 resize-none" value={exp.description || ""} onChange={(e) => updateData(`experience.${idx}.description`, e.target.value)} placeholder="Description" />
               
               <div className="space-y-1.5 pt-1 border-t border-[#f2f2f7]">
                 <p className="text-[10px] font-semibold text-[#8e8e93]">Achievements</p>
                 {exp.achievements.map((ach, aIdx) => (
                   <div key={aIdx} className="flex gap-1.5 relative group/ach">
-                    <input type="text" className="flex-1 text-[11px] p-1.5 rounded-lg border border-[#e5e5ea] outline-none focus:border-[#0071e3] bg-[#f5f5f7] focus:bg-white" value={ach || ""} onChange={(e) => updateData(`experience.${idx}.achievements.${aIdx}`, e.target.value)} />
+                    <input {...field(`experience.${idx}.achievements.${aIdx}`)} type="text" className="flex-1 text-[11px] p-1.5 rounded-lg border border-[#e5e5ea] outline-none focus:border-[#0071e3] bg-[#f5f5f7] focus:bg-white" value={ach || ""} onChange={(e) => updateData(`experience.${idx}.achievements.${aIdx}`, e.target.value)} />
                     <button 
                       onClick={() => updateData(`experience.${idx}.achievements`, exp.achievements.filter((_, i) => i !== aIdx))}
                       className="w-6 h-6 rounded-md text-red-400 hover:text-red-500 hover:bg-red-50 flex items-center justify-center shrink-0"
@@ -350,9 +367,9 @@ function ContentTab({ selected, design, data, onChange, updateData }: {
                 <X className="w-3 h-3" />
               </button>
               
-              <input type="text" className="w-full text-[12px] p-2 rounded-xl border border-[#e5e5ea] outline-none focus:border-[#0071e3] transition-colors bg-[#f5f5f7] focus:bg-white" value={edu.degree || ""} onChange={(e) => updateData(`education.${idx}.degree`, e.target.value)} placeholder="Degree" />
-              <input type="text" className="w-full text-[12px] p-2 rounded-xl border border-[#e5e5ea] outline-none focus:border-[#0071e3] transition-colors bg-[#f5f5f7] focus:bg-white" value={edu.institution || ""} onChange={(e) => updateData(`education.${idx}.institution`, e.target.value)} placeholder="Institution" />
-              <input type="text" className="w-full text-[12px] p-2 rounded-xl border border-[#e5e5ea] outline-none focus:border-[#0071e3] transition-colors bg-[#f5f5f7] focus:bg-white" value={edu.year || ""} onChange={(e) => updateData(`education.${idx}.year`, e.target.value)} placeholder="Year" />
+              <input {...field(`education.${idx}.degree`)} type="text" className="w-full text-[12px] p-2 rounded-xl border border-[#e5e5ea] outline-none focus:border-[#0071e3] transition-colors bg-[#f5f5f7] focus:bg-white" value={edu.degree || ""} onChange={(e) => updateData(`education.${idx}.degree`, e.target.value)} placeholder="Degree" />
+              <input {...field(`education.${idx}.institution`)} type="text" className="w-full text-[12px] p-2 rounded-xl border border-[#e5e5ea] outline-none focus:border-[#0071e3] transition-colors bg-[#f5f5f7] focus:bg-white" value={edu.institution || ""} onChange={(e) => updateData(`education.${idx}.institution`, e.target.value)} placeholder="Institution" />
+              <input {...field(`education.${idx}.year`)} type="text" className="w-full text-[12px] p-2 rounded-xl border border-[#e5e5ea] outline-none focus:border-[#0071e3] transition-colors bg-[#f5f5f7] focus:bg-white" value={edu.year || ""} onChange={(e) => updateData(`education.${idx}.year`, e.target.value)} placeholder="Year" />
             </div>
           ))}
         </div>
@@ -380,9 +397,10 @@ function ContentTab({ selected, design, data, onChange, updateData }: {
                 <X className="w-3 h-3" />
               </button>
               
-              <input type="text" className="w-full text-[12px] p-2 rounded-xl border border-[#e5e5ea] outline-none focus:border-[#0071e3] transition-colors bg-[#f5f5f7] focus:bg-white" value={proj.name || ""} onChange={(e) => updateData(`projects.${idx}.name`, e.target.value)} placeholder="Project Name" />
-              <textarea className="w-full text-[12px] p-2 rounded-xl border border-[#e5e5ea] outline-none focus:border-[#0071e3] transition-colors bg-[#f5f5f7] focus:bg-white h-16 resize-none" value={proj.description || ""} onChange={(e) => updateData(`projects.${idx}.description`, e.target.value)} placeholder="Description" />
-              <input type="text" className="w-full text-[12px] p-2 rounded-xl border border-[#e5e5ea] outline-none focus:border-[#0071e3] transition-colors bg-[#f5f5f7] focus:bg-white" value={proj.tech?.join(", ") || ""} onChange={(e) => updateData(`projects.${idx}.tech`, e.target.value.split(",").map(s => s.trim()))} placeholder="Tech Stack (comma separated)" />
+              <input {...field(`projects.${idx}.name`)} type="text" className="w-full text-[12px] p-2 rounded-xl border border-[#e5e5ea] outline-none focus:border-[#0071e3] transition-colors bg-[#f5f5f7] focus:bg-white" value={proj.name || ""} onChange={(e) => updateData(`projects.${idx}.name`, e.target.value)} placeholder="Project Name" />
+              <textarea {...field(`projects.${idx}.description`)} className="w-full text-[12px] p-2 rounded-xl border border-[#e5e5ea] outline-none focus:border-[#0071e3] transition-colors bg-[#f5f5f7] focus:bg-white h-16 resize-none" value={proj.description || ""} onChange={(e) => updateData(`projects.${idx}.description`, e.target.value)} placeholder="Description" />
+              <input {...field(`projects.${idx}.impact`)} type="text" className="w-full text-[12px] p-2 rounded-xl border border-[#e5e5ea] outline-none focus:border-[#0071e3] transition-colors bg-[#f5f5f7] focus:bg-white" value={proj.impact || ""} onChange={(e) => updateData(`projects.${idx}.impact`, e.target.value)} placeholder="Impact / Result" />
+              <input {...field(`projects.${idx}.tech`)} type="text" className="w-full text-[12px] p-2 rounded-xl border border-[#e5e5ea] outline-none focus:border-[#0071e3] transition-colors bg-[#f5f5f7] focus:bg-white" value={proj.tech?.join(", ") || ""} onChange={(e) => updateData(`projects.${idx}.tech`, e.target.value.split(",").map(s => s.trim()))} placeholder="Tech Stack (comma separated)" />
             </div>
           ))}
         </div>
@@ -401,7 +419,7 @@ function ContentTab({ selected, design, data, onChange, updateData }: {
       <div className="space-y-4">
         <Label>Skills</Label>
         <div className="p-3.5 bg-white border border-[#e5e5ea] rounded-2xl shadow-sm">
-          <textarea 
+          <textarea {...field("skills")} 
             className="w-full text-[12px] p-2 rounded-xl border border-[#e5e5ea] outline-none focus:border-[#0071e3] transition-colors bg-[#f5f5f7] focus:bg-white h-24 resize-none" 
             value={data.skills.join(", ")} 
             onChange={(e) => updateData("skills", e.target.value.split(",").map(s => s.trim()))} 
@@ -418,13 +436,30 @@ function ContentTab({ selected, design, data, onChange, updateData }: {
       <div className="space-y-4">
         <Label>Certifications</Label>
         <div className="p-3.5 bg-white border border-[#e5e5ea] rounded-2xl shadow-sm">
-          <textarea 
+          <textarea {...field("certifications")} 
             className="w-full text-[12px] p-2 rounded-xl border border-[#e5e5ea] outline-none focus:border-[#0071e3] transition-colors bg-[#f5f5f7] focus:bg-white h-24 resize-none" 
             value={data.certifications.join("\n")} 
             onChange={(e) => updateData("certifications", e.target.value.split("\n"))} 
             placeholder="AWS Certified...&#10;Google Cloud..." 
           />
           <p className="text-[10px] text-[#8e8e93] mt-1.5 font-medium">One certification per line</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (selected === "languages") {
+    return (
+      <div className="space-y-4">
+        <Label>Languages</Label>
+        <div className="p-3.5 bg-white border border-[#e5e5ea] rounded-2xl shadow-sm">
+          <textarea {...field("languages")}
+            className="w-full text-[12px] p-2 rounded-xl border border-[#e5e5ea] outline-none focus:border-[#0071e3] transition-colors bg-[#f5f5f7] focus:bg-white h-24 resize-none"
+            value={(data.languages || []).join("\n")}
+            onChange={(e) => updateData("languages", e.target.value.split("\n").map((s) => s.trim()).filter(Boolean))}
+            placeholder="English\nSpanish\nArabic"
+          />
+          <p className="text-[10px] text-[#8e8e93] mt-1.5 font-medium">One language per line</p>
         </div>
       </div>
     );
@@ -758,13 +793,13 @@ function TabBtn({ active, onClick, children }: { active: boolean; onClick: () =>
 }
 
 const ALL_SECTIONS: SectionId[] = [
-  "global", "header", "summary", "experience", "education", "skills", "projects", "certifications",
+  "global", "header", "summary", "experience", "education", "skills", "projects", "certifications", "languages",
 ];
 
 // ─── MAIN EXPORT ──────────────────────────────────────────────────────────────
 export function DesignPanel({
   design, data, onChange, updateData, onClose,
-  selected, setSelected,
+  selected, setSelected, focusedField,
 }: {
   design: DesignSettings;
   data: ResumeData;
@@ -773,15 +808,24 @@ export function DesignPanel({
   onClose: () => void;
   selected: SectionId;
   setSelected: (s: SectionId) => void;
+  focusedField?: string | null;
 }) {
-  const [tab, setTab] = useState<Tab>("style");
+  const [tab, setTab] = useState<Tab>(selected === "global" ? "style" : "content");
+
+  useEffect(() => {
+    setTab(selected === "global" ? "style" : "content");
+  }, [selected]);
+
+  useEffect(() => {
+    if (focusedField) setTab("content");
+  }, [focusedField]);
 
   return (
     <SelectionContext.Provider value={{ selected, setSelected }}>
       <div className="flex h-full w-full flex-col select-none" style={{ background: "#ffffff", color: "#1d1d1f" }}>
 
         {/* Header */}
-        <div className="flex items-center justify-between px-4 py-3 shrink-0" style={{ borderBottom: "1px solid #f2f2f7" }}>
+        <div className="flex items-center justify-between px-4 py-3 shrink-0" style={{ borderBottom: "1px solid #f2f2f7", background: "linear-gradient(180deg, #ffffff 0%, #fbfbfc 100%)" }}>
           <div className="flex items-center gap-2.5">
             <div className="flex w-7 h-7 items-center justify-center rounded-xl" style={{ background: "#f5f5f7", border: "1px solid #e5e5ea" }}>
               <Sliders className="w-3.5 h-3.5" style={{ color: "#0071e3" }} />
@@ -792,6 +836,10 @@ export function DesignPanel({
             </div>
           </div>
           <div className="flex items-center gap-1">
+            <div className="hidden sm:flex flex-col items-end mr-2">
+              <span className="text-[9px] font-semibold uppercase tracking-[0.12em] text-[#8e8e93]">Editing</span>
+              <span className="max-w-[130px] truncate text-[11px] font-semibold text-[#1d1d1f]">{focusedField ? focusedField.split('.').slice(-1)[0] || SECTION_META[selected].label : SECTION_META[selected].label}</span>
+            </div>
             <button onClick={() => onChange({ ...DEFAULT_DESIGN })} title="Reset" className="w-7 h-7 rounded-lg flex items-center justify-center transition-colors hover:bg-black/5" style={{ color: "#8e8e93" }}>
               <RotateCcw className="w-3.5 h-3.5" />
             </button>

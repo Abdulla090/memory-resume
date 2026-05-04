@@ -1519,6 +1519,7 @@ export function GetPDFDocument({ data, template }: { data: ResumeData; template:
     case 'ref-silva': return <ExecutivePDF data={data} />;
     case 'ref-schumacher': return <ForgePDF data={data} />;
     case 'ref-palmerston': return <PalmerstonExactPDF data={data} />;
+    case 'ref-alvarado': return <PalmerstonExactPDF data={data} />;
     case 'ref-sanchez': return <CarbonPDF data={data} />;
     case 'gallego': return <GallegoPDF data={data} />;
     case 'leroy': return <LeroyPDF data={data} />;

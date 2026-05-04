@@ -56,6 +56,7 @@ export interface ResumeData {
   phone?: string;
   photoUrl?: string;
   location?: string;
+  languages?: string[];
   summary: string;
   experience: ExperienceItem[];
   projects: ProjectItem[];
@@ -108,7 +109,7 @@ export interface DesignSettings {
   contentOrder: string[];      // section ordering
 }
 
-export type TemplateId = "minimal" | "executive" | "noir" | "apex" | "slate" | "cipher" | "monolith" | "pinnacle" | "avant" | "vanguard" | "nexus" | "orbit" | "metric" | "prism" | "carbon" | "atlas" | "forge" | "zenith" | "vector" | "new-sleek" | "new-professional" | "new-academic" | "ref-torres" | "ref-silva" | "ref-schumacher" | "ref-palmerston" | "ref-sanchez" | "mercer" | "gallego" | "leroy" | "dubois";
+export type TemplateId = "minimal" | "executive" | "noir" | "apex" | "slate" | "cipher" | "monolith" | "pinnacle" | "avant" | "vanguard" | "nexus" | "orbit" | "metric" | "prism" | "carbon" | "atlas" | "forge" | "zenith" | "vector" | "new-sleek" | "new-professional" | "new-academic" | "ref-torres" | "ref-silva" | "ref-schumacher" | "ref-palmerston" | "ref-sanchez" | "ref-alvarado" | "mercer" | "gallego" | "leroy" | "dubois";
 
 export interface SavedResume {
   id: string;

@@ -1,24 +1,7 @@
 import React from 'react';
 import type { ResumeData, TemplateId, DesignSettings } from "@/lib/types";
-import { DesignContext } from "./DesignContext";
-
-const rtlPattern = /[\u0600-\u06ff\u0750-\u077f\u08a0-\u08ff]/;
-
-function isRTL(data: ResumeData) {
-  return rtlPattern.test(
-    [
-      data.name,
-      data.title,
-      data.location,
-      data.summary,
-      ...data.skills,
-      ...data.certifications,
-      ...data.experience.flatMap((item) => [item.title, item.company, item.description, ...item.achievements]),
-      ...data.projects.flatMap((item) => [item.name, item.description, item.impact, ...item.tech]),
-      ...data.education.flatMap((item) => [item.degree, item.institution]),
-    ].filter(Boolean).join(" "),
-  );
-}
+import { DesignContext, FieldFocusContext } from "./DesignContext";
+import { isRTL } from "./template-helpers";
 
 function labels(rtl: boolean) {
   return rtl
@@ -323,6 +306,7 @@ import {
   NewProfessionalTemplate,
   NewSleekTemplate,
   RefPalmerstonTemplate,
+  RefAlvaradoTemplate,
   RefSanchezTemplate,
   RefSchumacherTemplate,
   RefSilvaTemplate,
@@ -337,10 +321,12 @@ export function ResumePreview({
   data,
   template,
   design,
+  onFieldFocus,
 }: {
   data: ResumeData;
   template: TemplateId;
   design?: DesignSettings;
+  onFieldFocus?: (path: string) => void;
 }) {
   const rtl = isRTL(data);
   let preview: React.ReactNode;
@@ -365,6 +351,7 @@ export function ResumePreview({
     case "ref-silva": preview = <RefSilvaTemplate data={data} />; break;
     case "ref-schumacher": preview = <RefSchumacherTemplate data={data} />; break;
     case "ref-palmerston": preview = <RefPalmerstonTemplate data={data} />; break;
+    case "ref-alvarado": preview = <RefAlvaradoTemplate data={data} />; break;
     case "ref-sanchez": preview = <RefSanchezTemplate data={data} />; break;
     case "mercer": preview = <MercerTemplate data={data} />; break;
     case "gallego": preview = <GallegoTemplate data={data} />; break;
@@ -377,7 +364,7 @@ export function ResumePreview({
   return (
     <DesignContext.Provider value={design}>
       <div dir={rtl ? "rtl" : "ltr"} className="resume-rtl-scope h-full w-full [unicode-bidi:plaintext]">
-        {preview}
+        {onFieldFocus ? <FieldFocusContext.Provider value={onFieldFocus}>{preview}</FieldFocusContext.Provider> : preview}
       </div>
     </DesignContext.Provider>
   );
