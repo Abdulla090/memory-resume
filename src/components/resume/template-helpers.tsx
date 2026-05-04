@@ -44,6 +44,47 @@ export function labels(rtl: boolean) {
   };
 }
 
+export function label(data: ResumeData, key: "profile" | "executiveProfile" | "summary" | "experience" | "professionalExperience" | "projects" | "skills" | "keySkills" | "expertise" | "metrics" | "education" | "certifications" | "terminalExperience" | "terminalSkills" | "terminalEducation") {
+  const rtl = isRTL(data);
+  const map = rtl
+    ? {
+        profile: "پڕۆفایل",
+        executiveProfile: "پڕۆفایلی پیشەیی",
+        summary: "پوختە",
+        experience: "ئەزموون",
+        professionalExperience: "ئەزموونی پیشەیی",
+        projects: "پرۆژەکان",
+        skills: "لێهاتووییەکان",
+        keySkills: "لێهاتووییە سەرەکییەکان",
+        expertise: "پسپۆڕی",
+        metrics: "پێوەرەکان",
+        education: "خوێندن",
+        certifications: "بڕوانامەکان",
+        terminalExperience: "~/ئەزموون $",
+        terminalSkills: "~/لێهاتوویی $",
+        terminalEducation: "~/خوێندن $",
+      }
+    : {
+        profile: "Profile",
+        executiveProfile: "Executive Profile",
+        summary: "Executive Summary",
+        experience: "Experience",
+        professionalExperience: "Professional Experience",
+        projects: "Projects",
+        skills: "Skills",
+        keySkills: "Key Skills",
+        expertise: "Expertise",
+        metrics: "Metrics",
+        education: "Education",
+        certifications: "Certifications",
+        terminalExperience: "~/experience $",
+        terminalSkills: "~/skills $",
+        terminalEducation: "~/education $",
+      };
+
+  return map[key];
+}
+
 export function initials(name: string) {
   return name
     .split(/\s+/)
