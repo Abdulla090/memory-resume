@@ -12,6 +12,11 @@ export function RefTorresTemplate({ data }: { data: ResumeData }) {
   const c = optimizeResumeForOnePage(data);
   const rtl = isRTL(c);
   const l = labels(rtl);
+  const design = useContext(DesignContext);
+  const colLayout = design?.columnLayout || "sidebar-right";
+  const isLeftSidebar = colLayout === "sidebar-left";
+  const photoShape = design?.photoShape || "circle";
+  const photoBlockShape = photoShape === "square" ? "rounded" : photoShape;
   const sideItems = [c.location, c.email, c.phone].filter(Boolean);
 
   return (
@@ -19,10 +24,10 @@ export function RefTorresTemplate({ data }: { data: ResumeData }) {
       <div className="h-[168px] bg-[#315b74]">
         <div className="h-full w-full opacity-20" style={{ backgroundImage: "linear-gradient(135deg, transparent 0 46%, rgba(255,255,255,.35) 46% 47%, transparent 47% 100%)", backgroundSize: "28px 28px" }} />
       </div>
-      <div className="grid grid-cols-[308px_1fr] ">
-        <aside className="relative min-h-[954px] bg-[#f3f3f3] px-12 pb-10 pt-32 ">
+      <div className={`grid ${colLayout === "single" ? "grid-cols-1" : colLayout === "two-col" ? "grid-cols-2" : isLeftSidebar ? "grid-cols-[308px_1fr]" : "grid-cols-[1fr_308px]"}`}>
+        <aside className={`relative min-h-[954px] bg-[#f3f3f3] px-12 pb-10 pt-32 ${!isLeftSidebar && colLayout !== "single" ? "order-last" : ""}`}>
           <div className="absolute -top-[105px] left-1/2 h-[220px] w-[220px] -translate-x-1/2 overflow-hidden rounded-full border-[5px] border-[#d8e2e9] bg-slate-200">
-            {c.photoUrl ? <img src={c.photoUrl} alt={c.name} className="h-full w-full object-cover" /> : <div className="flex h-full w-full items-center justify-center text-5xl font-black text-[var(--color-text)] opacity-80">{initials(c.name)}</div>}
+            <PhotoBlock data={c} shape={photoBlockShape} />
           </div>
           <Editable path="name" value={c.name} as="h1" className="mt-3 text-[42px] font-light uppercase leading-[1.02] tracking-[0.08em] rtl:tracking-normal text-[#1e405a]" />
           <Editable path="title" value={c.title} as="p" className="mt-3 border-b border-[#b8c5ce] pb-4 text-[15px] font-semibold uppercase tracking-[0.09em] rtl:tracking-normal text-neutral-800" />
@@ -36,7 +41,7 @@ export function RefTorresTemplate({ data }: { data: ResumeData }) {
             </div>
           </section>
 
-          {(c.skillItems?.length ? c.skillItems.length > 0 : c.skills.length > 0) && (
+          {(design?.showSkillBars !== false && (c.skillItems?.length ? c.skillItems.length > 0 : c.skills.length > 0)) && (
             <section className="mt-10">
               <h2 className="mb-5 text-[18px] font-black uppercase tracking-[0.2em] rtl:tracking-normal text-[#1d3f59]">{l.skills}</h2>
               {c.skillItems && c.skillItems.length > 0 ? (

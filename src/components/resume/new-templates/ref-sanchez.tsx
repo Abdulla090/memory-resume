@@ -12,6 +12,10 @@ export function RefSanchezTemplate({ data }: { data: ResumeData }) {
   const c = optimizeResumeForOnePage(data);
   const rtl = isRTL(c);
   const l = labels(rtl);
+  const design = useContext(DesignContext);
+  const showSkillBars = design?.showSkillBars !== false;
+  const photoShape = design?.photoShape || "circle";
+  const photoBlockShape = photoShape === "square" ? "rounded" : photoShape;
 
   const TimelineSection = ({ title, icon, children }: { title: string; icon: string; children: ReactNode }) => (
     <section className="relative pl-16 rtl:pl-0 rtl:pr-16">
@@ -25,8 +29,8 @@ export function RefSanchezTemplate({ data }: { data: ResumeData }) {
   return (
     <div dir={rtl ? "rtl" : "ltr"} className="bg-white font-sans text-[#263241]" style={{ minHeight: "1122px", width: "100%" }}>
       <header className="relative h-[185px] bg-[#303b4e] text-white">
-        <div className="absolute left-[28px] top-[78px] z-10 h-[170px] w-[170px] overflow-hidden rounded-full border-[7px] border-white bg-slate-200 rtl:left-auto rtl:right-[28px]">
-          {c.photoUrl ? <img src={c.photoUrl} alt={c.name} className="h-full w-full object-cover" /> : <div className="flex h-full w-full items-center justify-center text-[2.2em] font-black text-[var(--color-text)] opacity-80">{initials(c.name)}</div>}
+        <div className="absolute left-[28px] top-[78px] z-10 rtl:left-auto rtl:right-[28px]">
+          <PhotoBlock data={c} shape={photoBlockShape} />
         </div>
         <div className="pl-[315px] pt-[62px] rtl:pl-0 rtl:pr-[315px]">
           <h1 className="text-[38px] font-black uppercase leading-none">{c.name}</h1>
@@ -42,7 +46,7 @@ export function RefSanchezTemplate({ data }: { data: ResumeData }) {
               {[c.phone, c.email, c.location].filter(Boolean).map((item) => <p key={item}>{item}</p>)}
             </div>
           </section>
-          {(c.skillItems?.length ? c.skillItems.length > 0 : c.skills.length > 0) && (
+          {showSkillBars && (c.skillItems?.length ? c.skillItems.length > 0 : c.skills.length > 0) && (
             <section className="mt-9">
               <h2 className="mb-4 border-b-2 border-[#8c939a] pb-2 text-[18px] font-black uppercase tracking-[0.15em] rtl:tracking-normal">{l.skills}</h2>
               <div className="space-y-3">

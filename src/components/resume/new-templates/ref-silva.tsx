@@ -12,13 +12,15 @@ export function RefSilvaTemplate({ data }: { data: ResumeData }) {
   const c = optimizeResumeForOnePage(data);
   const rtl = isRTL(c);
   const l = labels(rtl);
+  const design = useContext(DesignContext);
+  const showSkillBars = design?.showSkillBars !== false;
+  const photoShape = design?.photoShape || "circle";
+  const photoBlockShape = photoShape === "square" ? "rounded" : photoShape;
 
   return (
     <div dir={rtl ? "rtl" : "ltr"} className="bg-white font-sans text-[#1f1b18]" style={{ minHeight: "1122px", width: "100%" }}>
       <header className="flex h-[190px] items-center gap-11 bg-[#342820] px-12 text-white rtl:flex-row-reverse">
-        <div className="h-[135px] w-[135px] overflow-hidden rounded-full bg-stone-200">
-          {c.photoUrl ? <img src={c.photoUrl} alt={c.name} className="h-full w-full object-cover" /> : <div className="flex h-full w-full items-center justify-center text-[2.2em] font-black text-stone-500">{initials(c.name)}</div>}
-        </div>
+        <PhotoBlock data={c} shape={photoBlockShape} />
         <div className="border-l-[7px] border-white pl-8 rtl:border-l-0 rtl:border-r-[7px] rtl:pl-0 rtl:pr-8">
           <h1 className="text-[45px] font-black leading-none tracking-tight rtl:tracking-normal">{c.name}</h1>
           <p className="mt-2 text-[23px] font-bold">{c.title}</p>
@@ -46,7 +48,7 @@ export function RefSilvaTemplate({ data }: { data: ResumeData }) {
               </div>
             </section>
           )}
-          {(c.skillItems?.length ? c.skillItems.length > 0 : c.skills.length > 0) && (
+          {showSkillBars && (c.skillItems?.length ? c.skillItems.length > 0 : c.skills.length > 0) && (
             <section className="mt-10">
               <h2 className="mb-5 text-[22px] font-normal">{l.skills}</h2>
               {c.skillItems && c.skillItems.length > 0 ? (

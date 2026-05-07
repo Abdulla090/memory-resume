@@ -11,6 +11,10 @@ import { optimizeResumeForOnePage } from "@/lib/resume-utils";
 export function RefPalmerstonTemplate({ data }: { data: ResumeData }) {
   const c = optimizeResumeForOnePage(data);
   const rtl = isRTL(c);
+  const design = useContext(DesignContext);
+  const showSkillBars = design?.showSkillBars !== false;
+  const photoShape = design?.photoShape || "circle";
+  const photoBlockShape = photoShape === "square" ? "rounded" : photoShape;
   const referenceItems = c.projects.length > 0
     ? c.projects.slice(0, 2).map((project) => ({
         name: project.name,
@@ -32,8 +36,8 @@ export function RefPalmerstonTemplate({ data }: { data: ResumeData }) {
     <div dir={rtl ? "rtl" : "ltr"} className="relative overflow-hidden bg-white font-sans text-[#111827]" style={{ height: "1122px", minHeight: "1122px", width: "794px", maxWidth: "100%" }}>
       <header className="absolute left-0 top-0 h-[208px] w-full bg-white">
         <div className="absolute left-0 top-0 h-[205px] w-[285px] rounded-br-[48px] bg-[#303b4e]">
-          <div className="absolute left-[59px] top-[34px] h-[151px] w-[151px] overflow-hidden rounded-full border-[5px] border-[#b9b4ad] bg-slate-200">
-            {c.photoUrl ? <img src={c.photoUrl} alt={c.name} className="h-full w-full object-cover" /> : <div className="flex h-full w-full items-center justify-center text-[2.2em] font-black text-[var(--color-text)] opacity-80">{initials(c.name)}</div>}
+          <div className="absolute left-[59px] top-[34px]">
+            <PhotoBlock data={c} shape={photoBlockShape} />
           </div>
         </div>
         <div className="ml-[330px] pt-[64px]">
@@ -82,12 +86,12 @@ export function RefPalmerstonTemplate({ data }: { data: ResumeData }) {
           </section>
         )}
 
-        <section className="mt-9">
+        {showSkillBars && <section className="mt-9">
           <SidebarHeading>Skills</SidebarHeading>
           <div className="mt-5 space-y-3 text-[12px] font-semibold leading-[1.25]">
             {c.skills.slice(0, 6).map((skill) => <p key={skill}>{skill}</p>)}
           </div>
-        </section>
+        </section>}
 
         <section className="mt-9">
           <SidebarHeading>Language</SidebarHeading>

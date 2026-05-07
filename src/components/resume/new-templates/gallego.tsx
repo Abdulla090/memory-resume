@@ -11,6 +11,10 @@ import { optimizeResumeForOnePage } from "@/lib/resume-utils";
 export function GallegoTemplate({ data }: { data: ResumeData }) {
   const c = optimizeResumeForOnePage(data);
   const rtl = isRTL(c);
+  const design = useContext(DesignContext);
+  const showSkillBars = design?.showSkillBars !== false;
+  const photoShape = design?.photoShape || "circle";
+  const photoBlockShape = photoShape === "square" ? "rounded" : photoShape;
   const contact = [c.phone, c.email, c.location].filter(Boolean);
   const referenceItems = c.projects.length > 0
     ? c.projects.slice(0, 2).map((project) => ({
@@ -61,14 +65,8 @@ export function GallegoTemplate({ data }: { data: ResumeData }) {
       </div>
 
       <aside className="absolute left-0 top-0 z-10 h-full w-[325px] bg-[#073f57] px-[30px] pt-[66px] text-white rtl:left-auto rtl:right-0">
-        <div className="mx-auto h-[210px] w-[210px] overflow-hidden rounded-full border-[7px] border-white/75 bg-slate-200">
-          {c.photoUrl ? (
-            <img src={c.photoUrl} alt={c.name} className="h-full w-full object-cover" />
-          ) : (
-            <div className="flex h-full w-full items-center justify-center bg-slate-200 text-5xl font-black text-[#073f57]">
-              {initials(c.name)}
-            </div>
-          )}
+        <div className="mx-auto">
+          <PhotoBlock data={c} shape={photoBlockShape} />
         </div>
 
         <section className="mt-[44px]">
@@ -102,14 +100,14 @@ export function GallegoTemplate({ data }: { data: ResumeData }) {
           </div>
         </section>
 
-        <section className="mt-[52px]">
+        {showSkillBars && <section className="mt-[52px]">
           <SidebarTitle>{rtl ? "╪▓┘à╪º┘å█ò┌⌐╪º┘å" : "Languages"}</SidebarTitle>
           <ul className="list-disc space-y-1 pl-5 text-[13px] font-bold leading-[1.2] rtl:pl-0 rtl:pr-5">
             {languageItems.map((item) => (
               <li key={item}>{item}</li>
             ))}
           </ul>
-        </section>
+        </section>}
       </aside>
 
       <main className="relative z-20 ml-[325px] min-h-[1122px] pb-10 pl-0 pr-[30px] pt-[64px] rtl:ml-0 rtl:mr-[325px] rtl:pl-[30px] rtl:pr-0">

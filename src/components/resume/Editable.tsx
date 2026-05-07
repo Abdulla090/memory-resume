@@ -11,7 +11,7 @@ export function Editable({
 }: {
   value: string;
   path: string;
-  as?: any;
+  as?: React.ElementType;
   className?: string;
   placeholder?: string;
   onFocus?: () => void;

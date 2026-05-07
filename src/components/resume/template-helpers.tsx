@@ -4,6 +4,16 @@ import type { ResumeData } from "@/lib/types";
 
 const rtlPattern = /[\u0600-\u06ff\u0750-\u077f\u08a0-\u08ff]/;
 
+export function getContrastTheme(hexColor?: string): "light" | "dark" {
+  if (!hexColor) return "light";
+  const hex = hexColor.replace("#", "");
+  const r = parseInt(hex.substr(0, 2), 16);
+  const g = parseInt(hex.substr(2, 2), 16);
+  const b = parseInt(hex.substr(4, 2), 16);
+  const yiq = (r * 299 + g * 587 + b * 114) / 1000;
+  return yiq >= 128 ? "light" : "dark";
+}
+
 export function isRTL(data: ResumeData) {
   return rtlPattern.test(
     [

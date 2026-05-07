@@ -11,6 +11,10 @@ import { optimizeResumeForOnePage } from "@/lib/resume-utils";
 export function LeroyTemplate({ data }: { data: ResumeData }) {
   const c = optimizeResumeForOnePage(data);
   const rtl = isRTL(c);
+  const design = useContext(DesignContext);
+  const showSkillBars = design?.showSkillBars !== false;
+  const photoShape = design?.photoShape || "circle";
+  const photoBlockShape = photoShape === "square" ? "rounded" : photoShape;
   const competenceItems = c.skills.slice(0, 6);
   const languageItems = (c.certifications.length > 0 ? c.certifications : c.skills).slice(0, 3);
   const leisureText = c.projects.length > 0
@@ -37,12 +41,8 @@ export function LeroyTemplate({ data }: { data: ResumeData }) {
           {secondLine && <div>{secondLine}</div>}
         </div>
 
-        <div className="mx-auto mt-[28px] h-[202px] w-[202px] overflow-hidden rounded-full bg-slate-200">
-          {c.photoUrl ? (
-            <img src={c.photoUrl} alt={c.name} className="h-full w-full object-cover" />
-          ) : (
-            <div className="flex h-full w-full items-center justify-center bg-slate-200 text-5xl font-black text-[#202a3a]">{initials(c.name)}</div>
-          )}
+        <div className="mx-auto mt-[28px]">
+          <PhotoBlock data={c} shape={photoBlockShape} />
         </div>
 
         <div className="mt-[38px] px-[43px] text-[14px] font-black leading-[1.2] text-white">
@@ -85,11 +85,11 @@ export function LeroyTemplate({ data }: { data: ResumeData }) {
       </div>
 
       <main className="absolute left-[378px] right-[42px] top-[228px] z-10 space-y-[18px]">
-        <CreamPanel title="Competences" className="min-h-[280px]">
+        {showSkillBars && <CreamPanel title="Competences" className="min-h-[280px]">
           <ul className="list-disc space-y-[3px] pl-5 text-[15px] font-semibold leading-[1.05] rtl:pl-0 rtl:pr-5">
             {competenceItems.map((skill) => <li key={skill}>{skill}</li>)}
           </ul>
-        </CreamPanel>
+        </CreamPanel>}
 
         <CreamPanel title="Experience" className="min-h-[276px]">
           <ul className="list-disc space-y-[22px] pl-5 text-[15px] font-semibold leading-[1.14] rtl:pl-0 rtl:pr-5">

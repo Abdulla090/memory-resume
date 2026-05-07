@@ -10,6 +10,11 @@ import { optimizeResumeForOnePage } from "@/lib/resume-utils";
 export function RefAlvaradoTemplate({ data }: { data: ResumeData }) {
   const c = optimizeResumeForOnePage(data);
   const rtl = isRTL(c);
+  const design = useContext(DesignContext);
+  const colLayout = design?.columnLayout || "sidebar-left";
+  const showSkillBars = design?.showSkillBars !== false;
+  const photoShape = design?.photoShape || "circle";
+  const photoBlockShape = photoShape === "square" ? "rounded" : photoShape;
   const references = c.projects.length > 0
     ? c.projects.slice(0, 2).map((project) => ({
         name: project.name,
@@ -29,12 +34,8 @@ export function RefAlvaradoTemplate({ data }: { data: ResumeData }) {
       <div className="absolute left-[144px] top-0 h-[82px] w-[152px] bg-[#f4f4f1]" />
 
       <header className="absolute left-0 top-0 h-[162px] w-full bg-white">
-        <div className="absolute left-[26px] top-[28px] h-[136px] w-[136px] overflow-hidden rounded-full border-[6px] border-white bg-[#d8d8d3] shadow-[0_0_0_1px_rgba(0,0,0,0.06)]">
-          {c.photoUrl ? (
-            <img src={c.photoUrl} alt={c.name} className="h-full w-full object-cover" />
-          ) : (
-            <div className="flex h-full w-full items-center justify-center text-[2.1em] font-black text-[#5d5d59]">{initials(c.name)}</div>
-          )}
+        <div className="absolute left-[26px] top-[28px]">
+          <PhotoBlock data={c} shape={photoBlockShape} />
         </div>
 
         <div className="absolute left-[186px] top-[28px] h-[102px] rounded-none bg-[#27272e] px-[34px] pt-[23px] text-white" style={{ width: "566px" }}>
@@ -44,7 +45,7 @@ export function RefAlvaradoTemplate({ data }: { data: ResumeData }) {
       </header>
 
       <main className="absolute left-0 top-[160px] h-[962px] w-full">
-        <aside className="absolute left-[16px] top-0 h-full w-[145px] px-0 pb-[18px] pt-[44px] text-[#262626]">
+        <aside className={`absolute top-0 h-full w-[145px] px-0 pb-[18px] pt-[44px] text-[#262626] ${colLayout === "sidebar-right" ? "right-[16px] left-auto" : "left-[16px]"}`}>
           <section>
             <h2 className="mb-4 text-[12px] font-black uppercase tracking-[0.34em] text-[#262626]">About me</h2>
             <Editable path="summary" value={c.summary} as="p" className="text-[8.6px] leading-[1.62] text-[#4d4d4d]" />
@@ -65,7 +66,7 @@ export function RefAlvaradoTemplate({ data }: { data: ResumeData }) {
             </section>
           )}
 
-          {(c.skillItems?.length ? c.skillItems.length > 0 : c.skills.length > 0) && (
+          {showSkillBars && (c.skillItems?.length ? c.skillItems.length > 0 : c.skills.length > 0) && (
             <section className="mt-[34px]">
               <h2 className="mb-4 text-[12px] font-black uppercase tracking-[0.34em] text-[#262626]">Skills</h2>
               <div className="space-y-2.5">
@@ -93,7 +94,7 @@ export function RefAlvaradoTemplate({ data }: { data: ResumeData }) {
           </section>
         </aside>
 
-        <section className="absolute left-[176px] top-0 w-[586px] px-[16px] pt-[30px]">
+        <section className={`absolute top-0 w-[586px] px-[16px] pt-[30px] ${colLayout === "sidebar-right" ? "left-[16px]" : "left-[176px]"}`}>
           <section>
             <h2 className="border-b border-[#9da09d] pb-2 text-[17px] font-black uppercase tracking-[0.28em] text-[#27272e]">Experience</h2>
             <div className="mt-4 space-y-[18px]">

@@ -22,7 +22,6 @@ import { Route as DashboardCoverLettersRouteImport } from './routes/dashboard.co
 import { Route as DashboardAnalyticsRouteImport } from './routes/dashboard.analytics'
 import { Route as DashboardAiWriterRouteImport } from './routes/dashboard.ai-writer'
 import { Route as DashboardAiOptimizeRouteImport } from './routes/dashboard.ai-optimize'
-import { Route as EditorRouteImport } from './routes/editor.'
 
 const TemplatesRoute = TemplatesRouteImport.update({
   id: '/templates',
@@ -89,18 +88,12 @@ const DashboardAiOptimizeRoute = DashboardAiOptimizeRouteImport.update({
   path: '/ai-optimize',
   getParentRoute: () => DashboardRoute,
 } as any)
-const EditorRoute = EditorRouteImport.update({
-  id: '/editor/',
-  path: '/editor/',
-  getParentRoute: () => rootRouteImport,
-} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRouteWithChildren
   '/onboarding': typeof OnboardingRoute
   '/templates': typeof TemplatesRoute
-  '/editor/': typeof EditorRoute
   '/dashboard/ai-optimize': typeof DashboardAiOptimizeRoute
   '/dashboard/ai-writer': typeof DashboardAiWriterRoute
   '/dashboard/analytics': typeof DashboardAnalyticsRoute
@@ -115,7 +108,6 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/onboarding': typeof OnboardingRoute
   '/templates': typeof TemplatesRoute
-  '/editor': typeof EditorRoute
   '/dashboard/ai-optimize': typeof DashboardAiOptimizeRoute
   '/dashboard/ai-writer': typeof DashboardAiWriterRoute
   '/dashboard/analytics': typeof DashboardAnalyticsRoute
@@ -132,7 +124,6 @@ export interface FileRoutesById {
   '/dashboard': typeof DashboardRouteWithChildren
   '/onboarding': typeof OnboardingRoute
   '/templates': typeof TemplatesRoute
-  '/editor/': typeof EditorRoute
   '/dashboard/ai-optimize': typeof DashboardAiOptimizeRoute
   '/dashboard/ai-writer': typeof DashboardAiWriterRoute
   '/dashboard/analytics': typeof DashboardAnalyticsRoute
@@ -150,7 +141,6 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/onboarding'
     | '/templates'
-    | '/editor/'
     | '/dashboard/ai-optimize'
     | '/dashboard/ai-writer'
     | '/dashboard/analytics'
@@ -165,7 +155,6 @@ export interface FileRouteTypes {
     | '/'
     | '/onboarding'
     | '/templates'
-    | '/editor'
     | '/dashboard/ai-optimize'
     | '/dashboard/ai-writer'
     | '/dashboard/analytics'
@@ -181,7 +170,6 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/onboarding'
     | '/templates'
-    | '/editor/'
     | '/dashboard/ai-optimize'
     | '/dashboard/ai-writer'
     | '/dashboard/analytics'
@@ -198,7 +186,6 @@ export interface RootRouteChildren {
   DashboardRoute: typeof DashboardRouteWithChildren
   OnboardingRoute: typeof OnboardingRoute
   TemplatesRoute: typeof TemplatesRoute
-  EditorRoute: typeof EditorRoute
   EditorIdRoute: typeof EditorIdRoute
 }
 
@@ -295,13 +282,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardAiOptimizeRouteImport
       parentRoute: typeof DashboardRoute
     }
-    '/editor/': {
-      id: '/editor/'
-      path: '/editor'
-      fullPath: '/editor/'
-      preLoaderRoute: typeof EditorRouteImport
-      parentRoute: typeof rootRouteImport
-    }
   }
 }
 
@@ -336,7 +316,6 @@ const rootRouteChildren: RootRouteChildren = {
   DashboardRoute: DashboardRouteWithChildren,
   OnboardingRoute: OnboardingRoute,
   TemplatesRoute: TemplatesRoute,
-  EditorRoute: EditorRoute,
   EditorIdRoute: EditorIdRoute,
 }
 export const routeTree = rootRouteImport

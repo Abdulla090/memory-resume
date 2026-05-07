@@ -13,6 +13,8 @@ export function RefSchumacherTemplate({ data }: { data: ResumeData }) {
   const rtl = isRTL(c);
   const l = labels(rtl);
   const contact = [c.location, c.email, c.phone].filter(Boolean);
+  const design = useContext(DesignContext);
+  const showSkillBars = design?.showSkillBars !== false;
 
   return (
     <div dir={rtl ? "rtl" : "ltr"} className="border-[4px] border-[#7c3cff] bg-white px-[80px] py-[84px] font-sans text-[#161616]" style={{ minHeight: "1122px", width: "100%" }}>
@@ -57,7 +59,7 @@ export function RefSchumacherTemplate({ data }: { data: ResumeData }) {
         </aside>
 
         <main className="">
-          {(c.skillItems?.length ? c.skillItems.length > 0 : c.skills.length > 0) && (
+          {showSkillBars && (c.skillItems?.length ? c.skillItems.length > 0 : c.skills.length > 0) && (
             <section>
               <h2 className="mb-5 text-[22px] font-black leading-none">{rtl ? "┘ä█Ä┘ç╪º╪¬┘ê┘ê█î█î█ò ╪│█ò╪▒█ò┌⌐█î█î█ò┌⌐╪º┘å" : "Core Skills"}</h2>
               <div className="grid grid-cols-2 gap-x-10 gap-y-5">

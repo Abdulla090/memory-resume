@@ -12,6 +12,10 @@ export function MercerTemplate({ data }: { data: ResumeData }) {
   const c = optimizeResumeForOnePage(data);
   const rtl = isRTL(c);
   const l = labels(rtl);
+  const design = useContext(DesignContext);
+  const showSkillBars = design?.showSkillBars !== false;
+  const photoShape = design?.photoShape || "circle";
+  const photoBlockShape = photoShape === "square" ? "rounded" : photoShape;
 
   const SectionHeader = ({ title }: { title: string }) => (
     <div className="bg-[#305178] text-white px-6 py-2 rounded-full inline-block mb-4 text-lg font-black min-w-[200px]">
@@ -41,7 +45,7 @@ export function MercerTemplate({ data }: { data: ResumeData }) {
           )}
 
           {/* Skills */}
-          {(c.skillItems?.length ? c.skillItems.length > 0 : c.skills.length > 0) && (
+          {showSkillBars && (c.skillItems?.length ? c.skillItems.length > 0 : c.skills.length > 0) && (
             <section>
               <h2 className="text-xl font-bold border-b border-white pb-2 mb-6 tracking-wide">{l.skills}</h2>
               <div className="space-y-4">
@@ -119,17 +123,9 @@ export function MercerTemplate({ data }: { data: ResumeData }) {
         {/* Main Content */}
         <main className="p-10 pt-16 flex flex-col gap-10 relative z-10">
            {/* Profile Photo */}
-           <div 
-            className="absolute -left-[180px] top-10 w-64 h-64 rounded-full border-[12px] border-white overflow-hidden bg-slate-200 shadow-lg rtl:left-auto rtl:-right-[180px]"
-           >
-              {c.photoUrl ? (
-                <img src={c.photoUrl} alt={c.name} className="w-full h-full object-cover" />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-slate-100 to-slate-200 text-6xl font-black text-[var(--color-text)] opacity-60">
-                  {initials(c.name)}
-                </div>
-              )}
-           </div>
+            <div className="absolute -left-[180px] top-10 rtl:left-auto rtl:-right-[180px]">
+              <PhotoBlock data={c} shape={photoBlockShape} />
+            </div>
 
            {/* Header Area */}
            <div className="ml-20 pt-4 rtl:ml-0 rtl:mr-20">

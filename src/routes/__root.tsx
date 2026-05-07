@@ -1,12 +1,12 @@
-import { Outlet, Link, createRootRoute, HeadContent, Scripts } from "@tanstack/react-router";
-import { Toaster } from "sonner";
 import { useEffect } from "react";
+import { createRootRoute, HeadContent, Link, Outlet, Scripts } from "@tanstack/react-router";
+import { Toaster } from "sonner";
+
 import { useAppStore } from "@/lib/store";
 
 import appCss from "../styles.css?url";
 
 function NotFoundComponent() {
-
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="max-w-md text-center">
@@ -32,7 +32,10 @@ export const Route = createRootRoute({
   head: () => ({
     meta: [
       { charSet: "utf-8" },
-      { name: "viewport", content: "width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" },
+      {
+        name: "viewport",
+        content: "width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover",
+      },
       { title: "MemoryCV — Your memory. Your career. Infinite resumes." },
       {
         name: "description",
@@ -78,9 +81,7 @@ function RootShell({ children }: { children: React.ReactNode }) {
         <HeadContent />
       </head>
       <body style={{ overflowX: "hidden", minHeight: "100dvh" }}>
-        <div style={{ overflowX: "hidden", position: "relative" }}>
-        {children}
-        </div>
+        <div style={{ overflowX: "hidden", position: "relative" }}>{children}</div>
         <Scripts />
       </body>
     </html>
@@ -96,7 +97,7 @@ function RootComponent() {
 
   const language = useAppStore((state) => state.language);
   const dir = language === "ku" ? "rtl" : "ltr";
-  
+
   useEffect(() => {
     // Only set lang — never set dir on <html> as it shifts the scrollbar
     // to the left on mobile, causing a horizontal viewport offset.

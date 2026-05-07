@@ -9,7 +9,7 @@ import type {
 import { optimizeResumeForOnePage } from "./resume-utils";
 
 const AI_ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions";
-const DEFAULT_MODEL = "gemini-3.1-flash-lite-preview";
+const DEFAULT_MODEL = "gemini-2.5-flash";
 
 interface GatewayMessage {
   role: "system" | "user" | "assistant";
@@ -762,7 +762,7 @@ export const fixResumeErrors = createServerFn({ method: "POST" })
   .handler(async ({ data }): Promise<{ resume: ResumeData; reply: string }> => {
     const json = await callGateway({
       apiKey: data.apiKey,
-      model: "gemini-3.1-flash-lite-preview",
+      model: "gemini-2.5-flash",
       messages: [
         {
           role: "system",
@@ -828,7 +828,7 @@ export const generateCoverLetter = createServerFn({ method: "POST" })
   .handler(async ({ data }): Promise<{ coverLetter: string }> => {
     const json = await callGateway({
       apiKey: data.apiKey,
-      model: "gemini-3.1-flash-lite-preview",
+      model: "gemini-2.5-flash",
       messages: [
         {
           role: "system",

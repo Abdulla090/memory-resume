@@ -11,7 +11,10 @@ import { optimizeResumeForOnePage } from "@/lib/resume-utils";
 export function DuboisTemplate({ data }: { data: ResumeData }) {
   const c = optimizeResumeForOnePage(data);
   const rtl = isRTL(c);
-  const blue = "#153f68";
+  const design = useContext(DesignContext);
+  const showSkillBars = design?.showSkillBars !== false;
+  const photoShape = design?.photoShape || "square";
+  const photoBlockShape = photoShape === "circle" ? "circle" : photoShape === "none" ? "none" : "rounded";
   const skills = c.skills.slice(0, 6);
   const languages = (c.certifications.length > 0 ? c.certifications : c.skills).slice(0, 2);
   const interests = c.projects.length > 0 ? c.projects.slice(0, 4).map((p) => p.name) : c.skills.slice(0, 4);
@@ -21,11 +24,9 @@ export function DuboisTemplate({ data }: { data: ResumeData }) {
   );
 
   return (
-    <div dir={rtl ? "rtl" : "ltr"} className="relative overflow-hidden bg-white font-sans text-[#153f68]" style={{ height: "1122px", minHeight: "1122px", width: "794px", maxWidth: "100%" }}>
+    <div dir={rtl ? "rtl" : "ltr"} className="relative overflow-hidden bg-white font-sans text-[#153f68]" style={{ minHeight: "1122px", width: "100%", maxWidth: "100%" }}>
       <aside className="absolute left-0 top-0 h-full w-[260px] bg-[#dcdfe5] px-[41px] pt-[26px]">
-        <div className="h-[244px] w-[172px] overflow-hidden border-[4px] border-white bg-slate-200">
-          {c.photoUrl ? <img src={c.photoUrl} alt={c.name} className="h-full w-full object-cover" /> : <div className="flex h-full w-full items-center justify-center text-[2.2em] font-black">{initials(c.name)}</div>}
-        </div>
+        <PhotoBlock data={c} shape={photoBlockShape} />
 
         <section className="mt-[45px]">
           <SidebarTitle>Coordonnees</SidebarTitle>
@@ -48,12 +49,12 @@ export function DuboisTemplate({ data }: { data: ResumeData }) {
           </div>
         </section>
 
-        <section className="mt-[54px]">
+        {showSkillBars && <section className="mt-[54px]">
           <SidebarTitle>Competences</SidebarTitle>
           <div className="space-y-2 text-[13px] font-bold leading-[1.35]">
             {skills.map((skill) => <p key={skill}>{skill}</p>)}
           </div>
-        </section>
+        </section>}
 
         <section className="mt-[58px]">
           <SidebarTitle>Centres d'interet</SidebarTitle>
