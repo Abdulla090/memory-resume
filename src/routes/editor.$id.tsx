@@ -352,12 +352,10 @@ function ResumeEditor() {
   const [showHistory, setShowHistory] = useState(false);
 
   const [zoom, setZoom] = useState(0.5);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  const [isDesignOpen, setIsDesignOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState<"chat" | "design">("chat");
   const [mobileDesignOpen, setMobileDesignOpen] = useState(false);
   const [mobileChatOpen, setMobileChatOpen] = useState(false);
-  const [leftSidebarWidth, setLeftSidebarWidth] = useState(360);
-  const [rightSidebarWidth, setRightSidebarWidth] = useState(360);
+  const [leftSidebarWidth, setLeftSidebarWidth] = useState(340);
   const [selectedSection, setSelectedSection] = useState<SectionId>("global");
   const [focusedField, setFocusedField] = useState<string | null>(null);
   const [inlineEdit, setInlineEdit] = useState<{
@@ -372,8 +370,7 @@ function ResumeEditor() {
 
   useEffect(() => {
     if (window.matchMedia("(max-width: 1023px)").matches) {
-      setIsSidebarOpen(false);
-      setIsDesignOpen(false);
+      // Handled by mobile responsive states now
     }
   }, []);
 
@@ -382,29 +379,23 @@ function ResumeEditor() {
     if (!raw) return;
     try {
       const saved = JSON.parse(raw) as {
-        isSidebarOpen?: boolean;
-        isDesignOpen?: boolean;
+        activeTab?: "chat" | "design";
         leftSidebarWidth?: number;
-        rightSidebarWidth?: number;
       };
-      // Always default to AI chat open and Design sidebar closed, ignoring saved open states
-      // if (typeof saved.isSidebarOpen === "boolean") setIsSidebarOpen(saved.isSidebarOpen);
-      // if (typeof saved.isDesignOpen === "boolean") setIsDesignOpen(saved.isDesignOpen);
+      if (saved.activeTab) setActiveTab(saved.activeTab);
       if (typeof saved.leftSidebarWidth === "number")
         setLeftSidebarWidth(Math.max(300, Math.min(460, saved.leftSidebarWidth)));
-      if (typeof saved.rightSidebarWidth === "number")
-        setRightSidebarWidth(Math.max(300, Math.min(460, saved.rightSidebarWidth)));
     } catch {
-      // Ignore malformed layout state.
+      // Ignore
     }
   }, []);
 
   useEffect(() => {
     window.localStorage.setItem(
       LAYOUT_STORAGE_KEY,
-      JSON.stringify({ isSidebarOpen, isDesignOpen, leftSidebarWidth, rightSidebarWidth }),
+      JSON.stringify({ activeTab, leftSidebarWidth })
     );
-  }, [isSidebarOpen, isDesignOpen, leftSidebarWidth, rightSidebarWidth]);
+  }, [activeTab, leftSidebarWidth]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -591,7 +582,7 @@ function ResumeEditor() {
 
   const handleFixErrors = async () => {
     if (chatLoading) return;
-    setIsSidebarOpen(true);
+    setActiveTab("chat");
     const userMsg = isKu
       ? "تکایە هەموو هەڵەکانی سیڤییەکەم چاک بکە و هەڵسەنگاندنێکی تەواوم پێ بدە بەپێی ڕێنماییەکان."
       : "Please fix all errors in my resume and give me a full HR evaluation.";
@@ -676,291 +667,299 @@ function ResumeEditor() {
       }
       return;
     }
-    if (!isDesignOpen) setIsDesignOpen(true);
+    setActiveTab("design");
     setInlineEdit(null);
   };
 
   return (
-    <div className="min-h-screen bg-[#f8faff] text-slate-900 font-sans selection:bg-blue-100 selection:text-blue-900 relative overflow-hidden flex flex-col">
+    <div className="h-[100dvh] w-full bg-[#f8faff] text-slate-900 font-sans selection:bg-blue-100 selection:text-blue-900 relative overflow-hidden flex flex-col">
       {/* Background blobs */}
       <div className="absolute top-[-10%] left-[-10%] w-[600px] h-[600px] bg-blue-300/20 rounded-full blur-[120px] pointer-events-none mix-blend-multiply" />
       <div className="absolute bottom-[-10%] right-[-10%] w-[800px] h-[800px] bg-blue-400/10 rounded-full blur-[150px] pointer-events-none mix-blend-multiply" />
 
       {/* Glass Navigation */}
-      <header className="sticky top-0 z-50 bg-white/70 backdrop-blur-xl border-b border-blue-100/50 hidden md:block">
-        <div className="max-w-[1600px] mx-auto px-4 sm:px-6">
+      <header className="sticky top-0 z-50 bg-white border-b border-slate-200 hidden md:block shrink-0">
+        <div className="px-4 sm:px-6">
           <div className="flex h-16 items-center justify-between">
             <Link to="/" className="flex items-center gap-2.5 cursor-pointer group">
               <img
                 src="/logo/MemoryCV Logo Icon Only.png"
                 alt="MemoryCV"
-                className="w-16 h-16 rounded-xl object-contain group-hover:scale-105 transition-transform duration-300"
+                className="w-8 h-8 rounded-lg object-contain group-hover:scale-105 transition-transform duration-300"
               />
-              <span className="text-2xl font-bold tracking-tight text-slate-900 group-hover:text-blue-950 transition-colors">
+              <span className="text-lg font-bold tracking-tight text-slate-900 group-hover:text-blue-950 transition-colors">
                 MemoryCV
               </span>
             </Link>
 
-            <div className="flex items-center gap-2 sm:gap-3">
-              <button
-                onClick={() => setTemplateModalOpen(true)}
-                className="px-4 py-2 sm:py-2.5 text-sm font-bold text-purple-700 hover:text-purple-950 rounded-xl hover:bg-purple-50 transition-all flex items-center gap-2 border border-purple-200 bg-white shadow-sm hover:shadow-md active:scale-95"
-              >
-                <LayoutTemplate className="h-4 w-4" />
-                <span className="hidden sm:inline">{isKu ? "نەخشەکان" : "Design"}</span>
-              </button>
-
-              <button
-                onClick={() => setIsDesignOpen((o) => !o)}
-                className={`px-4 py-2 sm:py-2.5 text-sm font-bold rounded-xl transition-all flex items-center gap-2 border shadow-sm hover:shadow-md active:scale-95 ${
-                  isDesignOpen
-                    ? "bg-slate-900 border-slate-900 text-white"
-                    : "bg-white border-slate-200 text-slate-700 hover:bg-slate-50"
-                }`}
-              >
-                <SlidersHorizontal className="h-4 w-4" />
-                <span className="hidden sm:inline">{isKu ? "ستایل" : "Style"}</span>
-              </button>
-
+            <div className="flex items-center gap-3">
               <button
                 onClick={handleCheckATS}
-                className="px-4 py-2 sm:py-2.5 text-sm font-bold text-emerald-700 hover:text-emerald-950 rounded-xl hover:bg-emerald-50 transition-all flex items-center gap-2 border border-emerald-200 bg-white shadow-sm hover:shadow-md active:scale-95"
+                className="px-4 py-2 text-sm font-semibold text-emerald-700 hover:text-emerald-950 rounded-lg hover:bg-emerald-50 transition-all flex items-center gap-2 bg-emerald-50/50"
               >
                 <CheckCircle2 className="h-4 w-4" />
                 <span className="hidden sm:inline">{isKu ? "پشکنینی ATS" : "ATS Score"}</span>
               </button>
 
               <button
-                onClick={() => setTailorOpen(true)}
-                className="px-4 py-2 sm:py-2.5 text-sm font-bold text-blue-700 hover:text-blue-950 rounded-xl hover:bg-blue-50 transition-all flex items-center gap-2 border border-blue-200 bg-white shadow-sm hover:shadow-md active:scale-95"
-              >
-                <Target className="h-4 w-4" />
-                <span className="hidden sm:inline">{isKu ? "گونجاندن" : "Tailor"}</span>
-              </button>
-
-              <button
                 onClick={handleFixErrors}
                 disabled={chatLoading}
-                className="px-4 py-2 sm:py-2.5 text-sm font-bold text-amber-700 hover:text-amber-950 rounded-xl hover:bg-amber-50 transition-all flex items-center gap-2 border border-amber-200 bg-white shadow-sm hover:shadow-md active:scale-95 disabled:opacity-50 disabled:active:scale-100"
+                className="px-4 py-2 text-sm font-semibold text-amber-700 hover:text-amber-950 rounded-lg hover:bg-amber-50 transition-all flex items-center gap-2 bg-amber-50/50 disabled:opacity-50"
               >
                 <Wand2 className="h-4 w-4" />
-                <span className="hidden sm:inline">{isKu ? "چاککردنی هەڵەکان" : "Fix Errors"}</span>
+                <span className="hidden sm:inline">{isKu ? "چاککردنی هەڵەکان" : "Fix Grammar"}</span>
               </button>
+              
+              <div className="w-px h-6 bg-slate-200 mx-1"></div>
 
               <button
-                onClick={handleGenerateCoverLetter}
-                className="px-4 py-2 sm:py-2.5 text-sm font-bold text-indigo-700 hover:text-indigo-950 rounded-xl hover:bg-indigo-50 transition-all flex items-center gap-2 border border-indigo-200 bg-white shadow-sm hover:shadow-md active:scale-95"
+                onClick={() => setTemplateModalOpen(true)}
+                className="px-4 py-2 text-sm font-semibold text-slate-700 hover:text-slate-950 rounded-lg hover:bg-slate-50 transition-all flex items-center gap-2 border border-slate-200 bg-white"
               >
-                <FileText className="h-4 w-4" />
-                <span className="hidden sm:inline">{isKu ? "نامەی داواکاری" : "Cover Letter"}</span>
+                <LayoutTemplate className="h-4 w-4" />
+                <span className="hidden sm:inline">{isKu ? "نەخشەکان" : "Templates"}</span>
               </button>
+              
+              <div className="flex items-center">
+                 <ExportButtons
+                  data={previewData}
+                  template={resume.template}
+                  name={previewData.name}
+                  previewRef={previewRef}
+                />
+              </div>
             </div>
           </div>
         </div>
       </header>
 
-      <main
-        className="relative flex-1 z-10 mx-auto grid w-full max-w-[1760px] gap-4 overflow-hidden rounded-[40px] border border-white/70 bg-[linear-gradient(180deg,rgba(248,250,252,0.96),rgba(255,255,255,0.9))] px-3 pb-4 pt-4 shadow-[0_35px_120px_-50px_rgba(15,23,42,0.45)] backdrop-blur-2xl sm:gap-6 sm:px-6 sm:pb-6 sm:pt-6"
-        style={{
-          gridTemplateColumns: `minmax(0, 1fr)`,
-          transition: "grid-template-columns 0.3s ease",
-        }}
-      >
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(59,130,246,0.12),transparent_28%),radial-gradient(circle_at_top_right,rgba(168,85,247,0.1),transparent_24%),linear-gradient(180deg,rgba(255,255,255,0.72),transparent_18%)]" />
-        {/* Mobile sidebars are handled by shadcn Sheet components below */}
+      <main className="relative flex-1 min-h-0 z-10 mx-auto w-full max-w-[1760px] px-3 pt-6 pb-0 sm:px-6 sm:pt-8 sm:pb-0 flex flex-col overflow-hidden">
+        <div className="pointer-events-none absolute inset-0 rounded-3xl bg-[radial-gradient(circle_at_top_left,rgba(59,130,246,0.08),transparent_28%),radial-gradient(circle_at_top_right,rgba(168,85,247,0.06),transparent_24%)]" />
 
-        <section
-          className="grid gap-4 lg:grid-cols-[var(--left-col)_minmax(0,1fr)_var(--right-col)] lg:gap-7 transition-[grid-template-columns] duration-300 ease-in-out"
-          style={{
-            "--left-col": isSidebarOpen ? `${leftSidebarWidth}px` : "0px",
-            "--right-col": isDesignOpen ? `${rightSidebarWidth}px` : "0px",
-            transition: "grid-template-columns 0.3s ease",
-          } as React.CSSProperties}
+        <div
+          className="relative flex-1 min-h-0 grid grid-rows-1 gap-4 lg:grid-cols-[var(--left-col)_minmax(0,1fr)] lg:gap-6"
+          style={{ "--left-col": `${leftSidebarWidth}px` } as React.CSSProperties}
         >
-          {/* Left pane: AI Chat */}
+          {/* Left pane: Sidebar */}
           <aside
-            className={`
-          relative flex flex-col gap-4 min-w-0 lg:col-start-1
-          lg:sticky lg:top-24 lg:h-[calc(100dvh-8rem)]
-          ${isSidebarOpen ? "hidden lg:flex lg:w-auto lg:overflow-visible lg:bg-transparent lg:p-0 lg:z-auto" : "hidden"}
-        `}
+            className="relative hidden lg:flex lg:col-start-1 z-10 flex-col min-h-0"
           >
-            <div className="flex h-full flex-col overflow-hidden rounded-[2rem] border border-white/70 bg-white/92 shadow-[0_24px_70px_-34px_rgba(15,23,42,0.28)] ring-1 ring-white/60 backdrop-blur-2xl">
-              {/* Header */}
-              <div className="flex shrink-0 items-center justify-between border-b border-slate-100/80 bg-[linear-gradient(180deg,rgba(255,255,255,0.96),rgba(248,250,252,0.82))] px-5 py-4">
-                <div>
-                  <div className="mb-2 inline-flex items-center gap-1.5 rounded-full border border-blue-100 bg-blue-50 px-2.5 py-1 text-[10px] font-semibold text-blue-700 shadow-sm">
-                    <Bot className="h-3.5 w-3.5" />
-                    Smart workspace
-                  </div>
-                  <h2 className="flex items-center gap-2 text-sm font-bold tracking-tight text-slate-900">
-                    <Bot className="w-4 h-4 text-blue-600" />
-                    {isKu ? "یاریدەدەری زیرەکی دەستکرد" : "AI Assistant"}
-                  </h2>
-                  <p className="text-xs text-slate-500 mt-1">
-                    {isKu
-                      ? "داوابکە هەر شتێک بگۆڕێت، یان وەشانی پێشوو هەڵبژێرە."
-                      : "Ask to change anything, or pick a past version."}
-                  </p>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <button
-                    onClick={() => setIsSidebarOpen(false)}
-                    className="rounded-full p-1.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700"
-                    aria-label="Close chat sidebar"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
+            {/* Sidebar card */}
+            <div className="flex flex-col flex-1 min-h-0 rounded-2xl border border-slate-200/70 bg-white shadow-[0_8px_30px_-12px_rgba(15,23,42,0.12)]">
 
-              {history.length > 0 && (
-                <div className="flex shrink-0 items-center justify-between border-b border-slate-100 bg-white/60 px-5 py-2.5">
-                  <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
-                    {isKu ? "وەشانە پاشەکەوتکراوەکان" : "History"}
-                  </span>
-                  <button
-                    onClick={() => setShowHistory((v) => !v)}
-                    className={`flex items-center gap-1 rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider transition-colors ${
-                      showHistory
-                        ? "bg-blue-100 text-blue-700 shadow-sm"
-                        : "text-slate-500 hover:bg-slate-100"
-                    }`}
-                  >
-                    <Clock className="w-3 h-3" />
-                    {history.length} {isKu ? "وەشان" : `version${history.length !== 1 ? "s" : ""}`}
-                  </button>
-                </div>
-              )}
-
-              {/* History panel */}
-              {showHistory && history.length > 0 && (
-                <div className="max-h-44 shrink-0 space-y-1 overflow-y-auto border-b border-slate-100 bg-slate-50/90 px-4 py-2">
-                  {history.map((h) => (
-                    <div
-                      key={h.id}
-                      className="group flex items-center justify-between gap-2 rounded-2xl border border-transparent px-3 py-2.5 shadow-sm transition-colors hover:border-slate-200 hover:bg-white"
-                    >
-                      <div className="min-w-0">
-                        <p className="text-[12px] text-slate-700 truncate font-semibold">
-                          {h.label}
-                        </p>
-                        <p className="text-[10px] text-slate-400 font-medium">
-                          {new Date(h.timestamp).toLocaleTimeString([], {
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          })}
-                        </p>
-                      </div>
-                      <button
-                        onClick={() => handleRevert(h.id)}
-                        className="shrink-0 flex items-center gap-1 rounded-full px-2 py-1 text-[11px] font-bold text-blue-600 opacity-0 transition-opacity hover:bg-blue-50 hover:text-blue-800 group-hover:opacity-100"
-                      >
-                        <RotateCcw className="w-3 h-3" /> {isKu ? "گێڕانەوە" : "Restore"}
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              {/* Messages */}
-              <div
-                className="flex-1 overflow-y-auto space-y-4 bg-[linear-gradient(180deg,rgba(248,250,252,0.55),rgba(255,255,255,0.95))] p-5"
-                style={{ scrollbarWidth: "thin", scrollbarColor: "#e2e8f0 transparent" }}
-              >
-                <AnimatePresence initial={false}>
-                  {messages.map((msg, i) => (
-                    <motion.div
-                      initial={{ opacity: 0, y: 15, scale: 0.95 }}
-                      animate={{ opacity: 1, y: 0, scale: 1 }}
-                      transition={{ type: "spring", stiffness: 400, damping: 25 }}
-                      key={i}
-                      className={`flex gap-3 ${msg.role === "user" ? "justify-end" : "justify-start"}`}
-                    >
-                      {msg.role === "assistant" && (
-                        <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center flex-shrink-0 shadow-[0_4px_10px_rgba(37,99,235,0.2)]">
-                          <Bot className="w-4 h-4 text-white" />
-                        </div>
-                      )}
-                      <div className="flex flex-col gap-1 max-w-[85%]">
-                        <div
-                          className={`text-[14.5px] px-5 py-3.5 rounded-[24px] leading-relaxed shadow-sm ${
-                            msg.role === "user"
-                              ? "bg-blue-600 text-white rounded-br-sm font-medium shadow-blue-200"
-                              : "bg-white border border-slate-100 text-slate-800 rounded-bl-sm shadow-[0_4px_20px_rgba(0,0,0,0.03)]"
-                          }`}
-                        >
-                          {msg.content}
-                        </div>
-                        {msg.role === "assistant" && msg.snapshotId && (
-                          <button
-                            onClick={() => handleRevert(msg.snapshotId!)}
-                            className="self-start flex items-center gap-1 text-[10.5px] font-bold text-slate-400 hover:text-blue-600 transition-colors mt-1"
-                          >
-                            <RotateCcw className="w-3 h-3" />{" "}
-                            {isKu ? "گەڕانەوە لەم گۆڕانکارییە" : "Undo this change"}
-                          </button>
-                        )}
-                      </div>
-                    </motion.div>
-                  ))}
-                </AnimatePresence>
-                {chatLoading && (
-                  <div className="flex gap-3 justify-start">
-                    <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center flex-shrink-0 shadow-[0_4px_10px_rgba(37,99,235,0.2)]">
-                      <Loader2 className="w-4 h-4 text-white animate-spin" />
-                    </div>
-                    <div className="flex gap-1.5 items-center px-5 py-4 rounded-2xl rounded-tl-sm bg-white border border-slate-100 shadow-sm">
-                      {[0, 1, 2].map((i) => (
-                        <span
-                          key={i}
-                          className="w-2 h-2 rounded-full bg-blue-400 animate-bounce"
-                          style={{ animationDelay: `${i * 0.15}s` }}
-                        />
-                      ))}
-                    </div>
-                  </div>
-                )}
-                <div ref={messagesEndRef} />
-              </div>
-
-              {/* Input */}
-              <div className="flex w-full shrink-0 justify-center border-t border-slate-100 bg-white/90 px-4 pb-safe-6 pt-4">
-                <form
-                  onSubmit={handleChatSubmit}
-                  className="flex w-full items-center gap-2 rounded-full border border-slate-200 bg-white/95 px-1.5 py-1.5 shadow-[0_16px_40px_-24px_rgba(15,23,42,0.28)] ring-4 ring-transparent transition-all duration-300 focus-within:border-blue-300 focus-within:ring-blue-500/10 sm:gap-3 sm:px-2 sm:py-2"
-                >
-                  <input
-                    value={chatInput}
-                    onChange={(e) => setChatInput(e.target.value)}
-                    placeholder={
-                      isKu
-                        ? "پوختەی کارەکەم با بەهێزتر بێت..."
-                        : "Make my summary more executive..."
-                    }
-                    disabled={chatLoading}
-                    className="flex-1 bg-transparent pl-4 text-[14px] font-medium text-slate-800 outline-none placeholder:text-slate-400"
+              {/* ── Tab switcher (always visible, pinned top) ── */}
+              <div className="shrink-0 px-3 pt-3 pb-2">
+                <div className="relative flex w-full rounded-xl bg-slate-100 p-1">
+                  {/* Animated pill */}
+                  <motion.div
+                    layout
+                    layoutId="sidebar-tab-pill"
+                    className="absolute inset-y-1 rounded-[10px] bg-white shadow-sm"
+                    style={{
+                      left: activeTab === "chat" ? "4px" : "calc(50%)",
+                      width: "calc(50% - 4px)",
+                    }}
+                    transition={{ type: "spring", stiffness: 500, damping: 35 }}
                   />
                   <button
-                    type="submit"
-                    disabled={!chatInput.trim() || chatLoading}
-                    className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-900 text-white shadow-sm transition-all hover:bg-blue-600 disabled:bg-slate-200 disabled:text-slate-400 sm:h-9 sm:w-9"
+                    onClick={() => setActiveTab("chat")}
+                    className={`relative z-10 flex flex-1 items-center justify-center gap-2 h-9 rounded-[10px] text-[13px] font-semibold transition-colors ${
+                      activeTab === "chat" ? "text-slate-900" : "text-slate-400 hover:text-slate-600"
+                    }`}
                   >
-                    <ArrowUp className="w-4 h-4" />
+                    <Bot className="w-4 h-4" /> AI Chat
                   </button>
-                </form>
+                  <button
+                    onClick={() => setActiveTab("design")}
+                    className={`relative z-10 flex flex-1 items-center justify-center gap-2 h-9 rounded-[10px] text-[13px] font-semibold transition-colors ${
+                      activeTab === "design" ? "text-slate-900" : "text-slate-400 hover:text-slate-600"
+                    }`}
+                  >
+                    <SlidersHorizontal className="w-4 h-4" /> Design
+                  </button>
+                </div>
+              </div>
+
+              {/* ── Tab content ── */}
+              <div className="flex-1 min-h-0 flex flex-col">
+                {activeTab === "chat" ? (
+                  /* ─── AI CHAT TAB ─── */
+                  <div className="flex flex-col h-full min-h-0">
+                    {/* History toggle */}
+                    {history.length > 0 && (
+                      <div className="flex shrink-0 items-center justify-between border-y border-slate-100 px-4 py-2">
+                        <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
+                          {isKu ? "وەشانە پاشەکەوتکراوەکان" : "History"}
+                        </span>
+                        <button
+                          onClick={() => setShowHistory((v) => !v)}
+                          className={`flex items-center gap-1 rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider transition-colors ${
+                            showHistory
+                              ? "bg-blue-100 text-blue-700 shadow-sm"
+                              : "text-slate-500 hover:bg-slate-100"
+                          }`}
+                        >
+                          <Clock className="w-3 h-3" />
+                          {history.length} {isKu ? "وەشان" : `version${history.length !== 1 ? "s" : ""}`}
+                        </button>
+                      </div>
+                    )}
+
+                    {showHistory && history.length > 0 && (
+                      <div className="max-h-40 shrink-0 space-y-1 overflow-y-auto border-b border-slate-100 bg-slate-50/80 px-3 py-2">
+                        {history.map((h) => (
+                          <div
+                            key={h.id}
+                            className="group flex items-center justify-between gap-2 rounded-xl px-3 py-2 transition-colors hover:bg-white"
+                          >
+                            <div className="min-w-0">
+                              <p className="text-[12px] text-slate-700 truncate font-semibold">{h.label}</p>
+                              <p className="text-[10px] text-slate-400 font-medium">
+                                {new Date(h.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                              </p>
+                            </div>
+                            <button
+                              onClick={() => handleRevert(h.id)}
+                              className="shrink-0 flex items-center gap-1 rounded-full px-2 py-1 text-[11px] font-bold text-blue-600 opacity-0 transition-opacity hover:bg-blue-50 group-hover:opacity-100"
+                            >
+                              <RotateCcw className="w-3 h-3" /> {isKu ? "گێڕانەوە" : "Restore"}
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Messages */}
+                    <div
+                      className="flex-1 min-h-0 overflow-y-auto space-y-4 p-4"
+                      style={{ scrollbarWidth: "thin", scrollbarColor: "#e2e8f0 transparent" }}
+                    >
+                      <AnimatePresence initial={false}>
+                        {messages.map((msg, i) => (
+                          <motion.div
+                            initial={{ opacity: 0, y: 12, scale: 0.97 }}
+                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                            transition={{ type: "spring", stiffness: 400, damping: 25 }}
+                            key={i}
+                            className={`flex gap-3 ${msg.role === "user" ? "justify-end" : "justify-start"}`}
+                          >
+                            {msg.role === "assistant" && (
+                              <div className="w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center flex-shrink-0 border border-slate-200">
+                                <Bot className="w-3.5 h-3.5 text-slate-600" />
+                              </div>
+                            )}
+                            <div className="flex flex-col gap-1 max-w-[85%]">
+                              <div
+                                className={`text-[13.5px] px-4 py-2.5 rounded-2xl leading-relaxed ${
+                                  msg.role === "user"
+                                    ? "bg-slate-900 text-white rounded-tr-sm font-medium"
+                                    : "bg-slate-50 text-slate-800 border border-slate-200/80"
+                                }`}
+                              >
+                                {msg.content}
+                              </div>
+                              {msg.role === "assistant" && msg.snapshotId && (
+                                <button
+                                  onClick={() => handleRevert(msg.snapshotId!)}
+                                  className="self-start flex items-center gap-1 text-[10px] font-bold text-slate-400 hover:text-blue-600 transition-colors mt-0.5"
+                                >
+                                  <RotateCcw className="w-3 h-3" /> {isKu ? "گەڕانەوە لەم گۆڕانکارییە" : "Undo this change"}
+                                </button>
+                              )}
+                            </div>
+                          </motion.div>
+                        ))}
+                      </AnimatePresence>
+                      {chatLoading && (
+                        <div className="flex gap-3 justify-start">
+                          <div className="w-7 h-7 rounded-full bg-slate-50 border border-slate-200 flex items-center justify-center flex-shrink-0">
+                            <Loader2 className="w-3.5 h-3.5 text-slate-500 animate-spin" />
+                          </div>
+                          <div className="flex gap-1.5 items-center px-4 py-2.5 rounded-2xl bg-slate-50 border border-slate-200/80">
+                            {[0, 1, 2].map((i) => (
+                              <span key={i} className="w-1.5 h-1.5 rounded-full bg-slate-300 animate-bounce" style={{ animationDelay: `${i * 0.15}s` }} />
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                      <div ref={messagesEndRef} />
+                    </div>
+
+                    {/* Quick chips */}
+                    <div className="shrink-0 px-3 pt-1.5 pb-1.5 flex gap-1.5 overflow-x-auto scrollbar-hide border-t border-slate-100">
+                      {[
+                        { label: "Stronger bullets", prompt: "Make my bullet points stronger." },
+                        { label: "Add metrics", prompt: "Add metrics to my experience." },
+                        { label: "Shorten", prompt: "Shorten the summary." },
+                        { label: "Tailor for job", prompt: "Tailor for job" },
+                      ].map((chip) => (
+                        <button
+                          key={chip.label}
+                          onClick={() => setChatInput(chip.prompt)}
+                          className="whitespace-nowrap shrink-0 px-3 py-1.5 rounded-full text-[12px] font-medium text-slate-600 bg-slate-50 border border-slate-200/80 hover:bg-slate-100 hover:border-slate-300 transition-colors"
+                        >
+                          {chip.label}
+                        </button>
+                      ))}
+                    </div>
+
+                    {/* Input */}
+                    <div className="shrink-0 px-3 pb-3 pt-2">
+                      <form
+                        onSubmit={handleChatSubmit}
+                        className="flex w-full items-center gap-2 rounded-xl border border-slate-200 bg-white px-2 py-1.5 shadow-sm transition-all focus-within:border-blue-400 focus-within:ring-2 focus-within:ring-blue-100"
+                      >
+                        <textarea
+                          value={chatInput}
+                          onChange={(e) => setChatInput(e.target.value)}
+                          placeholder={isKu ? "پوختەی کارەکەم با بەهێزتر بێت..." : "Ask AI to edit anything..."}
+                          disabled={chatLoading}
+                          rows={1}
+                          className="flex-1 bg-transparent pl-2 text-[13px] font-medium text-slate-800 outline-none placeholder:text-slate-400 resize-none max-h-20 scrollbar-hide py-1"
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter" && !e.shiftKey) {
+                              e.preventDefault();
+                              handleChatSubmit(e);
+                            }
+                          }}
+                        />
+                        <button
+                          type="submit"
+                          disabled={!chatInput.trim() || chatLoading}
+                          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-blue-600 text-white shadow-sm transition-all hover:bg-blue-700 disabled:bg-slate-100 disabled:text-slate-400"
+                        >
+                          <ArrowUp className="w-4 h-4" />
+                        </button>
+                      </form>
+                    </div>
+                  </div>
+                ) : (
+                  /* ─── DESIGN TAB ─── */
+                  <div className="flex flex-col h-full min-h-0 overflow-y-auto">
+                    <DesignPanel
+                      design={design}
+                      data={data}
+                      onChange={updateDesign}
+                      updateData={updateData}
+                      onClose={() => setActiveTab("chat")}
+                      selected={selectedSection}
+                      setSelected={setSelectedSection}
+                      focusedField={focusedField}
+                    />
+                  </div>
+                )}
               </div>
             </div>
+
+            {/* Resize handle */}
             <div
-              className="hidden lg:block absolute top-0 right-0 h-full w-1.5 cursor-col-resize bg-transparent hover:bg-blue-500/20"
+              className="absolute top-0 right-0 h-full w-1.5 cursor-col-resize z-20 hover:bg-blue-200 transition-colors"
               onMouseDown={(e) => {
                 e.preventDefault();
                 const startX = e.clientX;
                 const startWidth = leftSidebarWidth;
                 const onMove = (ev: MouseEvent) => {
-                  setLeftSidebarWidth(
-                    Math.max(320, Math.min(430, startWidth + (ev.clientX - startX))),
-                  );
+                  setLeftSidebarWidth(Math.max(320, Math.min(500, startWidth + (ev.clientX - startX))));
                 };
                 const onUp = () => {
                   window.removeEventListener("mousemove", onMove);
@@ -973,8 +972,8 @@ function ResumeEditor() {
           </aside>
 
           {/* Right pane: Preview Area */}
-          <section className="flex flex-col h-full lg:h-[calc(100dvh-8rem)] min-w-0 lg:col-start-2">
-            <div className="relative flex h-[calc(100vh-10rem)] flex-1 flex-col overflow-hidden rounded-[2rem] border border-slate-200/80 bg-[linear-gradient(180deg,rgba(248,250,252,0.95),rgba(255,255,255,0.94))] p-2 shadow-[0_24px_70px_-34px_rgba(15,23,42,0.2)] backdrop-blur-3xl sm:p-4 lg:h-auto lg:p-6">
+          <section className="flex flex-col min-w-0 min-h-0 lg:col-start-2">
+            <div className="relative flex flex-1 min-h-0 flex-col overflow-hidden rounded-[2rem] border border-slate-200/80 bg-[linear-gradient(180deg,rgba(248,250,252,0.95),rgba(255,255,255,0.94))] p-2 shadow-[0_24px_70px_-34px_rgba(15,23,42,0.2)] backdrop-blur-3xl sm:p-4 lg:p-6">
               {/* Toolbar Area */}
               <div className="mb-4 flex shrink-0 flex-wrap items-center justify-between gap-3 px-2">
                 <div className="flex items-center gap-3">
@@ -985,19 +984,8 @@ function ResumeEditor() {
                     <Bot className="w-4 h-4" />
                     AI Chat
                   </button>
-                  <button
-                    onClick={() => setMobileDesignOpen(true)}
-                    className="flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2.5 text-sm font-bold text-slate-700 shadow-sm transition-all active:scale-95 hover:bg-slate-50 lg:hidden"
-                  >
-                    <SlidersHorizontal className="w-4 h-4" />
-                    Design
-                  </button>
-                  <button
-                    onClick={() => setIsSidebarOpen((value) => !value)}
-                    className="hidden items-center gap-2 rounded-full border border-slate-200 bg-white/85 px-4 py-2.5 text-sm font-bold text-slate-700 shadow-sm transition-all active:scale-95 hover:bg-white lg:flex"
-                  >
-                    {isSidebarOpen ? "Hide chat" : "Show chat"}
-                  </button>
+                  
+                  
                   <div className="hidden items-center gap-3 rounded-full border border-white bg-white/70 px-3 py-1.5 shadow-sm backdrop-blur-md sm:flex">
                     <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                     <span className="text-xs font-bold uppercase tracking-wider text-slate-700">
@@ -1039,14 +1027,7 @@ function ResumeEditor() {
                       <ZoomIn className="w-4 h-4" />
                     </button>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <ExportButtons
-                      data={previewData}
-                      template={resume.template}
-                      name={previewData.name}
-                      previewRef={previewRef}
-                    />
-                  </div>
+                  
                 </div>
               </div>
 
@@ -1229,60 +1210,8 @@ function ResumeEditor() {
             </SheetContent>
           </Sheet>
 
-          {/* Right pane: Design Panel */}
-          <AnimatePresence>
-            {isDesignOpen && (
-              <motion.aside
-                key="design-panel"
-                initial={{ opacity: 0, x: 24 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: 24 }}
-                transition={{ type: "spring", stiffness: 400, damping: 35 }}
-                className="relative hidden min-w-0 flex-col overflow-hidden rounded-[1.9rem] border border-slate-200/80 bg-white shadow-[0_20px_60px_-32px_rgba(15,23,42,0.22)] lg:sticky lg:top-24 lg:flex lg:h-[calc(100dvh-8rem)] lg:col-start-3"
-                style={{ width: `${rightSidebarWidth}px` }}
-              >
-                <DesignPanel
-                  design={design}
-                  data={data}
-                  onChange={updateDesign}
-                  updateData={updateData}
-                  onClose={() => setIsDesignOpen(false)}
-                  selected={selectedSection}
-                  setSelected={setSelectedSection}
-                  focusedField={focusedField}
-                />
-                <div className="absolute right-4 top-4 z-10 flex items-center gap-1.5 rounded-full border border-slate-200 bg-white/90 px-2 py-1 shadow-sm">
-                  <button
-                    onClick={() => setIsDesignOpen(false)}
-                    className="rounded-full p-1.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700"
-                    aria-label="Close design sidebar"
-                  >
-                    <X className="h-3.5 w-3.5" />
-                  </button>
-                </div>
-                <div
-                  className="absolute top-0 left-0 h-full w-1.5 cursor-col-resize bg-transparent hover:bg-blue-500/20"
-                  onMouseDown={(e) => {
-                    e.preventDefault();
-                    const startX = e.clientX;
-                    const startWidth = rightSidebarWidth;
-                    const onMove = (ev: MouseEvent) => {
-                      setRightSidebarWidth(
-                        Math.max(320, Math.min(430, startWidth - (ev.clientX - startX))),
-                      );
-                    };
-                    const onUp = () => {
-                      window.removeEventListener("mousemove", onMove);
-                      window.removeEventListener("mouseup", onUp);
-                    };
-                    window.addEventListener("mousemove", onMove);
-                    window.addEventListener("mouseup", onUp);
-                  }}
-                />
-              </motion.aside>
-            )}
-          </AnimatePresence>
-        </section>
+          
+        </div>
       </main>
 
       {/* Modals */}

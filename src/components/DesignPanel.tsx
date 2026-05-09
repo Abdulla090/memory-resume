@@ -7,25 +7,9 @@
 import { useState, useEffect, createContext, useContext } from "react";
 import type { ReactNode, FC } from "react";
 import type { DesignSettings, ResumeData } from "@/lib/types";
-import {
-  X,
-  RotateCcw,
-  Sliders,
-  Minus,
-  Circle,
-  Square,
-  ArrowRight,
-  Star,
-  GripVertical,
-  Briefcase,
-  GraduationCap,
-  Award,
-  FolderOpen,
-  BarChart3,
-  AlignLeft,
-  User,
-  Globe,
-} from "lucide-react";
+import { ArrowRight, Award, BarChart3, Briefcase, Circle, FolderOpen, Globe, GripVertical, GraduationCap, Minus, RotateCcw, Sliders, Square, Star, User, X, AlignLeft, LayoutGrid, Type, AlignCenter, AlignRight, FileText } from "lucide-react";
+// HeroUI 3.x - no broken imports needed for these atoms
+import { Button } from "@/components/ui/button";
 
 // ─── Default design ──────────────────────────────────────────────────────────
 export const DEFAULT_DESIGN: DesignSettings = {
@@ -277,19 +261,15 @@ function Slider({
     <div className="space-y-1.5">
       <div className="flex items-center justify-between">
         <Label>{label}</Label>
-        <span className="text-[10px] font-semibold tabular-nums text-blue-600">
-          {typeof value === "number" && !Number.isInteger(value) ? value.toFixed(2) : value}
-          {unit}
+        <span className="text-[10px] font-bold tabular-nums text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full">
+          {typeof value === "number" && !Number.isInteger(value) ? value.toFixed(2) : value}{unit}
         </span>
       </div>
-      <div className="relative h-4 flex items-center">
+      <div className="relative h-5 flex items-center group">
+        <div className="absolute inset-x-0 h-[4px] rounded-full bg-slate-200" />
         <div
-          className="absolute inset-x-0 h-[3px] rounded-full"
-          style={{ background: "#e2e8f0" }}
-        />
-        <div
-          className="absolute h-[3px] rounded-full"
-          style={{ width: `${pct}%`, background: "#2563eb" }}
+          className="absolute h-[4px] rounded-full bg-gradient-to-r from-blue-500 to-blue-600 transition-all"
+          style={{ width: `${pct}%` }}
         />
         <input
           type="range"
@@ -298,16 +278,11 @@ function Slider({
           step={step}
           value={value}
           onChange={(e) => onChange(Number(e.target.value))}
-          className="absolute inset-0 w-full opacity-0 cursor-pointer h-4"
+          className="absolute inset-0 w-full opacity-0 cursor-pointer h-5"
         />
         <div
-          className="absolute w-3.5 h-3.5 rounded-full shadow pointer-events-none"
-          style={{
-            left: `calc(${pct}% - 7px)`,
-            background: "#ffffff",
-            border: "2px solid #2563eb",
-            boxShadow: "0 1px 4px rgba(37,99,235,0.28)",
-          }}
+          className="absolute w-4 h-4 rounded-full bg-white shadow-md border-2 border-blue-500 pointer-events-none transition-all group-hover:scale-110"
+          style={{ left: `calc(${pct}% - 8px)` }}
         />
       </div>
     </div>
@@ -328,13 +303,7 @@ function Select({
     <select
       value={value}
       onChange={(e) => onChange(e.target.value)}
-      className="w-full cursor-pointer appearance-none rounded-xl px-3 py-2 text-[11px] font-medium focus:outline-none"
-      style={{
-        background: "#f8fafc",
-        border: "1px solid #cbd5e1",
-        color: "#1d1d1f",
-        boxShadow: "0 1px 2px rgba(15,23,42,0.04)",
-      }}
+      className="w-full cursor-pointer appearance-none rounded-xl px-3 py-2 text-[12px] font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50 border border-slate-200 text-slate-800 shadow-sm transition-all hover:bg-slate-100"
     >
       {options.map((o) => (
         <option key={o.value} value={o.value}>
@@ -389,20 +358,18 @@ function Toggle({
   onChange: (v: boolean) => void;
 }) {
   return (
-    <div className="flex items-center justify-between py-1">
+    <div className="flex items-center justify-between py-1.5">
       <span className="text-[11px] font-medium text-slate-700">{label}</span>
       <button
         onClick={() => onChange(!checked)}
         aria-label={label}
-        className="relative h-5 w-9 shrink-0 rounded-full transition-all duration-200"
-        style={{ background: checked ? "#22c55e" : "#e2e8f0" }}
+        className={`relative h-[22px] w-10 shrink-0 rounded-full transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500/30 ${
+          checked ? "bg-emerald-500 shadow-emerald-200 shadow-md" : "bg-slate-200"
+        }`}
       >
         <span
-          className="absolute top-[2px] h-4 w-4 rounded-full bg-white shadow-sm transition-all duration-200"
-          style={{
-            left: checked ? "calc(100% - 18px)" : "2px",
-            boxShadow: "0 1px 3px rgba(15,23,42,0.15)",
-          }}
+          className="absolute top-[3px] h-4 w-4 rounded-full bg-white shadow-sm transition-all duration-300"
+          style={{ left: checked ? "calc(100% - 19px)" : "3px" }}
         />
       </button>
     </div>
@@ -424,19 +391,17 @@ function IconRow<T extends string>({
   return (
     <div className="space-y-1.5">
       <Label>{label}</Label>
-      <div className="flex flex-wrap gap-2">
+      <div className="flex gap-1 bg-slate-100 p-1 rounded-xl w-fit">
         {options.map((o) => (
           <button
             key={o.value}
             onClick={() => onChange(o.value)}
             title={o.tip}
-            className="flex h-8 w-8 items-center justify-center rounded-lg transition-all"
-            style={{
-              background: value === o.value ? "#2563eb" : "#f8fafc",
-              border: `1px solid ${value === o.value ? "#2563eb" : "#cbd5e1"}`,
-              color: value === o.value ? "#fff" : "#3a3a3c",
-              boxShadow: value === o.value ? "0 1px 4px rgba(37,99,235,0.25)" : "none",
-            }}
+            className={`w-8 h-8 flex items-center justify-center rounded-lg transition-all duration-200 ${
+              value === o.value
+                ? "bg-white shadow-md text-blue-600 scale-105"
+                : "text-slate-400 hover:text-slate-700 hover:bg-white/60"
+            }`}
           >
             {o.icon}
           </button>

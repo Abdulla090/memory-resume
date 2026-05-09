@@ -444,11 +444,11 @@ export function ClientPDFPreview({
   return (
     <div ref={containerRef} className="absolute inset-0 overflow-auto bg-slate-100/50">
       <div className="flex min-h-full min-w-max items-start justify-center p-2 sm:p-4">
-        <div className="relative shrink-0 transition-all" style={{ width: `${794 * scale}px`, height: `${contentHeight * scale}px` }}>
+        <div className="relative shrink-0 transition-all duration-300 ease-in-out" style={{ width: `${794 * scale}px`, height: `${contentHeight * scale}px` }}>
           <div
             ref={previewRef}
             onClick={handlePreviewClick}
-            className="ds-live absolute left-0 top-0 z-10 overflow-hidden rounded-[28px] border border-slate-200/70 shadow-[0_20px_50px_-24px_rgba(15,23,42,0.45)] transition-shadow hover:ring-2 hover:ring-blue-400/50"
+            className="ds-live absolute left-0 top-0 z-10 overflow-hidden rounded-[28px] border border-slate-200/70 shadow-[0_20px_50px_-24px_rgba(15,23,42,0.45)] transition-all duration-300 ease-in-out hover:ring-2 hover:ring-blue-400/50"
             style={{
               width: "794px",
               height: `${contentHeight}px`,

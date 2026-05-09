@@ -4,6 +4,7 @@ import { Toaster } from "sonner";
 
 import { useAppStore } from "@/lib/store";
 
+
 import appCss from "../styles.css?url";
 
 function NotFoundComponent() {
