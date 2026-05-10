@@ -30,69 +30,65 @@ export function isRTL(data: ResumeData) {
   );
 }
 
-export function labels(rtl: boolean) {
-  return rtl
-    ? {
-        profile: "پوختە",
-        experience: "ئەزموون",
-        projects: "پرۆژەکان",
-        skills: "لێهاتووییەکان",
-        education: "خوێندن",
-        certifications: "بڕوانامەکان",
-        contact: "پەیوەندی",
-        selected: "دیاریکراو",
-      }
-    : {
-        profile: "Profile",
-        experience: "Experience",
-        projects: "Selected Projects",
-        skills: "Skills",
-        education: "Education",
-        certifications: "Certifications",
-        contact: "Contact",
-        selected: "Selected",
+export function labels(data: ResumeData, rtl: boolean) {
+  const get = (key: string, defRTL: string, defLTR: string) => {
+    const defaultVal = rtl ? defRTL : defLTR;
+    const value = data.sectionTitles?.[key] || defaultVal;
+    return <Editable path={`sectionTitles.${key}`} value={value} as="span" />;
+  };
+
+  return {
+    profile: get("profile", "پوختە", "Profile"),
+    experience: get("experience", "ئەزموون", "Experience"),
+    projects: get("projects", "پرۆژەکان", "Selected Projects"),
+    skills: get("skills", "لێهاتووییەکان", "Skills"),
+    education: get("education", "خوێندن", "Education"),
+    certifications: get("certifications", "بڕوانامەکان", "Certifications"),
+    contact: get("contact", "پەیوەندی", "Contact"),
+    selected: get("selected", "دیاریکراو", "Selected"),
   };
 }
 
 export function label(data: ResumeData, key: "profile" | "executiveProfile" | "summary" | "experience" | "professionalExperience" | "projects" | "skills" | "keySkills" | "expertise" | "metrics" | "education" | "certifications" | "terminalExperience" | "terminalSkills" | "terminalEducation") {
   const rtl = isRTL(data);
-  const map = rtl
-    ? {
-        profile: "پڕۆفایل",
-        executiveProfile: "پڕۆفایلی پیشەیی",
-        summary: "پوختە",
-        experience: "ئەزموون",
-        professionalExperience: "ئەزموونی پیشەیی",
-        projects: "پرۆژەکان",
-        skills: "لێهاتووییەکان",
-        keySkills: "لێهاتووییە سەرەکییەکان",
-        expertise: "پسپۆڕی",
-        metrics: "پێوەرەکان",
-        education: "خوێندن",
-        certifications: "بڕوانامەکان",
-        terminalExperience: "~/ئەزموون $",
-        terminalSkills: "~/لێهاتوویی $",
-        terminalEducation: "~/خوێندن $",
-      }
-    : {
-        profile: "Profile",
-        executiveProfile: "Executive Profile",
-        summary: "Executive Summary",
-        experience: "Experience",
-        professionalExperience: "Professional Experience",
-        projects: "Projects",
-        skills: "Skills",
-        keySkills: "Key Skills",
-        expertise: "Expertise",
-        metrics: "Metrics",
-        education: "Education",
-        certifications: "Certifications",
-        terminalExperience: "~/experience $",
-        terminalSkills: "~/skills $",
-        terminalEducation: "~/education $",
-      };
-
-  return map[key];
+  const mapRtl: Record<string, string> = {
+    profile: "پڕۆفایل",
+    executiveProfile: "پڕۆفایلی پیشەیی",
+    summary: "پوختە",
+    experience: "ئەزموون",
+    professionalExperience: "ئەزموونی پیشەیی",
+    projects: "پرۆژەکان",
+    skills: "لێهاتووییەکان",
+    keySkills: "لێهاتووییە سەرەکییەکان",
+    expertise: "پسپۆڕی",
+    metrics: "پێوەرەکان",
+    education: "خوێندن",
+    certifications: "بڕوانامەکان",
+    terminalExperience: "~/ئەزموون $",
+    terminalSkills: "~/لێهاتوویی $",
+    terminalEducation: "~/خوێندن $",
+  };
+  const mapLtr: Record<string, string> = {
+    profile: "Profile",
+    executiveProfile: "Executive Profile",
+    summary: "Executive Summary",
+    experience: "Experience",
+    professionalExperience: "Professional Experience",
+    projects: "Projects",
+    skills: "Skills",
+    keySkills: "Key Skills",
+    expertise: "Expertise",
+    metrics: "Metrics",
+    education: "Education",
+    certifications: "Certifications",
+    terminalExperience: "~/experience $",
+    terminalSkills: "~/skills $",
+    terminalEducation: "~/education $",
+  };
+  
+  const defaultVal = rtl ? mapRtl[key] : mapLtr[key];
+  const value = data.sectionTitles?.[key] || defaultVal;
+  return <Editable path={`sectionTitles.${key}`} value={value} as="span" />;
 }
 
 export function initials(name: string) {
@@ -137,7 +133,7 @@ export function Section({
   children,
   accent = "border-slate-900 text-[var(--color-heading)]",
 }: {
-  title: string;
+  title: ReactNode;
   children: ReactNode;
   accent?: string;
 }) {

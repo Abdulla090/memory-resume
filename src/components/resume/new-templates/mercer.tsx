@@ -11,13 +11,13 @@ import { optimizeResumeForOnePage } from "@/lib/resume-utils";
 export function MercerTemplate({ data }: { data: ResumeData }) {
   const c = optimizeResumeForOnePage(data);
   const rtl = isRTL(c);
-  const l = labels(rtl);
+  const l = labels(c, rtl);
   const design = useContext(DesignContext);
   const showSkillBars = design?.showSkillBars !== false;
   const photoShape = design?.photoShape || "circle";
   const photoBlockShape = photoShape === "square" ? "rounded" : photoShape;
 
-  const SectionHeader = ({ title }: { title: string }) => (
+  const SectionHeader = ({ title }: { title: ReactNode }) => (
     <div className="bg-[#305178] text-white px-6 py-2 rounded-full inline-block mb-4 text-lg font-black min-w-[200px]">
       {title}
     </div>

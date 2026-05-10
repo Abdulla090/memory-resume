@@ -11,7 +11,7 @@ import { optimizeResumeForOnePage } from "@/lib/resume-utils";
 export function RefSchumacherTemplate({ data }: { data: ResumeData }) {
   const c = optimizeResumeForOnePage(data);
   const rtl = isRTL(c);
-  const l = labels(rtl);
+  const l = labels(c, rtl);
   const contact = [c.location, c.email, c.phone].filter(Boolean);
   const design = useContext(DesignContext);
   const showSkillBars = design?.showSkillBars !== false;

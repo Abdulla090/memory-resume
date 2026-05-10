@@ -29,7 +29,7 @@ import { optimizeResumeForOnePage } from "@/lib/resume-utils";
 export function NewAcademicTemplate({ data }: { data: ResumeData }) {
   const c = optimizeResumeForOnePage(data);
   const rtl = isRTL(c);
-  const l = labels(rtl);
+  const l = labels(c, rtl);
   const design = useContext(DesignContext);
 
   const colLayout = design?.columnLayout || "sidebar-right";

@@ -11,7 +11,7 @@ import { optimizeResumeForOnePage } from "@/lib/resume-utils";
 export function RefSilvaTemplate({ data }: { data: ResumeData }) {
   const c = optimizeResumeForOnePage(data);
   const rtl = isRTL(c);
-  const l = labels(rtl);
+  const l = labels(c, rtl);
   const design = useContext(DesignContext);
   const showSkillBars = design?.showSkillBars !== false;
   const photoShape = design?.photoShape || "circle";

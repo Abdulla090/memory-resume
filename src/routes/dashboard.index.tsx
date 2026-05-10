@@ -1,423 +1,426 @@
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router';
-import { Plus, Upload, BrainCircuit, FileText, CheckCircle2, LayoutTemplate, PenTool, Briefcase, BarChart2, Sun, ArrowRight, MoreVertical, Settings, Wand2, Clock } from 'lucide-react';
-import { LeftCardSVG, CenterCardSVG } from './index';
+import {
+  FileText,
+  ArrowRight,
+  Sparkles,
+  ArrowUp,
+  Paperclip,
+  Briefcase as BriefcaseIcon,
+  Code2,
+  PenLine,
+  GraduationCap,
+} from 'lucide-react';
+import { useMemo, useRef, useState } from 'react';
 import { useAppStore } from '@/lib/store';
 import { motion, Variants } from 'framer-motion';
+import { toast } from 'sonner';
+import { SAMPLE_MEMORIES } from '@/lib/sample-memories';
+import { ResumePreview } from '@/components/resume/templates';
+import type { ResumeData, TemplateId } from '@/lib/types';
 
 export const Route = createFileRoute('/dashboard/')({
   component: DashboardIndex,
 });
 
+// ── Templates (mirrors /templates route) ────────────────────────────────
+type Category = 'All' | 'Minimal' | 'Professional' | 'Academic' | 'Creative';
+
+const TEMPLATES: {
+  id: TemplateId;
+  label: string;
+  desc: string;
+  category: Category;
+  isNew?: boolean;
+}[] = [
+  { id: 'minimal', label: 'Minimal', desc: 'Clean hierarchy', category: 'Minimal' },
+  { id: 'slate', label: 'Slate', desc: 'Swiss precision', category: 'Minimal' },
+  { id: 'avant', label: 'Avant', desc: 'Brutalist lines', category: 'Minimal' },
+  { id: 'vanguard', label: 'Vanguard', desc: 'Massive typography', category: 'Minimal' },
+  { id: 'executive', label: 'Executive', desc: 'Dark sidebar', category: 'Professional' },
+  { id: 'apex', label: 'Apex', desc: 'Bold top bar', category: 'Professional' },
+  { id: 'monolith', label: 'Monolith', desc: 'Highly structured', category: 'Professional' },
+  { id: 'metric', label: 'Metric', desc: 'Data-driven', category: 'Professional' },
+  { id: 'carbon', label: 'Carbon', desc: 'Charcoal sidebar', category: 'Professional', isNew: true },
+  { id: 'atlas', label: 'Atlas', desc: 'Corporate authority', category: 'Professional', isNew: true },
+  { id: 'new-sleek', label: 'NEW Sleek A4', desc: 'Photo-led precision', category: 'Professional', isNew: true },
+  { id: 'new-professional', label: 'NEW Professional A4', desc: 'Executive sidebar', category: 'Professional', isNew: true },
+  { id: 'new-academic', label: 'NEW Academic A4', desc: 'Research CV layout', category: 'Academic', isNew: true },
+  { id: 'ref-torres', label: 'NEW Torres Exact', desc: 'Blue photo sidebar', category: 'Professional', isNew: true },
+  { id: 'ref-silva', label: 'NEW Silva Exact', desc: 'Brown account split', category: 'Professional', isNew: true },
+  { id: 'ref-schumacher', label: 'NEW Schumacher Exact', desc: 'Orange skill bars', category: 'Creative', isNew: true },
+  { id: 'ref-palmerston', label: 'NEW Palmerston Exact', desc: 'Slate graphic designer', category: 'Professional', isNew: true },
+  { id: 'ref-alvarado', label: 'NEW Alvarado Exact', desc: 'Two-tone classic profile', category: 'Professional', isNew: true },
+  { id: 'new-alvarado', label: 'NEW Lorna Pixel', desc: 'Pixel perfect match', category: 'Professional', isNew: true },
+  { id: 'ref-sanchez', label: 'NEW Sanchez Exact', desc: 'Timeline manager', category: 'Professional', isNew: true },
+  { id: 'mercer', label: 'NEW Mercer Exact', desc: 'Navy structured dual-column', category: 'Professional', isNew: true },
+  { id: 'gallego', label: 'NEW Gallego Exact', desc: 'Teal presentation designer', category: 'Professional', isNew: true },
+  { id: 'leroy', label: 'NEW Leroy Exact', desc: 'French real estate profile', category: 'Professional', isNew: true },
+  { id: 'dubois', label: 'NEW Dubois Exact', desc: 'French project manager', category: 'Professional', isNew: true },
+  { id: 'noir', label: 'Noir', desc: 'All-black luxury', category: 'Creative' },
+  { id: 'cipher', label: 'Cipher', desc: 'Dark tech aesthetic', category: 'Creative' },
+  { id: 'pinnacle', label: 'Pinnacle', desc: 'Dark layered layout', category: 'Creative' },
+  { id: 'nexus', label: 'Nexus', desc: 'Timeline SVG nodes', category: 'Creative' },
+  { id: 'orbit', label: 'Orbit', desc: 'Interactive elements', category: 'Creative' },
+  { id: 'prism', label: 'Prism', desc: 'Geometric shapes', category: 'Creative' },
+  { id: 'forge', label: 'Forge', desc: 'Industrial brutalist', category: 'Minimal', isNew: true },
+  { id: 'zenith', label: 'Zenith', desc: 'Gold luxury premium', category: 'Professional', isNew: true },
+  { id: 'vector', label: 'Vector', desc: 'Dark mode tech', category: 'Creative', isNew: true },
+];
+
+const MINI_SAMPLE: ResumeData = {
+  name: 'Jane Doe',
+  title: 'Product Designer',
+  email: 'jane@example.com',
+  phone: '+1 234 567 890',
+  photoUrl: 'https://picsum.photos/seed/maya-okafor-headshot/240/240',
+  location: 'New York, NY',
+  summary: 'Creative designer focusing on UI/UX and visual storytelling.',
+  experience: [
+    {
+      title: 'Lead Designer',
+      company: 'Creative Studio',
+      duration: '2020 — Present',
+      description: 'Leading design team for major client projects.',
+      achievements: ['Delivered award-winning campaigns.'],
+    },
+    {
+      title: 'UX Designer',
+      company: 'Tech Startup',
+      duration: '2018 — 2020',
+      description: 'Designed core application interfaces.',
+      achievements: [],
+    },
+  ],
+  projects: [],
+  education: [{ degree: 'BFA Design', institution: 'Design School', year: '2018' }],
+  skills: ['Figma', 'UI/UX', 'Prototyping'],
+  certifications: [],
+};
+
+function Thumbnail({ id }: { id: TemplateId }) {
+  return (
+    <div className="absolute inset-0 bg-slate-100 overflow-hidden pointer-events-none flex items-center justify-center">
+      <svg viewBox="0 0 794 1123" className="w-full h-full">
+        <foreignObject width="794" height="1123">
+          <div className="w-[794px] h-[1123px] bg-white text-left">
+            <ResumePreview data={MINI_SAMPLE} template={id} />
+          </div>
+        </foreignObject>
+      </svg>
+    </div>
+  );
+}
+
 function DashboardIndex() {
   const navigate = useNavigate();
   const language = useAppStore((state) => state.language);
-  const isKu = language === "ku";
-  const resumes = useAppStore((state) => state.resumes);
-  const recentCVs = resumes.slice(0, 3);
+  const isKu = language === 'ku';
+
+  // ── Bolt-style chat intake state ───────────────────────────────────────
+  const [prompt, setPrompt] = useState('');
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // ── Templates filter ───────────────────────────────────────────────────
+  const [filter, setFilter] = useState<Category>('All');
+  const filteredTemplates = useMemo(() => {
+    if (filter === 'All') return TEMPLATES;
+    return TEMPLATES.filter((t) => t.category === filter);
+  }, [filter]);
+  const categories: Category[] = ['All', 'Minimal', 'Professional', 'Academic', 'Creative'];
+
+  const handleSubmit = () => {
+    const text = prompt.trim();
+    if (text.length < 20) {
+      toast.error(
+        isKu
+          ? 'کەمێک زیاتر بنووسە دەربارەی خۆت (٢٠+ پیت).'
+          : 'Add a bit more detail (20+ chars).'
+      );
+      return;
+    }
+    navigate({
+      to: '/onboarding',
+      search: { prompt: text },
+    });
+  };
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      setPrompt((p) => p + (p ? '\n\n' : '') + `[${file.name}]\n` + (ev.target?.result as string));
+      toast.success(isKu ? `بارکرا ${file.name}` : `Loaded ${file.name}`);
+    };
+    reader.readAsText(file);
+    e.target.value = '';
+  };
+
+  const quickPrompts = isKu
+    ? [
+        { icon: BriefcaseIcon, label: 'بەڕێوەبەری بەرهەم' },
+        { icon: Code2, label: 'ئەندازیاری نەرمەکاڵا' },
+        { icon: PenLine, label: 'دیزاینەری UX' },
+        { icon: GraduationCap, label: 'سیڤی ئەکادیمی' },
+      ]
+    : [
+        { icon: BriefcaseIcon, label: 'Product Manager CV' },
+        { icon: Code2, label: 'Software Engineer CV' },
+        { icon: PenLine, label: 'UX Designer CV' },
+        { icon: GraduationCap, label: 'Academic CV' },
+      ];
+
+  const handleQuickPrompt = (label: string) => {
+    const seed = isKu
+      ? `من دەمەوێت سیڤییەک دروست بکەم بۆ ڕۆڵی «${label}». ئەمەش کورتەیەک دەربارەی ئەزموونەکەم: `
+      : `I want to build a resume for the role of "${label}". Here is a short summary of my background: `;
+    setPrompt(seed);
+    textareaRef.current?.focus();
+  };
+
+  const handleTrySample = () => {
+    const sample = SAMPLE_MEMORIES[0];
+    if (!sample) return;
+    setPrompt(sample.text);
+    toast.success(isKu ? 'نموونە بارکرا' : 'Sample loaded');
+    textareaRef.current?.focus();
+  };
 
   const containerVariants: Variants = {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
-      transition: {
-        staggerChildren: 0.1,
-      },
+      transition: { staggerChildren: 0.08 },
     },
   };
 
   const itemVariants: Variants = {
     hidden: { opacity: 0, y: 20 },
-    visible: { 
-      opacity: 1, 
+    visible: {
+      opacity: 1,
       y: 0,
-      transition: { 
-        type: "spring",
-        stiffness: 100,
-        damping: 15,
-        mass: 1
-      }
+      transition: { type: 'spring', stiffness: 100, damping: 15, mass: 1 },
     },
   };
 
   return (
-    <motion.div 
-      className="max-w-7xl mx-auto space-y-4 sm:space-y-6 pb-10"
+    <motion.div
+      className="relative mx-auto w-full max-w-7xl space-y-10 sm:space-y-12 pb-10"
       variants={containerVariants}
       initial="hidden"
       animate="visible"
     >
-      
-      {/* Top Row */}
-      <motion.div variants={itemVariants} className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
-        
-        {/* Hero Banner */}
-        <div className="lg:col-span-2 rounded-[2rem] bg-gradient-to-br from-[#e6f2ff] to-[#f0f7ff] p-6 sm:p-10 relative overflow-hidden border border-white shadow-sm flex flex-col justify-center min-h-[280px] sm:min-h-[300px]">
-          {/* Background Decorations */}
-          <div className={`absolute top-10 w-40 h-20 bg-white/40 blur-2xl rounded-full pointer-events-none ${isKu ? 'left-10' : 'right-10'}`} />
-          <div className={`absolute bottom-[-30%] w-[300px] h-[200px] bg-blue-200/20 blur-3xl rounded-full pointer-events-none ${isKu ? 'left-[15%]' : 'right-[15%]'}`} />
-          
-          {/* Two Sleek Resume Mockups */}
-          <div dir="ltr" className={`absolute top-1/2 -translate-y-1/2 w-[220px] sm:w-[280px] h-[260px] sm:h-[320px] pointer-events-none select-none hidden sm:block ${isKu ? 'left-6 lg:left-12' : 'right-6 lg:right-12'}`}>
-            
-            {/* Back Resume — rotated right, shifted up */}
-            <div 
-              className={`absolute top-0 w-[180px] origin-center shadow-[0_20px_40px_rgba(0,0,0,0.15)] rounded-2xl ${isKu ? 'left-0' : 'right-0'}`}
-              style={{ transform: `rotate(${isKu ? '-8deg' : '8deg'}) translateX(${isKu ? '-10px' : '10px'}) translateY(-10px)` }}
-            >
-              <LeftCardSVG />
-            </div>
-
-            {/* Front Resume — rotated left, shifted down & over */}
-            <div 
-              className={`absolute bottom-0 w-[190px] origin-center z-10 shadow-[0_25px_35px_rgba(37,99,235,0.15)] rounded-lg ${isKu ? 'right-0' : 'left-0'}`}
-              style={{ transform: `rotate(${isKu ? '6deg' : '-6deg'}) translateX(${isKu ? '10px' : '-10px'}) translateY(5px)` }}
-            >
-              <CenterCardSVG />
-            </div>
-
+      {/* ───────── Bolt-style chat intake hero ───────── */}
+      <motion.section
+        variants={itemVariants}
+        className="relative overflow-hidden rounded-[2.25rem] border border-white/70 bg-gradient-to-b from-[#eaf5ff] via-[#f3f9ff] to-white p-6 sm:p-10 lg:p-14 shadow-[0_20px_60px_-30px_rgba(59,130,246,0.35)]"
+      >
+        {/* Sky & cloud decoration */}
+        <div className="pointer-events-none absolute inset-0 -z-0">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(186,230,253,0.55),transparent_60%)]" />
+          <div className="absolute top-[-80px] left-[-60px] h-[260px] w-[520px] opacity-80">
+            <div className="absolute top-24 left-6 h-32 w-32 rounded-full bg-white blur-[6px]" />
+            <div className="absolute top-2 left-28 h-40 w-40 rounded-full bg-white blur-[6px]" />
+            <div className="absolute top-20 left-60 h-28 w-28 rounded-full bg-white blur-[6px]" />
+            <div className="absolute top-32 left-0 h-20 w-[420px] rounded-full bg-white blur-[4px]" />
           </div>
-
-          <div className="relative z-10 max-w-[400px]">
-            <div className="inline-block text-sm font-bold text-slate-600 mb-4 bg-white/60 backdrop-blur-sm px-4 py-1.5 rounded-full shadow-sm">
-              {isKu ? "سڵاو! 👋" : "Hello! 👋"}
-            </div>
-            <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-slate-900 tracking-tight leading-[1.1] mb-3 sm:mb-4">
-              {isKu ? (
-                <>با زیرەکی دەستکرد<br/>سیڤییەکی نایابت بۆ دروست بکات</>
-              ) : (
-                <>Let AI build your<br/>perfect CV</>
-              )}
-            </h1>
-            <p className="text-slate-500 font-medium mb-8 text-sm md:text-base max-w-[280px]">
-              {isKu ? "زیرەک. تایبەت. پشت بەستوو بە یادگە. دروستکراوە بۆ دەرفەتی داهاتووت." : "Smart. Personalized. Memory-based. Built for your next opportunity."}
-            </p>
-            <div className="flex flex-wrap gap-3 sm:gap-4">
-              <Link to="/onboarding" className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-2xl font-bold shadow-lg shadow-blue-600/20 transition-all hover:-translate-y-0.5">
-                <Plus className="w-5 h-5" /> {isKu ? "دروستکردنی سیڤیی نوێ" : "Create New CV"}
-              </Link>
-              <button className="flex items-center gap-2 bg-white text-blue-600 px-6 py-3 rounded-2xl font-bold shadow-sm border border-blue-100 hover:shadow-md transition-all">
-                <Upload className="w-5 h-5" /> {isKu ? "بارکردنی سیڤیی هەبوو" : "Upload Existing"}
-              </button>
-            </div>
+          <div className="absolute top-[-60px] right-[-40px] h-[220px] w-[460px] opacity-70">
+            <div className="absolute top-16 right-6 h-28 w-28 rounded-full bg-white blur-[6px]" />
+            <div className="absolute top-[-10px] right-24 h-40 w-40 rounded-full bg-white blur-[6px]" />
+            <div className="absolute top-24 right-0 h-16 w-[380px] rounded-full bg-white blur-[4px]" />
+          </div>
+          <div className="absolute bottom-[-80px] right-[20%] h-[160px] w-[360px] opacity-60">
+            <div className="absolute top-4 left-10 h-20 w-20 rounded-full bg-white blur-[5px]" />
+            <div className="absolute top-0 left-24 h-24 w-24 rounded-full bg-white blur-[5px]" />
+            <div className="absolute top-10 left-0 h-14 w-[300px] rounded-full bg-white blur-[4px]" />
           </div>
         </div>
 
-        {/* AI Memory Widget */}
-        <div className="rounded-[2rem] bg-white border border-slate-100 p-8 shadow-sm flex flex-col justify-between min-h-[300px]">
-          <div>
-            <div className="flex items-center gap-3 mb-2">
-              <div className="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center text-blue-600">
-                <BrainCircuit className="w-6 h-6" />
-              </div>
-              <h3 className="text-xl font-extrabold text-slate-900">{isKu ? "یادگەی زیرەکی دەستکرد" : "AI Memory"}</h3>
-            </div>
-            <p className="text-slate-500 text-sm font-medium mb-6 leading-relaxed">
-              {isKu ? "ئەزموون، شارەزایی و ئارەزووەکانت لە یاد دەهێڵمەوە بۆ ئەوەی هەر سیڤییەک باشتر بکەم." : "I remember your experience, skills, and preferences to make every CV better."}
-            </p>
-            
-            <div className="grid grid-cols-2 gap-3">
-              {[
-                { label: isKu ? 'ئەزموونەکان' : 'Experiences', count: 24, icon: FileText },
-                { label: isKu ? 'شارەزاییەکان' : 'Skills', count: 18, icon: PenTool },
-                { label: isKu ? 'دەستکەوتەکان' : 'Achievements', count: 15, icon: CheckCircle2 },
-                { label: isKu ? 'ئارەزووەکان' : 'Preferences', count: 12, icon: Settings },
-              ].map((item) => (
-                <div key={item.label} className="bg-slate-50 p-3 rounded-2xl flex gap-3 items-center border border-slate-100/50">
-                   <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-blue-500 shadow-sm shrink-0">
-                     <item.icon className="w-4 h-4" />
-                   </div>
-                   <div>
-                     <div className="text-[10px] font-bold text-slate-900 leading-none">{item.label}</div>
-                     <div className="text-[10px] font-medium text-slate-500 mt-1">{item.count} {isKu ? "پاشەکەوتکراوە" : "saved"}</div>
-                   </div>
+        <div className="relative z-10 flex flex-col items-center text-center">
+          {/* Greeting pill */}
+          <div className="inline-flex items-center gap-2 rounded-full bg-white/80 px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-sky-700 shadow-sm backdrop-blur-sm ring-1 ring-sky-100">
+            <Sparkles className="h-3.5 w-3.5 text-sky-500" />
+            {isKu ? 'سڵاو 👋 ئامادەم یارمەتیت بدەم' : 'Welcome back 👋'}
+          </div>
+
+          <h1 className="mt-5 max-w-3xl text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-slate-900 leading-[1.1]">
+            {isKu ? (
+              <>
+                چ جۆرە سیڤییەک <span className="bg-gradient-to-r from-sky-500 to-blue-600 bg-clip-text text-transparent">دروست بکەین؟</span>
+              </>
+            ) : (
+              <>
+                What kind of resume <span className="bg-gradient-to-r from-sky-500 to-blue-600 bg-clip-text text-transparent">shall we craft?</span>
+              </>
+            )}
+          </h1>
+          <p className="mt-3 max-w-xl text-sm sm:text-base font-medium text-slate-500">
+            {isKu
+              ? 'سیڤییەکەت، پوختەی لینکدین، یان کورتەیەک دەربارەی خۆت دابنێ — من سیڤییەکی پیشەیی بۆ دروست دەکەم لە چەند چرکەیەکدا.'
+              : 'Paste your resume, LinkedIn summary, or a quick intro about yourself — I’ll turn it into a polished CV in seconds.'}
+          </p>
+
+          {/* Chat input card */}
+          <div className="mt-8 w-full max-w-2xl">
+            <div className="group rounded-[26px] border border-slate-200/70 bg-white/80 shadow-[0_10px_40px_-18px_rgba(15,23,42,0.18)] ring-4 ring-transparent backdrop-blur-xl transition-all duration-300 focus-within:border-sky-200 focus-within:bg-white focus-within:ring-sky-400/10 overflow-hidden">
+              <textarea
+                ref={textareaRef}
+                value={prompt}
+                onChange={(e) => setPrompt(e.target.value)}
+                placeholder={
+                  isKu
+                    ? 'بۆ نموونە: «ئەندازیاری سینێری نەرمەکاڵام بە ٥ ساڵ ئەزموون لە React و Node، سەرپەرشتیاری تیمێکی ٤ کەسی…»'
+                    : 'e.g., "Senior software engineer with 5 years of experience, led a team of 4, redesigned the onboarding flow…"'
+                }
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
+                    e.preventDefault();
+                    handleSubmit();
+                  }
+                }}
+                className="w-full resize-none bg-transparent px-6 pt-6 pb-3 text-[15px] leading-relaxed text-slate-800 outline-none placeholder:text-slate-400"
+                style={{ minHeight: '140px' }}
+              />
+
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 border-t border-slate-100 bg-slate-50/60 px-3 py-2.5 sm:px-4">
+                <div className="flex items-center gap-1.5 sm:gap-2">
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={handleFileUpload}
+                    className="hidden"
+                    accept=".txt,.md,.pdf,.docx,.doc,.rtf"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="flex items-center gap-1.5 rounded-xl px-3 py-2 text-[12px] font-bold text-slate-600 transition-all hover:bg-white hover:text-sky-600 hover:shadow-sm"
+                    title={isKu ? 'بارکردنی فایل' : 'Attach file'}
+                  >
+                    <Paperclip className="h-4 w-4" />
+                    <span className="hidden sm:inline">{isKu ? 'بارکردن' : 'Attach'}</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleTrySample}
+                    className="flex items-center gap-1.5 rounded-xl px-3 py-2 text-[12px] font-bold text-slate-600 transition-all hover:bg-white hover:text-sky-600 hover:shadow-sm"
+                  >
+                    <FileText className="h-4 w-4" />
+                    <span className="hidden sm:inline">{isKu ? 'نموونە' : 'Try sample'}</span>
+                  </button>
                 </div>
+
+                <div className="flex items-center justify-end gap-2">
+                  <span className="hidden sm:inline text-[11px] font-semibold text-slate-400">
+                    {isKu ? '⌘ + Enter' : 'Press ⌘ + Enter'}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={handleSubmit}
+                    disabled={prompt.trim().length < 20}
+                    className="flex items-center gap-2 rounded-xl bg-gradient-to-br from-sky-500 to-blue-600 px-4 py-2.5 text-[13px] font-bold text-white shadow-lg shadow-sky-500/25 transition-all hover:-translate-y-0.5 hover:shadow-xl hover:shadow-sky-500/30 disabled:pointer-events-none disabled:translate-y-0 disabled:bg-slate-200 disabled:from-slate-200 disabled:to-slate-200 disabled:text-slate-400 disabled:shadow-none"
+                  >
+                    {isKu ? 'دروستکردنی سیڤی' : 'Build my CV'}
+                    <ArrowUp className="h-4 w-4" />
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Quick prompt chips */}
+            <div className="mt-5 flex flex-wrap items-center justify-center gap-2">
+              {quickPrompts.map((item) => (
+                <button
+                  key={item.label}
+                  type="button"
+                  onClick={() => handleQuickPrompt(item.label)}
+                  className="flex items-center gap-2 rounded-full border border-sky-100 bg-white/80 px-3.5 py-2 text-[12px] font-bold text-slate-700 backdrop-blur-sm transition-all hover:border-sky-200 hover:bg-white hover:text-sky-700 hover:shadow-sm"
+                >
+                  <item.icon className="h-3.5 w-3.5 text-sky-500" />
+                  {item.label}
+                </button>
               ))}
-            </div>
-          </div>
-          <div className="mt-6 flex justify-between items-end">
-            <div className="text-[10px] text-slate-400 font-semibold leading-tight">
-              {isKu ? "دوایین نوێکردنەوەی یادگە" : "Memory last updated"}<br/><span className="text-slate-600">{isKu ? "ئەمڕۆ، ١٠:٣٠ بەیانی" : "Today, 10:30 AM"}</span>
-            </div>
-            <button className="text-blue-600 text-xs font-bold flex items-center gap-1 hover:underline">
-              {isKu ? "بەڕێوەبردنی یادگە" : "Manage Memory"} <ArrowRight className={`w-3 h-3 ${isKu ? 'rotate-180' : ''}`} />
-            </button>
-          </div>
-        </div>
-
-      </motion.div>
-
-      {/* Middle Row */}
-      <motion.div variants={itemVariants} className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
-        
-        {/* My CVs */}
-        <div className="rounded-[2rem] bg-white border border-slate-100 p-8 shadow-sm">
-          <div className="flex justify-between items-center mb-6">
-            <div className="flex items-center gap-2">
-               <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center text-blue-500">
-                 <FileText className="w-4 h-4" />
-               </div>
-               <h3 className="font-bold text-slate-900">{isKu ? "سیڤییەکانم" : "My CVs"}</h3>
-            </div>
-            <Link to="/dashboard/my-cvs" className="text-blue-600 text-xs font-bold flex items-center gap-1 hover:underline">{isKu ? "هەمووی ببینە" : "View all"} <ArrowRight className={`w-3 h-3 ${isKu ? 'rotate-180' : ''}`} /></Link>
-          </div>
-          
-          <div className="space-y-3">
-            {recentCVs.length === 0 ? (
-              <div className="text-center py-6">
-                <FileText className="w-8 h-8 text-slate-200 mx-auto mb-3" />
-                <p className="text-xs text-slate-400 font-medium">{isKu ? "هێشتا سیڤییەک نەدروستکراوە" : "No CVs yet"}</p>
-                <Link to="/onboarding" className="inline-flex items-center gap-1 mt-3 text-xs font-bold text-blue-600 hover:underline">
-                  <Plus className="w-3 h-3" /> {isKu ? "دروستکردنی یەکەم سیڤی" : "Create your first CV"}
-                </Link>
-              </div>
-            ) : recentCVs.map((cv) => (
-              <button
-                key={cv.id}
-                onClick={() => navigate({ to: '/editor/$id', params: { id: cv.id } })}
-                className="w-full flex items-center justify-between p-3 -mx-3 rounded-2xl hover:bg-slate-50 transition-colors cursor-pointer group border border-transparent hover:border-slate-100 text-left"
+              <Link
+                to="/onboarding"
+                className="flex items-center gap-1 rounded-full px-3.5 py-2 text-[12px] font-bold text-slate-500 transition-colors hover:text-sky-700"
               >
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-slate-400 group-hover:bg-white group-hover:shadow-sm group-hover:text-blue-500 transition-all">
-                    <FileText className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <div className="text-sm font-bold text-slate-900 truncate max-w-[150px]">{cv.title}</div>
-                    <div className="text-[10px] text-slate-500 font-medium mt-0.5 flex items-center gap-1">
-                      <Clock className="w-2.5 h-2.5" />
-                      {new Date(cv.createdAt).toLocaleDateString()}
-                    </div>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                   <div className="text-[10px] font-bold text-blue-500 bg-blue-50 px-2 py-1 rounded-md capitalize">{cv.template}</div>
-                   <ArrowRight className="w-3.5 h-3.5 text-slate-300 group-hover:text-blue-500 transition-colors" />
-                </div>
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* AI Optimize */}
-        <div className="rounded-[2rem] bg-white border border-slate-100 p-8 shadow-sm relative overflow-hidden flex flex-col items-center justify-center text-center">
-          <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-blue-400 to-blue-600" />
-          <h3 className="font-bold text-slate-900 flex items-center gap-2 mb-2">
-            <Wand2 className="w-5 h-5 text-blue-500" /> {isKu ? "باشترکردنی زیرەکی دەستکرد" : "AI Optimize"}
-          </h3>
-          <p className="text-xs font-medium text-slate-500 mb-6">{isKu ? "سیڤییەکەت بە پێشنیاری زیرەکی دەستکرد باشتر بکە." : "Improve your CV with AI suggestions."}</p>
-          
-          <div className="flex items-center justify-center gap-8 w-full mb-8">
-             <div className="relative w-24 h-24 flex items-center justify-center">
-               <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
-                 <circle cx="50" cy="50" r="40" stroke="#f1f5f9" strokeWidth="8" fill="none" />
-                 <circle cx="50" cy="50" r="40" stroke="#3b82f6" strokeWidth="8" fill="none" strokeDasharray="251.2" strokeDashoffset="20.096" strokeLinecap="round" />
-               </svg>
-               <div className="absolute inset-0 flex flex-col items-center justify-center">
-                 <span className="text-3xl font-black text-slate-900 leading-none">92</span>
-                 <span className="text-[10px] font-bold text-slate-500 mt-1">Score</span>
-               </div>
-             </div>
-             
-             <div className="space-y-3 text-left">
-               {isKu ? ['ناوەڕۆک', 'پێکهاتە', 'وشە سەرەکییەکان', 'کاریگەری'].map((item) => (
-                 <div key={item} className="flex items-center gap-2 text-[11px] font-bold text-slate-600">
-                   <CheckCircle2 className="w-4 h-4 text-emerald-500" /> {item}
-                 </div>
-               )) : ['Content', 'Structure', 'Keywords', 'Impact'].map((item) => (
-                 <div key={item} className="flex items-center gap-2 text-[11px] font-bold text-slate-600">
-                   <CheckCircle2 className="w-4 h-4 text-emerald-500" /> {item}
-                 </div>
-               ))}
-             </div>
-          </div>
-          
-          <button className="w-full py-3.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold shadow-lg shadow-blue-500/20 transition-all text-sm flex justify-center items-center gap-2 hover:-translate-y-0.5">
-            {isKu ? "ئێستا باشتر بکە" : "Optimize Now"} <ArrowRight className={`w-4 h-4 ${isKu ? 'rotate-180' : ''}`} />
-          </button>
-        </div>
-
-        {/* Templates */}
-        <div className="rounded-[2rem] bg-white border border-slate-100 p-8 shadow-sm">
-          <div className="flex justify-between items-center mb-6">
-            <div className="flex items-center gap-2">
-               <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center text-blue-500">
-                 <LayoutTemplate className="w-4 h-4" />
-               </div>
-               <h3 className="font-bold text-slate-900">{isKu ? "تیمپڵەیتەکان" : "Templates"}</h3>
+                {isKu ? 'یاخود لە سەرەتاوە دەستپێبکە' : 'Or start from scratch'}
+                <ArrowRight className={`h-3 w-3 ${isKu ? 'rotate-180' : ''}`} />
+              </Link>
             </div>
-            <Link to="/templates" className="text-blue-600 text-xs font-bold flex items-center gap-1 hover:underline">{isKu ? "هەمووی ببینە" : "Browse all"} <ArrowRight className={`w-3 h-3 ${isKu ? 'rotate-180' : ''}`} /></Link>
-          </div>
-          
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-             {['Modern', 'Professional', 'Creative'].map((name) => (
-                <div key={name} className="flex flex-col items-center gap-3">
-                   <div className="w-full aspect-[1/1.414] bg-slate-100 rounded-xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-md transition-all cursor-pointer group">
-                      <div className="w-full h-full bg-white p-2">
-                         <div className="w-1/3 h-1.5 bg-slate-300 rounded mb-2"></div>
-                         <div className="w-1/4 h-1 bg-slate-200 rounded mb-1"></div>
-                         <div className="w-full h-1 bg-slate-100 rounded mb-0.5"></div>
-                         <div className="w-5/6 h-1 bg-slate-100 rounded mb-3"></div>
-                         <div className="flex gap-2">
-                            <div className="w-1/3 h-10 bg-slate-50 rounded"></div>
-                            <div className="w-2/3 h-10 bg-slate-50 rounded"></div>
-                         </div>
-                      </div>
-                   </div>
-                   <span className="text-[10px] font-bold text-slate-600">{name}</span>
-                </div>
-             ))}
           </div>
         </div>
+      </motion.section>
 
-      </motion.div>
-
-      {/* Bottom Row */}
-      <motion.div variants={itemVariants} className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
-        
-        {/* AI Writer */}
-        <div className="rounded-[2rem] bg-white border border-slate-100 p-8 shadow-sm">
-          <div className="flex items-center gap-2 mb-2">
-             <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center text-blue-500">
-               <PenTool className="w-4 h-4" />
-             </div>
-             <h3 className="font-bold text-slate-900">{isKu ? "نووسەری زیرەکی دەستکرد" : "AI Writer"}</h3>
+      {/* ───────── Templates gallery ───────── */}
+      <motion.section variants={itemVariants} className="space-y-6">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900">
+              {isKu ? 'تیمپڵەیتەکان' : 'Templates'}
+            </h2>
+            <p className="mt-1 text-sm font-medium text-slate-500">
+              {isKu
+                ? 'تیمپڵەیتێک هەڵبژێرە و ئەزموونەکانت بگوێزەوە بۆ سیڤییەکی سەرنجڕاکێش.'
+                : 'Pick a template to instantly reformat your experience into a winning resume.'}
+            </p>
           </div>
-          <p className="text-xs font-medium text-slate-500 mb-6 pl-10">{isKu ? "ناوەڕۆکی تایبەت بۆ سیڤییەکەت دروست بکە" : "Generate tailored content for your CV"}</p>
-          
-          <div className="grid grid-cols-2 gap-3 mb-6">
-             {isKu ? ['پوختەی پیشەیی', 'ئەزموونی کار', 'دەستکەوتە سەرەکییەکان', 'بەشی شارەزایی'].map((item) => (
-                <button key={item} className="px-3 py-3 bg-blue-50 hover:bg-blue-100 text-blue-600 text-[10px] font-bold rounded-xl transition-colors border border-blue-100/50 text-center">
-                  {item}
+
+          <div className="flex flex-wrap gap-2">
+            {categories.map((cat) => {
+              const isActive = filter === cat;
+              return (
+                <button
+                  key={cat}
+                  type="button"
+                  onClick={() => setFilter(cat)}
+                  className={`rounded-full border px-4 py-1.5 text-[12px] font-bold transition-all ${
+                    isActive
+                      ? 'border-sky-200 bg-sky-50 text-sky-700 shadow-sm'
+                      : 'border-slate-200 bg-white text-slate-600 hover:border-sky-200 hover:text-sky-700'
+                  }`}
+                >
+                  {cat}
                 </button>
-             )) : ['Professional Summary', 'Work Experience', 'Key Achievements', 'Skills Section'].map((item) => (
-                <button key={item} className="px-3 py-3 bg-blue-50 hover:bg-blue-100 text-blue-600 text-[10px] font-bold rounded-xl transition-colors border border-blue-100/50 text-center">
-                  {item}
-                </button>
-             ))}
-          </div>
-          <button className="w-full py-3.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold shadow-lg shadow-blue-500/20 transition-all text-sm flex justify-center items-center gap-2 hover:-translate-y-0.5">
-            <Wand2 className="w-4 h-4" /> {isKu ? "دروستکردن بە زیرەکی دەستکرد" : "Generate with AI"}
-          </button>
-        </div>
-
-        {/* Job Tracker */}
-        <div className="rounded-[2rem] bg-white border border-slate-100 p-8 shadow-sm">
-          <div className="flex justify-between items-center mb-6">
-            <div className="flex items-center gap-2">
-               <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center text-blue-500">
-                 <Briefcase className="w-4 h-4" />
-               </div>
-               <h3 className="font-bold text-slate-900">{isKu ? "چاودێری کار" : "Job Tracker"}</h3>
-            </div>
-            <Link to="/dashboard/job-tracker" className="text-blue-600 text-xs font-bold flex items-center gap-1 hover:underline">{isKu ? "هەمووی ببینە" : "View all"} <ArrowRight className={`w-3 h-3 ${isKu ? 'rotate-180' : ''}`} /></Link>
-          </div>
-          
-          <div className="space-y-4">
-            {isKu ? [
-              { role: 'دیزاینەری بەرهەم', company: 'Google', status: 'چاوپێکەوتن', date: '٢٢ ئایار', color: 'text-blue-600 bg-blue-50 border-blue-200' },
-              { role: 'دیزاینەری UI/UX', company: 'Microsoft', status: 'پێشکەشکراوە', date: '١٨ ئایار', color: 'text-emerald-600 bg-emerald-50 border-emerald-200' },
-              { role: 'پێشەنگی دیزاین', company: 'Netflix', status: 'پاڵێوراو', date: '١٥ ئایار', color: 'text-amber-600 bg-amber-50 border-amber-200' },
-            ].map((job, i) => (
-              <div key={i} className="flex items-center justify-between border-b border-slate-50 pb-4 last:border-0 last:pb-0">
-                 <div>
-                   <div className="text-sm font-bold text-slate-900">{job.role}</div>
-                   <div className="text-[10px] font-medium text-slate-500 mt-0.5">{job.company}</div>
-                 </div>
-                 <div className="flex items-center gap-4">
-                   <div className={`text-[10px] font-bold px-2.5 py-1 rounded-full border ${job.color}`}>
-                     {job.status}
-                   </div>
-                   <div className={`text-[10px] font-bold text-slate-400 w-10 ${isKu ? 'text-left' : 'text-right'}`}>{job.date}</div>
-                 </div>
-              </div>
-            )) : [
-              { role: 'Product Designer', company: 'Google', status: 'Interview', date: 'May 22', color: 'text-blue-600 bg-blue-50 border-blue-200' },
-              { role: 'UI/UX Designer', company: 'Microsoft', status: 'Applied', date: 'May 18', color: 'text-emerald-600 bg-emerald-50 border-emerald-200' },
-              { role: 'Design Lead', company: 'Netflix', status: 'Shortlisted', date: 'May 15', color: 'text-amber-600 bg-amber-50 border-amber-200' },
-            ].map((job, i) => (
-              <div key={i} className="flex items-center justify-between border-b border-slate-50 pb-4 last:border-0 last:pb-0">
-                 <div>
-                   <div className="text-sm font-bold text-slate-900">{job.role}</div>
-                   <div className="text-[10px] font-medium text-slate-500 mt-0.5">{job.company}</div>
-                 </div>
-                 <div className="flex items-center gap-4">
-                   <div className={`text-[10px] font-bold px-2.5 py-1 rounded-full border ${job.color}`}>
-                     {job.status}
-                   </div>
-                   <div className={`text-[10px] font-bold text-slate-400 w-10 ${isKu ? 'text-left' : 'text-right'}`}>{job.date}</div>
-                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
 
-        {/* Analytics */}
-        <div className="rounded-[2rem] bg-white border border-slate-100 p-8 shadow-sm">
-          <div className="flex justify-between items-center mb-6">
-            <div className="flex items-center gap-2">
-               <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center text-blue-500">
-                 <BarChart2 className="w-4 h-4" />
-               </div>
-               <h3 className="font-bold text-slate-900">{isKu ? "شیکاری" : "Analytics"}</h3>
-            </div>
-            <Link to="/dashboard/analytics" className="text-blue-600 text-xs font-bold flex items-center gap-1 hover:underline">{isKu ? "هەمووی ببینە" : "View all"} <ArrowRight className={`w-3 h-3 ${isKu ? 'rotate-180' : ''}`} /></Link>
-          </div>
-          
-          <div className="flex flex-col sm:flex-row gap-4 h-auto sm:h-[140px]">
-             {/* Views Chart */}
-             <div className="flex-1 border border-slate-100 rounded-2xl p-4 flex flex-col justify-between min-h-[140px] sm:min-h-0">
-                <div className="text-[10px] font-bold text-slate-500">{isKu ? "بینینی پرۆفایل" : "Profile Views"}</div>
-                <div className="flex items-end gap-2 mt-1">
-                  <div className="text-3xl font-black text-slate-900 leading-none">247</div>
-                  <div className="text-[10px] font-bold text-emerald-500 mb-1">↑ 18%</div>
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {filteredTemplates.map((t) => (
+            <Link
+              key={t.id}
+              to="/onboarding"
+              className="group relative flex flex-col items-center gap-3 rounded-[1.5rem] border border-slate-200 bg-white p-4 transition-all duration-500 hover:-translate-y-1 hover:border-sky-300 hover:bg-sky-50/30 hover:shadow-[0_20px_40px_-12px_rgba(14,165,233,0.18)]"
+            >
+              <div className="relative aspect-[1/1.4] w-full overflow-hidden rounded-xl border border-slate-100 bg-slate-100 shadow-[0_4px_20px_rgba(0,0,0,0.06)]">
+                <Thumbnail id={t.id} />
+                <div className="absolute inset-0 flex items-end justify-center bg-gradient-to-b from-transparent via-transparent to-black/60 pb-6 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+                  <span className="translate-y-4 rounded-full bg-sky-600 px-5 py-2.5 text-sm font-bold text-white shadow-lg transition-all duration-300 group-hover:translate-y-0">
+                    {isKu ? 'بەکارهێنان' : 'Use Template'}
+                  </span>
                 </div>
-                {/* Fake sparkline */}
-                <svg className="w-full h-10 mt-auto" viewBox="0 0 100 30" preserveAspectRatio="none">
-                  <path d="M0 25 L20 20 L40 28 L60 15 L80 18 L100 5" fill="none" stroke="#3b82f6" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-                  <path d="M0 25 L20 20 L40 28 L60 15 L80 18 L100 5 V30 H0 Z" fill="url(#sparkGrad)" />
-                  <defs>
-                    <linearGradient id="sparkGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.2" />
-                      <stop offset="100%" stopColor="#3b82f6" stopOpacity="0" />
-                    </linearGradient>
-                  </defs>
-                </svg>
-             </div>
-             
-             {/* Match Score */}
-             <div className="w-full sm:w-2/5 border border-slate-100 rounded-2xl p-4 flex flex-col items-center justify-center text-center min-h-[140px] sm:min-h-0">
-                <div className="text-[10px] font-bold text-slate-500 mb-3">{isKu ? "ڕێژەی گونجان" : "Match Score"}</div>
-                <div className="relative w-16 h-16 flex items-center justify-center">
-                   <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
-                     <circle cx="50" cy="50" r="40" stroke="#f1f5f9" strokeWidth="10" fill="none" />
-                     <circle cx="50" cy="50" r="40" stroke="#3b82f6" strokeWidth="10" fill="none" strokeDasharray="251.2" strokeDashoffset="32.656" strokeLinecap="round" />
-                   </svg>
-                   <div className="absolute inset-0 flex flex-col items-center justify-center">
-                     <span className="text-sm font-black text-slate-900 leading-none">87%</span>
-                   </div>
-                 </div>
-                 <span className="text-[10px] font-bold text-emerald-500 mt-2">{isKu ? "نایاب" : "Excellent"}</span>
-             </div>
-          </div>
+              </div>
+
+              <div className="w-full px-2 text-left">
+                <h3 className="flex items-center justify-between text-base font-bold text-slate-900">
+                  {t.label}
+                  {t.isNew && (
+                    <span className="rounded-full bg-sky-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-sky-700">
+                      {isKu ? 'نوێ' : 'New'}
+                    </span>
+                  )}
+                </h3>
+                <p className="text-xs font-medium text-slate-500">
+                  {t.category} • {t.desc}
+                </p>
+              </div>
+            </Link>
+          ))}
         </div>
-
-      </motion.div>
-
-      {/* Tip of the day */}
-      <motion.div variants={itemVariants} className="rounded-[2rem] bg-gradient-to-r from-blue-50 to-[#e0f2fe] border border-blue-100 p-5 sm:p-6 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-         <div className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-sm shrink-0">
-               <Sun className="w-6 h-6 text-amber-400" />
-            </div>
-            <div>
-               <h4 className="text-sm font-bold text-slate-900">{isKu ? "ئامۆژگاری ئەمڕۆ" : "Tip of the day"}</h4>
-               <p className="text-xs font-medium text-slate-600 mt-1">{isKu ? "دەستکەوتە ژمارەییەکان زیاد بکە بۆ ئەزموونەکەت بۆ ئەوەی سەرنجی دامەزرێنەران ڕابکێشیت." : "Add quantified achievements to your experience to stand out to recruiters."}</p>
-            </div>
-         </div>
-         <button className="bg-white text-blue-600 text-xs font-bold px-4 py-2.5 rounded-xl shadow-sm hover:shadow border border-blue-100 transition-all flex items-center gap-1 shrink-0">
-            {isKu ? "نموونە ببینە" : "See Example"} <ArrowRight className={`w-3 h-3 ${isKu ? 'rotate-180' : ''}`} />
-         </button>
-      </motion.div>
-      
+      </motion.section>
     </motion.div>
   );
 }

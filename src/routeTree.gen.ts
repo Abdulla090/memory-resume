@@ -15,6 +15,7 @@ import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DashboardIndexRouteImport } from './routes/dashboard.index'
 import { Route as EditorIdRouteImport } from './routes/editor.$id'
+import { Route as DashboardThanksRouteImport } from './routes/dashboard.thanks'
 import { Route as DashboardSettingsRouteImport } from './routes/dashboard.settings'
 import { Route as DashboardMyCvsRouteImport } from './routes/dashboard.my-cvs'
 import { Route as DashboardJobTrackerRouteImport } from './routes/dashboard.job-tracker'
@@ -52,6 +53,11 @@ const EditorIdRoute = EditorIdRouteImport.update({
   id: '/editor/$id',
   path: '/editor/$id',
   getParentRoute: () => rootRouteImport,
+} as any)
+const DashboardThanksRoute = DashboardThanksRouteImport.update({
+  id: '/thanks',
+  path: '/thanks',
+  getParentRoute: () => DashboardRoute,
 } as any)
 const DashboardSettingsRoute = DashboardSettingsRouteImport.update({
   id: '/settings',
@@ -101,6 +107,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/job-tracker': typeof DashboardJobTrackerRoute
   '/dashboard/my-cvs': typeof DashboardMyCvsRoute
   '/dashboard/settings': typeof DashboardSettingsRoute
+  '/dashboard/thanks': typeof DashboardThanksRoute
   '/editor/$id': typeof EditorIdRoute
   '/dashboard/': typeof DashboardIndexRoute
 }
@@ -115,6 +122,7 @@ export interface FileRoutesByTo {
   '/dashboard/job-tracker': typeof DashboardJobTrackerRoute
   '/dashboard/my-cvs': typeof DashboardMyCvsRoute
   '/dashboard/settings': typeof DashboardSettingsRoute
+  '/dashboard/thanks': typeof DashboardThanksRoute
   '/editor/$id': typeof EditorIdRoute
   '/dashboard': typeof DashboardIndexRoute
 }
@@ -131,6 +139,7 @@ export interface FileRoutesById {
   '/dashboard/job-tracker': typeof DashboardJobTrackerRoute
   '/dashboard/my-cvs': typeof DashboardMyCvsRoute
   '/dashboard/settings': typeof DashboardSettingsRoute
+  '/dashboard/thanks': typeof DashboardThanksRoute
   '/editor/$id': typeof EditorIdRoute
   '/dashboard/': typeof DashboardIndexRoute
 }
@@ -148,6 +157,7 @@ export interface FileRouteTypes {
     | '/dashboard/job-tracker'
     | '/dashboard/my-cvs'
     | '/dashboard/settings'
+    | '/dashboard/thanks'
     | '/editor/$id'
     | '/dashboard/'
   fileRoutesByTo: FileRoutesByTo
@@ -162,6 +172,7 @@ export interface FileRouteTypes {
     | '/dashboard/job-tracker'
     | '/dashboard/my-cvs'
     | '/dashboard/settings'
+    | '/dashboard/thanks'
     | '/editor/$id'
     | '/dashboard'
   id:
@@ -177,6 +188,7 @@ export interface FileRouteTypes {
     | '/dashboard/job-tracker'
     | '/dashboard/my-cvs'
     | '/dashboard/settings'
+    | '/dashboard/thanks'
     | '/editor/$id'
     | '/dashboard/'
   fileRoutesById: FileRoutesById
@@ -232,6 +244,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/editor/$id'
       preLoaderRoute: typeof EditorIdRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/dashboard/thanks': {
+      id: '/dashboard/thanks'
+      path: '/thanks'
+      fullPath: '/dashboard/thanks'
+      preLoaderRoute: typeof DashboardThanksRouteImport
+      parentRoute: typeof DashboardRoute
     }
     '/dashboard/settings': {
       id: '/dashboard/settings'
@@ -293,6 +312,7 @@ interface DashboardRouteChildren {
   DashboardJobTrackerRoute: typeof DashboardJobTrackerRoute
   DashboardMyCvsRoute: typeof DashboardMyCvsRoute
   DashboardSettingsRoute: typeof DashboardSettingsRoute
+  DashboardThanksRoute: typeof DashboardThanksRoute
   DashboardIndexRoute: typeof DashboardIndexRoute
 }
 
@@ -304,6 +324,7 @@ const DashboardRouteChildren: DashboardRouteChildren = {
   DashboardJobTrackerRoute: DashboardJobTrackerRoute,
   DashboardMyCvsRoute: DashboardMyCvsRoute,
   DashboardSettingsRoute: DashboardSettingsRoute,
+  DashboardThanksRoute: DashboardThanksRoute,
   DashboardIndexRoute: DashboardIndexRoute,
 }
 

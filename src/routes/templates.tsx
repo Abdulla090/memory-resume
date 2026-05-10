@@ -107,6 +107,13 @@ const TEMPLATES: {
     isNew: true,
   },
   {
+    id: "new-alvarado",
+    label: "NEW Lorna Pixel",
+    desc: "Pixel perfect match",
+    category: "Professional",
+    isNew: true,
+  },
+  {
     id: "ref-sanchez",
     label: "NEW Sanchez Exact",
     desc: "Timeline manager",

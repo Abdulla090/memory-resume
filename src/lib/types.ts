@@ -64,6 +64,7 @@ export interface ResumeData {
   skills: string[];
   skillItems?: SkillItem[];
   certifications: string[];
+  sectionTitles?: Record<string, string>;
 }
 
 // ── Design Control Panel Settings ────────────────────────────
@@ -142,6 +143,7 @@ export type TemplateId =
   | "ref-palmerston"
   | "ref-sanchez"
   | "ref-alvarado"
+  | "new-alvarado"
   | "mercer"
   | "gallego"
   | "leroy"

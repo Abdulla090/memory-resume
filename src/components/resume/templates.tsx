@@ -307,6 +307,7 @@ import {
   NewSleekTemplate,
   RefPalmerstonTemplate,
   RefAlvaradoTemplate,
+  NewAlvaradoTemplate,
   RefSanchezTemplate,
   RefSchumacherTemplate,
   RefSilvaTemplate,
@@ -352,6 +353,7 @@ export function ResumePreview({
     case "ref-schumacher": preview = <RefSchumacherTemplate data={data} />; break;
     case "ref-palmerston": preview = <RefPalmerstonTemplate data={data} />; break;
     case "ref-alvarado": preview = <RefAlvaradoTemplate data={data} />; break;
+    case "new-alvarado": preview = <NewAlvaradoTemplate data={data} />; break;
     case "ref-sanchez": preview = <RefSanchezTemplate data={data} />; break;
     case "mercer": preview = <MercerTemplate data={data} />; break;
     case "gallego": preview = <GallegoTemplate data={data} />; break;

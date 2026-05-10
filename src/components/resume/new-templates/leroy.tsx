@@ -24,7 +24,7 @@ export function LeroyTemplate({ data }: { data: ResumeData }) {
   const firstLine = nameParts.slice(0, Math.ceil(nameParts.length / 2)).join(" ") || c.name;
   const secondLine = nameParts.slice(Math.ceil(nameParts.length / 2)).join(" ");
 
-  const CreamPanel = ({ title, children, className = "" }: { title: string; children: ReactNode; className?: string }) => (
+  const CreamPanel = ({ title, children, className = "" }: { title: ReactNode; children: ReactNode; className?: string }) => (
     <section className={`bg-[#f8f7f4] px-[38px] py-[28px] text-[#050b14] ${className}`}>
       <h2 className="mb-3 font-serif text-[34px] font-bold uppercase leading-none tracking-[0.02em] text-[#142033] rtl:tracking-normal">{title}</h2>
       {children}

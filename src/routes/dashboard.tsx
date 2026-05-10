@@ -1,5 +1,5 @@
 import { createFileRoute, Outlet, Link, useLocation } from '@tanstack/react-router';
-import { Home, Files, LayoutTemplate, PenTool, Wand2, BarChart2, FileText, Briefcase, Settings, Cloud, BrainCircuit, ChevronRight, Menu, X } from 'lucide-react';
+import { Home, Files, LayoutTemplate, PenTool, Wand2, BarChart2, FileText, Briefcase, Settings, Cloud, BrainCircuit, ChevronRight, Menu, X, Heart } from 'lucide-react';
 import { useState } from 'react';
 import { useAppStore } from '@/lib/store';
 
@@ -21,6 +21,7 @@ function DashboardLayout() {
     { name: isKu ? 'باشترکردنی AI' : 'AI Optimize', icon: Wand2, path: '/dashboard/ai-optimize' },
     { name: isKu ? 'شیکاری' : 'Analytics', icon: BarChart2, path: '/dashboard/analytics' },
     { name: isKu ? 'نامەی ڕووپۆش' : 'Cover Letters', icon: FileText, path: '/dashboard/cover-letters' },
+    { name: isKu ? 'کارتی سوپاس' : 'Thank-You Cards', icon: Heart, path: '/dashboard/thanks' },
     { name: isKu ? 'چاودێری کار' : 'Job Tracker', icon: Briefcase, path: '/dashboard/job-tracker' },
     { name: isKu ? 'ڕێکخستنەکان' : 'Settings', icon: Settings, path: '/dashboard/settings' },
   ];

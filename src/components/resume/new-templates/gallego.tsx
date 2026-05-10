@@ -32,7 +32,7 @@ export function GallegoTemplate({ data }: { data: ResumeData }) {
     icon,
     className = "",
   }: {
-    title: string;
+    title: ReactNode;
     icon: ReactNode;
     className?: string;
   }) => (

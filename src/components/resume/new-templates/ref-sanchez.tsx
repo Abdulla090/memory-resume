@@ -11,13 +11,13 @@ import { optimizeResumeForOnePage } from "@/lib/resume-utils";
 export function RefSanchezTemplate({ data }: { data: ResumeData }) {
   const c = optimizeResumeForOnePage(data);
   const rtl = isRTL(c);
-  const l = labels(rtl);
+  const l = labels(c, rtl);
   const design = useContext(DesignContext);
   const showSkillBars = design?.showSkillBars !== false;
   const photoShape = design?.photoShape || "circle";
   const photoBlockShape = photoShape === "square" ? "rounded" : photoShape;
 
-  const TimelineSection = ({ title, icon, children }: { title: string; icon: string; children: ReactNode }) => (
+  const TimelineSection = ({ title, icon, children }: { title: ReactNode; icon: string; children: ReactNode }) => (
     <section className="relative pl-16 rtl:pl-0 rtl:pr-16">
       <span className="absolute left-[17px] top-0 grid h-[140px] w-[1px] bg-[#99a1ab] rtl:left-auto rtl:right-[17px]" />
       <span className="absolute left-0 top-0 grid h-9 w-9 place-items-center rounded-full bg-[#303b4e] text-[12px] font-black text-white rtl:left-auto rtl:right-0">{icon}</span>

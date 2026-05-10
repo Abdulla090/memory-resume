@@ -11,3 +11,4 @@ export { LeroyTemplate } from "./new-templates/leroy";
 export { DuboisTemplate } from "./new-templates/dubois";
 export { GallegoTemplate } from "./new-templates/gallego";
 export { MercerTemplate } from "./new-templates/mercer";
+export { NewAlvaradoTemplate } from "./new-templates/new-alvarado";

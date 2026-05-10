@@ -5,6 +5,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { parseMemory, generateResume, getFollowUpQuestions, patchProfileWithAnswers } from "@/lib/ai.functions";
 import { useAppStore } from "@/lib/store";
 import type { SavedResume, FollowUpQuestion, FollowUpAnswer } from "@/lib/types";
+import { getTemplateDefaults } from "@/components/DesignPanel";
 import {
   FileText, Loader2, ArrowUp, SkipForward, Paperclip, Sparkles, CheckCircle2, ImagePlus, Star, Bot
 } from "lucide-react";
@@ -13,6 +14,13 @@ import { SAMPLE_MEMORIES } from "@/lib/sample-memories";
 
 export const Route = createFileRoute("/onboarding")({
   head: () => ({ meta: [{ title: "MemoryCV — Builder" }] }),
+  validateSearch: (search: Record<string, unknown>): { prompt?: string } => {
+    const raw = search.prompt;
+    if (typeof raw === "string" && raw.trim().length > 0) {
+      return { prompt: raw };
+    }
+    return {};
+  },
   component: ChatOnboarding,
 });
 
@@ -27,6 +35,7 @@ interface ChatMessage {
 
 function ChatOnboarding() {
   const navigate = useNavigate();
+  const { prompt: incomingPrompt } = Route.useSearch();
   const setProfile = useAppStore((s) => s.setProfile);
   const profile = useAppStore((s) => s.profile);
   const apiKey = useAppStore((s) => s.apiKey);
@@ -130,6 +139,60 @@ function ChatOnboarding() {
     }
   };
 
+  // Auto-run intake when arriving from the dashboard with a seeded prompt
+  const autoRanRef = useRef(false);
+  useEffect(() => {
+    if (autoRanRef.current) return;
+    if (!incomingPrompt || stage !== "intake") return;
+    autoRanRef.current = true;
+    setInputText(incomingPrompt);
+    // Defer so state flushes before the handler reads it
+    const t = setTimeout(() => {
+      // We pass the memory directly via the input state, then kick off the extract.
+      // handleExtract reads from `inputText`, so we wrap the call after state update.
+      void (async () => {
+        // Re-read the latest value by using the memory directly
+        const memory = incomingPrompt.trim();
+        if (memory.length < 20) return;
+        setRawMemory(memory);
+        setInputText("");
+        setIsThinking(true);
+        setStage("parsing");
+        addMsg({ from: "user", content: memory.slice(0, 240) + (memory.length > 240 ? "…" : "") });
+        try {
+          const { profile: parsed } = await parseMemoryFn({ data: { apiKey, memory } });
+          setProfile(parsed);
+          const { state, message, questions } = await getQuestionsFn({
+            data: { apiKey, profile: parsed, rawMemory: memory },
+          });
+          setIsThinking(false);
+          if (state === "READY_TO_TEMPLATE" || questions.length === 0) {
+            addMsg({ from: "ai", content: message || (isKu ? `پرۆفایلەکە وەرگیرا، ${parsed.name || "بەڕێز"}! چ ڕۆڵێک دەکەیتە ئامانج بۆ ئەم سیڤییە؟` : `Profile captured, ${parsed.name || "there"}! What role are you targeting for this resume?`) });
+            setStage("builder");
+          } else {
+            addMsg({ from: "ai", content: message || (isKu ? `پرۆفایلەکەتم دەستکەوت، ${parsed.name || "بەڕێز"}! تەنها چەند پرسیارێکی خێرا بۆ ئەوەی سیڤییەکەت بەهێزتر بێت.` : `Got your profile, ${parsed.name || "there"}! Just a few quick questions to make your resume even stronger.`) });
+            setPendingQs(questions);
+            setQIdx(0);
+            setStage("questions");
+            setTimeout(() => addMsg({ from: "ai", content: questions[0].question, question: questions[0] }), 350);
+          }
+        } catch (err) {
+          setIsThinking(false);
+          const errorMsg = err instanceof Error ? err.message : String(err);
+          if (errorMsg.includes("500") || errorMsg.includes("HTTPError") || errorMsg.includes("MISSING_API_KEY")) {
+            toast.error(isKu ? "تکایە کلیلی API لە Vercel دابنێ" : "Please configure your GEMINI_API_KEY in Vercel settings.");
+          } else {
+            toast.error(errorMsg || (isKu ? "شیکردنەوەکە سەرکەوتوو نەبوو. دووبارە هەوڵ بدەرەوە." : "Failed to analyze. Try again."));
+          }
+          setStage("intake");
+          setInputText(incomingPrompt);
+        }
+      })();
+    }, 50);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [incomingPrompt]);
+
   // ── Step 2: answer question ──────────────────────────────────────────────
   const handleAnswer = (answer: string, idx: number) => {
     const q = pendingQs[idx];
@@ -198,7 +261,10 @@ function ChatOnboarding() {
         id: crypto.randomUUID(),
         title: resume.title || jobTarget.slice(0, 60),
         jobTarget,
-        template: "executive",
+        // Match the layout used on the /editor/dev sample: clean "minimal" template
+        // with its design defaults so every new resume opens with the same polish.
+        template: "minimal",
+        design: getTemplateDefaults("minimal"),
         data: resume,
         createdAt: Date.now(),
       };

@@ -62,6 +62,7 @@ const DEV_RESUME = {
   id: DEV_SAMPLE_ID,
   title: "Senior Product Designer",
   template: "minimal" as TemplateId,
+  design: getTemplateDefaults("minimal"),
   createdAt: Date.now(),
   jobTarget: "Lead Product Designer at a SaaS company",
   data: {
@@ -202,6 +203,13 @@ const TEMPLATES: {
     id: "ref-alvarado",
     label: "NEW Alvarado Exact",
     desc: "Two-tone classic profile",
+    category: "Professional",
+    isNew: true,
+  },
+  {
+    id: "new-alvarado",
+    label: "NEW Lorna Pixel",
+    desc: "Pixel perfect match",
     category: "Professional",
     isNew: true,
   },
@@ -370,7 +378,7 @@ function ResumeEditor() {
 
   useEffect(() => {
     if (window.matchMedia("(max-width: 1023px)").matches) {
-      // Handled by mobile responsive states now
+      setZoom(1);
     }
   }, []);
 
