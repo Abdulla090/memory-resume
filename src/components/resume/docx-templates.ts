@@ -344,6 +344,7 @@ const DOCX_BUILDERS: Record<string, (data: ResumeData) => Document> = {
   gallego: buildExecutiveDocx,
   leroy: buildExecutiveDocx,
   dubois: buildExecutiveDocx,
+  "claudia-alves": buildExecutiveDocx,
 };
 
 export async function exportResumeDocx(data: ResumeData, template: string, filename: string) {

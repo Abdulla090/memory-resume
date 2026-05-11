@@ -147,7 +147,8 @@ export type TemplateId =
   | "mercer"
   | "gallego"
   | "leroy"
-  | "dubois";
+  | "dubois"
+  | "claudia-alves";
 
 export interface SavedResume {
   id: string;

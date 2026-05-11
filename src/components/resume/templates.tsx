@@ -316,6 +316,7 @@ import {
   GallegoTemplate,
   LeroyTemplate,
   DuboisTemplate,
+  ClaudiaAlvesTemplate,
 } from "./templates-new";
 
 export function ResumePreview({
@@ -359,6 +360,7 @@ export function ResumePreview({
     case "gallego": preview = <GallegoTemplate data={data} />; break;
     case "leroy": preview = <LeroyTemplate data={data} />; break;
     case "dubois": preview = <DuboisTemplate data={data} />; break;
+    case "claudia-alves": preview = <ClaudiaAlvesTemplate data={data} />; break;
     case "minimal":
     default: preview = <MinimalTemplate data={data} />;
   }

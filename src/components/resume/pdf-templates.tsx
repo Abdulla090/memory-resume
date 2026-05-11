@@ -1524,6 +1524,7 @@ export function GetPDFDocument({ data, template }: { data: ResumeData; template:
     case 'gallego': return <GallegoPDF data={data} />;
     case 'leroy': return <LeroyPDF data={data} />;
     case 'dubois': return <DuboisPDF data={data} />;
+    case 'claudia-alves': return <PalmerstonExactPDF data={data} />;
     // Dedicated renderers matching live preview designs
     case 'noir': return <NoirPDF data={data} />;
     case 'apex': return <AtlasPDF data={data} />;

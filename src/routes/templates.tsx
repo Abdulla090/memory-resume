@@ -148,6 +148,13 @@ const TEMPLATES: {
     category: "Professional",
     isNew: true,
   },
+  {
+    id: "claudia-alves",
+    label: "NEW Claudia Alves",
+    desc: "Gray manager reference",
+    category: "Professional",
+    isNew: true,
+  },
   { id: "noir", label: "Noir", desc: "All-black luxury", category: "Creative" },
   { id: "cipher", label: "Cipher", desc: "Dark tech aesthetic", category: "Creative" },
   { id: "pinnacle", label: "Pinnacle", desc: "Dark layered layout", category: "Creative" },
