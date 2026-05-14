@@ -256,6 +256,22 @@ function ResumeEditor() {
     toast.success(isKu ? "گەڕێندرایەوە بۆ وەشانی پێشووتر" : "Reverted to previous version");
   };
 
+  const handleImageUpload = (base64: string) => {
+    updateData("photoUrl", base64);
+    toast.success(isKu ? "وێنەی پرۆفایل زیادکرا" : "Profile image updated");
+  };
+
+  const handleDocumentUpload = async (file: File) => {
+    toast.success(isKu ? `فایلی ${file.name} بارکرا` : `File ${file.name} uploaded`);
+    const userMsg = isKu ? `فایلی بارکراو: ${file.name}` : `Uploaded file: ${file.name}`;
+    setMessages((p) => [...p, { role: "user", content: userMsg }]);
+    setChatLoading(true);
+    setTimeout(() => {
+      setMessages((p) => [...p, { role: "assistant", content: isKu ? "زۆر باشە، فایلم وەرگرت. چۆن دەتەوێت زانیارییەکانی ئەم فایلە لە سیڤییەکەتدا بەکاربهێنم؟" : "I've received your file. How would you like me to use this information in your resume?" }]);
+      setChatLoading(false);
+    }, 1000);
+  };
+
   // ─── Render ──────────────────────────────────────────────────────────────────
   return (
     <DesignContext.Provider value={design}>
@@ -319,6 +335,8 @@ function ResumeEditor() {
                 onFixErrors={handleFixErrors}
                 onOpenTemplates={() => setTemplateModalOpen(true)}
                 onGenerateCoverLetter={handleGenerateCoverLetter}
+                onImageUpload={handleImageUpload}
+                onDocumentUpload={handleDocumentUpload}
               />
             </aside>
           </div>

@@ -32,12 +32,15 @@ interface EditorChatPaneProps {
   onFixErrors: () => void;
   onOpenTemplates: () => void;
   onGenerateCoverLetter: () => void;
+  onImageUpload?: (base64: string) => void;
+  onDocumentUpload?: (file: File) => void;
 }
 
 export function EditorChatPane({
   isKu, messages, chatLoading, chatInput, setChatInput, onSubmit,
   isRecording, setIsRecording, history, showHistory, setShowHistory,
-  onRevert, messagesEndRef, onCheckATS, onFixErrors, onOpenTemplates, onGenerateCoverLetter
+  onRevert, messagesEndRef, onCheckATS, onFixErrors, onOpenTemplates, onGenerateCoverLetter,
+  onImageUpload, onDocumentUpload
 }: EditorChatPaneProps) {
   const chips = [
     { label: "Stronger bullets", prompt: "Make my bullet points stronger and more impactful." },
@@ -48,6 +51,26 @@ export function EditorChatPane({
 
   const [showTools, setShowTools] = useState(false);
   const toolsRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.type.startsWith("image/")) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        if (event.target?.result && onImageUpload) {
+          onImageUpload(event.target.result as string);
+        }
+      };
+      reader.readAsDataURL(file);
+    } else {
+      if (onDocumentUpload) onDocumentUpload(file);
+    }
+    // reset input
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
 
   useEffect(() => {
     const handleClick = (e: MouseEvent) => {
@@ -160,6 +183,7 @@ export function EditorChatPane({
       <div className="shrink-0 px-4 pb-4 pt-2">
         <div className="relative rounded-[22px] bg-white shadow-[0_4px_20px_rgba(0,0,0,0.1),0_1px_0_rgba(255,255,255,0.9)_inset,0_0_0_1px_rgba(15,23,42,0.06)]">
           <form onSubmit={onSubmit}>
+            <input type="file" ref={fileInputRef} className="hidden" accept="image/*,.pdf,.doc,.docx,.txt" onChange={handleFileUpload} />
             <textarea
               value={chatInput}
               onChange={(e) => setChatInput(e.target.value)}
@@ -171,7 +195,7 @@ export function EditorChatPane({
             />
             <div className="flex items-center justify-between px-3 pb-3 pt-1">
               <div className="flex items-center gap-1.5">
-                <button type="button" className="size-9 rounded-full flex items-center justify-center bg-white text-slate-500 shadow-[0_2px_8px_rgba(0,0,0,0.1),0_1px_0_rgba(255,255,255,0.9)_inset,0_0_0_1px_rgba(0,0,0,0.06)] hover:shadow-[0_3px_12px_rgba(0,0,0,0.13)] active:shadow-[inset_0_2px_4px_rgba(0,0,0,0.1)] transition-all duration-150">
+                <button type="button" onClick={() => fileInputRef.current?.click()} className="size-9 rounded-full flex items-center justify-center bg-white text-slate-500 shadow-[0_2px_8px_rgba(0,0,0,0.1),0_1px_0_rgba(255,255,255,0.9)_inset,0_0_0_1px_rgba(0,0,0,0.06)] hover:shadow-[0_3px_12px_rgba(0,0,0,0.13)] active:shadow-[inset_0_2px_4px_rgba(0,0,0,0.1)] transition-all duration-150">
                   <Plus className="size-4" />
                 </button>
                 <div className="relative" ref={toolsRef}>
