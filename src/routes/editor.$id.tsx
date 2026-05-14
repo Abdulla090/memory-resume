@@ -26,6 +26,13 @@ import {
   Loader2,
   Wand2,
   SlidersHorizontal,
+  Mic,
+  Map,
+  Plus,
+  MoreHorizontal,
+  FileUser,
+  ChevronRight,
+  PanelRight,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -359,13 +366,15 @@ function ResumeEditor() {
   >([]);
   const [showHistory, setShowHistory] = useState(false);
 
-  const [zoom, setZoom] = useState(0.5);
+  const [zoom, setZoom] = useState(0.65);
   const [activeTab, setActiveTab] = useState<"chat" | "design">("chat");
   const [mobileDesignOpen, setMobileDesignOpen] = useState(false);
   const [mobileChatOpen, setMobileChatOpen] = useState(false);
   const [leftSidebarWidth, setLeftSidebarWidth] = useState(340);
   const [selectedSection, setSelectedSection] = useState<SectionId>("global");
   const [focusedField, setFocusedField] = useState<string | null>(null);
+  const [showResume, setShowResume] = useState(false);
+  const [isRecording, setIsRecording] = useState(false);
   const [inlineEdit, setInlineEdit] = useState<{
     path: string;
     value: string;
@@ -680,199 +689,151 @@ function ResumeEditor() {
   };
 
   return (
-    <div className="h-[100dvh] w-full bg-[#f8faff] text-slate-900 font-sans selection:bg-blue-100 selection:text-blue-900 relative overflow-hidden flex flex-col">
-      {/* Background blobs */}
-      <div className="absolute top-[-10%] left-[-10%] w-[600px] h-[600px] bg-blue-300/20 rounded-full blur-[120px] pointer-events-none mix-blend-multiply" />
-      <div className="absolute bottom-[-10%] right-[-10%] w-[800px] h-[800px] bg-blue-400/10 rounded-full blur-[150px] pointer-events-none mix-blend-multiply" />
+    <div className="h-[100dvh] w-full bg-[#f0f2f7] text-slate-900 font-sans selection:bg-blue-100 selection:text-blue-900 relative overflow-hidden flex flex-col">
+      {/* Soft ambient background */}
+      <div className="absolute inset-0 bg-gradient-to-br from-slate-100 via-blue-50/30 to-slate-100 pointer-events-none" />
 
-      {/* Glass Navigation */}
-      <header className="sticky top-0 z-50 bg-white border-b border-slate-200 hidden md:block shrink-0">
-        <div className="px-4 sm:px-6">
-          <div className="flex h-16 items-center justify-between">
-            <Link to="/" className="flex items-center gap-2.5 cursor-pointer group">
-              <img
-                src="/logo/MemoryCV Logo Icon Only.png"
-                alt="MemoryCV"
-                className="w-8 h-8 rounded-lg object-contain group-hover:scale-105 transition-transform duration-300"
-              />
-              <span className="text-lg font-bold tracking-tight text-slate-900 group-hover:text-blue-950 transition-colors">
-                MemoryCV
-              </span>
-            </Link>
-
-            <div className="flex items-center gap-3">
-              <button
-                onClick={handleCheckATS}
-                className="px-4 py-2 text-sm font-semibold text-emerald-700 hover:text-emerald-950 rounded-lg hover:bg-emerald-50 transition-all flex items-center gap-2 bg-emerald-50/50"
-              >
-                <CheckCircle2 className="h-4 w-4" />
-                <span className="hidden sm:inline">{isKu ? "پشکنینی ATS" : "ATS Score"}</span>
-              </button>
-
-              <button
-                onClick={handleFixErrors}
-                disabled={chatLoading}
-                className="px-4 py-2 text-sm font-semibold text-amber-700 hover:text-amber-950 rounded-lg hover:bg-amber-50 transition-all flex items-center gap-2 bg-amber-50/50 disabled:opacity-50"
-              >
-                <Wand2 className="h-4 w-4" />
-                <span className="hidden sm:inline">{isKu ? "چاککردنی هەڵەکان" : "Fix Grammar"}</span>
-              </button>
-              
-              <div className="w-px h-6 bg-slate-200 mx-1"></div>
-
-              <button
-                onClick={() => setTemplateModalOpen(true)}
-                className="px-4 py-2 text-sm font-semibold text-slate-700 hover:text-slate-950 rounded-lg hover:bg-slate-50 transition-all flex items-center gap-2 border border-slate-200 bg-white"
-              >
-                <LayoutTemplate className="h-4 w-4" />
-                <span className="hidden sm:inline">{isKu ? "نەخشەکان" : "Templates"}</span>
-              </button>
-              
-              <div className="flex items-center">
-                 <ExportButtons
-                  data={previewData}
-                  template={resume.template}
-                  name={previewData.name}
-                  previewRef={previewRef}
-                />
-              </div>
+      {/* ── Lovable-style Top Bar ── */}
+      <header className="relative z-50 shrink-0 flex items-center justify-between px-4 py-3 border-b border-white/60"
+        style={{ background: "rgba(255,255,255,0.82)", backdropFilter: "blur(20px)" }}>
+        {/* Left: logo + name */}
+        <div className="flex items-center gap-3">
+          <Link to="/" className="flex items-center gap-2 group cursor-pointer">
+            <div className="size-8 rounded-xl bg-white shadow-[0_2px_8px_rgba(0,0,0,0.12),0_1px_0_rgba(255,255,255,0.8)_inset] flex items-center justify-center">
+              <img src="/logo/MemoryCV Logo Icon Only.png" alt="MemoryCV" className="size-5 object-contain" />
             </div>
+          </Link>
+          {/* Resume project name pill */}
+          <div className="flex items-center gap-1.5 rounded-full px-3 py-1 bg-white shadow-[0_2px_8px_rgba(0,0,0,0.08),0_1px_0_rgba(255,255,255,0.9)_inset] border border-white/60">
+            <FileUser className="size-3.5 text-slate-500" />
+            <span className="text-[13px] font-semibold text-slate-700 max-w-[160px] truncate">{data.name || "My Resume"}</span>
+            <ChevronDown className="size-3 text-slate-400" />
           </div>
+        </div>
+
+        {/* Center: quick actions */}
+        <div className="hidden md:flex items-center gap-2">
+          <button onClick={handleCheckATS}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-semibold text-emerald-700 bg-white shadow-[0_2px_6px_rgba(0,0,0,0.08),0_1px_0_rgba(255,255,255,0.9)_inset] border border-white/60 hover:shadow-[0_3px_10px_rgba(0,0,0,0.12)] active:shadow-[inset_0_2px_4px_rgba(0,0,0,0.08)] transition-all duration-150">
+            <CheckCircle2 className="size-3.5" />{isKu ? "ATS" : "ATS Score"}
+          </button>
+          <button onClick={handleFixErrors} disabled={chatLoading}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-semibold text-amber-700 bg-white shadow-[0_2px_6px_rgba(0,0,0,0.08),0_1px_0_rgba(255,255,255,0.9)_inset] border border-white/60 hover:shadow-[0_3px_10px_rgba(0,0,0,0.12)] active:shadow-[inset_0_2px_4px_rgba(0,0,0,0.08)] transition-all duration-150 disabled:opacity-40">
+            <Wand2 className="size-3.5" />{isKu ? "چاک بکە" : "Fix"}
+          </button>
+          <button onClick={() => setTemplateModalOpen(true)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-semibold text-slate-700 bg-white shadow-[0_2px_6px_rgba(0,0,0,0.08),0_1px_0_rgba(255,255,255,0.9)_inset] border border-white/60 hover:shadow-[0_3px_10px_rgba(0,0,0,0.12)] active:shadow-[inset_0_2px_4px_rgba(0,0,0,0.08)] transition-all duration-150">
+            <LayoutTemplate className="size-3.5" />{isKu ? "نەخشە" : "Templates"}
+          </button>
+        </div>
+
+        {/* Right: preview toggle + export */}
+        <div className="flex items-center gap-2">
+          <ExportButtons data={previewData} template={resume.template} name={previewData.name} previewRef={previewRef} />
+          <button
+            onClick={() => setShowResume(v => !v)}
+            className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-[13px] font-bold transition-all duration-200 ${
+              showResume
+                ? "bg-slate-900 text-white shadow-[0_4px_12px_rgba(15,23,42,0.25),0_1px_0_rgba(255,255,255,0.1)_inset]"
+                : "bg-white text-slate-800 shadow-[0_2px_8px_rgba(0,0,0,0.1),0_1px_0_rgba(255,255,255,0.9)_inset] border border-white/60 hover:shadow-[0_4px_12px_rgba(0,0,0,0.14)]"
+            } active:scale-[0.97]`}
+          >
+            <PanelRight className="size-4" />
+            <span className="hidden sm:inline">{isKu ? "سیڤی" : "Preview"}</span>
+          </button>
         </div>
       </header>
 
-      <main className="relative flex-1 min-h-0 z-10 mx-auto w-full max-w-[1760px] px-3 pt-6 pb-0 sm:px-6 sm:pt-8 sm:pb-0 flex flex-col overflow-hidden">
-        <div className="pointer-events-none absolute inset-0 rounded-3xl bg-[radial-gradient(circle_at_top_left,rgba(59,130,246,0.08),transparent_28%),radial-gradient(circle_at_top_right,rgba(168,85,247,0.06),transparent_24%)]" />
-
+      <main className="relative flex-1 min-h-0 z-10 flex flex-col overflow-hidden">
         <div
-          className="relative flex-1 min-h-0 grid grid-rows-1 gap-4 lg:grid-cols-[var(--left-col)_minmax(0,1fr)] lg:gap-6"
-          style={{ "--left-col": `${leftSidebarWidth}px` } as React.CSSProperties}
+          className="relative flex-1 min-h-0 flex flex-col"
         >
-          {/* Left pane: Sidebar */}
-          <aside
-            className="relative hidden lg:flex lg:col-start-1 z-10 flex-col min-h-0"
-          >
-            {/* Sidebar card */}
-            <div className="flex flex-col flex-1 min-h-0 rounded-2xl border border-slate-200/70 bg-white shadow-[0_8px_30px_-12px_rgba(15,23,42,0.12)]">
+          {/* ── Full-width Lovable Chat Pane ── */}
+          <aside className="relative flex flex-col flex-1 min-h-0 max-w-[780px] mx-auto w-full">
+            {/* Chat card */}
+            <div className="flex flex-col flex-1 min-h-0 rounded-3xl bg-white/70 shadow-[0_8px_40px_-12px_rgba(15,23,42,0.15),0_0_0_1px_rgba(255,255,255,0.8)] backdrop-blur-sm overflow-hidden">
 
-              {/* ── Tab switcher (always visible, pinned top) ── */}
-              <div className="shrink-0 px-3 pt-3 pb-2">
-                <div className="relative flex w-full rounded-xl bg-slate-100 p-1">
-                  {/* Animated pill */}
-                  <motion.div
-                    layout
-                    layoutId="sidebar-tab-pill"
-                    className="absolute inset-y-1 rounded-[10px] bg-white shadow-sm"
-                    style={{
-                      left: activeTab === "chat" ? "4px" : "calc(50%)",
-                      width: "calc(50% - 4px)",
-                    }}
-                    transition={{ type: "spring", stiffness: 500, damping: 35 }}
-                  />
-                  <button
-                    onClick={() => setActiveTab("chat")}
-                    className={`relative z-10 flex flex-1 items-center justify-center gap-2 h-9 rounded-[10px] text-[13px] font-semibold transition-colors ${
-                      activeTab === "chat" ? "text-slate-900" : "text-slate-400 hover:text-slate-600"
-                    }`}
-                  >
-                    <Bot className="w-4 h-4" /> AI Chat
-                  </button>
-                  <button
-                    onClick={() => setActiveTab("design")}
-                    className={`relative z-10 flex flex-1 items-center justify-center gap-2 h-9 rounded-[10px] text-[13px] font-semibold transition-colors ${
-                      activeTab === "design" ? "text-slate-900" : "text-slate-400 hover:text-slate-600"
-                    }`}
-                  >
-                    <SlidersHorizontal className="w-4 h-4" /> Design
+              {/* ── Lovable-style chat header ── */}
+              <div className="shrink-0 flex items-center justify-between px-5 pt-4 pb-3 border-b border-slate-100/80">
+                <div className="flex items-center gap-2">
+                  <div className="size-7 rounded-xl bg-gradient-to-br from-slate-700 to-slate-900 flex items-center justify-center shadow-[0_2px_6px_rgba(0,0,0,0.2)]">
+                    <Bot className="size-3.5 text-white" />
+                  </div>
+                  <span className="text-[14px] font-bold text-slate-800">{isKu ? "ژیاری دەستکرد" : "AI Assistant"}</span>
+                  {chatLoading && <Loader2 className="size-3.5 text-blue-500 animate-spin" />}
+                </div>
+                <div className="flex items-center gap-1.5">
+                  {history.length > 0 && (
+                    <button onClick={() => setShowHistory(v => !v)}
+                      className={`flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-semibold transition-all ${
+                        showHistory ? "bg-blue-100 text-blue-700" : "text-slate-500 hover:bg-slate-100"
+                      }`}>
+                      <Clock className="size-3" />{history.length}v
+                    </button>
+                  )}
+                  <button onClick={() => setActiveTab(activeTab === "design" ? "chat" : "design")}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-semibold transition-all ${
+                      activeTab === "design"
+                        ? "bg-slate-900 text-white shadow-[0_2px_8px_rgba(0,0,0,0.2)]"
+                        : "bg-white text-slate-600 shadow-[0_2px_6px_rgba(0,0,0,0.08),0_1px_0_rgba(255,255,255,0.9)_inset] border border-white/60"
+                    } hover:shadow-[0_3px_10px_rgba(0,0,0,0.12)] active:scale-[0.97]`}>
+                    <SlidersHorizontal className="size-3.5" />{isKu ? "دیزاین" : "Design"}
                   </button>
                 </div>
               </div>
 
+              {/* Version history strip */}
+              {showHistory && history.length > 0 && (
+                <div className="max-h-36 shrink-0 overflow-y-auto border-b border-slate-100 bg-slate-50/60 px-3 py-2 space-y-1">
+                  {history.map((h) => (
+                    <div key={h.id} className="group flex items-center justify-between gap-2 rounded-xl px-3 py-2 hover:bg-white transition-colors">
+                      <div className="min-w-0">
+                        <p className="text-[12px] font-semibold text-slate-700 truncate">{h.label}</p>
+                        <p className="text-[10px] text-slate-400">{new Date(h.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</p>
+                      </div>
+                      <button onClick={() => handleRevert(h.id)}
+                        className="shrink-0 flex items-center gap-1 rounded-full px-2 py-1 text-[11px] font-bold text-blue-600 opacity-0 group-hover:opacity-100 hover:bg-blue-50 transition-all">
+                        <RotateCcw className="size-3" />{isKu ? "گێڕانەوە" : "Restore"}
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+
               {/* ── Tab content ── */}
               <div className="flex-1 min-h-0 flex flex-col">
                 {activeTab === "chat" ? (
-                  /* ─── AI CHAT TAB ─── */
                   <div className="flex flex-col h-full min-h-0">
-                    {/* History toggle */}
-                    {history.length > 0 && (
-                      <div className="flex shrink-0 items-center justify-between border-y border-slate-100 px-4 py-2">
-                        <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
-                          {isKu ? "وەشانە پاشەکەوتکراوەکان" : "History"}
-                        </span>
-                        <button
-                          onClick={() => setShowHistory((v) => !v)}
-                          className={`flex items-center gap-1 rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider transition-colors ${
-                            showHistory
-                              ? "bg-blue-100 text-blue-700 shadow-sm"
-                              : "text-slate-500 hover:bg-slate-100"
-                          }`}
-                        >
-                          <Clock className="w-3 h-3" />
-                          {history.length} {isKu ? "وەشان" : `version${history.length !== 1 ? "s" : ""}`}
-                        </button>
-                      </div>
-                    )}
-
-                    {showHistory && history.length > 0 && (
-                      <div className="max-h-40 shrink-0 space-y-1 overflow-y-auto border-b border-slate-100 bg-slate-50/80 px-3 py-2">
-                        {history.map((h) => (
-                          <div
-                            key={h.id}
-                            className="group flex items-center justify-between gap-2 rounded-xl px-3 py-2 transition-colors hover:bg-white"
-                          >
-                            <div className="min-w-0">
-                              <p className="text-[12px] text-slate-700 truncate font-semibold">{h.label}</p>
-                              <p className="text-[10px] text-slate-400 font-medium">
-                                {new Date(h.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-                              </p>
-                            </div>
-                            <button
-                              onClick={() => handleRevert(h.id)}
-                              className="shrink-0 flex items-center gap-1 rounded-full px-2 py-1 text-[11px] font-bold text-blue-600 opacity-0 transition-opacity hover:bg-blue-50 group-hover:opacity-100"
-                            >
-                              <RotateCcw className="w-3 h-3" /> {isKu ? "گێڕانەوە" : "Restore"}
-                            </button>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-
                     {/* Messages */}
-                    <div
-                      className="flex-1 min-h-0 overflow-y-auto space-y-4 p-4"
-                      style={{ scrollbarWidth: "thin", scrollbarColor: "#e2e8f0 transparent" }}
-                    >
+                    <div className="flex-1 min-h-0 overflow-y-auto space-y-5 px-5 py-4" style={{ scrollbarWidth: "thin", scrollbarColor: "#e2e8f0 transparent" }}>
                       <AnimatePresence initial={false}>
                         {messages.map((msg, i) => (
-                          <motion.div
-                            initial={{ opacity: 0, y: 12, scale: 0.97 }}
+                          <motion.div key={i}
+                            initial={{ opacity: 0, y: 10, scale: 0.98 }}
                             animate={{ opacity: 1, y: 0, scale: 1 }}
-                            transition={{ type: "spring", stiffness: 400, damping: 25 }}
-                            key={i}
-                            className={`flex gap-3 ${msg.role === "user" ? "justify-end" : "justify-start"}`}
-                          >
+                            transition={{ type: "spring", stiffness: 420, damping: 28 }}
+                            className={`flex gap-3 ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
                             {msg.role === "assistant" && (
-                              <div className="w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center flex-shrink-0 border border-slate-200">
-                                <Bot className="w-3.5 h-3.5 text-slate-600" />
+                              <div className="size-8 rounded-2xl bg-gradient-to-br from-slate-700 to-slate-900 flex items-center justify-center flex-shrink-0 shadow-[0_3px_8px_rgba(0,0,0,0.18)]">
+                                <Bot className="size-4 text-white" />
                               </div>
                             )}
-                            <div className="flex flex-col gap-1 max-w-[85%]">
-                              <div
-                                className={`text-[13.5px] px-4 py-2.5 rounded-2xl leading-relaxed ${
-                                  msg.role === "user"
-                                    ? "bg-slate-900 text-white rounded-tr-sm font-medium"
-                                    : "bg-slate-50 text-slate-800 border border-slate-200/80"
-                                }`}
-                              >
+                            <div className="flex flex-col gap-2 max-w-[82%]">
+                              <div className={`text-[14px] leading-relaxed ${
+                                msg.role === "user"
+                                  ? "bg-slate-900 text-white px-4 py-3 rounded-[20px] rounded-tr-md font-medium shadow-[0_4px_12px_rgba(15,23,42,0.18)]"
+                                  : "bg-white text-slate-800 px-4 py-3 rounded-[20px] rounded-tl-md shadow-[0_2px_12px_rgba(15,23,42,0.08),0_0_0_1px_rgba(15,23,42,0.04)]"
+                              }`}>
                                 {msg.content}
                               </div>
+                              {/* Lovable-style action card for assistant */}
                               {msg.role === "assistant" && msg.snapshotId && (
-                                <button
-                                  onClick={() => handleRevert(msg.snapshotId!)}
-                                  className="self-start flex items-center gap-1 text-[10px] font-bold text-slate-400 hover:text-blue-600 transition-colors mt-0.5"
-                                >
-                                  <RotateCcw className="w-3 h-3" /> {isKu ? "گەڕانەوە لەم گۆڕانکارییە" : "Undo this change"}
-                                </button>
+                                <div className="flex items-center gap-2">
+                                  <button onClick={() => handleRevert(msg.snapshotId!)}
+                                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold text-slate-500 bg-white shadow-[0_1px_4px_rgba(0,0,0,0.08),0_0_0_1px_rgba(0,0,0,0.04)] hover:text-blue-600 hover:shadow-[0_2px_8px_rgba(37,99,235,0.12)] transition-all">
+                                    <RotateCcw className="size-3" />{isKu ? "گەڕانەوە" : "Undo"}
+                                  </button>
+                                </div>
                               )}
                             </div>
                           </motion.div>
@@ -880,65 +841,79 @@ function ResumeEditor() {
                       </AnimatePresence>
                       {chatLoading && (
                         <div className="flex gap-3 justify-start">
-                          <div className="w-7 h-7 rounded-full bg-slate-50 border border-slate-200 flex items-center justify-center flex-shrink-0">
-                            <Loader2 className="w-3.5 h-3.5 text-slate-500 animate-spin" />
+                          <div className="size-8 rounded-2xl bg-gradient-to-br from-slate-700 to-slate-900 flex items-center justify-center flex-shrink-0 shadow-[0_3px_8px_rgba(0,0,0,0.18)]">
+                            <Loader2 className="size-4 text-white animate-spin" />
                           </div>
-                          <div className="flex gap-1.5 items-center px-4 py-2.5 rounded-2xl bg-slate-50 border border-slate-200/80">
-                            {[0, 1, 2].map((i) => (
-                              <span key={i} className="w-1.5 h-1.5 rounded-full bg-slate-300 animate-bounce" style={{ animationDelay: `${i * 0.15}s` }} />
-                            ))}
+                          <div className="flex gap-1.5 items-center px-4 py-3 rounded-[20px] rounded-tl-md bg-white shadow-[0_2px_12px_rgba(15,23,42,0.08),0_0_0_1px_rgba(15,23,42,0.04)]">
+                            {[0,1,2].map(i => <span key={i} className="size-2 rounded-full bg-slate-300 animate-bounce" style={{ animationDelay: `${i*0.15}s` }} />)}
                           </div>
                         </div>
                       )}
                       <div ref={messagesEndRef} />
                     </div>
 
-                    {/* Quick chips */}
-                    <div className="shrink-0 px-3 pt-1.5 pb-1.5 flex gap-1.5 overflow-x-auto scrollbar-hide border-t border-slate-100">
+                    {/* Quick suggestion chips — Lovable style */}
+                    <div className="shrink-0 px-4 pb-2 flex gap-2 overflow-x-auto" style={{ scrollbarWidth: "none" }}>
                       {[
-                        { label: "Stronger bullets", prompt: "Make my bullet points stronger." },
-                        { label: "Add metrics", prompt: "Add metrics to my experience." },
-                        { label: "Shorten", prompt: "Shorten the summary." },
-                        { label: "Tailor for job", prompt: "Tailor for job" },
+                        { label: "Stronger bullets", prompt: "Make my bullet points stronger and more impactful." },
+                        { label: "Add metrics", prompt: "Add quantified metrics to my experience." },
+                        { label: "Shorten summary", prompt: "Shorten the summary to 2 sentences." },
+                        { label: "Tailor for job", prompt: "Tailor my resume for the job target." },
                       ].map((chip) => (
-                        <button
-                          key={chip.label}
-                          onClick={() => setChatInput(chip.prompt)}
-                          className="whitespace-nowrap shrink-0 px-3 py-1.5 rounded-full text-[12px] font-medium text-slate-600 bg-slate-50 border border-slate-200/80 hover:bg-slate-100 hover:border-slate-300 transition-colors"
-                        >
+                        <button key={chip.label} onClick={() => setChatInput(chip.prompt)}
+                          className="whitespace-nowrap shrink-0 px-3.5 py-2 rounded-full text-[12px] font-semibold text-slate-600 bg-white shadow-[0_2px_6px_rgba(0,0,0,0.07),0_1px_0_rgba(255,255,255,0.9)_inset] border border-white/60 hover:shadow-[0_3px_10px_rgba(0,0,0,0.1)] active:shadow-[inset_0_2px_4px_rgba(0,0,0,0.07)] transition-all duration-150">
                           {chip.label}
                         </button>
                       ))}
                     </div>
 
-                    {/* Input */}
-                    <div className="shrink-0 px-3 pb-3 pt-2">
-                      <form
-                        onSubmit={handleChatSubmit}
-                        className="flex w-full items-center gap-2 rounded-xl border border-slate-200 bg-white px-2 py-1.5 shadow-sm transition-all focus-within:border-blue-400 focus-within:ring-2 focus-within:ring-blue-100"
-                      >
-                        <textarea
-                          value={chatInput}
-                          onChange={(e) => setChatInput(e.target.value)}
-                          placeholder={isKu ? "پوختەی کارەکەم با بەهێزتر بێت..." : "Ask AI to edit anything..."}
-                          disabled={chatLoading}
-                          rows={1}
-                          className="flex-1 bg-transparent pl-2 text-[13px] font-medium text-slate-800 outline-none placeholder:text-slate-400 resize-none max-h-20 scrollbar-hide py-1"
-                          onKeyDown={(e) => {
-                            if (e.key === "Enter" && !e.shiftKey) {
-                              e.preventDefault();
-                              handleChatSubmit(e);
-                            }
-                          }}
-                        />
-                        <button
-                          type="submit"
-                          disabled={!chatInput.trim() || chatLoading}
-                          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-blue-600 text-white shadow-sm transition-all hover:bg-blue-700 disabled:bg-slate-100 disabled:text-slate-400"
-                        >
-                          <ArrowUp className="w-4 h-4" />
-                        </button>
-                      </form>
+                    {/* ── Lovable-style Bottom Input Bar ── */}
+                    <div className="shrink-0 px-4 pb-4 pt-2">
+                      <div className="rounded-[22px] bg-white shadow-[0_4px_20px_rgba(0,0,0,0.1),0_1px_0_rgba(255,255,255,0.9)_inset,0_0_0_1px_rgba(15,23,42,0.06)] overflow-hidden">
+                        <form onSubmit={handleChatSubmit}>
+                          <textarea
+                            value={chatInput}
+                            onChange={(e) => setChatInput(e.target.value)}
+                            placeholder={isKu ? "داوا لە زیاری دەستکرد بکە..." : "Ask Lovable..."}
+                            disabled={chatLoading}
+                            rows={2}
+                            className="w-full bg-transparent px-5 pt-4 pb-2 text-[14px] font-medium text-slate-800 outline-none placeholder:text-slate-400 resize-none scrollbar-hide"
+                            onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleChatSubmit(e); } }}
+                          />
+                          {/* Action row */}
+                          <div className="flex items-center justify-between px-3 pb-3 pt-1">
+                            <div className="flex items-center gap-1.5">
+                              {/* + button — soft 3D clay */}
+                              <button type="button"
+                                className="size-9 rounded-full flex items-center justify-center bg-white text-slate-500 shadow-[0_2px_8px_rgba(0,0,0,0.1),0_1px_0_rgba(255,255,255,0.9)_inset,0_0_0_1px_rgba(0,0,0,0.06)] hover:shadow-[0_3px_12px_rgba(0,0,0,0.13)] active:shadow-[inset_0_2px_4px_rgba(0,0,0,0.1)] transition-all duration-150">
+                                <Plus className="size-4" />
+                              </button>
+                              {/* More button */}
+                              <button type="button"
+                                className="size-9 rounded-full flex items-center justify-center bg-white text-slate-500 shadow-[0_2px_8px_rgba(0,0,0,0.1),0_1px_0_rgba(255,255,255,0.9)_inset,0_0_0_1px_rgba(0,0,0,0.06)] hover:shadow-[0_3px_12px_rgba(0,0,0,0.13)] active:shadow-[inset_0_2px_4px_rgba(0,0,0,0.1)] transition-all duration-150">
+                                <MoreHorizontal className="size-4" />
+                              </button>
+                            </div>
+                            <div className="flex items-center gap-1.5">
+                              {/* Mic button — soft 3D clay */}
+                              <button type="button"
+                                onClick={() => setIsRecording(r => !r)}
+                                className={`size-9 rounded-full flex items-center justify-center transition-all duration-150 ${
+                                  isRecording
+                                    ? "bg-red-500 text-white shadow-[0_4px_12px_rgba(239,68,68,0.4)] scale-105"
+                                    : "bg-white text-slate-500 shadow-[0_2px_8px_rgba(0,0,0,0.1),0_1px_0_rgba(255,255,255,0.9)_inset,0_0_0_1px_rgba(0,0,0,0.06)] hover:shadow-[0_3px_12px_rgba(0,0,0,0.13)] active:shadow-[inset_0_2px_4px_rgba(0,0,0,0.1)]"
+                                }`}>
+                                <Mic className="size-4" />
+                              </button>
+                              {/* Send button — primary 3D clay */}
+                              <button type="submit" disabled={!chatInput.trim() || chatLoading}
+                                className="size-9 rounded-full flex items-center justify-center bg-slate-900 text-white shadow-[0_4px_12px_rgba(15,23,42,0.28),0_1px_0_rgba(255,255,255,0.1)_inset] hover:bg-slate-800 hover:shadow-[0_6px_16px_rgba(15,23,42,0.32)] active:shadow-[inset_0_2px_6px_rgba(0,0,0,0.3)] active:scale-[0.95] disabled:bg-slate-200 disabled:text-slate-400 disabled:shadow-none transition-all duration-150">
+                                <ArrowUp className="size-4" />
+                              </button>
+                            </div>
+                          </div>
+                        </form>
+                      </div>
                     </div>
                   </div>
                 ) : (
@@ -978,249 +953,80 @@ function ResumeEditor() {
               }}
             />
           </aside>
+        </div>
+      </main>
 
-          {/* Right pane: Preview Area */}
-          <section className="flex flex-col min-w-0 min-h-0 lg:col-start-2">
-            <div className="relative flex flex-1 min-h-0 flex-col overflow-hidden rounded-[2rem] border border-slate-200/80 bg-[linear-gradient(180deg,rgba(248,250,252,0.95),rgba(255,255,255,0.94))] p-2 shadow-[0_24px_70px_-34px_rgba(15,23,42,0.2)] backdrop-blur-3xl sm:p-4 lg:p-6">
-              {/* Toolbar Area */}
-              <div className="mb-4 flex shrink-0 flex-wrap items-center justify-between gap-3 px-2">
+      {/* ── Resume Preview Overlay Panel (Lovable-style slide-in) ── */}
+      <AnimatePresence>
+        {showResume && (
+          <>
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-[60] bg-slate-900/20 backdrop-blur-[2px]"
+              onClick={() => setShowResume(false)}
+            />
+            {/* Panel */}
+            <motion.div
+              initial={{ x: "100%", opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              exit={{ x: "100%", opacity: 0 }}
+              transition={{ type: "spring", stiffness: 340, damping: 34 }}
+              className="fixed top-0 right-0 bottom-0 z-[70] w-full max-w-2xl flex flex-col"
+              style={{ background: "rgba(248,250,252,0.97)", backdropFilter: "blur(24px)", boxShadow: "-20px 0 60px rgba(15,23,42,0.15)" }}
+            >
+              {/* Panel header */}
+              <div className="shrink-0 flex items-center justify-between px-5 py-4 border-b border-slate-200/60">
                 <div className="flex items-center gap-3">
-                  <button
-                    onClick={() => setMobileChatOpen(true)}
-                    className="flex items-center gap-2 rounded-full bg-blue-600 px-4 py-2.5 text-sm font-bold text-white shadow-[0_10px_24px_rgba(37,99,235,0.24)] transition-all active:scale-95 hover:bg-blue-700 lg:hidden"
-                  >
-                    <Bot className="w-4 h-4" />
-                    AI Chat
-                  </button>
-                  
-                  
-                  <div className="hidden items-center gap-3 rounded-full border border-white bg-white/70 px-3 py-1.5 shadow-sm backdrop-blur-md sm:flex">
-                    <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                    <span className="text-xs font-bold uppercase tracking-wider text-slate-700">
-                      Live Preview
-                    </span>
+                  <div className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest text-slate-400">
+                    <div className="size-2 rounded-full bg-emerald-500 animate-pulse" />
+                    Live Preview
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => setSoraniMode((value) => !value)}
-                    className={`flex items-center gap-1.5 rounded-full border px-3 py-2.5 text-xs font-bold tracking-wide shadow-sm transition-all active:scale-[0.98] ${
+                  {/* RTL toggle */}
+                  <button onClick={() => setSoraniMode(v => !v)}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-semibold transition-all ${
                       soraniMode
-                        ? "border-slate-800 bg-slate-900 text-white"
-                        : "border-white bg-white/80 text-slate-700 hover:bg-white"
-                    }`}
-                  >
-                    <Languages className="h-4 w-4" />
-                    <span className="hidden sm:inline">
-                      {soraniMode ? "کوردی RTL" : "Kurdish RTL"}
-                    </span>
-                    <span className="sm:hidden">{soraniMode ? "KU" : "EN"}</span>
+                        ? "bg-slate-900 text-white shadow-[0_3px_10px_rgba(0,0,0,0.2)]"
+                        : "bg-white text-slate-600 shadow-[0_2px_6px_rgba(0,0,0,0.08),0_1px_0_rgba(255,255,255,0.9)_inset] border border-white/60"
+                    } active:scale-[0.97]`}>
+                    <Languages className="size-3.5" />
+                    <span className="hidden sm:inline">{soraniMode ? "Kurdish RTL" : "EN"}</span>
                   </button>
-                  <div className="flex items-center rounded-xl border border-slate-200 bg-white/80 shadow-sm overflow-hidden">
-                    <button
-                      onClick={() => setZoom((z) => Math.max(0.5, z - 0.25))}
-                      className="p-1.5 text-slate-600 transition-colors hover:bg-slate-100 sm:p-2"
-                      title="Zoom Out"
-                    >
-                      <ZoomOut className="w-4 h-4" />
-                    </button>
-                    <span className="w-8 text-center text-[10px] font-bold text-slate-700 sm:w-10 sm:text-xs">
-                      {Math.round(zoom * 100)}%
-                    </span>
-                    <button
-                      onClick={() => setZoom((z) => Math.min(2, z + 0.25))}
-                      className="p-1.5 text-slate-600 transition-colors hover:bg-slate-100 sm:p-2"
-                      title="Zoom In"
-                    >
-                      <ZoomIn className="w-4 h-4" />
-                    </button>
+                  {/* Zoom controls */}
+                  <div className="flex items-center rounded-full bg-white shadow-[0_2px_6px_rgba(0,0,0,0.08),0_0_0_1px_rgba(0,0,0,0.06)] overflow-hidden">
+                    <button onClick={() => setZoom(z => Math.max(0.4, z - 0.1))} className="px-3 py-2 text-slate-600 hover:bg-slate-50 transition-colors text-sm font-bold">−</button>
+                    <span className="px-2 text-[11px] font-bold text-slate-700">{Math.round(zoom * 100)}%</span>
+                    <button onClick={() => setZoom(z => Math.min(2, z + 0.1))} className="px-3 py-2 text-slate-600 hover:bg-slate-50 transition-colors text-sm font-bold">+</button>
                   </div>
-                  
-                </div>
-              </div>
-
-              {/* Resume Container with smooth scroll */}
-              <div className="relative flex-1 overflow-hidden rounded-[1.5rem] border border-slate-200/80 bg-white shadow-[0_0_0_1px_rgba(15,23,42,0.04),0_28px_60px_-26px_rgba(15,23,42,0.18)] @container">
-                <ClientPDFPreview
-                  data={previewData}
-                  template={resume.template}
-                  previewRef={previewRef}
-                  zoom={zoom}
-                  design={design}
-                  updateData={updateData}
-                  onSectionClick={handlePreviewSectionClick}
-                />
-              </div>
-            </div>
-          </section>
-
-          <Sheet open={mobileChatOpen} onOpenChange={setMobileChatOpen}>
-            <SheetContent
-              side="left"
-              className="w-[92vw] max-w-[24rem] bg-white p-0 text-slate-900"
-            >
-              <SheetHeader className="border-b border-slate-100 px-5 py-4 text-left">
-                <SheetTitle>AI Assistant</SheetTitle>
-                <SheetDescription>Use the full assistant on mobile.</SheetDescription>
-              </SheetHeader>
-              <div className="flex h-[calc(100dvh-5rem)] flex-col">
-                <div className="flex shrink-0 items-center justify-between border-b border-slate-100 bg-white/70 px-5 py-3">
-                  <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-slate-400">
-                    <Clock className="w-3 h-3" />
-                    {history.length} {isKu ? "وەشان" : `version${history.length !== 1 ? "s" : ""}`}
-                  </div>
-                  <button
-                    onClick={() => {
-                      setMobileChatOpen(false);
-                      setMobileDesignOpen(true);
-                    }}
-                    className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-slate-700 shadow-sm"
-                  >
-                    Open design
+                  {/* Close */}
+                  <button onClick={() => setShowResume(false)}
+                    className="size-9 rounded-full flex items-center justify-center bg-white text-slate-500 shadow-[0_2px_8px_rgba(0,0,0,0.1),0_1px_0_rgba(255,255,255,0.9)_inset,0_0_0_1px_rgba(0,0,0,0.06)] hover:text-slate-800 transition-all">
+                    <X className="size-4" />
                   </button>
                 </div>
-
-                {history.length > 0 && (
-                  <div className="px-5 py-2 border-b border-slate-100 bg-slate-50/80 space-y-1 max-h-36 overflow-y-auto shrink-0">
-                    {history.map((h) => (
-                      <div
-                        key={h.id}
-                        className="flex items-center justify-between gap-2 rounded-lg px-3 py-2 hover:bg-white border border-transparent hover:border-slate-200 transition-colors group shadow-sm"
-                      >
-                        <div className="min-w-0">
-                          <p className="text-[12px] text-slate-700 truncate font-semibold">
-                            {h.label}
-                          </p>
-                          <p className="text-[10px] text-slate-400 font-medium">
-                            {new Date(h.timestamp).toLocaleTimeString([], {
-                              hour: "2-digit",
-                              minute: "2-digit",
-                            })}
-                          </p>
-                        </div>
-                        <button
-                          onClick={() => handleRevert(h.id)}
-                          className="shrink-0 flex items-center gap-1 text-[11px] font-bold text-blue-600 hover:text-blue-800 px-2 py-1 rounded-md hover:bg-blue-50"
-                        >
-                          <RotateCcw className="w-3 h-3" /> {isKu ? "گێڕانەوە" : "Restore"}
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                <div
-                  className="flex-1 overflow-y-auto p-5 space-y-4"
-                  style={{ scrollbarWidth: "thin", scrollbarColor: "#e2e8f0 transparent" }}
-                >
-                  <AnimatePresence initial={false}>
-                    {messages.map((msg, i) => (
-                      <motion.div
-                        key={i}
-                        initial={{ opacity: 0, y: 15, scale: 0.95 }}
-                        animate={{ opacity: 1, y: 0, scale: 1 }}
-                        transition={{ type: "spring", stiffness: 400, damping: 25 }}
-                        className={`flex gap-3 ${msg.role === "user" ? "justify-end" : "justify-start"}`}
-                      >
-                        {msg.role === "assistant" && (
-                          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center flex-shrink-0 shadow-[0_4px_10px_rgba(37,99,235,0.2)]">
-                            <Bot className="w-4 h-4 text-white" />
-                          </div>
-                        )}
-                        <div className="flex flex-col gap-1 max-w-[85%]">
-                          <div
-                            className={`text-[14.5px] px-5 py-3.5 rounded-[24px] leading-relaxed shadow-sm ${msg.role === "user" ? "bg-blue-600 text-white rounded-br-sm font-medium shadow-blue-200" : "bg-white border border-slate-100 text-slate-800 rounded-bl-sm shadow-[0_4px_20px_rgba(0,0,0,0.03)]"}`}
-                          >
-                            {msg.content}
-                          </div>
-                          {msg.role === "assistant" && msg.snapshotId && (
-                            <button
-                              onClick={() => handleRevert(msg.snapshotId!)}
-                              className="self-start flex items-center gap-1 text-[10.5px] font-bold text-slate-400 hover:text-blue-600 transition-colors mt-1"
-                            >
-                              <RotateCcw className="w-3 h-3" />{" "}
-                              {isKu ? "گەڕانەوە لەم گۆڕانکارییە" : "Undo this change"}
-                            </button>
-                          )}
-                        </div>
-                      </motion.div>
-                    ))}
-                  </AnimatePresence>
-                  {chatLoading && (
-                    <div className="flex gap-3 justify-start">
-                      <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center flex-shrink-0 shadow-[0_4px_10px_rgba(37,99,235,0.2)]">
-                        <Loader2 className="w-4 h-4 text-white animate-spin" />
-                      </div>
-                      <div className="flex gap-1.5 items-center px-5 py-4 rounded-2xl rounded-tl-sm bg-white border border-slate-100 shadow-sm">
-                        {[0, 1, 2].map((i) => (
-                          <span
-                            key={i}
-                            className="w-2 h-2 rounded-full bg-blue-400 animate-bounce"
-                            style={{ animationDelay: `${i * 0.15}s` }}
-                          />
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                  <div ref={messagesEndRef} />
-                </div>
-
-                <div className="p-4 shrink-0 pb-safe-6 flex justify-center w-full border-t border-slate-100 bg-white/80">
-                  <form
-                    onSubmit={handleChatSubmit}
-                    className="flex w-full items-center gap-2 rounded-full px-1.5 py-1.5 bg-white/90 border border-slate-200 shadow-[0_8px_30px_rgb(0,0,0,0.06)]"
-                  >
-                    <input
-                      value={chatInput}
-                      onChange={(e) => setChatInput(e.target.value)}
-                      placeholder={
-                        isKu
-                          ? "پوختەی کارەکەم با بەهێزتر بێت..."
-                          : "Make my summary more executive..."
-                      }
-                      disabled={chatLoading}
-                      className="flex-1 bg-transparent outline-none text-slate-800 font-medium text-[14px] placeholder:text-slate-400 pl-4"
-                    />
-                    <button
-                      type="submit"
-                      disabled={!chatInput.trim() || chatLoading}
-                      className="w-8 h-8 rounded-full bg-slate-900 disabled:bg-slate-200 hover:bg-blue-600 flex items-center justify-center transition-all disabled:text-slate-400 text-white shadow-sm shrink-0"
-                    >
-                      <ArrowUp className="w-4 h-4" />
-                    </button>
-                  </form>
+              </div>
+              {/* Resume canvas */}
+              <div className="flex-1 min-h-0 overflow-auto p-6">
+                <div className="rounded-2xl overflow-hidden shadow-[0_8px_40px_rgba(15,23,42,0.14),0_0_0_1px_rgba(15,23,42,0.06)] bg-white">
+                  <ClientPDFPreview
+                    data={previewData}
+                    template={resume.template}
+                    previewRef={previewRef}
+                    zoom={zoom}
+                    design={design}
+                    updateData={updateData}
+                    onSectionClick={handlePreviewSectionClick}
+                  />
                 </div>
               </div>
-            </SheetContent>
-          </Sheet>
-
-          <Sheet open={mobileDesignOpen} onOpenChange={setMobileDesignOpen}>
-            <SheetContent
-              side="right"
-              className="w-[92vw] max-w-[24rem] bg-white p-0 text-slate-900"
-            >
-              <SheetHeader className="border-b border-slate-100 px-5 py-4 text-left">
-                <SheetTitle>Design</SheetTitle>
-                <SheetDescription>Adjust the live resume styles.</SheetDescription>
-              </SheetHeader>
-              <div className="h-[calc(100dvh-5rem)] overflow-y-auto">
-                <DesignPanel
-                  design={design}
-                  data={data}
-                  onChange={updateDesign}
-                  updateData={updateData}
-                  onClose={() => setMobileDesignOpen(false)}
-                  selected={selectedSection}
-                  setSelected={setSelectedSection}
-                  focusedField={focusedField}
-                />
-              </div>
-            </SheetContent>
-          </Sheet>
-
-          
-        </div>
-      </main>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
 
       {/* Modals */}
       <AnimatePresence>
