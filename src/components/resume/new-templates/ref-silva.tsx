@@ -1,4 +1,4 @@
-import { useContext } from "react";
+import { use } from "react";
 import type { ReactNode } from "react";
 import { DesignContext } from "../DesignContext";
 import { Editable } from "../Editable";
@@ -12,7 +12,7 @@ export function RefSilvaTemplate({ data }: { data: ResumeData }) {
   const c = optimizeResumeForOnePage(data);
   const rtl = isRTL(c);
   const l = labels(c, rtl);
-  const design = useContext(DesignContext);
+  const design = use(DesignContext);
   const showSkillBars = design?.showSkillBars !== false;
   const photoShape = design?.photoShape || "circle";
   const photoBlockShape = photoShape === "square" ? "rounded" : photoShape;
@@ -53,8 +53,8 @@ export function RefSilvaTemplate({ data }: { data: ResumeData }) {
               <h2 className="mb-5 text-[22px] font-normal">{l.skills}</h2>
               {c.skillItems && c.skillItems.length > 0 ? (
                 <div className="flex flex-col gap-3">
-                  {c.skillItems.map((s, i) => (
-                    <div key={i} className="flex flex-col">
+                  {c.skillItems.map((s) => (
+                    <div key={s.name} className="flex flex-col">
                       <span className="text-[13px] font-medium">{s.name}</span>
                       <BarRating level={s.level} />
                     </div>
@@ -71,21 +71,21 @@ export function RefSilvaTemplate({ data }: { data: ResumeData }) {
 
         <main className="px-8 py-9 ">
           <section>
-            <h2 className="mb-5 text-[23px] font-normal">{rtl ? "┘╛┘ê╪«╪¬█ò" : "Summary"}</h2>
+            <h2 className="mb-5 text-[23px] font-normal">{rtl ? "پوختە" : "Summary"}</h2>
             <ul className="list-disc space-y-1.5 pl-5 text-[12px] leading-5 rtl:pl-0 rtl:pr-5">
-              {(c.summary.match(/[^.!?]+[.!?]*/g) ?? [c.summary]).slice(0, 4).map((line, index) => <li key={index}>{line.trim()}</li>)}
+              {(c.summary.match(/[^.!?]+[.!?]*/g) ?? [c.summary]).slice(0, 4).map((line, index) => <li key={`sum-${index}`}>{line.trim()}</li>)}
             </ul>
           </section>
           {c.experience.length > 0 && (
             <section className="mt-9">
-              <h2 className="mb-5 text-[23px] font-normal">{rtl ? "╪ª█ò╪▓┘à┘ê┘ê┘å█ò┌⌐╪º┘å" : "Experiences"}</h2>
+              <h2 className="mb-5 text-[23px] font-normal">{rtl ? "ئەزموونەکان" : "Experiences"}</h2>
               <div className="space-y-8">
                 {c.experience.slice(0, 3).map((item, index) => (
                   <article key={`${item.company}-${index}`}>
                     <h3 className="text-[14px] font-medium uppercase">{item.title}</h3>
                     <p className="text-[12px]">{item.company} / {item.duration}</p>
                     <ul className="mt-2 list-disc space-y-1 pl-5 text-[12px] leading-5 rtl:pl-0 rtl:pr-5">
-                      {(item.achievements.length ? item.achievements : [item.description]).slice(0, 3).map((achievement, achievementIndex) => <li key={achievementIndex}>{achievement}</li>)}
+                      {(item.achievements.length ? item.achievements : [item.description]).slice(0, 3).map((achievement, achievementIndex) => <li key={`ach-${index}-${achievementIndex}`}>{achievement}</li>)}
                     </ul>
                   </article>
                 ))}
@@ -94,7 +94,7 @@ export function RefSilvaTemplate({ data }: { data: ResumeData }) {
           )}
           {c.projects.length > 0 && (
             <section className="mt-9">
-              <h2 className="mb-5 text-[23px] font-normal">{rtl ? "╪«█ò┌╡╪º╪¬ ┘ê ┘╛╪▒█å┌ÿ█ò┌⌐╪º┘å" : "Awards"}</h2>
+              <h2 className="mb-5 text-[23px] font-normal">{rtl ? "خەڵات و پرۆژەکان" : "Awards"}</h2>
               <div className="space-y-5 text-[13px]">
                 {c.projects.map((project) => (
                   <div key={project.name}>
@@ -110,4 +110,3 @@ export function RefSilvaTemplate({ data }: { data: ResumeData }) {
     </div>
   );
 }
-

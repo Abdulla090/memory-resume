@@ -1,17 +1,28 @@
-import { useContext } from "react";
+import { use } from "react";
 import type { ReactNode } from "react";
 import { DesignContext } from "../DesignContext";
 import { Editable } from "../Editable";
-import { PhotoBlock, isRTL, labels, pickLanguages, skillRating } from "../template-helpers";
+import { isRTL, labels, pickLanguages, skillRating } from "../template-helpers";
 import type { ResumeData } from "@/lib/types";
 import { optimizeResumeForOnePage } from "@/lib/resume-utils";
 import { Phone, Mail, MapPin, Globe } from "lucide-react";
+
+function SectionTitle({ title, className = "" }: { title: ReactNode; className?: string }) {
+  return (
+    <div className={`mb-4 flex items-center gap-4 ${className}`}>
+      <h2 className="shrink-0 text-[14px] font-black uppercase tracking-[0.2em] rtl:tracking-normal text-[#2b2b2f]">
+        {title}
+      </h2>
+      <div className="h-[1px] w-full bg-[#2b2b2f] opacity-30" />
+    </div>
+  );
+}
 
 export function NewAlvaradoTemplate({ data }: { data: ResumeData }) {
   const c = optimizeResumeForOnePage(data);
   const rtl = isRTL(c);
   const l = labels(c, rtl);
-  const design = useContext(DesignContext);
+  const design = use(DesignContext);
   const showSkillBars = design?.showSkillBars !== false;
   
   const references = c.projects.length > 0
@@ -27,14 +38,7 @@ export function NewAlvaradoTemplate({ data }: { data: ResumeData }) {
       }));
   const languages = pickLanguages(c);
 
-  const SectionTitle = ({ title, className = "" }: { title: ReactNode; className?: string }) => (
-    <div className={`mb-4 flex items-center gap-4 ${className}`}>
-      <h2 className="shrink-0 text-[14px] font-black uppercase tracking-[0.2em] rtl:tracking-normal text-[#2b2b2f]">
-        {title}
-      </h2>
-      <div className="h-[1px] w-full bg-[#2b2b2f] opacity-30" />
-    </div>
-  );
+
 
   return (
     <div dir={rtl ? "rtl" : "ltr"} className="relative overflow-hidden bg-white font-sans text-[#2b2b2f]" style={{ height: "1122px", minHeight: "1122px", width: "794px", maxWidth: "100%" }}>
@@ -184,7 +188,7 @@ export function NewAlvaradoTemplate({ data }: { data: ResumeData }) {
                         <li><Editable path={`experience.${index}.description`} value={item.description} as="span" /></li>
                       )}
                       {item.achievements.slice(0, 2).map((ach, i) => (
-                        <li key={i}><Editable path={`experience.${index}.achievements.${i}`} value={ach} as="span" /></li>
+                        <li key={`ach-${index}-${i}`}><Editable path={`experience.${index}.achievements.${i}`} value={ach} as="span" /></li>
                       ))}
                     </ul>
                   </div>

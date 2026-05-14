@@ -1,4 +1,4 @@
-import { useContext } from "react";
+import { use } from "react";
 import type { ReactNode } from "react";
 import { DesignContext } from "../DesignContext";
 import { Editable } from "../Editable";
@@ -8,10 +8,16 @@ import { BriefcaseBusiness, Globe, GraduationCap, Mail, MapPin, Phone, UserRound
 import type { ResumeData } from "@/lib/types";
 import { optimizeResumeForOnePage } from "@/lib/resume-utils";
 
+function SidebarHeading({ children }: { children: ReactNode }) {
+  return (
+    <h2 className="border-b border-white/55 pb-2 text-[28px] font-black leading-none tracking-[0.14em] text-white">{children}</h2>
+  );
+}
+
 export function RefPalmerstonTemplate({ data }: { data: ResumeData }) {
   const c = optimizeResumeForOnePage(data);
   const rtl = isRTL(c);
-  const design = useContext(DesignContext);
+  const design = use(DesignContext);
   const showSkillBars = design?.showSkillBars !== false;
   const photoShape = design?.photoShape || "circle";
   const photoBlockShape = photoShape === "square" ? "rounded" : photoShape;
@@ -28,9 +34,6 @@ export function RefPalmerstonTemplate({ data }: { data: ResumeData }) {
       }));
   const languageItems = (c.certifications.length > 0 ? c.certifications : c.skills).slice(0, 3);
 
-  const SidebarHeading = ({ children }: { children: ReactNode }) => (
-    <h2 className="border-b border-white/55 pb-2 text-[28px] font-black leading-none tracking-[0.14em] text-white">{children}</h2>
-  );
 
   return (
     <div dir={rtl ? "rtl" : "ltr"} className="relative overflow-hidden bg-white font-sans text-[#111827]" style={{ height: "1122px", minHeight: "1122px", width: "794px", maxWidth: "100%" }}>
@@ -52,8 +55,8 @@ export function RefPalmerstonTemplate({ data }: { data: ResumeData }) {
           { icon: <Mail size={15} fill="currentColor" strokeWidth={3} />, text: c.email },
           { icon: <Globe size={15} strokeWidth={3} />, text: c.location ? "www.reallygreatsite.com" : undefined },
           { icon: <MapPin size={15} fill="currentColor" strokeWidth={3} />, text: c.location },
-        ].filter((item) => item.text).map((item, index) => (
-          <div key={index} className="flex min-w-0 items-center gap-2">
+        ].filter((item) => item.text).map((item) => (
+          <div key={item.text} className="flex min-w-0 items-center gap-2">
             <span className="grid h-5 w-5 shrink-0 place-items-center text-white">{item.icon}</span>
             <span className="truncate">{item.text}</span>
           </div>

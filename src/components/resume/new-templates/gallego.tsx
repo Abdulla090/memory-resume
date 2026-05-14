@@ -1,4 +1,4 @@
-import { useContext } from "react";
+import { use } from "react";
 import type { ReactNode } from "react";
 import { DesignContext } from "../DesignContext";
 import { Editable } from "../Editable";
@@ -8,10 +8,29 @@ import { BriefcaseBusiness, Globe, GraduationCap, Mail, MapPin, Phone, UserRound
 import type { ResumeData } from "@/lib/types";
 import { optimizeResumeForOnePage } from "@/lib/resume-utils";
 
+function SectionRibbon({ title, icon, className = "" }: { title: ReactNode; icon: ReactNode; className?: string }) {
+  return (
+    <div className={`relative -ml-6 h-[48px] w-[392px] bg-[#075a7c] text-white shadow-[0_4px_0_rgba(0,0,0,0.16)] rtl:-ml-0 rtl:-mr-6 ${className}`}>
+      <div className="flex h-full items-center gap-3 px-8 text-[22px] font-black leading-none tracking-tight rtl:flex-row-reverse rtl:tracking-normal">
+        <span className="grid h-7 w-7 place-items-center text-white">{icon}</span>
+        <span>{title}</span>
+      </div>
+    </div>
+  );
+}
+
+function SidebarTitle({ children }: { children: ReactNode }) {
+  return (
+    <div className="mb-4 h-[43px] rounded-full border-[3px] border-white/55 text-center text-[21px] font-black leading-[38px] tracking-tight text-white">
+      {children}
+    </div>
+  );
+}
+
 export function GallegoTemplate({ data }: { data: ResumeData }) {
   const c = optimizeResumeForOnePage(data);
   const rtl = isRTL(c);
-  const design = useContext(DesignContext);
+  const design = use(DesignContext);
   const showSkillBars = design?.showSkillBars !== false;
   const photoShape = design?.photoShape || "circle";
   const photoBlockShape = photoShape === "square" ? "rounded" : photoShape;
@@ -27,28 +46,6 @@ export function GallegoTemplate({ data }: { data: ResumeData }) {
       }));
   const languageItems = (c.certifications.length > 0 ? c.certifications : c.skills).slice(0, 4);
 
-  const SectionRibbon = ({
-    title,
-    icon,
-    className = "",
-  }: {
-    title: ReactNode;
-    icon: ReactNode;
-    className?: string;
-  }) => (
-    <div className={`relative -ml-6 h-[48px] w-[392px] bg-[#075a7c] text-white shadow-[0_4px_0_rgba(0,0,0,0.16)] rtl:-ml-0 rtl:-mr-6 ${className}`}>
-      <div className="flex h-full items-center gap-3 px-8 text-[22px] font-black leading-none tracking-tight rtl:flex-row-reverse rtl:tracking-normal">
-        <span className="grid h-7 w-7 place-items-center text-white">{icon}</span>
-        <span>{title}</span>
-      </div>
-    </div>
-  );
-
-  const SidebarTitle = ({ children }: { children: ReactNode }) => (
-    <div className="mb-4 h-[43px] rounded-full border-[3px] border-white/55 text-center text-[21px] font-black leading-[38px] tracking-tight text-white">
-      {children}
-    </div>
-  );
 
   return (
     <div
@@ -149,7 +146,7 @@ export function GallegoTemplate({ data }: { data: ResumeData }) {
                     <p className="font-semibold text-[#4f6c78]">{item.title}</p>
                     <ul className="mt-2 list-disc space-y-1 pl-5 text-[12px] font-semibold leading-[1.25] text-[#4f6c78] rtl:pl-0 rtl:pr-5">
                       {(item.achievements.length ? item.achievements : [item.description]).slice(0, 3).map((achievement, achievementIndex) => (
-                        <li key={achievementIndex}>{achievement}</li>
+                        <li key={`ach-${index}-${achievementIndex}`}>{achievement}</li>
                       ))}
                     </ul>
                   </article>
