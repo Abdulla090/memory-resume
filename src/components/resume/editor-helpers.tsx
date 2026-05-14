@@ -5,7 +5,7 @@ import type { SectionId } from "@/components/DesignPanel";
 import { exportPreviewAsPDF } from "@/lib/pdf-screenshot";
 import { ResumePreview } from "@/components/resume/ResumePreview";
 import { UpdateDataContext, type UpdateDataFn } from "@/components/resume/DesignContext";
-import { Download, FileText } from "lucide-react";
+import { Download, FileText, ChevronDown } from "lucide-react";
 import { useLayoutEffect, useRef, useState, useEffect } from "react";
 import { toast } from "sonner";
 
@@ -160,10 +160,21 @@ export function ExportButtons({
   previewRef: RefObject<HTMLDivElement | null>;
 }) {
   const [pdfLoading, setPdfLoading] = useState(false);
+  const [vectorLoading, setVectorLoading] = useState(false);
   const [docxLoading, setDocxLoading] = useState(false);
+  const [open, setOpen] = useState(false);
   const filename = name.replace(/\s+/g, "_") || "resume";
 
-  const handlePDF = async () => {
+  useEffect(() => {
+    if (!open) return;
+    const close = () => setOpen(false);
+    document.addEventListener("click", close);
+    return () => document.removeEventListener("click", close);
+  }, [open]);
+
+  const handlePDF = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setOpen(false);
     setPdfLoading(true);
     try {
       if (previewRef.current) {
@@ -177,7 +188,24 @@ export function ExportButtons({
     }
   };
 
-  const handleDocx = async () => {
+  const handleVectorPDF = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setOpen(false);
+    setVectorLoading(true);
+    try {
+      const { exportResumePDF } = await import("@/components/resume/pdf-templates");
+      await exportResumePDF(data, template, filename);
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to generate Vector PDF");
+    } finally {
+      setVectorLoading(false);
+    }
+  };
+
+  const handleDocx = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setOpen(false);
     setDocxLoading(true);
     try {
       const { exportResumeDocx } = await import("@/components/resume/docx-templates");
@@ -187,26 +215,51 @@ export function ExportButtons({
     }
   };
 
+  const anyLoading = pdfLoading || vectorLoading || docxLoading;
+
   return (
-    <>
+    <div className="relative">
       <button
-        onClick={handleDocx}
-        disabled={docxLoading}
-        className="flex items-center gap-1.5 px-3 py-2.5 sm:py-1.5 rounded-xl sm:rounded-full bg-white/80 backdrop-blur-md border border-white text-xs font-bold tracking-wide text-slate-700 shadow-sm hover:bg-white hover:shadow-md transition-all disabled:opacity-50"
-      >
-        <FileText className="w-4 h-4 sm:w-3.5 sm:h-3.5" />
-        <span className="hidden sm:inline">{docxLoading ? "..." : "DOCX"}</span>
-      </button>
-      <button
-        onClick={handlePDF}
-        disabled={pdfLoading}
+        onClick={(e) => {
+          e.stopPropagation();
+          setOpen(!open);
+        }}
+        disabled={anyLoading}
         className="flex items-center gap-1.5 px-4 py-2.5 sm:py-1.5 rounded-xl sm:rounded-full bg-blue-600 backdrop-blur-md border border-blue-500 text-xs font-bold tracking-wide text-white shadow-sm hover:bg-blue-700 hover:shadow-md transition-all disabled:opacity-50"
       >
         <Download className="w-4 h-4 sm:w-3.5 sm:h-3.5" />
-        <span className="hidden sm:inline">{pdfLoading ? "..." : "PDF"}</span>
-        <span className="sm:hidden font-bold">{pdfLoading ? "..." : "PDF"}</span>
+        <span className="hidden sm:inline">{anyLoading ? "Exporting..." : "Download"}</span>
+        <span className="sm:hidden font-bold">{anyLoading ? "..." : "Save"}</span>
+        <ChevronDown className={`w-4 h-4 sm:w-3 sm:h-3 ml-0.5 opacity-80 transition-transform ${open ? "rotate-180" : ""}`} />
       </button>
-    </>
+
+      {open && (
+        <div className="absolute right-0 top-full mt-2 w-[220px] bg-white border border-slate-200 rounded-xl shadow-[0_8px_40px_rgba(15,23,42,0.14)] overflow-hidden z-[100] flex flex-col p-1.5 animate-in fade-in zoom-in-95 duration-100 origin-top-right">
+          <button
+            onClick={handlePDF}
+            className="flex items-center justify-between px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 hover:text-blue-600 rounded-lg transition-colors text-left group"
+          >
+            <span>PDF (Canvas)</span>
+            <span className="text-[10px] text-slate-400 font-normal group-hover:text-blue-400">All Langs</span>
+          </button>
+          <button
+            onClick={handleVectorPDF}
+            className="flex items-center justify-between px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 hover:text-blue-600 rounded-lg transition-colors text-left group"
+          >
+            <span>PDF (Vector)</span>
+            <span className="text-[10px] text-slate-400 font-normal group-hover:text-blue-400">EN Only</span>
+          </button>
+          <div className="h-px bg-slate-100 my-1 mx-2" />
+          <button
+            onClick={handleDocx}
+            className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 hover:text-blue-600 rounded-lg transition-colors text-left group"
+          >
+            <FileText className="w-4 h-4 opacity-70 group-hover:opacity-100" />
+            <span>Word (DOCX)</span>
+          </button>
+        </div>
+      )}
+    </div>
   );
 }
 

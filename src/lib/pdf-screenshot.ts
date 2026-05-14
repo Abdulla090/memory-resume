@@ -16,31 +16,23 @@ export async function exportPreviewAsPDF(
     import("jspdf"),
   ]);
 
-  // Snapshot original styles in one read pass
-  const originalCssText = previewElement.style.cssText;
-
-  // Force desktop A4 width for the screenshot so mobile captures aren't squashed
-  previewElement.style.cssText +=
-    ";width:794px;max-width:none;transform:none;zoom:1";
-
   const fullHeight = previewElement.scrollHeight;
-
-  // Batch all remaining overrides in one write
-  previewElement.style.cssText +=
-    `;height:${fullHeight}px;max-height:none;overflow:visible`;
-
-  let canvas: HTMLCanvasElement;
-  try {
-    canvas = await toCanvas(previewElement, {
-      pixelRatio: 2,           // 2× for retina-quality sharpness
-      backgroundColor: undefined,   // preserve dark/custom template backgrounds
-      width: 794,
-      height: fullHeight,
-    });
-  } finally {
-    // Restore everything in one write
-    previewElement.style.cssText = originalCssText;
-  }
+  // html-to-image allows us to pass a style object that it applies to the clone,
+  // preventing layout thrashing and correctly capturing it at 1x scale!
+  const canvas = await toCanvas(previewElement, {
+    pixelRatio: 2,           // 2× for retina-quality sharpness
+    backgroundColor: undefined,
+    width: 794,
+    height: fullHeight,
+    style: {
+      transform: "scale(1)",
+      transformOrigin: "top left",
+      width: "794px",
+      height: `${fullHeight}px`,
+      maxHeight: "none",
+      maxWidth: "none",
+    }
+  });
   // ── PDF generation ────────────────────────────────────────────────────────
 
   const A4_W = 210;  // mm

@@ -477,7 +477,7 @@ export const chatEditResume = createServerFn({ method: "POST" })
         {
           role: "system",
           content:
-            "You are an elite resume editor and AI assistant. The user will provide their current resume data (in JSON) and a message detailing what changes they want. You must output the fully updated resume data reflecting these changes using the save_resume tool. You must also provide a brief reply confirming what you changed. If the user asks to raise, lower, reduce, fill, or change skill bars, dots, stars, or visual skill levels, update resume.skillItems with names aligned to resume.skills and levels from 1 to 5.",
+            "You are an elite resume editor and AI assistant. The user will provide their current resume data (in JSON) and a message detailing what changes they want. You must output the fully updated resume data reflecting these changes using the save_resume tool. \n\nCRITICAL LANGUAGE RULE: No matter what language the user speaks in their request, you MUST modify the resume data in the exact same language the resume is currently written in. Do not translate the resume content unless explicitly asked.\n\nCRITICAL REPLY RULE: Your conversational reply must be VERY short and concise (max 1 sentence) confirming the changes. If the user asks to raise, lower, reduce, fill, or change skill bars, dots, stars, or visual skill levels, update resume.skillItems with names aligned to resume.skills and levels from 1 to 5.",
         },
         {
           role: "user",
@@ -494,7 +494,7 @@ export const chatEditResume = createServerFn({ method: "POST" })
               type: "object",
               properties: {
                 resume: resumeSchema,
-                reply: { type: "string", description: "A brief message (1-2 sentences) confirming the changes made to the user." }
+                reply: { type: "string", description: "A VERY short and concise conversational reply (max 1 sentence) confirming the changes." }
               },
               required: ["resume", "reply"]
             },
@@ -770,23 +770,13 @@ export const fixResumeErrors = createServerFn({ method: "POST" })
 # Primary Objective
 Analyze the provided CV comprehensively. You must automatically deduce the candidate's target department/industry, identify all structural, grammatical, and strategic flaws, and provide actionable, high-impact solutions to elevate the CV to a top-1% standard. AND most importantly, YOU MUST ACTUALLY FIX THE CV BY RETURNING THE UPDATED RESUME JSON alongside your analysis.
 # Core Directives & Constraints (Strictly Enforced)
-1. **Absolute Truth & Zero Hallucination:** Do not fabricate information, skills, or experiences. Base your entire analysis strictly on the provided text. Do not imagine details.
+1. **Absolute Truth & Zero Hallucination:** Do not fabricate information, skills, or experiences. Base your entire analysis strictly on the provided text.
 2. **Context Isolation:** Treat this analysis in absolute isolation. Do not mix, reference, or incorporate any data or topics from previous chats.
-3. **Language Mandate:** Your entire response (the 'reply' field), including all analysis, explanations, and feedback, MUST be delivered in the original, fluent Kurdish language. (Even if the CV is English, your analysis reply must be Kurdish).
-4. **Proactive Enhancement:** Anticipate what makes a perfect CV. If the candidate forgot essential elements (e.g., quantifiable metrics, soft skills, specific technical stack), explicitly point them out and suggest additions.
-5. **Maximum Capability:** Operate at your highest level of analytical reasoning, critical thinking, and HR expertise.
-# Execution Steps
-Please evaluate the uploaded CV by following these exact steps for your text reply:
-1. **Auto-Detect Department:** Read the CV and immediately explicitly state the primary department, industry, and seniority level the candidate belongs to (e.g., Senior Mobile Development, Entry-Level Marketing, Cybersecurity).
-2. **Initial Impression & ATS Compatibility:** Give a brief summary of how a recruiter and an ATS bot would currently view this CV.
-3. **Critical Flaw Analysis (Mistakes):** Deep-dive into the CV's mistakes. Categorize them by:
-- Formatting & Structure
-- Grammar, Spelling, & Phrasing
-- Missing Information / Weak Points
-4. **Strategic Solutions & Rewrites:** For every mistake identified in Step 3, provide a direct, optimized solution. Provide exact examples of how weak sentences should be rewritten using strong action verbs.
-5. **Final Verdict:** Give a score out of 10 for the current CV, and an estimated score if your changes are applied.
+3. **Language Mandate:** The CV/Resume data itself MUST be updated in the original language of the CV. Do not translate the CV content!
+4. **Conciseness Mandate:** Your entire response (the 'reply' field) MUST be VERY SHORT (max 1 sentence) acknowledging that the errors have been fixed and ATS optimized. Do NOT output a long analysis.
+5. **Proactive Enhancement:** Anticipate what makes a perfect CV. Fix formatting, grammar, phrasing, and missing information.
 
-Use the save_resume tool. The 'resume' parameter should contain the ACTUALLY FIXED AND IMPROVED RESUME based on your analysis. The 'reply' parameter should contain your detailed Kurdish analysis following the Execution Steps.`,
+Use the save_resume tool. The 'resume' parameter should contain the ACTUALLY FIXED AND IMPROVED RESUME based on your analysis. The 'reply' parameter should contain your VERY SHORT conversational acknowledgment.`,
         },
         {
           role: "user",
@@ -803,7 +793,7 @@ Use the save_resume tool. The 'resume' parameter should contain the ACTUALLY FIX
               type: "object",
               properties: {
                 resume: resumeSchema,
-                reply: { type: "string", description: "The detailed Kurdish analysis following the Execution Steps." }
+                reply: { type: "string", description: "A VERY short and concise conversational reply (max 1 sentence) confirming the CV has been fixed." }
               },
               required: ["resume", "reply"]
             },
