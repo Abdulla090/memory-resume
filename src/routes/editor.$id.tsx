@@ -375,6 +375,14 @@ function ResumeEditor() {
   const [focusedField, setFocusedField] = useState<string | null>(null);
   const [showResume, setShowResume] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
+  // Show resume on desktop by default on mount
+  const didAutoOpen = React.useRef(false);
+  React.useEffect(() => {
+    if (!didAutoOpen.current && window.innerWidth >= 1024) {
+      setShowResume(true);
+      didAutoOpen.current = true;
+    }
+  }, []);
   const [inlineEdit, setInlineEdit] = useState<{
     path: string;
     value: string;
@@ -749,7 +757,7 @@ function ResumeEditor() {
           className="relative flex-1 min-h-0 flex flex-col"
         >
           {/* ── Full-width Lovable Chat Pane ── */}
-          <aside className="relative flex flex-col flex-1 min-h-0 max-w-[780px] mx-auto w-full">
+          <aside className="relative flex flex-col flex-1 min-h-0 max-w-[780px] mx-auto w-full pb-20">
             {/* Chat card */}
             <div className="flex flex-col flex-1 min-h-0 rounded-3xl bg-white/70 shadow-[0_8px_40px_-12px_rgba(15,23,42,0.15),0_0_0_1px_rgba(255,255,255,0.8)] backdrop-blur-sm overflow-hidden">
 
@@ -1028,7 +1036,23 @@ function ResumeEditor() {
         )}
       </AnimatePresence>
 
-      {/* Modals */}
+      {/* ── Floating Preview FAB — always visible — */}
+      <motion.button
+        onClick={() => setShowResume(v => !v)}
+        whileHover={{ scale: 1.05, y: -2 }}
+        whileTap={{ scale: 0.95 }}
+        className={`fixed bottom-6 right-6 z-[55] flex items-center gap-2.5 px-5 py-3 rounded-full font-bold text-[14px] shadow-[0_8px_28px_rgba(15,23,42,0.22),0_2px_0_rgba(255,255,255,0.12)_inset] transition-colors duration-200 ${
+          showResume
+            ? "bg-slate-900 text-white"
+            : "bg-white text-slate-800 border border-slate-200/60 shadow-[0_8px_28px_rgba(15,23,42,0.14),0_1px_0_rgba(255,255,255,0.9)_inset]"
+        }`}
+        aria-label="Toggle resume preview"
+      >
+        <PanelRight className="size-[18px] shrink-0" />
+        <span>{showResume ? "Close Preview" : "View Resume"}</span>
+      </motion.button>
+
+
       <AnimatePresence>
         {tailorOpen && (
           <motion.div
