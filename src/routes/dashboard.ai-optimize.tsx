@@ -8,11 +8,11 @@ export const Route = createFileRoute('/dashboard/ai-optimize')({
 function AiOptimizePage() {
   return (
     <div className="h-full flex flex-col items-center justify-center text-center">
-      <div className="w-16 h-16 bg-blue-50 text-blue-500 rounded-2xl flex items-center justify-center mb-6 shadow-sm">
-        <Wand2 className="w-8 h-8" />
+      <div className="size-16 bg-blue-50 text-blue-500 rounded-2xl flex items-center justify-center mb-6 shadow-sm">
+        <Wand2 className="size-8" />
       </div>
-      <h1 className="text-3xl font-extrabold text-slate-900 mb-2">AI Optimize</h1>
-      <p className="text-slate-500 font-medium">This page is under construction.</p>
+      <h1 className="text-3xl font-semibold text-zinc-900 mb-2">AI Optimize</h1>
+      <p className="text-zinc-500 font-medium">This page is under construction.</p>
     </div>
   );
 }

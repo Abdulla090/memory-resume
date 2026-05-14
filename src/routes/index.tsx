@@ -1,5 +1,5 @@
 /* eslint-disable react-refresh/only-export-components */
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { animate, motion, AnimatePresence, useScroll, useTransform } from "framer-motion";
 import { TrustedMarquee } from "../components/TrustedMarquee";
 import {
@@ -7,7 +7,6 @@ import {
   ArrowRight,
   CheckCircle,
   ChevronDown,
-  Download,
   FileText,
   Globe,
   LockKeyhole,
@@ -235,6 +234,30 @@ function Counter({ to, suffix = "" }: { to: number; suffix?: string }) {
   );
 }
 
+/** Smart CTA button: first-timers → /onboarding, returning users → /dashboard */
+function CtaButton({
+  id,
+  className,
+  onboardingDone,
+  children,
+}: {
+  id?: string;
+  className?: string;
+  onboardingDone: boolean;
+  children: React.ReactNode;
+}) {
+  const navigate = useNavigate();
+  return (
+    <button
+      id={id}
+      className={className}
+      onClick={() => navigate({ to: onboardingDone ? "/dashboard" : "/onboarding" })}
+    >
+      {children}
+    </button>
+  );
+}
+
 export function Header({
   language,
   onToggleLanguage,
@@ -245,6 +268,9 @@ export function Header({
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const t = copy[language];
+  const navigate = useNavigate();
+  const onboardingDone = useAppStore((s) => s.onboardingDone);
+  const handleStart = () => navigate({ to: onboardingDone ? "/dashboard" : "/onboarding" });
 
   // Zero-cost scroll detection — IntersectionObserver fires once on threshold cross, not per frame
   useEffect(() => {
@@ -291,7 +317,7 @@ export function Header({
             WebkitBackdropFilter: "blur(16px)",
             willChange: "max-width, border-radius",
             transition:
-              "max-width 0.35s ease, margin-top 0.35s ease, height 0.35s ease, border-radius 0.35s ease, box-shadow 0.35s ease",
+              "max-width 0.65s cubic-bezier(0.25,0.46,0.45,0.94), margin-top 0.65s cubic-bezier(0.25,0.46,0.45,0.94), height 0.65s cubic-bezier(0.25,0.46,0.45,0.94), border-radius 0.65s cubic-bezier(0.25,0.46,0.45,0.94), box-shadow 0.65s cubic-bezier(0.25,0.46,0.45,0.94)",
           }}
         >
           <Link to="/" className="flex shrink-0 items-center gap-2 cursor-pointer" id="nav-logo">
@@ -332,21 +358,20 @@ export function Header({
                 style={{
                   maxWidth: scrolled ? "0px" : "80px",
                   opacity: scrolled ? 0 : 1,
-                  transition: "max-width 0.3s ease, opacity 0.2s ease",
+                  transition: "max-width 0.55s cubic-bezier(0.25,0.46,0.45,0.94), opacity 0.4s ease",
                 }}
               >
                 {t.toggle}
               </span>
             </button>
 
-            <Link
-              to="/dashboard"
+            <button
+              onClick={handleStart}
               id="nav-free-trial"
               className="hidden md:block rounded-full bg-blue-600 px-5 py-2 text-sm font-bold text-white shadow-sm transition-all hover:bg-blue-700 hover:shadow-md"
-              dir={t.dir}
             >
               {t.navCta}
-            </Link>
+            </button>
 
             <button
               className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 transition-colors hover:bg-slate-50 md:hidden"
@@ -515,14 +540,12 @@ export function Header({
                 }}
                 className="mt-4 w-full max-w-xs"
               >
-                <Link
-                  to="/dashboard"
-                  onClick={() => setMobileOpen(false)}
+                <button
+                  onClick={() => { setMobileOpen(false); void handleStart(); }}
                   className="flex w-full items-center justify-center gap-2 rounded-2xl bg-blue-600 px-6 py-4 text-base font-bold text-white shadow-[0_8px_24px_rgba(37,99,235,0.28)] transition-all active:scale-95 hover:bg-blue-700"
-                  dir={t.dir}
                 >
                   {t.navCta}
-                </Link>
+                </button>
               </motion.div>
             </div>
 
@@ -1157,6 +1180,7 @@ function DirectionArrow({ language, className }: { language: Language; className
 
 function Hero({ language }: { language: Language }) {
   const t = copy[language];
+  const onboardingDone = useAppStore((s) => s.onboardingDone);
 
   return (
     <section className="app-frame px-3 pb-0 pt-4 sm:px-6 sm:pt-6">
@@ -1192,14 +1216,10 @@ function Hero({ language }: { language: Language }) {
             transition={{ delay: 0.26, duration: 0.5 }}
             className="mt-7 flex flex-wrap items-center justify-center gap-4"
           >
-            <Link
-              to="/dashboard"
-              id="hero-cta"
-              className="inline-flex items-center gap-2 rounded-full bg-blue-600 px-6 py-3 text-sm font-bold text-white shadow-[0_4px_14px_0_rgba(37,99,235,0.39)] transition-all hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(37,99,235,0.5)] active:scale-95 sm:px-8 sm:py-3.5"
-            >
+            <CtaButton id="hero-cta" onboardingDone={onboardingDone} className="inline-flex items-center gap-2 rounded-full bg-blue-600 px-6 py-3 text-sm font-bold text-white shadow-[0_4px_14px_0_rgba(37,99,235,0.39)] transition-all hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(37,99,235,0.5)] active:scale-95 sm:px-8 sm:py-3.5">
               {t.heroCta}
               <DirectionArrow language={language} className="h-4 w-4" />
-            </Link>
+            </CtaButton>
             <Link
               to="/templates"
               className="group inline-flex items-center gap-2 rounded-full border border-blue-200/50 bg-white/10 px-6 py-3 text-sm font-bold text-blue-50 backdrop-blur-md shadow-[inset_0_1px_0_rgba(255,255,255,0.2)] transition-all hover:-translate-y-0.5 hover:bg-white/20 hover:text-white hover:shadow-[0_8px_20px_rgba(0,0,0,0.1)] active:scale-95 sm:px-8 sm:py-3.5"
@@ -1227,6 +1247,7 @@ function Hero({ language }: { language: Language }) {
 
 export function StatsSection({ language }: { language: Language }) {
   const t = copy[language];
+  const onboardingDone = useAppStore((s) => s.onboardingDone);
   const textAlign = language === "ku" ? "text-right" : "text-left";
 
   return (
@@ -1310,7 +1331,7 @@ const BentoHeroCard = ({ language }: { language: Language }) => {
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
-      className="relative w-full overflow-hidden rounded-[2rem] border border-white/50 bg-gradient-to-br from-[#e8f3ff] to-[#cce4ff] shadow-xl"
+      className="relative w-full overflow-hidden rounded-[2rem] border border-slate-100 bg-white shadow-xl"
     >
       <div className="pointer-events-none absolute inset-0">
         <div className="absolute bottom-[-10%] right-[10%] h-[200px] w-[400px] rounded-full bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.6)_0%,transparent_70%)]" />
@@ -1481,7 +1502,6 @@ const BentoSecurityCard = ({ language }: { language: Language }) => {
 
 const BentoCreateWinCard = ({ language }: { language: Language }) => {
   const t = copy[language];
-  const textAlign = language === "ku" ? "text-right" : "text-left";
 
   return (
     <motion.div
@@ -1489,33 +1509,16 @@ const BentoCreateWinCard = ({ language }: { language: Language }) => {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ delay: 0.2 }}
-      className="relative grid min-h-[280px] overflow-hidden rounded-[1.5rem] border border-blue-100 bg-white shadow-xl sm:rounded-[2rem] md:grid-cols-[0.8fr_1.2fr]"
+      className="relative min-h-[280px] overflow-hidden rounded-[1.5rem] border border-blue-100 bg-white shadow-xl sm:min-h-[360px] sm:rounded-[2rem]"
     >
       <div
-        className={`relative z-10 flex flex-col justify-center p-8 ${textAlign} sm:p-10`}
-        dir={t.dir}
-      >
-        <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-600 text-white">
-          <Download className="h-5 w-5" />
-        </div>
-        <h3
-          className={`text-3xl font-extrabold ${language === "ku" ? "leading-[1.45]" : "leading-[1.18]"} tracking-tight text-slate-900`}
-        >
-          {t.downloadTitlePrefix}
-          <span className="text-blue-500">{t.downloadTitleHighlight}</span>
-        </h3>
-        <p className="mt-4 max-w-[34ch] text-sm font-medium leading-7 text-slate-500">
-          {t.downloadBody}
-        </p>
-      </div>
-      <div
-        className="relative flex min-h-[260px] items-center justify-center overflow-hidden bg-[#eef6ff] px-4"
+        className="absolute inset-0 flex items-center justify-center overflow-hidden bg-white"
         dir="ltr"
       >
         <img
           src="/images/bento/download cv bento.webp"
           alt={t.downloadAlt}
-          className="h-full max-h-[360px] w-full select-none object-contain"
+          className="h-full w-full select-none object-cover"
           draggable={false}
         />
       </div>
@@ -1576,6 +1579,7 @@ export function FAQSection({ language }: { language: Language }) {
 
 export function BentoGridSection({ language }: { language: Language }) {
   const t = copy[language];
+  const onboardingDone = useAppStore((s) => s.onboardingDone);
 
   return (
     <section
@@ -1622,14 +1626,10 @@ export function BentoGridSection({ language }: { language: Language }) {
             {t.ctaBody}
           </p>
           <div className="flex flex-wrap justify-center gap-4">
-            <Link
-              to="/dashboard"
-              id="closing-cta-btn"
-              className="inline-flex items-center gap-2 rounded-xl bg-white px-6 py-3 text-base font-bold text-blue-700 shadow-lg transition-all hover:-translate-y-1 hover:shadow-xl sm:rounded-2xl sm:px-8 sm:py-4 sm:text-lg"
-            >
+            <CtaButton id="closing-cta-btn" onboardingDone={onboardingDone} className="inline-flex items-center gap-2 rounded-xl bg-white px-6 py-3 text-base font-bold text-blue-700 shadow-lg transition-all hover:-translate-y-1 hover:shadow-xl sm:rounded-2xl sm:px-8 sm:py-4 sm:text-lg">
               {t.ctaPrimary}
               <DirectionArrow language={language} className="h-5 w-5" />
-            </Link>
+            </CtaButton>
             <Link
               to="/templates"
               id="closing-templates-btn"

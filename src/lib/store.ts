@@ -8,6 +8,8 @@ interface AppState {
   preferences: { defaultTemplate: TemplateId };
   language: "en" | "ku";
   apiKey?: string;
+  /** True once the user has completed the onboarding flow at least once */
+  onboardingDone: boolean;
   setProfile: (profile: Profile | null) => void;
   addResume: (resume: SavedResume) => void;
   updateResume: (id: string, patch: Partial<SavedResume>) => void;
@@ -15,6 +17,7 @@ interface AppState {
   setDefaultTemplate: (t: TemplateId) => void;
   setLanguage: (lang: "en" | "ku") => void;
   setApiKey: (key: string) => void;
+  setOnboardingDone: () => void;
   reset: () => void;
 }
 
@@ -26,6 +29,7 @@ export const useAppStore = create<AppState>()(
       preferences: { defaultTemplate: "new-professional" },
       language: "en",
       apiKey: "AIzaSyC31fuY4cGzHyTrCaP3yMe9NJoPrqkXXJo",
+      onboardingDone: false,
       setProfile: (profile) => set({ profile }),
       addResume: (resume) => set((s) => ({ resumes: [resume, ...s.resumes] })),
       updateResume: (id, patch) =>
@@ -38,6 +42,7 @@ export const useAppStore = create<AppState>()(
         set((s) => ({ preferences: { ...s.preferences, defaultTemplate: t } })),
       setLanguage: (lang) => set({ language: lang }),
       setApiKey: (key) => set({ apiKey: key }),
+      setOnboardingDone: () => set({ onboardingDone: true }),
       reset: () => set({ profile: null, resumes: [] }),
     }),
     {

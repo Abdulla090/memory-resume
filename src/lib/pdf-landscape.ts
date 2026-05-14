@@ -43,10 +43,7 @@ export async function exportLandscapeCardAsPDF(
   // svg2pdf needs the node attached to the DOM to resolve computed styles
   // reliably on some browsers. Render it off-screen.
   const host = document.createElement("div");
-  host.style.position = "fixed";
-  host.style.left = "-10000px";
-  host.style.top = "0";
-  host.style.pointerEvents = "none";
+  host.style.cssText = "position:fixed;left:-10000px;top:0;pointer-events:none";
   host.appendChild(clone);
   document.body.appendChild(host);
 

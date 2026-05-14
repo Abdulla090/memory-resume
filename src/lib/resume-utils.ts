@@ -25,11 +25,10 @@ function clampInline(text: string, maxChars: number) {
 
 function dedupeStrings(values: string[], limit: number) {
   return Array.from(
-    new Set(
-      values
-        .map((value) => value.trim())
-        .filter(Boolean),
-    ),
+    new Set(values.flatMap((value) => {
+      const t = value.trim();
+      return t ? [t] : [];
+    })),
   ).slice(0, limit);
 }
 

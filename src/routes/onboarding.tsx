@@ -40,6 +40,7 @@ function ChatOnboarding() {
   const profile = useAppStore((s) => s.profile);
   const apiKey = useAppStore((s) => s.apiKey);
   const addResume = useAppStore((s) => s.addResume);
+  const setOnboardingDone = useAppStore((s) => s.setOnboardingDone);
   const language = useAppStore((s) => s.language);
   const isKu = language === "ku";
 
@@ -269,6 +270,7 @@ function ChatOnboarding() {
         createdAt: Date.now(),
       };
       addResume(saved);
+      setOnboardingDone(); // mark so future CTAs skip this page
       // Show sleek loader for 2.2s then navigate so user sees the transition
       setIsThinking(false);
       setShowLoader(true);

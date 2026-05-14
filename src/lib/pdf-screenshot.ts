@@ -16,25 +16,18 @@ export async function exportPreviewAsPDF(
     import("jspdf"),
   ]);
 
-  const originalHeight = previewElement.style.height;
-  const originalOverflow = previewElement.style.overflow;
-  const originalMaxHeight = previewElement.style.maxHeight;
-  const originalWidth = previewElement.style.width;
-  const originalMaxWidth = previewElement.style.maxWidth;
-  const originalTransform = previewElement.style.transform;
-  const originalZoom = previewElement.style.zoom;
+  // Snapshot original styles in one read pass
+  const originalCssText = previewElement.style.cssText;
 
-  // Temporarily force desktop A4 width for the screenshot so mobile captures aren't squashed
-  previewElement.style.width = "794px";
-  previewElement.style.maxWidth = "none";
-  previewElement.style.transform = "none";
-  previewElement.style.zoom = "1";
+  // Force desktop A4 width for the screenshot so mobile captures aren't squashed
+  previewElement.style.cssText +=
+    ";width:794px;max-width:none;transform:none;zoom:1";
 
   const fullHeight = previewElement.scrollHeight;
 
-  previewElement.style.height = `${fullHeight}px`;
-  previewElement.style.maxHeight = "none";
-  previewElement.style.overflow = "visible";
+  // Batch all remaining overrides in one write
+  previewElement.style.cssText +=
+    `;height:${fullHeight}px;max-height:none;overflow:visible`;
 
   let canvas: HTMLCanvasElement;
   try {
@@ -45,14 +38,8 @@ export async function exportPreviewAsPDF(
       height: fullHeight,
     });
   } finally {
-    // Always restore original styles even if capture fails
-    previewElement.style.width = originalWidth;
-    previewElement.style.maxWidth = originalMaxWidth;
-    previewElement.style.transform = originalTransform;
-    previewElement.style.zoom = originalZoom;
-    previewElement.style.height = originalHeight;
-    previewElement.style.maxHeight = originalMaxHeight;
-    previewElement.style.overflow = originalOverflow;
+    // Restore everything in one write
+    previewElement.style.cssText = originalCssText;
   }
   // ── PDF generation ────────────────────────────────────────────────────────
 

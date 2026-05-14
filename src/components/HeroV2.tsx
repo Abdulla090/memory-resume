@@ -1,7 +1,8 @@
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { motion } from "framer-motion";
 import { ArrowLeft, ArrowRight, ArrowUpRight, Sparkles } from "lucide-react";
 import { useState } from "react";
+import { useAppStore } from "@/lib/store";
 import {
   LeftCardSVG,
   CenterCardSVG,
@@ -116,6 +117,12 @@ function MarqueeColumns() {
 export function HeroV2({ language }: { language: Language }) {
   const t = copy[language];
   const [starting, setStarting] = useState(false);
+  const navigate = useNavigate();
+  const onboardingDone = useAppStore((s) => s.onboardingDone);
+  const handleStart = () => {
+    setStarting(true);
+    void navigate({ to: onboardingDone ? "/dashboard" : "/onboarding" });
+  };
 
   return (
     <section className="flex-1 max-w-[1600px] w-full mx-auto px-3 sm:px-6 relative z-10 pt-4 sm:pt-6">
@@ -207,22 +214,23 @@ export function HeroV2({ language }: { language: Language }) {
               transition={{ delay: 0.35, duration: 0.5 }}
               className="mt-4 flex flex-row flex-wrap gap-2 sm:mt-8 sm:items-center sm:gap-4"
             >
-              <Link
-                to="/onboarding"
+              <button
                 id="hero-v2-cta"
-                onClick={() => setStarting(true)}
+                onClick={handleStart}
                 aria-label={t.heroCta}
-                className="group relative isolate inline-flex min-w-[150px] items-center justify-center gap-2 overflow-hidden rounded-full border border-white/20 bg-[linear-gradient(180deg,#3478f1_0%,#2567e4_58%,#215bd5_100%)] px-4 py-2.5 text-xs font-bold text-white shadow-[0_10px_22px_-17px_rgba(17,74,190,0.58),inset_0_1px_0_rgba(255,255,255,0.22),inset_0_-4px_10px_rgba(22,63,160,0.12)] outline-none transition-[box-shadow,filter,border-color] duration-300 ease-out hover:border-white/28 hover:shadow-[0_11px_24px_-18px_rgba(17,74,190,0.62),inset_0_1px_0_rgba(255,255,255,0.24),inset_0_-4px_10px_rgba(22,63,160,0.1)] hover:brightness-[1.01] focus-visible:ring-4 focus-visible:ring-white/35 active:brightness-[0.98] sm:min-w-[178px] sm:px-8 sm:py-3.5 sm:text-sm"
+                className="group relative isolate inline-flex min-w-[150px] items-center justify-center gap-2 overflow-hidden rounded-full border border-white/20 bg-[linear-gradient(180deg,#3478f1_0%,#2567e4_58%,#215bd5_100%)] px-4 py-2.5 text-xs font-bold text-white shadow-[0_10px_22px_-17px_rgba(17,74,190,0.58),inset_0_1px_0_rgba(255,255,255,0.22),inset_0_-4px_10px_rgba(22,63,160,0.12)] outline-none transition-[box-shadow,filter,border-color] duration-300 ease-out hover:border-white/34 hover:shadow-[0_14px_28px_-18px_rgba(17,74,190,0.72),inset_0_1px_0_rgba(255,255,255,0.34),inset_0_-5px_12px_rgba(22,63,160,0.13)] hover:brightness-[1.025] focus-visible:ring-4 focus-visible:ring-white/35 active:brightness-[0.98] sm:min-w-[178px] sm:px-8 sm:py-3.5 sm:text-sm"
               >
-                <span className="pointer-events-none absolute inset-x-4 top-[2px] h-[36%] rounded-full bg-white/9 blur-[2px]" />
-                <span className="pointer-events-none absolute inset-0 rounded-full bg-[radial-gradient(circle_at_50%_0%,rgba(255,255,255,0.09),transparent_50%)] opacity-80 transition-opacity duration-300 group-hover:opacity-100" />
+                <span className="pointer-events-none absolute inset-x-4 top-[2px] h-[38%] rounded-full bg-white/12 blur-[2px] transition-opacity duration-300 group-hover:opacity-90" />
+                <span className="pointer-events-none absolute inset-0 rounded-full bg-[radial-gradient(circle_at_50%_0%,rgba(255,255,255,0.12),transparent_50%)] opacity-80 transition-opacity duration-300 group-hover:opacity-100" />
+                <span className="pointer-events-none absolute inset-0 rounded-full ring-1 ring-inset ring-white/0 transition-[box-shadow,opacity] duration-500 group-hover:ring-white/24 group-hover:shadow-[inset_0_0_22px_rgba(255,255,255,0.12)]" />
+                <span className="pointer-events-none absolute inset-y-[-20%] left-[-50%] w-[34%] rotate-12 bg-gradient-to-r from-transparent via-white/24 to-transparent opacity-0 blur-[2px] transition-[transform,opacity] duration-700 ease-out group-hover:translate-x-[430%] group-hover:opacity-100" />
                 <span className="relative z-10">
                   {starting ? (language === "ku" ? "ئامادەکردن..." : "Preparing...") : t.heroCta}
                 </span>
-                <span className="relative z-10 grid h-6 w-6 place-items-center rounded-full bg-white/12 shadow-[inset_0_1px_0_rgba(255,255,255,0.14)] transition-colors duration-300 group-hover:bg-white/15">
+                <span className="relative z-10 grid h-6 w-6 place-items-center rounded-full bg-white/12 shadow-[inset_0_1px_0_rgba(255,255,255,0.14)] transition-[background-color,box-shadow,filter] duration-300 group-hover:bg-white/20 group-hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.28),inset_0_0_10px_rgba(255,255,255,0.08)] group-hover:brightness-105">
                   <DirectionArrow language={language} className="h-3.5 w-3.5" />
                 </span>
-              </Link>
+              </button>
               <Link
                 to="/templates"
                 className="group relative isolate inline-flex items-center justify-center gap-1.5 overflow-hidden rounded-full border border-white/30 bg-gradient-to-b from-white/80 to-blue-50/60 px-4 py-2.5 text-xs font-bold text-blue-800 backdrop-blur-xl shadow-[0_10px_22px_-18px_rgba(15,69,200,0.34),inset_0_1px_0_rgba(255,255,255,0.72),inset_0_-5px_12px_rgba(59,130,246,0.08)] transition-[box-shadow,background-color,border-color] duration-300 hover:border-white/40 hover:bg-white/95 hover:shadow-[0_11px_24px_-19px_rgba(15,69,200,0.38),inset_0_1px_0_rgba(255,255,255,0.76),inset_0_-5px_12px_rgba(59,130,246,0.07)] active:bg-white/90 sm:px-8 sm:py-3.5 sm:text-sm"
