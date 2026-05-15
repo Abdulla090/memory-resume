@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { Mic, Type, ArrowUp, ArrowLeft, Briefcase, Settings2, Sparkles } from 'lucide-react';
-import { useState, useMemo, useEffect, useRef } from 'react';
+import { memo, useState, useMemo, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAppStore } from '@/lib/store';
 import { generateInterviewQuestion } from '@/lib/ai.functions';
@@ -11,8 +11,8 @@ export const Route = createFileRoute('/interview')({
 
 const ParticleOrb = ({ isSpeaking }: { isSpeaking: boolean }) => {
   const particles = useMemo(() => {
-    return Array.from({ length: 150 }).map((_, i) => {
-      const angle = (i / 150) * Math.PI * 2;
+    return Array.from({ length: 36 }).map((_, i) => {
+      const angle = (i / 36) * Math.PI * 2;
       const radius = 60 + Math.random() * 30;
       return {
         id: i,
@@ -33,16 +33,14 @@ const ParticleOrb = ({ isSpeaking }: { isSpeaking: boolean }) => {
           style={{ width: p.size, height: p.size }}
           initial={{ opacity: 0, x: p.x * 0.2, y: p.y * 0.2, scale: 0 }}
           animate={{ 
-            opacity: [0.1, 0.8, 0.1], 
-            x: isSpeaking ? p.x * (1 + Math.random() * 0.2) : p.x, 
-            y: isSpeaking ? p.y * (1 + Math.random() * 0.2) : p.y, 
-            scale: isSpeaking ? [1, 1.5, 1] : 1 
+            opacity: isSpeaking ? [0.2, 0.8, 0.2] : 0.45, 
+            x: p.x, 
+            y: p.y, 
+            scale: isSpeaking ? [1, 1.25, 1] : 1 
           }}
           transition={{ 
-            opacity: { duration: 2 + Math.random(), repeat: Infinity, delay: p.delay },
-            x: { duration: 0.8 + Math.random(), repeat: Infinity, repeatType: "mirror" },
-            y: { duration: 0.8 + Math.random(), repeat: Infinity, repeatType: "mirror" },
-            scale: { duration: 0.8 + Math.random(), repeat: Infinity, repeatType: "mirror" },
+            opacity: { duration: 1.8 + Math.random(), repeat: Infinity, delay: p.delay },
+            scale: { duration: 1.2 + Math.random() * 0.4, repeat: Infinity, repeatType: "mirror" },
             default: { ease: "easeInOut" }
           }}
         />
@@ -52,14 +50,11 @@ const ParticleOrb = ({ isSpeaking }: { isSpeaking: boolean }) => {
         className="absolute z-10 w-28 h-28 bg-gradient-to-br from-blue-500 to-cyan-300 rounded-full blur-[3px] mix-blend-screen"
         initial={{ scale: 0, opacity: 0 }}
         animate={{ 
-          scale: isSpeaking ? [1, 1.2, 1] : 1, 
-          opacity: isSpeaking ? 1 : 0.7,
-          boxShadow: isSpeaking 
-            ? "0 0 80px 30px rgba(56, 189, 248, 0.9)" 
-            : "0 0 40px 15px rgba(56, 189, 248, 0.5)"
+          scale: isSpeaking ? [1, 1.1, 1] : 1, 
+          opacity: isSpeaking ? 1 : 0.72,
         }}
         transition={{ 
-          scale: { duration: 1.2, repeat: Infinity, ease: "easeInOut" }, 
+          scale: { duration: 1.8, repeat: Infinity, ease: "easeInOut" }, 
           opacity: { duration: 2, ease: "easeOut" } 
         }}
       />
@@ -67,23 +62,45 @@ const ParticleOrb = ({ isSpeaking }: { isSpeaking: boolean }) => {
       <motion.div
         className="absolute inset-0 rounded-full border border-sky-400/40 opacity-60"
         style={{ borderStyle: "dashed", borderWidth: "2px" }}
-        animate={{ rotate: 360, scale: isSpeaking ? 1.08 : 1 }}
-        transition={{ rotate: { duration: 20, repeat: Infinity, ease: "linear" }, scale: { duration: 1.2, repeat: Infinity, repeatType: "mirror" } }}
+        animate={{ rotate: 360, scale: isSpeaking ? 1.04 : 1 }}
+        transition={{ rotate: { duration: 40, repeat: Infinity, ease: "linear" }, scale: { duration: 1.6, repeat: Infinity, repeatType: "mirror" } }}
       />
       <motion.div
         className="absolute inset-6 rounded-full border border-blue-500/50"
         style={{ borderStyle: "dotted", borderWidth: "4px" }}
-        animate={{ rotate: -360, scale: isSpeaking ? 0.92 : 1 }}
-        transition={{ rotate: { duration: 12, repeat: Infinity, ease: "linear" }, scale: { duration: 1.2, repeat: Infinity, repeatType: "mirror" } }}
+        animate={{ rotate: -360, scale: isSpeaking ? 0.96 : 1 }}
+        transition={{ rotate: { duration: 26, repeat: Infinity, ease: "linear" }, scale: { duration: 1.6, repeat: Infinity, repeatType: "mirror" } }}
       />
     </div>
   );
 };
 
+const MessageBubble = memo(function MessageBubble({
+  role,
+  content,
+}: {
+  role: 'ai' | 'user';
+  content: string;
+}) {
+  return (
+    <div className={`flex ${role === 'user' ? 'justify-end' : 'justify-start'}`}>
+      <div
+        className={`max-w-[85%] sm:max-w-[75%] rounded-3xl px-6 py-4 text-[15px] leading-relaxed shadow-lg backdrop-blur-md ${
+          role === 'user'
+            ? 'bg-primary/90 text-white rounded-tr-sm'
+            : 'bg-white/5 border border-white/10 text-white rounded-tl-sm'
+        }`}
+      >
+        {content}
+      </div>
+    </div>
+  );
+});
+
 function InterviewPage() {
   const navigate = useNavigate();
   const language = useAppStore((state) => state.language);
-  const apiKey = useAppStore((state) => state.geminiApiKey) || '';
+  const apiKey = useAppStore((state) => state.apiKey) || '';
   const isKu = language === 'ku';
 
   useEffect(() => {
@@ -100,17 +117,40 @@ function InterviewPage() {
   const [interviewInput, setInterviewInput] = useState('');
   const [questionIndex, setQuestionIndex] = useState(0);
   const [isAiSpeaking, setIsAiSpeaking] = useState(false);
+  const [interviewStage, setInterviewStage] = useState<'intro' | 'active'>('intro');
+  const [showInterviewContent, setShowInterviewContent] = useState(false);
   const [interviewMessages, setInterviewMessages] = useState<{role: 'ai'|'user', content: string}[]>([]);
   const [interviewScore, setInterviewScore] = useState<number | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const introTimerRef = useRef<number | null>(null);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [interviewMessages, isAiSpeaking]);
 
+  useEffect(() => {
+    if (interviewStage !== 'active') {
+      setShowInterviewContent(false);
+      return;
+    }
+
+    const timer = window.setTimeout(() => setShowInterviewContent(true), 260);
+    return () => window.clearTimeout(timer);
+  }, [interviewStage]);
+
+  useEffect(() => {
+    return () => {
+      if (introTimerRef.current !== null) {
+        window.clearTimeout(introTimerRef.current);
+      }
+    };
+  }, []);
+
   const handleStartInterview = async () => {
     if (!targetRole.trim()) return;
     setSetupState('interview');
+    setInterviewStage('intro');
+    setShowInterviewContent(false);
     setIsGenerating(true);
     setIsAiSpeaking(true);
 
@@ -126,9 +166,21 @@ function InterviewPage() {
         }
       });
       setInterviewMessages([{ role: 'ai', content: res.nextQuestion }]);
+      if (introTimerRef.current !== null) {
+        window.clearTimeout(introTimerRef.current);
+      }
+      introTimerRef.current = window.setTimeout(() => {
+        setInterviewStage('active');
+      }, 780);
     } catch (e) {
        console.error(e);
        setInterviewMessages([{ role: 'ai', content: isKu ? 'ببورە! نەمتوانی پەیوەندی بکەم بە زیرەکی دەستکرد، تکایە دڵنیابە لە API Key.' : 'Sorry! I could not connect to the AI. Please verify your API Key.' }]);
+       if (introTimerRef.current !== null) {
+         window.clearTimeout(introTimerRef.current);
+       }
+       introTimerRef.current = window.setTimeout(() => {
+         setInterviewStage('active');
+       }, 360);
     } finally {
       setIsGenerating(false);
       setIsAiSpeaking(false);
@@ -278,211 +330,228 @@ function InterviewPage() {
               </button>
             </div>
           </motion.div>
+        ) : interviewStage === 'intro' ? (
+          <motion.div
+            key="intro"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.35 }}
+            className="relative flex h-full w-full items-center justify-center"
+          >
+            <div className="absolute inset-0 pointer-events-none -z-10">
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 0.16 }}
+                transition={{ duration: 1.4 }}
+                className="absolute top-[14%] left-1/2 -translate-x-1/2 w-[760px] h-[760px] bg-primary/25 blur-[180px] rounded-full"
+              />
+            </div>
+
+            <motion.div
+              layoutId="interview-orb-shell"
+              className="flex items-center justify-center w-[340px] h-[340px] sm:w-[420px] sm:h-[420px]"
+              transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+            >
+              <ParticleOrb isSpeaking={isAiSpeaking} />
+            </motion.div>
+          </motion.div>
         ) : (
           <motion.div 
             key="interview"
             initial={{ opacity: 0, filter: 'blur(30px)' }}
             animate={{ opacity: 1, filter: 'blur(0px)' }}
             exit={{ opacity: 0, filter: 'blur(20px)' }}
-            transition={{ duration: 1.5, ease: [0.16, 1, 0.3, 1] }}
+            transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
             className="flex flex-col w-full h-full relative z-10"
           >
             {/* Top Section / Particle AI Orb */}
             <motion.div 
-              className="flex flex-col items-center justify-center w-full shrink-0"
+              className="flex flex-col items-center justify-center w-full shrink-0 overflow-visible pt-10 sm:pt-12"
               animate={{
-                height: interviewMessages.length > 1 ? "140px" : "45vh",
-                marginTop: interviewMessages.length > 1 ? "2rem" : "0",
+                height: interviewMessages.length > 1 ? "130px" : "44vh",
+                marginTop: interviewMessages.length > 1 ? "0.75rem" : "0",
               }}
-              transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
+              transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
             >
-            <motion.div
-              animate={{
-                scale: interviewMessages.length > 1 ? 0.4 : 1,
-                y: interviewMessages.length > 1 ? -20 : 0,
-              }}
-              transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
-            >
-              <ParticleOrb isSpeaking={isAiSpeaking} />
-            </motion.div>
+              <motion.div
+                layoutId="interview-orb-shell"
+                className="flex items-center justify-center w-56 h-56 sm:w-72 sm:h-72"
+                animate={{
+                  scale: interviewMessages.length > 1 ? 0.88 : 1,
+                  y: interviewMessages.length > 1 ? -2 : 0,
+                }}
+                transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
+              >
+                <ParticleOrb isSpeaking={isAiSpeaking} />
+              </motion.div>
             
-            <AnimatePresence>
-              {interviewMessages.length <= 1 && (
-                <motion.div 
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20, transition: { duration: 0.4 } }}
-                  className="relative z-10 flex flex-col items-center w-full mt-4"
-                >
-                  <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-widest uppercase text-center text-primary/80 mb-2 drop-shadow-[0_0_15px_rgba(37,99,235,0.5)]">
-                    {isKu ? 'یاریدەدەری زیرەکی دەستکرد' : 'A.I. INTERVIEWER'}
-                  </h1>
-                  <p className="text-sm sm:text-base text-white/50 text-center max-w-lg font-medium">
-                    {isKu 
-                      ? 'من لێرەم بۆ ئەوەی ڕاهێنانت پێ بکەم لەسەر چاوپێکەوتنەکانت بە شێوەیەکی پرۆفیشناڵ.' 
-                      : 'I will conduct a hyper-realistic, dynamic interview. Please state your target role.'}
-                  </p>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </motion.div>
-
-          {/* Chat Messages Section */}
-          <motion.div 
-            className="flex-1 w-full max-w-4xl mx-auto overflow-y-auto px-4 pb-56 sm:pb-48 pt-4 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.5 }}
-          >
-            <div className="space-y-6 flex flex-col justify-end min-h-full">
-              {interviewMessages.map((msg, i) => (
-                <motion.div 
-                  initial={{ opacity: 0, y: 15, scale: 0.95 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  transition={{ type: 'spring', stiffness: 200, damping: 20 }}
-                  key={i} 
-                  className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
-                >
-                  <div 
-                    className={`max-w-[85%] sm:max-w-[75%] rounded-3xl px-6 py-4 text-[15px] leading-relaxed shadow-lg backdrop-blur-md ${
-                      msg.role === 'user' 
-                        ? 'bg-primary/90 text-white rounded-tr-sm' 
-                        : 'bg-white/5 border border-white/10 text-white rounded-tl-sm'
-                    }`} 
-                  >
-                    {msg.content}
-                  </div>
-                </motion.div>
-              ))}
-              {isAiSpeaking && (
-                <motion.div 
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="flex justify-start"
-                >
-                  <div className="max-w-[85%] rounded-3xl bg-white/5 border border-white/10 px-6 py-4 rounded-tl-sm">
-                     <div className="flex gap-1.5 items-center h-6">
-                       <motion.span animate={{ y: [0, -5, 0] }} transition={{ repeat: Infinity, duration: 0.6, delay: 0 }} className="w-2 h-2 rounded-full bg-primary/60" />
-                       <motion.span animate={{ y: [0, -5, 0] }} transition={{ repeat: Infinity, duration: 0.6, delay: 0.2 }} className="w-2 h-2 rounded-full bg-primary/60" />
-                       <motion.span animate={{ y: [0, -5, 0] }} transition={{ repeat: Infinity, duration: 0.6, delay: 0.4 }} className="w-2 h-2 rounded-full bg-primary/60" />
-                     </div>
-                  </div>
-                </motion.div>
-              )}
-              <div ref={messagesEndRef} />
-            </div>
-          </motion.div>
-
-          {/* Input Area / Score Fixed Bottom */}
-          <div className="absolute bottom-0 left-0 w-full bg-gradient-to-t from-black via-black/90 to-transparent pt-10 pb-6 px-4 z-20 pointer-events-none">
-            <div className="max-w-4xl mx-auto w-full pointer-events-auto">
-              <AnimatePresence mode="wait">
-                {interviewScore !== null ? (
+              <AnimatePresence>
+                {showInterviewContent && interviewMessages.length <= 1 && (
                   <motion.div 
-                    key="score-card"
-                    initial={{ opacity: 0, y: 20, scale: 0.95 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    className="w-full rounded-[2.5rem] border border-sky-500/30 bg-sky-500/10 backdrop-blur-3xl shadow-[0_0_80px_rgba(14,165,233,0.3)] p-6 sm:p-8 flex items-center justify-between"
-                  >
-                    <div>
-                      <h3 className="text-2xl sm:text-3xl font-extrabold text-white mb-2 drop-shadow-[0_0_15px_rgba(37,99,235,0.5)]">
-                        {isKu ? 'ئەنجامی چاوپێکەوتن' : 'Final Score'}
-                      </h3>
-                      <p className="text-sky-200/80 font-medium">
-                        {isKu ? 'پێداچوونەوە بە وەڵامەکانتدا کرا بە سەرکەوتوویی.' : 'Your responses have been successfully analyzed.'}
-                      </p>
-                      <button 
-                        onClick={() => navigate({ to: '/dashboard' })}
-                        className="mt-6 px-6 py-2.5 rounded-full bg-primary/20 hover:bg-primary/30 text-primary border border-primary/50 transition-colors font-medium text-sm"
-                      >
-                        {isKu ? 'گەڕانەوە بۆ داشبۆرد' : 'Return to Dashboard'}
-                      </button>
-                    </div>
-                    <div className="relative flex items-center justify-center w-28 h-28 sm:w-32 sm:h-32 rounded-full bg-black/40 border-4 border-sky-500/30 shadow-[inset_0_0_20px_rgba(14,165,233,0.2)]">
-                       <motion.svg className="absolute inset-0 w-full h-full -rotate-90 drop-shadow-[0_0_10px_rgba(14,165,233,0.8)]" viewBox="0 0 100 100">
-                         <motion.circle 
-                           cx="50" cy="50" r="46" 
-                           fill="none" 
-                           stroke="currentColor" 
-                           strokeWidth="8" 
-                           className="text-sky-400"
-                           strokeDasharray="289.02"
-                           initial={{ strokeDashoffset: 289.02 }}
-                           animate={{ strokeDashoffset: 289.02 - (289.02 * interviewScore) / 100 }}
-                           transition={{ duration: 2, ease: "easeOut", delay: 0.5 }}
-                           strokeLinecap="round"
-                         />
-                       </motion.svg>
-                       <div className="absolute inset-0 flex items-center justify-center text-4xl sm:text-5xl font-black text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.5)]">
-                         <motion.span 
-                           initial={{ opacity: 0, scale: 0.5 }}
-                           animate={{ opacity: 1, scale: 1 }}
-                           transition={{ delay: 1, type: "spring" }}
-                         >
-                           {interviewScore}
-                         </motion.span>
-                       </div>
-                    </div>
-                  </motion.div>
-                ) : (
-                  <motion.div 
-                    key="input-box"
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: 20 }}
-                    className="w-full rounded-[2.5rem] border border-white/10 bg-white/[0.02] backdrop-blur-3xl shadow-[0_30px_100px_-20px_rgba(0,0,0,0.8)] p-3 sm:p-4 text-left"
+                    exit={{ opacity: 0, y: -20, transition: { duration: 0.4 } }}
+                    className="relative z-10 flex flex-col items-center w-full mt-4"
                   >
-                    {interviewMode === 'text' ? (
-                      <div className="relative flex items-center gap-3">
-                        <input 
-                          type="text" 
-                          value={interviewInput}
-                          onChange={(e) => setInterviewInput(e.target.value)}
-                          placeholder={isKu ? 'وەڵامەکەت لێرە بنووسە...' : 'Message AI Interviewer...'}
-                          className="flex-1 rounded-[2rem] border border-white/5 bg-black/40 px-6 py-4 text-[15px] text-white outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/20 transition-all placeholder:text-white/30 shadow-inner"
-                          onKeyDown={(e) => {
-                            if (e.key === 'Enter') handleInterviewSubmit();
-                          }}
-                        />
-                        <button 
-                          onClick={handleInterviewSubmit}
-                          disabled={isAiSpeaking || !interviewInput.trim()}
-                          className="rounded-full bg-primary p-4 text-white hover:scale-105 transition-transform shadow-[0_0_20px_rgba(37,99,235,0.3)] disabled:opacity-50 disabled:hover:scale-100 shrink-0"
-                        >
-                          <ArrowUp className="w-5 h-5" />
-                        </button>
-                      </div>
-                    ) : (
-                      <div className="flex flex-col items-center justify-center py-4">
-                         <button className="relative flex h-16 w-16 items-center justify-center rounded-full bg-primary/20 text-primary hover:bg-primary/30 transition-all group shadow-[0_0_50px_rgba(37,99,235,0.2)]">
-                           <div className="absolute inset-0 rounded-full bg-primary/30 animate-ping" style={{ animationDuration: '2s' }} />
-                           <Mic className="h-6 w-6 relative z-10 group-hover:scale-110 transition-transform" />
-                         </button>
-                         <p className="mt-4 text-xs font-bold text-white/60 animate-pulse tracking-widest uppercase">
-                           {isKu ? 'لە گوێگرتندایە...' : 'Listening...'}
-                         </p>
-                      </div>
-                    )}
-                    
-                    {/* Toggle Input Mode */}
-                    <div className="flex justify-center mt-3">
-                   <button 
-                     onClick={() => setInterviewMode(prev => prev === 'text' ? 'voice' : 'text')}
-                     className="text-[10px] font-bold uppercase tracking-wider text-white/40 hover:text-primary transition-colors flex items-center gap-1.5"
-                   >
-                     {interviewMode === 'text' ? (
-                       <><Mic className="w-3 h-3" /> {isKu ? 'گۆڕین بۆ دەنگ' : 'Switch to Voice'}</>
-                     ) : (
-                       <><Type className="w-3 h-3" /> {isKu ? 'گۆڕین بۆ دەق' : 'Switch to Text'}</>
-                     )}
-                   </button>
-                 </div>
+                    <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-widest uppercase text-center text-primary/80 mb-2 drop-shadow-[0_0_15px_rgba(37,99,235,0.5)]">
+                      {isKu ? 'یاریدەدەری زیرەکی دەستکرد' : 'A.I. INTERVIEWER'}
+                    </h1>
+                    <p className="text-sm sm:text-base text-white/50 text-center max-w-lg font-medium">
+                      {isKu 
+                        ? 'من لێرەم بۆ ئەوەی ڕاهێنانت پێ بکەم لەسەر چاوپێکەوتنەکانت بە شێوەیەکی پرۆفیشناڵ.' 
+                        : 'I will conduct a hyper-realistic, dynamic interview. Please state your target role.'}
+                    </p>
                   </motion.div>
                 )}
               </AnimatePresence>
-            </div>
-          </div>
-        </motion.div>
+            </motion.div>
+
+          {/* Chat Messages Section */}
+            <AnimatePresence>
+              {showInterviewContent && (
+                <motion.div 
+                  key="messages"
+                  className="flex-1 w-full max-w-4xl mx-auto overflow-y-auto px-4 pb-56 sm:pb-48 pt-4 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.12 }}
+                >
+                  <div className="space-y-6 flex flex-col justify-end min-h-full">
+                    {interviewMessages.map((msg, i) => (
+                      <MessageBubble key={i} role={msg.role} content={msg.content} />
+                    ))}
+                    {isAiSpeaking && (
+                      <motion.div 
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="flex justify-start"
+                      >
+                        <div className="max-w-[85%] rounded-3xl bg-white/5 border border-white/10 px-6 py-4 rounded-tl-sm">
+                          <div className="flex gap-1.5 items-center h-6">
+                            <motion.span animate={{ y: [0, -5, 0] }} transition={{ repeat: Infinity, duration: 0.6, delay: 0 }} className="w-2 h-2 rounded-full bg-primary/60" />
+                            <motion.span animate={{ y: [0, -5, 0] }} transition={{ repeat: Infinity, duration: 0.6, delay: 0.2 }} className="w-2 h-2 rounded-full bg-primary/60" />
+                            <motion.span animate={{ y: [0, -5, 0] }} transition={{ repeat: Infinity, duration: 0.6, delay: 0.4 }} className="w-2 h-2 rounded-full bg-primary/60" />
+                          </div>
+                        </div>
+                      </motion.div>
+                    )}
+                    <div ref={messagesEndRef} />
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+            {showInterviewContent && (
+              <div className="absolute bottom-0 left-0 w-full bg-gradient-to-t from-black via-black/90 to-transparent pt-10 pb-6 px-4 z-20 pointer-events-none">
+                <div className="max-w-4xl mx-auto w-full pointer-events-auto">
+                  <AnimatePresence mode="wait">
+                    {interviewScore !== null ? (
+                      <motion.div 
+                        key="score-card"
+                        initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        className="w-full rounded-[2.5rem] border border-sky-500/30 bg-sky-500/10 backdrop-blur-3xl shadow-[0_0_80px_rgba(14,165,233,0.3)] p-6 sm:p-8 flex items-center justify-between"
+                      >
+                        <div>
+                          <h3 className="text-2xl sm:text-3xl font-extrabold text-white mb-2 drop-shadow-[0_0_15px_rgba(37,99,235,0.5)]">
+                            {isKu ? 'ئەنجامی چاوپێکەوتن' : 'Final Score'}
+                          </h3>
+                          <p className="text-sky-200/80 font-medium">
+                            {isKu ? 'پێداچوونەوە بە وەڵامەکانتدا کرا بە سەرکەوتوویی.' : 'Your responses have been successfully analyzed.'}
+                          </p>
+                          <button 
+                            onClick={() => navigate({ to: '/dashboard' })}
+                            className="mt-6 px-6 py-2.5 rounded-full bg-primary/20 hover:bg-primary/30 text-primary border border-primary/50 transition-colors font-medium text-sm"
+                          >
+                            {isKu ? 'گەڕانەوە بۆ داشبۆرد' : 'Return to Dashboard'}
+                          </button>
+                        </div>
+                        <div className="relative flex items-center justify-center w-28 h-28 sm:w-32 sm:h-32 rounded-full bg-black/40 border-4 border-sky-500/30 shadow-[inset_0_0_20px_rgba(14,165,233,0.2)]">
+                           <motion.svg className="absolute inset-0 w-full h-full -rotate-90 drop-shadow-[0_0_10px_rgba(14,165,233,0.8)]" viewBox="0 0 100 100">
+                             <motion.circle 
+                                cx="50" cy="50" r="46" 
+                                fill="none" 
+                                stroke="currentColor" 
+                                strokeWidth="8" 
+                                className="text-sky-400"
+                                strokeDasharray="289.02"
+                                initial={{ strokeDashoffset: 289.02 }}
+                                animate={{ strokeDashoffset: 289.02 - (289.02 * interviewScore) / 100 }}
+                                transition={{ duration: 2, ease: "easeOut", delay: 0.5 }}
+                                strokeLinecap="round"
+                              />
+                            </motion.svg>
+                            <div className="absolute inset-0 flex items-center justify-center text-4xl sm:text-5xl font-black text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.5)]">
+                              <motion.span 
+                                initial={{ opacity: 0, scale: 0.5 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                transition={{ delay: 1, type: "spring" }}
+                              >
+                                {interviewScore}
+                              </motion.span>
+                            </div>
+                         </div>
+                      </motion.div>
+                    ) : (
+                      <motion.div 
+                        key="input-box"
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: 20 }}
+                        className="w-full rounded-[2.5rem] border border-white/10 bg-white/[0.02] backdrop-blur-3xl shadow-[0_30px_100px_-20px_rgba(0,0,0,0.8)] p-3 sm:p-4 text-left will-change-transform"
+                      >
+                        {interviewMode === 'text' ? (
+                          <div className="relative flex items-center gap-3">
+                            <input 
+                              type="text" 
+                              value={interviewInput}
+                              onChange={(e) => setInterviewInput(e.target.value)}
+                              placeholder={isKu ? 'وەڵامەکەت لێرە بنووسە...' : 'Message AI Interviewer...'}
+                              className="flex-1 rounded-[2rem] border border-white/5 bg-black/40 px-6 py-4 text-[15px] text-white outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/20 transition-all placeholder:text-white/30 shadow-inner"
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter') handleInterviewSubmit();
+                              }}
+                            />
+                            <button 
+                              onClick={handleInterviewSubmit}
+                              disabled={isAiSpeaking || !interviewInput.trim()}
+                              className="rounded-full bg-primary p-4 text-white hover:scale-105 transition-transform shadow-[0_0_20px_rgba(37,99,235,0.3)] disabled:opacity-50 disabled:hover:scale-100 shrink-0"
+                            >
+                              <ArrowUp className="w-5 h-5" />
+                            </button>
+                          </div>
+                        ) : (
+                          <div className="flex flex-col items-center justify-center py-4">
+                             <button className="relative flex h-16 w-16 items-center justify-center rounded-full bg-primary/20 text-primary hover:bg-primary/30 transition-all group shadow-[0_0_50px_rgba(37,99,235,0.2)]">
+                               <div className="absolute inset-0 rounded-full bg-primary/30 animate-ping" style={{ animationDuration: '2s' }} />
+                               <Mic className="h-6 w-6 relative z-10 group-hover:scale-110 transition-transform" />
+                             </button>
+                             <p className="mt-4 text-xs font-bold text-white/60 animate-pulse tracking-widest uppercase">
+                               {isKu ? 'لە گوێگرتندایە...' : 'Listening...'}
+                             </p>
+                          </div>
+                        )}
+                        
+                        {/* Toggle Input Mode */}
+                        <div className="flex justify-center mt-3">
+                       <button 
+                         onClick={() => setInterviewMode(prev => prev === 'text' ? 'voice' : 'text')}
+                         className="text-[10px] font-bold uppercase tracking-wider text-white/40 hover:text-primary transition-colors flex items-center gap-1.5"
+                       >
+                         {interviewMode === 'text' ? (
+                           <><Mic className="w-3 h-3" /> {isKu ? 'گۆڕین بۆ دەنگ' : 'Switch to Voice'}</>
+                         ) : (
+                           <><Type className="w-3 h-3" /> {isKu ? 'گۆڕین بۆ دەق' : 'Switch to Text'}</>
+                         )}
+                       </button>
+                     </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              </div>
+            )}
+          </motion.div>
         )}
       </AnimatePresence>
     </div>

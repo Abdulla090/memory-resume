@@ -468,16 +468,18 @@ export const chatEditResume = createServerFn({ method: "POST" })
       apiKey: z.string().optional(),
       resume: z.any(),
       userMessage: z.string().min(1).max(2000),
+      language: z.enum(["en", "ku"]).default("en"),
     }),
   )
   .handler(async ({ data }): Promise<{ resume: ResumeData; reply: string }> => {
+    const isKu = data.language === "ku";
     const json = await callGateway({
       apiKey: data.apiKey,
       messages: [
         {
           role: "system",
           content:
-            "You are an elite resume editor and AI assistant. The user will provide their current resume data (in JSON) and a message detailing what changes they want. You must output the fully updated resume data reflecting these changes using the save_resume tool. \n\nCRITICAL LANGUAGE RULE: No matter what language the user speaks in their request, you MUST modify the resume data in the exact same language the resume is currently written in. Do not translate the resume content unless explicitly asked.\n\nCRITICAL REPLY RULE: Your conversational reply must be VERY short and concise (max 1 sentence) confirming the changes. If the user asks to raise, lower, reduce, fill, or change skill bars, dots, stars, or visual skill levels, update resume.skillItems with names aligned to resume.skills and levels from 1 to 5.",
+            `You are an elite resume editor and AI assistant. The user will provide their current resume data (in JSON) and a message detailing what changes they want. You must output the fully updated resume data reflecting these changes using the save_resume tool. \n\nCRITICAL LANGUAGE RULE: No matter what language the user speaks in their request, you MUST modify the resume data in the exact same language the resume is currently written in. Do not translate the resume content unless explicitly asked.\n\nCRITICAL REPLY RULE: Your conversational reply must be VERY short and concise (max 1 sentence) confirming the changes. Write that reply in ${isKu ? "Kurdish (Sorani)" : "English"}. If the user asks to raise, lower, reduce, fill, or change skill bars, dots, stars, or visual skill levels, update resume.skillItems with names aligned to resume.skills and levels from 1 to 5.`,
         },
         {
           role: "user",
@@ -719,16 +721,18 @@ export const tailorToJob = createServerFn({ method: "POST" })
       apiKey: z.string().optional(),
       resume: z.any(),
       jobDescription: z.string().min(20).max(10000),
+      language: z.enum(["en", "ku"]).default("en"),
     }),
   )
   .handler(async ({ data }): Promise<{ resume: ResumeData }> => {
+    const isKu = data.language === "ku";
     const json = await callGateway({
       apiKey: data.apiKey,
       messages: [
         {
           role: "system",
           content:
-            "You rewrite an existing resume to be laser-targeted to the provided job description. Reorder, rephrase, surface relevant keywords. Do not invent companies, dates, or metrics. Keep structure identical.",
+            `You rewrite an existing resume to be laser-targeted to the provided job description. Reorder, rephrase, surface relevant keywords. Do not invent companies, dates, or metrics. Keep structure identical. If you need to add any short assistant-facing note, write it in ${isKu ? "Kurdish (Sorani)" : "English"}.`,
         },
         {
           role: "user",
@@ -757,9 +761,11 @@ export const fixResumeErrors = createServerFn({ method: "POST" })
     z.object({
       apiKey: z.string().optional(),
       resume: z.any(),
+      language: z.enum(["en", "ku"]).default("en"),
     }),
   )
   .handler(async ({ data }): Promise<{ resume: ResumeData; reply: string }> => {
+    const isKu = data.language === "ku";
     const json = await callGateway({
       apiKey: data.apiKey,
       model: "gemini-2.5-flash",
@@ -773,7 +779,7 @@ Analyze the provided CV comprehensively. You must automatically deduce the candi
 1. **Absolute Truth & Zero Hallucination:** Do not fabricate information, skills, or experiences. Base your entire analysis strictly on the provided text.
 2. **Context Isolation:** Treat this analysis in absolute isolation. Do not mix, reference, or incorporate any data or topics from previous chats.
 3. **Language Mandate:** The CV/Resume data itself MUST be updated in the original language of the CV. Do not translate the CV content!
-4. **Conciseness Mandate:** Your entire response (the 'reply' field) MUST be VERY SHORT (max 1 sentence) acknowledging that the errors have been fixed and ATS optimized. Do NOT output a long analysis.
+4. **Conciseness Mandate:** Your entire response (the 'reply' field) MUST be VERY SHORT (max 1 sentence) acknowledging that the errors have been fixed and ATS optimized. Do NOT output a long analysis. Write the reply in ${isKu ? "Kurdish (Sorani)" : "English"}.
 5. **Proactive Enhancement:** Anticipate what makes a perfect CV. Fix formatting, grammar, phrasing, and missing information.
 
 Use the save_resume tool. The 'resume' parameter should contain the ACTUALLY FIXED AND IMPROVED RESUME based on your analysis. The 'reply' parameter should contain your VERY SHORT conversational acknowledgment.`,

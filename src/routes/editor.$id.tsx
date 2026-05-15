@@ -17,18 +17,18 @@ import { DEFAULT_DESIGN, getTemplateDefaults } from "@/components/DesignPanel";
 import { getValueAtPath } from "@/components/resume/editor-helpers";
 
 // Sub-components
-import { EditorChatPane } from "./_editor/EditorChatPane";
-import { EditorPreviewPanel } from "./_editor/EditorPreviewPanel";
+import { EditorChatPane } from "@/components/editor/EditorChatPane";
+import { EditorPreviewPanel } from "@/components/editor/EditorPreviewPanel";
 import {
   TailorModal, CoverLetterModal, TemplateModal,
   ATSModal, InlineEditModal,
-} from "./_editor/EditorModals";
+} from "@/components/editor/EditorModals";
 
 // Constants
 import {
   DEV_SAMPLE_ID, DEV_RESUME, TEMPLATES,
   type Category,
-} from "./_editor/editor.constants";
+} from "@/components/editor/editor.constants";
 
 // ─── Route ────────────────────────────────────────────────────────────────────
 export const Route = createFileRoute("/editor/$id")({
@@ -52,6 +52,7 @@ function ResumeEditor() {
   const { id } = Route.useParams();
   const navigate = useNavigate();
   const resume = useAppStore((s) => s.resumes.find((r) => r.id === id));
+  const resumes = useAppStore((s) => s.resumes);
   const updateResume = useAppStore((s) => s.updateResume);
   const apiKey = useAppStore((s) => s.apiKey);
   const isKu = useAppStore((s) => s.language) === "ku";
@@ -80,6 +81,7 @@ function ResumeEditor() {
   const previewRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const didAutoOpen = useRef(false);
+  const resumeMenuRef = useRef<HTMLDivElement>(null);
 
   const [chatInput, setChatInput] = useState("");
   const [chatLoading, setChatLoading] = useState(false);
@@ -90,7 +92,8 @@ function ResumeEditor() {
   ]);
   const [history, setHistory] = useState<{ id: string; label: string; timestamp: number; snapshot: ResumeData }[]>([]);
   const [showHistory, setShowHistory] = useState(false);
-  const [zoom, setZoom] = useState(0.65);
+  const [showResumeMenu, setShowResumeMenu] = useState(false);
+  const [zoom, setZoom] = useState(1.08);
   const [showResume, setShowResume] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const [inlineEdit, setInlineEdit] = useState<{ path: string; value: string; section: string } | null>(null);
@@ -103,12 +106,32 @@ function ResumeEditor() {
   }, []);
 
   useEffect(() => {
-    if (window.matchMedia("(max-width: 1023px)").matches) setZoom(1);
+    if (window.matchMedia("(max-width: 1023px)").matches) {
+        setZoom(1.08);
+      } else {
+      setZoom(1.08);
+    }
   }, []);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (resumeMenuRef.current && !resumeMenuRef.current.contains(event.target as Node)) {
+        setShowResumeMenu(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const recentResumes = resumes
+    .filter((item) => item.id !== id)
+    .sort((a, b) => b.createdAt - a.createdAt)
+    .slice(0, 6);
 
   // ── Debounced preview (must be before early return — Rules of Hooks) ──────────
   const [debouncedData, setDebouncedData] = useState<ResumeData | undefined>(resume?.data);
@@ -196,7 +219,7 @@ function ResumeEditor() {
     if (jobDescription.trim().length < 20) { toast.error(isKu ? "تکایە وەسفێکی درێژتری کارەکە دابنێ." : "Paste a longer job description."); return; }
     setTailoring(true);
     try {
-      const { resume: tailored } = await tailorFn({ data: { apiKey, resume: data, jobDescription } });
+      const { resume: tailored } = await tailorFn({ data: { apiKey, resume: data, jobDescription, language: isKu ? "ku" : "en" } });
       updateData(tailored);
       toast.success(isKu ? "سیڤییەکە گونجێندرا" : "Resume tailored to job description");
       setTailorOpen(false); setJobDescription("");
@@ -212,7 +235,7 @@ function ResumeEditor() {
     const snapshotId = crypto.randomUUID();
     setHistory((p) => [{ id: snapshotId, label: userMsg.slice(0, 60), timestamp: Date.now(), snapshot: { ...data, experience: data.experience.map((e) => ({ ...e, achievements: [...e.achievements] })) } }, ...p]);
     try {
-      const { resume: updated, reply } = await chatEditFn({ data: { apiKey, resume: data, userMessage: userMsg } });
+      const { resume: updated, reply } = await chatEditFn({ data: { apiKey, resume: data, userMessage: userMsg, language: isKu ? "ku" : "en" } });
       updateData(updated); setMessages((p) => [...p, { role: "assistant", content: reply, snapshotId }]);
       toast.success(isKu ? "سیڤی نوێکرایەوە" : "Resume updated");
     } catch (e) {
@@ -229,7 +252,7 @@ function ResumeEditor() {
     const snapshotId = crypto.randomUUID();
     setHistory((p) => [{ id: snapshotId, label: "Before Auto-Fix", timestamp: Date.now(), snapshot: { ...data, experience: data.experience.map((e) => ({ ...e, achievements: [...e.achievements] })) } }, ...p]);
     try {
-      const { resume: updated, reply } = await fixErrorsFn({ data: { apiKey, resume: data } });
+      const { resume: updated, reply } = await fixErrorsFn({ data: { apiKey, resume: data, language: isKu ? "ku" : "en" } });
       updateData(updated); setMessages((p) => [...p, { role: "assistant", content: reply, snapshotId }]);
       toast.success(isKu ? "سیڤییەکە چاککرا" : "Resume fixed and evaluated");
     } catch (e) {
@@ -267,7 +290,7 @@ function ResumeEditor() {
     setMessages((p) => [...p, { role: "user", content: userMsg }]);
     setChatLoading(true);
     setTimeout(() => {
-      setMessages((p) => [...p, { role: "assistant", content: isKu ? "زۆر باشە، فایلم وەرگرت. چۆن دەتەوێت زانیارییەکانی ئەم فایلە لە سیڤییەکەتدا بەکاربهێنم؟" : "I've received your file. How would you like me to use this information in your resume?" }]);
+      setMessages((p) => [...p, { role: "assistant", content: isKu ? "زۆر باشە، فایلم وەرگرت. چۆن دەتەوێت ئەم زانیارییانە لە سیڤییەکەتدا بەکاربهێنم؟" : "I've received your file. How would you like me to use this information in your resume?" }]);
       setChatLoading(false);
     }, 1000);
   };
@@ -289,10 +312,46 @@ function ResumeEditor() {
                 <img src="/logo/MemoryCV Logo Icon Only.png" alt="MemoryCV" className="size-5 object-contain" />
               </div>
             </Link>
-            <div className="flex items-center gap-1.5 rounded-full px-3 py-1 bg-white shadow-[0_2px_8px_rgba(0,0,0,0.08),0_1px_0_rgba(255,255,255,0.9)_inset] border border-white/60">
-              <FileUser className="size-3.5 text-slate-500" />
-              <span className="text-[13px] font-semibold text-slate-700 max-w-[160px] truncate">{data.name || "My Resume"}</span>
-              <ChevronDown className="size-3 text-slate-400" />
+            <div className="relative" ref={resumeMenuRef}>
+              <button
+                type="button"
+                onClick={() => setShowResumeMenu((v) => !v)}
+                className="flex items-center gap-1.5 rounded-full px-3 py-1 bg-white shadow-[0_2px_8px_rgba(0,0,0,0.08),0_1px_0_rgba(255,255,255,0.9)_inset] border border-white/60 hover:bg-slate-50 transition-colors"
+              >
+                <FileUser className="size-3.5 text-slate-500" />
+                <span className="text-[13px] font-semibold text-slate-700 max-w-[160px] truncate">{data.name || "My Resume"}</span>
+                <ChevronDown className={`size-3 text-slate-400 transition-transform ${showResumeMenu ? "rotate-180" : ""}`} />
+              </button>
+              {showResumeMenu && recentResumes.length > 0 && (
+                <div className="absolute left-0 top-full z-50 mt-2 w-[min(92vw,18rem)] overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_18px_40px_-18px_rgba(15,23,42,0.35)]">
+                  <div className="px-3 py-2 text-[11px] font-bold uppercase tracking-[0.2em] text-slate-400 border-b border-slate-100">
+                    {isKu ? "سیڤییە تازەکان" : "Recent CVs"}
+                  </div>
+                  <div className="max-h-72 overflow-y-auto py-1">
+                    {recentResumes.map((item) => (
+                      <button
+                        key={item.id}
+                        type="button"
+                        onClick={() => {
+                          setShowResumeMenu(false);
+                          navigate({ to: "/editor/$id", params: { id: item.id } });
+                        }}
+                        className="flex w-full items-start gap-2 px-3 py-2 text-left hover:bg-slate-50 transition-colors"
+                      >
+                        <div className="mt-0.5 rounded-lg bg-blue-50 p-1.5 text-blue-600">
+                          <FileText className="size-3.5" />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <div className="truncate text-[13px] font-semibold text-slate-800">{item.title || item.data.name || "My Resume"}</div>
+                          <div className="truncate text-[11px] text-slate-500">
+                            {new Date(item.createdAt).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}
+                          </div>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
@@ -313,59 +372,93 @@ function ResumeEditor() {
           </div>
         </header>
 
-        {/* ── Chat pane ── */}
-        <main className="relative flex-1 min-h-0 z-10 flex flex-col overflow-hidden">
-          <div className="relative flex-1 min-h-0 flex flex-col">
-            <aside className="relative flex flex-col flex-1 min-h-0 max-w-[780px] mx-auto w-full">
-              <EditorChatPane
-                isKu={isKu}
-                messages={messages}
-                chatLoading={chatLoading}
-                chatInput={chatInput}
-                setChatInput={setChatInput}
-                onSubmit={handleChatSubmit}
-                isRecording={isRecording}
-                setIsRecording={setIsRecording}
-                history={history}
-                showHistory={showHistory}
-                setShowHistory={setShowHistory}
-                onRevert={handleRevert}
-                messagesEndRef={messagesEndRef}
-                onCheckATS={handleCheckATS}
-                onFixErrors={handleFixErrors}
-                onOpenTemplates={() => setTemplateModalOpen(true)}
-                onGenerateCoverLetter={handleGenerateCoverLetter}
-                onImageUpload={handleImageUpload}
-                onDocumentUpload={handleDocumentUpload}
-              />
+        {/* ── Editor workspace ── */}
+        <main className="relative z-10 flex-1 min-h-0 overflow-hidden">
+          <div className="flex h-full min-h-0 flex-col gap-4 p-3 md:p-4 lg:grid lg:grid-cols-[360px_minmax(0,1.35fr)] lg:gap-4">
+            <aside className="relative flex min-h-0 flex-1 flex-col lg:max-w-none max-lg:min-h-0 max-lg:overflow-hidden">
+              <div className="flex items-center justify-between px-1 pb-2 lg:hidden">
+                <div className="text-[11px] font-semibold uppercase tracking-[0.25em] text-slate-500">Assistant</div>
+              </div>
+              <div className="relative flex min-h-0 flex-1 flex-col max-lg:min-h-0 max-lg:overflow-hidden">
+                <EditorChatPane
+                  isKu={isKu}
+                  messages={messages}
+                  chatLoading={chatLoading}
+                  chatInput={chatInput}
+                  setChatInput={setChatInput}
+                  onSubmit={handleChatSubmit}
+                  isRecording={isRecording}
+                  setIsRecording={setIsRecording}
+                  history={history}
+                  showHistory={showHistory}
+                  setShowHistory={setShowHistory}
+                  onRevert={handleRevert}
+                  messagesEndRef={messagesEndRef}
+                  onCheckATS={handleCheckATS}
+                  onFixErrors={handleFixErrors}
+                  onOpenTemplates={() => setTemplateModalOpen(true)}
+                  onGenerateCoverLetter={handleGenerateCoverLetter}
+                  onImageUpload={handleImageUpload}
+                  onDocumentUpload={handleDocumentUpload}
+                />
+              </div>
             </aside>
+
+            <section className="hidden min-h-0 lg:flex lg:min-w-0">
+              <EditorPreviewPanel
+                show
+                mode="inline"
+                onClose={() => setShowResume(false)}
+                isKu={isKu}
+                soraniMode={soraniMode}
+                setSoraniMode={setSoraniMode}
+                zoom={zoom}
+                setZoom={setZoom}
+                previewData={previewData}
+                template={resume.template}
+                design={design}
+                updateData={updateData}
+                onSectionClick={(s, path) => {
+                  if (path) {
+                    setInlineEdit({
+                      section: s,
+                      path,
+                      value: String(getValueAtPath(data, path) || ""),
+                    });
+                  }
+                }}
+                previewRef={previewRef}
+              />
+            </section>
           </div>
         </main>
 
         {/* ── Preview overlay ── */}
-        <EditorPreviewPanel
-          show={showResume}
-          onClose={() => setShowResume(false)}
-          isKu={isKu}
-          soraniMode={soraniMode}
-          setSoraniMode={setSoraniMode}
-          zoom={zoom}
-          setZoom={setZoom}
-          previewData={previewData}
-          template={resume.template}
-          design={design}
-          updateData={updateData}
-          onSectionClick={(s, path) => {
-            if (path) {
-              setInlineEdit({
-                section: s,
-                path,
-                value: String(getValueAtPath(data, path) || ""),
-              });
-            }
-          }}
-          previewRef={previewRef}
-        />
+        <div className="lg:hidden">
+          <EditorPreviewPanel
+            show={showResume}
+            onClose={() => setShowResume(false)}
+            isKu={isKu}
+            soraniMode={soraniMode}
+            setSoraniMode={setSoraniMode}
+            zoom={zoom}
+            setZoom={setZoom}
+            previewData={previewData}
+            template={resume.template}
+            design={design}
+            updateData={updateData}
+            onSectionClick={(s, path) => {
+              if (path) {
+                setInlineEdit({
+                  section: s,
+                  path,
+                  value: String(getValueAtPath(data, path) || ""),
+                });
+              }
+            }}
+            previewRef={previewRef}
+          />
+        </div>
 
         {/* ── Modals ── */}
         <TailorModal open={tailorOpen} onClose={() => setTailorOpen(false)} isKu={isKu}

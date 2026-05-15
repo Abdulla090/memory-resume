@@ -68,7 +68,6 @@ export function EditorChatPane({
     } else {
       if (onDocumentUpload) onDocumentUpload(file);
     }
-    // reset input
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
@@ -83,10 +82,8 @@ export function EditorChatPane({
   }, []);
 
   return (
-    <div className="relative flex flex-col flex-1 min-h-0 rounded-3xl bg-white/70 shadow-[0_8px_40px_-12px_rgba(15,23,42,0.15),0_0_0_1px_rgba(255,255,255,0.8)] backdrop-blur-sm">
-
-      {/* Header */}
-      <div className="shrink-0 flex items-center justify-between px-5 pt-4 pb-3 border-b border-slate-100/80">
+    <div className="relative flex flex-col flex-1 min-h-0 rounded-3xl bg-white/70 shadow-[0_8px_40px_-12px_rgba(15,23,42,0.15),0_0_0_1px_rgba(255,255,255,0.8)] backdrop-blur-sm lg:rounded-3xl max-lg:h-full max-lg:rounded-[28px] max-lg:border max-lg:border-slate-200/70 max-lg:overflow-hidden">
+      <div className="shrink-0 flex items-center justify-between px-5 pt-4 pb-3 border-b border-slate-100/80 max-lg:px-4 max-lg:pt-3 max-lg:pb-2.5">
         <div className="flex items-center gap-2">
           <div className="size-7 rounded-xl bg-gradient-to-br from-slate-700 to-slate-900 flex items-center justify-center shadow-[0_2px_6px_rgba(0,0,0,0.2)]">
             <Bot className="size-3.5 text-white" />
@@ -104,7 +101,6 @@ export function EditorChatPane({
         )}
       </div>
 
-      {/* Version history strip */}
       {showHistory && history.length > 0 && (
         <div className="max-h-36 shrink-0 overflow-y-auto border-b border-slate-100 bg-slate-50/60 px-3 py-2 space-y-1">
           {history.map((h) => (
@@ -122,8 +118,7 @@ export function EditorChatPane({
         </div>
       )}
 
-      {/* Messages */}
-      <div className="flex-1 min-h-0 overflow-y-auto space-y-5 px-5 py-4" style={{ scrollbarWidth: "thin", scrollbarColor: "#e2e8f0 transparent" }}>
+      <div className="flex-1 min-h-0 overflow-y-auto space-y-5 px-5 py-4 max-lg:px-4 max-lg:py-3" style={{ scrollbarWidth: "thin", scrollbarColor: "#e2e8f0 transparent" }}>
         <AnimatePresence initial={false}>
           {messages.map((msg, i) => (
             <motion.div key={i}
@@ -169,8 +164,7 @@ export function EditorChatPane({
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Suggestion chips */}
-      <div className="shrink-0 px-4 pb-2 flex gap-2 overflow-x-auto" style={{ scrollbarWidth: "none" }}>
+      <div className="shrink-0 px-4 pb-2 flex gap-2 overflow-x-auto max-lg:px-3" style={{ scrollbarWidth: "none" }}>
         {chips.map((chip) => (
           <button key={chip.label} onClick={() => setChatInput(chip.prompt)}
             className="whitespace-nowrap shrink-0 px-3.5 py-2 rounded-full text-[12px] font-semibold text-slate-600 bg-white shadow-[0_2px_6px_rgba(0,0,0,0.07),0_1px_0_rgba(255,255,255,0.9)_inset] border border-white/60 hover:shadow-[0_3px_10px_rgba(0,0,0,0.1)] active:shadow-[inset_0_2px_4px_rgba(0,0,0,0.07)] transition-all duration-150">
@@ -179,8 +173,7 @@ export function EditorChatPane({
         ))}
       </div>
 
-      {/* Input bar */}
-      <div className="shrink-0 px-4 pb-4 pt-2">
+      <div className="shrink-0 px-4 pb-4 pt-2 max-lg:px-3 max-lg:pb-[calc(1rem+env(safe-area-inset-bottom))] max-lg:pt-2">
         <div className="relative rounded-[22px] bg-white shadow-[0_4px_20px_rgba(0,0,0,0.1),0_1px_0_rgba(255,255,255,0.9)_inset,0_0_0_1px_rgba(15,23,42,0.06)]">
           <form onSubmit={onSubmit}>
             <input type="file" ref={fileInputRef} className="hidden" accept="image/*,.pdf,.doc,.docx,.txt" onChange={handleFileUpload} />

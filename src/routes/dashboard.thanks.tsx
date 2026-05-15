@@ -16,6 +16,28 @@ import {
 import { exportLandscapeCardAsPDF } from "@/lib/pdf-landscape";
 import { useAppStore } from "@/lib/store";
 
+const isEnglishWord = (text: string) => /[A-Za-z]/.test(text);
+
+const MixedText = ({
+  value,
+  className,
+  dir,
+}: {
+  value: string;
+  className?: string;
+  dir?: "rtl" | "ltr";
+}) => (
+  <span className={className} dir={dir ?? "auto"} style={{ unicodeBidi: "plaintext" }}>
+    {value.split(/(\s+)/).map((part, i) =>
+      isEnglishWord(part) ? (
+        <bdi key={i}>{part}</bdi>
+      ) : (
+        <span key={i}>{part}</span>
+      ),
+    )}
+  </span>
+);
+
 export const Route = createFileRoute("/dashboard/thanks")({
   head: () => ({
     meta: [
@@ -173,24 +195,24 @@ function ThanksPage() {
   }, [pane]);
 
   return (
-    <div className="mx-auto flex w-full max-w-[1600px] flex-col gap-6 pb-12">
+    <div className="mx-auto flex w-full max-w-[1600px] flex-col gap-6 pb-12" dir={isKu ? "rtl" : "ltr"}>
       {/* Header */}
       <motion.header
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="flex flex-col gap-4 rounded-[2rem] border border-white/70 bg-gradient-to-br from-[#eaf5ff] via-[#f3f9ff] to-white p-6 sm:flex-row sm:items-center sm:justify-between sm:p-8 shadow-[0_20px_60px_-30px_rgba(59,130,246,0.3)]"
+        className="flex flex-col gap-4 rounded-[2rem] border border-slate-200/80 bg-white p-6 sm:flex-row sm:items-center sm:justify-between sm:p-8 shadow-[0_24px_70px_-40px_rgba(15,23,42,0.22)]"
       >
         <div className="flex items-center gap-4">
-          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-sky-400 to-blue-600 text-white shadow-lg shadow-sky-500/30">
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-slate-900 text-white shadow-sm">
             <Heart className="h-6 w-6" />
           </div>
           <div>
             <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900">
-              {isKu ? "کارتی سوپاس و بانگهێشت" : "Thank-You & Invitation Cards"}
+              <MixedText value={isKu ? "کارتی سوپاس و بانگهێشت" : "Thank-You & Invitation Cards"} />
             </h1>
-            <p className="mt-1 text-sm font-medium text-slate-500">
+            <p className="mt-1 max-w-2xl text-sm font-medium leading-6 text-slate-600">
               {isKu
-                ? "کارتێکی لاندسکێپ دروست بکە بۆ دەرچوون، هاوسەرگیری، یاخود بروانامە. دەرکردن وەک PDF ڤێکتۆر."
+                ? "کارتێکی لاندسکێپ دروست بکە بۆ دەرچوون، هاوسەرگیری، یان بروانامە. هەموو دەقەکان بە شێوەی ڕاست دەردەکەون و دەرکردن وەک PDF ڤێکتۆر دەبێت."
                 : "Design a landscape card for graduations, weddings, or certificates — exported as a true vector PDF."}
             </p>
           </div>
@@ -199,21 +221,21 @@ function ThanksPage() {
           type="button"
           onClick={handleDownload}
           disabled={exporting}
-          className="flex items-center justify-center gap-2 rounded-xl bg-gradient-to-br from-sky-500 to-blue-600 px-5 py-3 text-sm font-bold text-white shadow-lg shadow-sky-500/30 transition-all hover:-translate-y-0.5 hover:shadow-xl disabled:pointer-events-none disabled:opacity-60"
+          className="flex items-center justify-center gap-2 rounded-xl bg-slate-900 px-5 py-3 text-sm font-bold text-white shadow-sm transition-all hover:-translate-y-0.5 hover:bg-slate-800 disabled:pointer-events-none disabled:opacity-60"
         >
           {exporting ? (
             <Loader2 className="h-4 w-4 animate-spin" />
           ) : (
             <Download className="h-4 w-4" />
           )}
-          {isKu ? "دابەزاندنی PDF" : "Download Vector PDF"}
+          <MixedText value={isKu ? "دابەزاندنی PDF" : "Download Vector PDF"} />
         </button>
       </motion.header>
 
       {/* Main grid */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[360px_minmax(0,1fr)]">
         {/* Left: editor */}
-        <aside className="flex flex-col gap-5 rounded-2xl border border-slate-200/70 bg-white p-5 shadow-sm">
+        <aside className="flex flex-col gap-5 rounded-[1.75rem] border border-slate-200/80 bg-white p-5 shadow-sm">
           {/* Presets */}
           <section>
             <h3 className="mb-2 flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest text-slate-500">
@@ -276,7 +298,7 @@ function ThanksPage() {
           {/* Fields */}
           <section className="flex flex-col gap-3">
             <h3 className="text-[11px] font-bold uppercase tracking-widest text-slate-500">
-              {isKu ? "ناوەڕۆک" : "Content"}
+              <MixedText value={isKu ? "ناوەڕۆک" : "Content"} />
             </h3>
 
             <Field
@@ -328,9 +350,9 @@ function ThanksPage() {
         {/* Right: live preview */}
         <div
           ref={setPane}
-          className="relative flex min-h-[460px] items-center justify-center overflow-hidden rounded-2xl border border-slate-200/70 bg-white bg-[radial-gradient(circle_at_top,#e0f2fe,transparent_60%)] p-4 sm:p-8"
+          className="relative flex min-h-[520px] items-center justify-center overflow-hidden rounded-[2rem] border border-slate-200/80 bg-slate-50 p-4 sm:p-8 shadow-[0_18px_50px_-32px_rgba(15,23,42,0.22)]"
         >
-          <div className="absolute left-4 top-4 rounded-full bg-white/80 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-slate-600 shadow-sm backdrop-blur">
+          <div className="absolute left-4 top-4 rounded-full border border-slate-200 bg-white px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-slate-600 shadow-sm backdrop-blur">
             {activeTemplate.label}
           </div>
 
@@ -339,7 +361,7 @@ function ThanksPage() {
               width: CARD_W * fitScale,
               height: CARD_H * fitScale,
             }}
-            className="overflow-hidden rounded-lg shadow-[0_30px_60px_-20px_rgba(15,23,42,0.35)] ring-1 ring-slate-200"
+            className="overflow-hidden rounded-[1rem] shadow-[0_36px_80px_-30px_rgba(15,23,42,0.32)] ring-1 ring-slate-200"
           >
             <ThanksPreview data={data} template={template} svgRef={svgRef} />
           </div>
@@ -371,7 +393,7 @@ function Field({
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
           rows={4}
-          className="resize-none rounded-xl border border-slate-200 bg-slate-50/60 px-3 py-2.5 text-[13px] text-slate-800 outline-none transition-all placeholder:text-slate-400 focus:border-sky-300 focus:bg-white focus:ring-4 focus:ring-sky-400/10"
+          className="resize-none rounded-xl border border-slate-200 bg-slate-50/60 px-3 py-2.5 text-[13px] text-slate-800 outline-none transition-all placeholder:text-slate-400 focus:border-slate-400 focus:bg-white focus:ring-4 focus:ring-slate-400/10"
         />
       ) : (
         <input
@@ -379,7 +401,7 @@ function Field({
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
-          className="rounded-xl border border-slate-200 bg-slate-50/60 px-3 py-2.5 text-[13px] text-slate-800 outline-none transition-all placeholder:text-slate-400 focus:border-sky-300 focus:bg-white focus:ring-4 focus:ring-sky-400/10"
+          className="rounded-xl border border-slate-200 bg-slate-50/60 px-3 py-2.5 text-[13px] text-slate-800 outline-none transition-all placeholder:text-slate-400 focus:border-slate-400 focus:bg-white focus:ring-4 focus:ring-slate-400/10"
         />
       )}
     </label>

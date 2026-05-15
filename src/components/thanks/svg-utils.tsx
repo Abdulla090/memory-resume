@@ -42,7 +42,7 @@ export function MultilineText({
   lineHeight: number;
 } & React.SVGProps<SVGTextElement>) {
   return (
-    <text x={cx} y={y} textAnchor="middle" {...rest}>
+    <text x={cx} y={y} textAnchor="middle" direction="auto" unicodeBidi="plaintext" {...rest}>
       {lines.map((ln, i) => (
         <tspan key={i} x={cx} dy={i === 0 ? 0 : lineHeight}>
           {ln}

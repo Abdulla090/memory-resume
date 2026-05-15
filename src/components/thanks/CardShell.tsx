@@ -23,7 +23,7 @@ export const CardShell = forwardRef<
       width="100%"
       height="100%"
       preserveAspectRatio="xMidYMid meet"
-      style={{ display: "block", ...style }}
+      style={{ display: "block", unicodeBidi: "plaintext", ...style }}
     >
       <rect x={0} y={0} width={CARD_W} height={CARD_H} fill={background} />
       {children}
