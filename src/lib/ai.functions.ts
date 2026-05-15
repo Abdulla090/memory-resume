@@ -1,11 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
-import type {
-  CareerPath,
-  FollowUpQuestion,
-  Profile,
-  ResumeData,
-} from "./types";
+import type { CareerPath, FollowUpQuestion, Profile, ResumeData } from "./types";
 import { optimizeResumeForOnePage } from "./resume-utils";
 
 const AI_ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions";
@@ -36,7 +31,7 @@ async function callGateway(opts: {
   const modelName = opts.model ?? DEFAULT_MODEL;
 
   if (!authKey) {
-    throw new Error('MISSING_API_KEY');
+    throw new Error("MISSING_API_KEY");
   }
 
   const body: Record<string, unknown> = { model: modelName, messages: opts.messages };
@@ -44,35 +39,42 @@ async function callGateway(opts: {
   if (opts.toolChoice) body.tool_choice = opts.toolChoice;
 
   const res = await fetch(AI_ENDPOINT, {
-    method: 'POST',
+    method: "POST",
     headers: {
-      Authorization: 'Bearer ' + authKey,
-      'Content-Type': 'application/json',
+      Authorization: "Bearer " + authKey,
+      "Content-Type": "application/json",
     },
     body: JSON.stringify(body),
   });
 
   if (!res.ok) {
-    if (res.status === 429) throw new Error('Rate limit hit. Please wait and try again.');
-    if (res.status === 401 || res.status === 403) throw new Error('Invalid API key.');
-    const text = await res.text().catch(() => '');
-    console.error('API error:', res.status, text);
-    throw new Error('API error (' + res.status + ')');
+    if (res.status === 429) throw new Error("Rate limit hit. Please wait and try again.");
+    if (res.status === 401 || res.status === 403) throw new Error("Invalid API key.");
+    const text = await res.text().catch(() => "");
+    console.error("API error:", res.status, text);
+    throw new Error("API error (" + res.status + ")");
   }
 
   return res.json();
 }
 
-function extractToolArgs<T>(json: any): T {
-  const call = json?.choices?.[0]?.message?.tool_calls?.[0];
+function extractToolArgs<T>(json: unknown): T {
+  const call = (
+    json as {
+      choices?: Array<{ message?: { tool_calls?: Array<{ function?: { arguments?: string } }> } }>;
+    }
+  )?.choices?.[0]?.message?.tool_calls?.[0];
   if (!call?.function?.arguments) {
     throw new Error("AI did not return structured output");
   }
   return JSON.parse(call.function.arguments) as T;
 }
 
-function extractText(json: any): string {
-  return json?.choices?.[0]?.message?.content ?? "";
+function extractText(json: unknown): string {
+  return (
+    (json as { choices?: Array<{ message?: { content?: string } }> })?.choices?.[0]?.message
+      ?.content ?? ""
+  );
 }
 
 // ───────────────── parseMemory ─────────────────
@@ -214,14 +216,21 @@ export const getFollowUpQuestions = createServerFn({ method: "POST" })
       rawMemory: z.string(),
     }),
   )
-  .handler(async ({ data }): Promise<{ state: "GATHERING" | "READY_TO_TEMPLATE" | "NEED_CLARITY", message: string, questions: import("./types").FollowUpQuestion[] }> => {
-    const profileStr = JSON.stringify(data.profile);
-    const json = await callGateway({
-      apiKey: data.apiKey,
-      messages: [
-        {
-          role: "system",
-          content: `You are the "Workflow Navigator" for MemoryCV. Your job is to guide the user through the onboarding funnel and decide when their "Professional Memory" is complete enough to move to the next stage.
+  .handler(
+    async ({
+      data,
+    }): Promise<{
+      state: "GATHERING" | "READY_TO_TEMPLATE" | "NEED_CLARITY";
+      message: string;
+      questions: import("./types").FollowUpQuestion[];
+    }> => {
+      const profileStr = JSON.stringify(data.profile);
+      const json = await callGateway({
+        apiKey: data.apiKey,
+        messages: [
+          {
+            role: "system",
+            content: `You are the "Workflow Navigator" for MemoryCV. Your job is to guide the user through the onboarding funnel and decide when their "Professional Memory" is complete enough to move to the next stage.
 Your tone must be formal and logical, not chatty or casual. You are a system answering and analyzing, not a "dude" chatting.
 
 ### THE WORKFLOW STATES
@@ -243,50 +252,79 @@ IMPORTANT FOR UI COMPONENTS:
 - For multiple choice, use inputType "multiselect".
 - For standard text, use inputType "text".
 Return at most 4 questions. If READY_TO_TEMPLATE, return an empty questions array.`,
-        },
-        {
-          role: "user",
-          content: `Raw input:\n${data.rawMemory}\n\nExtracted profile:\n${profileStr}`,
-        },
-      ],
-      tools: [
-        {
-          type: "function",
-          function: {
-            name: "return_workflow_state",
-            description: "Return the current workflow state, an accompanying message, and any necessary follow-up questions.",
-            parameters: {
-              type: "object",
-              properties: {
-                state: { type: "string", enum: ["GATHERING", "READY_TO_TEMPLATE", "NEED_CLARITY"] },
-                message: { type: "string", description: "Formal message to the user explaining the state or what is needed." },
-                questions: {
-                  type: "array",
-                  items: {
-                    type: "object",
-                    properties: {
-                      id: { type: "string" },
-                      field: { type: "string", description: "Which profile field this fills, e.g. 'email', 'skills'" },
-                      question: { type: "string", description: "The logical question to ask the user" },
-                      helperText: { type: "string", description: "Brief explanation of why this matters" },
-                      inputType: { type: "string", enum: ["text", "select", "multiselect", "rating"] },
-                      options: { type: "array", items: { type: "string" }, description: "Options for select/multiselect. Empty if text or rating." },
-                      placeholder: { type: "string" },
+          },
+          {
+            role: "user",
+            content: `Raw input:\n${data.rawMemory}\n\nExtracted profile:\n${profileStr}`,
+          },
+        ],
+        tools: [
+          {
+            type: "function",
+            function: {
+              name: "return_workflow_state",
+              description:
+                "Return the current workflow state, an accompanying message, and any necessary follow-up questions.",
+              parameters: {
+                type: "object",
+                properties: {
+                  state: {
+                    type: "string",
+                    enum: ["GATHERING", "READY_TO_TEMPLATE", "NEED_CLARITY"],
+                  },
+                  message: {
+                    type: "string",
+                    description:
+                      "Formal message to the user explaining the state or what is needed.",
+                  },
+                  questions: {
+                    type: "array",
+                    items: {
+                      type: "object",
+                      properties: {
+                        id: { type: "string" },
+                        field: {
+                          type: "string",
+                          description: "Which profile field this fills, e.g. 'email', 'skills'",
+                        },
+                        question: {
+                          type: "string",
+                          description: "The logical question to ask the user",
+                        },
+                        helperText: {
+                          type: "string",
+                          description: "Brief explanation of why this matters",
+                        },
+                        inputType: {
+                          type: "string",
+                          enum: ["text", "select", "multiselect", "rating"],
+                        },
+                        options: {
+                          type: "array",
+                          items: { type: "string" },
+                          description: "Options for select/multiselect. Empty if text or rating.",
+                        },
+                        placeholder: { type: "string" },
+                      },
+                      required: ["id", "field", "question", "helperText", "inputType", "options"],
                     },
-                    required: ["id", "field", "question", "helperText", "inputType", "options"],
                   },
                 },
+                required: ["state", "message", "questions"],
               },
-              required: ["state", "message", "questions"],
             },
           },
-        },
-      ],
-      toolChoice: { type: "function", function: { name: "return_workflow_state" } },
-    });
-    const result = extractToolArgs<{ state: "GATHERING" | "READY_TO_TEMPLATE" | "NEED_CLARITY"; message: string; questions: import("./types").FollowUpQuestion[] }>(json);
-    return result;
-  });
+        ],
+        toolChoice: { type: "function", function: { name: "return_workflow_state" } },
+      });
+      const result = extractToolArgs<{
+        state: "GATHERING" | "READY_TO_TEMPLATE" | "NEED_CLARITY";
+        message: string;
+        questions: import("./types").FollowUpQuestion[];
+      }>(json);
+      return result;
+    },
+  );
 
 // ───────────────── patchProfileWithAnswers ─────────────────
 
@@ -304,7 +342,8 @@ export const patchProfileWithAnswers = createServerFn({ method: "POST" })
       messages: [
         {
           role: "system",
-          content: "You are a profile merge AI. Given an existing profile JSON and a set of user answers to follow-up questions, merge the answers into the profile and return the updated complete profile JSON. Preserve all existing data; only add/update fields based on the answers.",
+          content:
+            "You are a profile merge AI. Given an existing profile JSON and a set of user answers to follow-up questions, merge the answers into the profile and return the updated complete profile JSON. Preserve all existing data; only add/update fields based on the answers.",
         },
         {
           role: "user",
@@ -381,7 +420,8 @@ const resumeSchema = {
     skills: { type: "array", items: { type: "string" } },
     skillItems: {
       type: "array",
-      description: "Skill ratings used by visual resume templates. Keep names aligned with skills. Level is 1-5 and controls bars, dots, stars, or other skill graphics.",
+      description:
+        "Skill ratings used by visual resume templates. Keep names aligned with skills. Level is 1-5 and controls bars, dots, stars, or other skill graphics.",
       items: {
         type: "object",
         properties: {
@@ -420,8 +460,7 @@ export const generateResume = createServerFn({ method: "POST" })
       messages: [
         {
           role: "system",
-          content:
-            `### ROLE
+          content: `### ROLE
 You are the "Professional Memory Architect" for MemoryCV. Your goal is to transform messy, raw career data into high-impact, top-1% professional resumes that bypass ATS filters and impress human recruiters.
 
 ### THE MISSION
@@ -478,8 +517,7 @@ export const chatEditResume = createServerFn({ method: "POST" })
       messages: [
         {
           role: "system",
-          content:
-            `You are an elite resume editor and AI assistant. The user will provide their current resume data (in JSON) and a message detailing what changes they want. You must output the fully updated resume data reflecting these changes using the save_resume tool. \n\nCRITICAL LANGUAGE RULE: No matter what language the user speaks in their request, you MUST modify the resume data in the exact same language the resume is currently written in. Do not translate the resume content unless explicitly asked.\n\nCRITICAL REPLY RULE: Your conversational reply must be VERY short and concise (max 1 sentence) confirming the changes. Write that reply in ${isKu ? "Kurdish (Sorani)" : "English"}. If the user asks to raise, lower, reduce, fill, or change skill bars, dots, stars, or visual skill levels, update resume.skillItems with names aligned to resume.skills and levels from 1 to 5.`,
+          content: `You are an elite resume editor and AI assistant. The user will provide their current resume data (in JSON) and a message detailing what changes they want. You must output the fully updated resume data reflecting these changes using the save_resume tool. \n\nCRITICAL LANGUAGE RULE: No matter what language the user speaks in their request, you MUST modify the resume data in the exact same language the resume is currently written in. Do not translate the resume content unless explicitly asked.\n\nCRITICAL REPLY RULE: Your conversational reply must be VERY short and concise (max 1 sentence) confirming the changes. Write that reply in ${isKu ? "Kurdish (Sorani)" : "English"}. If the user asks to raise, lower, reduce, fill, or change skill bars, dots, stars, or visual skill levels, update resume.skillItems with names aligned to resume.skills and levels from 1 to 5.`,
         },
         {
           role: "user",
@@ -496,9 +534,13 @@ export const chatEditResume = createServerFn({ method: "POST" })
               type: "object",
               properties: {
                 resume: resumeSchema,
-                reply: { type: "string", description: "A VERY short and concise conversational reply (max 1 sentence) confirming the changes." }
+                reply: {
+                  type: "string",
+                  description:
+                    "A VERY short and concise conversational reply (max 1 sentence) confirming the changes.",
+                },
               },
-              required: ["resume", "reply"]
+              required: ["resume", "reply"],
             },
           },
         },
@@ -651,7 +693,11 @@ export const improveBullet = createServerFn({ method: "POST" })
         },
       ],
     });
-    return { bullet: extractText(json).trim().replace(/^["']|["']$/g, "") };
+    return {
+      bullet: extractText(json)
+        .trim()
+        .replace(/^["']|["']$/g, ""),
+    };
   });
 
 // ───────────────── suggestCareerPaths ─────────────────
@@ -671,14 +717,7 @@ const careerPathsSchema = {
           salaryRange: { type: "string" },
           timeToTransition: { type: "string" },
         },
-        required: [
-          "title",
-          "matchScore",
-          "whyFit",
-          "skillGaps",
-          "salaryRange",
-          "timeToTransition",
-        ],
+        required: ["title", "matchScore", "whyFit", "skillGaps", "salaryRange", "timeToTransition"],
       },
     },
   },
@@ -731,8 +770,7 @@ export const tailorToJob = createServerFn({ method: "POST" })
       messages: [
         {
           role: "system",
-          content:
-            `You rewrite an existing resume to be laser-targeted to the provided job description. Reorder, rephrase, surface relevant keywords. Do not invent companies, dates, or metrics. Keep structure identical. If you need to add any short assistant-facing note, write it in ${isKu ? "Kurdish (Sorani)" : "English"}.`,
+          content: `You rewrite an existing resume to be laser-targeted to the provided job description. Reorder, rephrase, surface relevant keywords. Do not invent companies, dates, or metrics. Keep structure identical. If you need to add any short assistant-facing note, write it in ${isKu ? "Kurdish (Sorani)" : "English"}.`,
         },
         {
           role: "user",
@@ -799,9 +837,13 @@ Use the save_resume tool. The 'resume' parameter should contain the ACTUALLY FIX
               type: "object",
               properties: {
                 resume: resumeSchema,
-                reply: { type: "string", description: "A VERY short and concise conversational reply (max 1 sentence) confirming the CV has been fixed." }
+                reply: {
+                  type: "string",
+                  description:
+                    "A VERY short and concise conversational reply (max 1 sentence) confirming the CV has been fixed.",
+                },
               },
-              required: ["resume", "reply"]
+              required: ["resume", "reply"],
             },
           },
         },
@@ -856,9 +898,12 @@ The Cover Letter must be written in ${data.language === "ku" ? "fluent Kurdish (
             parameters: {
               type: "object",
               properties: {
-                coverLetter: { type: "string", description: "The generated cover letter text in markdown format." }
+                coverLetter: {
+                  type: "string",
+                  description: "The generated cover letter text in markdown format.",
+                },
               },
-              required: ["coverLetter"]
+              required: ["coverLetter"],
             },
           },
         },
@@ -876,18 +921,22 @@ export const generateInterviewQuestion = createServerFn({ method: "POST" })
   .inputValidator(
     z.object({
       apiKey: z.string().optional(),
-      history: z.array(z.object({ role: z.enum(["ai", "user", "system", "assistant"]), content: z.string() })),
+      history: z.array(
+        z.object({ role: z.enum(["ai", "user", "system", "assistant"]), content: z.string() }),
+      ),
       targetRole: z.string().optional(),
       language: z.enum(["en", "ku"]).default("en"),
       questionIndex: z.number(),
       totalQuestions: z.number(),
-    })
+    }),
   )
   .handler(async ({ data }): Promise<{ nextQuestion: string }> => {
     const isKu = data.language === "ku";
-    const rolePrompt = data.targetRole ? `The user is interviewing for the role of: ${data.targetRole}. You ALREADY KNOW this role, DO NOT ask them what role they are applying for.` : "The user is interviewing for a general professional role.";
-    
-    let sysPrompt = `You are an expert AI Interviewer conducting a highly professional, hyper-realistic job interview.
+    const rolePrompt = data.targetRole
+      ? `The user is interviewing for the role of: ${data.targetRole}. You ALREADY KNOW this role, DO NOT ask them what role they are applying for.`
+      : "The user is interviewing for a general professional role.";
+
+    const sysPrompt = `You are an expert AI Interviewer conducting a highly professional, hyper-realistic job interview.
 ${rolePrompt}
 You are currently asking question ${data.questionIndex + 1} out of ${data.totalQuestions}.
 Your goal is to assess the candidate's skills, experience, and behavioral traits.
@@ -899,22 +948,27 @@ RULES:
 4. DO NOT break character. You are the interviewer.
 5. Keep the question concise (1-3 sentences maximum).
 6. DO NOT provide answers or hints.
-7. ${isKu ? 'YOU MUST SPEAK ONLY IN KURDISH SORANI (کوردی سۆرانی).' : 'Speak in English.'}`;
+7. ${isKu ? "YOU MUST SPEAK ONLY IN KURDISH SORANI (کوردی سۆرانی)." : "Speak in English."}`;
 
-    const messages: GatewayMessage[] = [
-      { role: "system", content: sysPrompt }
-    ];
+    const messages: GatewayMessage[] = [{ role: "system", content: sysPrompt }];
 
     if (data.history.length === 0) {
-      messages.push({ 
-        role: "user", 
-        content: isKu ? "من ئامادەم. تکایە یەکەم پرسیاری چاوپێکەوتنەکە بکە." : "I am ready. Please ask the first interview question." 
+      messages.push({
+        role: "user",
+        content: isKu
+          ? "من ئامادەم. تکایە یەکەم پرسیاری چاوپێکەوتنەکە بکە."
+          : "I am ready. Please ask the first interview question.",
       });
     } else {
-      messages.push(...data.history.map(msg => ({ 
-        role: msg.role === 'ai' ? 'assistant' : msg.role, 
-        content: msg.content 
-      } as GatewayMessage)));
+      messages.push(
+        ...data.history.map(
+          (msg) =>
+            ({
+              role: msg.role === "ai" ? "assistant" : msg.role,
+              content: msg.content,
+            }) as GatewayMessage,
+        ),
+      );
     }
 
     const json = await callGateway({
