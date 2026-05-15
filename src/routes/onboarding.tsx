@@ -359,9 +359,20 @@ function ChatOnboarding() {
       </AnimatePresence>
 
       {/* ── Header ── */}
-      <header className="relative z-10 px-6 py-5 flex items-center gap-3 shrink-0">
-        <img src="/logo/MemoryCV Logo Icon Only.png" alt="MemoryCV" className="h-16 w-16 rounded-xl object-contain" />
-        <span className="text-2xl font-bold text-slate-900 tracking-tight">MemoryCV</span>
+      <header className="relative z-10 px-6 py-5 flex items-center justify-between shrink-0">
+        <div className="flex items-center gap-3">
+          <img src="/logo/MemoryCV Logo Icon Only.png" alt="MemoryCV" className="h-16 w-16 rounded-xl object-contain" />
+          <span className="text-2xl font-bold text-slate-900 tracking-tight">MemoryCV</span>
+        </div>
+        <button 
+          onClick={() => {
+            setOnboardingDone();
+            navigate({ to: '/dashboard' });
+          }}
+          className="text-[14px] font-semibold text-slate-500 hover:text-slate-900 bg-white/50 hover:bg-white/80 px-4 py-2 rounded-full backdrop-blur-sm transition-colors border border-white"
+        >
+          {isKu ? "بازدان" : "Skip"}
+        </button>
       </header>
 
       {/* ── INTAKE ── */}

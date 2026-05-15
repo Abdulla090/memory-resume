@@ -1660,7 +1660,7 @@ function Landing() {
   const isRTL = language === "ku";
 
   return (
-    <div className="page-shell bg-background text-foreground" dir={t.dir} lang={t.lang}>
+    <div className="page-shell font-doran bg-background text-foreground" dir={t.dir} lang={t.lang}>
       <Header
         language={language}
         onToggleLanguage={() => setLanguage(language === "en" ? "ku" : "en")}

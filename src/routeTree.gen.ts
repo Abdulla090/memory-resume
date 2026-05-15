@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TemplatesRouteImport } from './routes/templates'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
+import { Route as InterviewRouteImport } from './routes/interview'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DashboardIndexRouteImport } from './routes/dashboard.index'
@@ -32,6 +33,11 @@ const TemplatesRoute = TemplatesRouteImport.update({
 const OnboardingRoute = OnboardingRouteImport.update({
   id: '/onboarding',
   path: '/onboarding',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InterviewRoute = InterviewRouteImport.update({
+  id: '/interview',
+  path: '/interview',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DashboardRoute = DashboardRouteImport.update({
@@ -98,6 +104,7 @@ const DashboardAiOptimizeRoute = DashboardAiOptimizeRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRouteWithChildren
+  '/interview': typeof InterviewRoute
   '/onboarding': typeof OnboardingRoute
   '/templates': typeof TemplatesRoute
   '/dashboard/ai-optimize': typeof DashboardAiOptimizeRoute
@@ -113,6 +120,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/interview': typeof InterviewRoute
   '/onboarding': typeof OnboardingRoute
   '/templates': typeof TemplatesRoute
   '/dashboard/ai-optimize': typeof DashboardAiOptimizeRoute
@@ -130,6 +138,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRouteWithChildren
+  '/interview': typeof InterviewRoute
   '/onboarding': typeof OnboardingRoute
   '/templates': typeof TemplatesRoute
   '/dashboard/ai-optimize': typeof DashboardAiOptimizeRoute
@@ -148,6 +157,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/dashboard'
+    | '/interview'
     | '/onboarding'
     | '/templates'
     | '/dashboard/ai-optimize'
@@ -163,6 +173,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/interview'
     | '/onboarding'
     | '/templates'
     | '/dashboard/ai-optimize'
@@ -179,6 +190,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/dashboard'
+    | '/interview'
     | '/onboarding'
     | '/templates'
     | '/dashboard/ai-optimize'
@@ -196,6 +208,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   DashboardRoute: typeof DashboardRouteWithChildren
+  InterviewRoute: typeof InterviewRoute
   OnboardingRoute: typeof OnboardingRoute
   TemplatesRoute: typeof TemplatesRoute
   EditorIdRoute: typeof EditorIdRoute
@@ -215,6 +228,13 @@ declare module '@tanstack/react-router' {
       path: '/onboarding'
       fullPath: '/onboarding'
       preLoaderRoute: typeof OnboardingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/interview': {
+      id: '/interview'
+      path: '/interview'
+      fullPath: '/interview'
+      preLoaderRoute: typeof InterviewRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/dashboard': {
@@ -335,6 +355,7 @@ const DashboardRouteWithChildren = DashboardRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   DashboardRoute: DashboardRouteWithChildren,
+  InterviewRoute: InterviewRoute,
   OnboardingRoute: OnboardingRoute,
   TemplatesRoute: TemplatesRoute,
   EditorIdRoute: EditorIdRoute,

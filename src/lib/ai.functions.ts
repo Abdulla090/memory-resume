@@ -863,3 +863,59 @@ The Cover Letter must be written in ${data.language === "ku" ? "fluent Kurdish (
     const result = extractToolArgs<{ coverLetter: string }>(json);
     return { coverLetter: result.coverLetter };
   });
+
+// ───────────────── generateInterviewQuestion ─────────────────
+
+export const generateInterviewQuestion = createServerFn({ method: "POST" })
+  .inputValidator(
+    z.object({
+      apiKey: z.string().optional(),
+      history: z.array(z.object({ role: z.enum(["ai", "user", "system", "assistant"]), content: z.string() })),
+      targetRole: z.string().optional(),
+      language: z.enum(["en", "ku"]).default("en"),
+      questionIndex: z.number(),
+      totalQuestions: z.number(),
+    })
+  )
+  .handler(async ({ data }): Promise<{ nextQuestion: string }> => {
+    const isKu = data.language === "ku";
+    const rolePrompt = data.targetRole ? `The user is interviewing for the role of: ${data.targetRole}. You ALREADY KNOW this role, DO NOT ask them what role they are applying for.` : "The user is interviewing for a general professional role.";
+    
+    let sysPrompt = `You are an expert AI Interviewer conducting a highly professional, hyper-realistic job interview.
+${rolePrompt}
+You are currently asking question ${data.questionIndex + 1} out of ${data.totalQuestions}.
+Your goal is to assess the candidate's skills, experience, and behavioral traits.
+
+RULES:
+1. Ask ONE clear, professional interview question.
+2. If this is question 1, welcome them briefly and immediately ask the first opening question (e.g., "Tell me about yourself" or a role-specific starter). DO NOT ask what role they are applying for.
+3. Base your question on the context of the conversation so far, or introduce a new relevant topic if needed.
+4. DO NOT break character. You are the interviewer.
+5. Keep the question concise (1-3 sentences maximum).
+6. DO NOT provide answers or hints.
+7. ${isKu ? 'YOU MUST SPEAK ONLY IN KURDISH SORANI (کوردی سۆرانی).' : 'Speak in English.'}`;
+
+    const messages: GatewayMessage[] = [
+      { role: "system", content: sysPrompt }
+    ];
+
+    if (data.history.length === 0) {
+      messages.push({ 
+        role: "user", 
+        content: isKu ? "من ئامادەم. تکایە یەکەم پرسیاری چاوپێکەوتنەکە بکە." : "I am ready. Please ask the first interview question." 
+      });
+    } else {
+      messages.push(...data.history.map(msg => ({ 
+        role: msg.role === 'ai' ? 'assistant' : msg.role, 
+        content: msg.content 
+      } as GatewayMessage)));
+    }
+
+    const json = await callGateway({
+      apiKey: data.apiKey,
+      model: "gemini-2.5-flash",
+      messages,
+    });
+
+    return { nextQuestion: extractText(json).trim() };
+  });

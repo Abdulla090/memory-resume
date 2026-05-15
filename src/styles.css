@@ -3,6 +3,15 @@
 @source "../src";
 @import "tw-animate-css";
 
+/* ── Rabar Kurdish Font ─────────────────────────────── */
+@font-face {
+  font-family: 'Rabar';
+  src: url('/KUFONT/Rabar_039.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
 /* ── Doran Kurdish Font ─────────────────────────────── */
 @font-face {
   font-family: 'Doran';
@@ -144,6 +153,9 @@
 @layer base {
   * {
     border-color: var(--color-border);
+    transition-property: background-color, border-color, color, fill, stroke, box-shadow;
+    transition-duration: 700ms;
+    transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
   }
 
   html, body {
@@ -169,11 +181,17 @@
     background: rgba(37,99,235,0.15);
   }
 
-  /* ── Apply Doran font for all RTL (Kurdish) content ── */
+  /* ── Apply Rabar font for all RTL (Kurdish) content by default ── */
   [dir="rtl"],
   [dir="rtl"] * {
-    font-family: 'Doran', 'Segoe UI', Tahoma, sans-serif !important;
+    font-family: 'Rabar', 'Segoe UI', Tahoma, sans-serif !important;
     letter-spacing: 0 !important;
+  }
+
+  /* ── Override for Landing Page to keep Doran ── */
+  .font-doran[dir="rtl"],
+  .font-doran[dir="rtl"] * {
+    font-family: 'Doran', 'Segoe UI', Tahoma, sans-serif !important;
   }
 }
 

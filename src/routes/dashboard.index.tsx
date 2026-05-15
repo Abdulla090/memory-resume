@@ -9,10 +9,13 @@ import {
   Code2,
   PenLine,
   GraduationCap,
+  MessageSquare,
+  Type,
+  Mic,
 } from 'lucide-react';
-import { useMemo, useRef, useState } from 'react';
+import { useMemo, useRef, useState, useEffect } from 'react';
 import { useAppStore } from '@/lib/store';
-import { motion, Variants } from 'framer-motion';
+import { motion, Variants, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
 import { SAMPLE_MEMORIES } from '@/lib/sample-memories';
 import { ResumePreview } from '@/components/resume/templates';
@@ -116,12 +119,10 @@ function DashboardIndex() {
   const language = useAppStore((state) => state.language);
   const isKu = language === 'ku';
 
-  // ── Bolt-style chat intake state ───────────────────────────────────────
   const [prompt, setPrompt] = useState('');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // ── Templates filter ───────────────────────────────────────────────────
   const [filter, setFilter] = useState<Category>('All');
   const filteredTemplates = useMemo(() => {
     if (filter === 'All') return TEMPLATES;
@@ -205,18 +206,40 @@ function DashboardIndex() {
   };
 
   return (
-    <motion.div
-      className="relative mx-auto w-full max-w-7xl space-y-10 sm:space-y-12 pb-10"
-      variants={containerVariants}
-      initial="hidden"
-      animate="visible"
-    >
-      {/* ───────── Bolt-style chat intake hero ───────── */}
+    <div className="relative mx-auto w-full max-w-7xl space-y-8 sm:space-y-10 pb-10">
+      
+      <motion.div 
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="flex justify-center w-full pt-4 relative z-20"
+      >
+        <div className="inline-flex items-center rounded-full border border-border bg-card/60 p-1.5 backdrop-blur-xl shadow-lg shadow-black/5">
+          <button
+            className="flex items-center gap-2 rounded-full px-6 py-2.5 text-sm font-bold transition-all duration-500 bg-foreground text-background shadow-md scale-105"
+          >
+            <BriefcaseIcon className="h-4 w-4" />
+            {isKu ? 'دروستکەری سیڤی' : 'CV Builder'}
+          </button>
+          <button
+            onClick={() => navigate({ to: '/interview' })}
+            className="flex items-center gap-2 rounded-full px-6 py-2.5 text-sm font-bold transition-all duration-500 text-muted-foreground hover:text-foreground"
+          >
+            <MessageSquare className="h-4 w-4" />
+            {isKu ? 'چاوپێکەوتن' : 'Interview Mode'}
+          </button>
+        </div>
+      </motion.div>
+
+      <motion.div
+        initial="hidden"
+        animate="visible"
+        variants={containerVariants}
+        className="space-y-10 sm:space-y-12"
+      >
       <motion.section
         variants={itemVariants}
-        className="relative overflow-hidden rounded-[2.25rem] border border-white/70 bg-gradient-to-b from-[#eaf5ff] via-[#f3f9ff] to-white p-6 sm:p-10 lg:p-14 shadow-[0_20px_60px_-30px_rgba(59,130,246,0.35)]"
+        className="relative overflow-hidden rounded-[2.25rem] border border-white/70 bg-gradient-to-b from-[#eaf5ff] via-[#f3f9ff] to-white p-6 sm:p-10 lg:p-14 shadow-[0_20px_60px_-30px_rgba(59,130,246,0.35)] dark:border-border dark:bg-card dark:from-card dark:to-card"
       >
-        {/* Sky & cloud decoration */}
         <div className="pointer-events-none absolute inset-0 -z-0">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(186,230,253,0.55),transparent_60%)]" />
           <div className="absolute top-[-80px] left-[-60px] h-[260px] w-[520px] opacity-80">
@@ -238,13 +261,12 @@ function DashboardIndex() {
         </div>
 
         <div className="relative z-10 flex flex-col items-center text-center">
-          {/* Greeting pill */}
           <div className="inline-flex items-center gap-2 rounded-full bg-white/80 px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-sky-700 shadow-sm backdrop-blur-sm ring-1 ring-sky-100">
             <Sparkles className="h-3.5 w-3.5 text-sky-500" />
             {isKu ? 'سڵاو 👋 ئامادەم یارمەتیت بدەم' : 'Welcome back 👋'}
           </div>
 
-          <h1 className="mt-5 max-w-3xl text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-slate-900 leading-[1.1]">
+          <motion.h1 className="mt-5 max-w-3xl text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-slate-900 dark:text-foreground leading-[1.1]">
             {isKu ? (
               <>
                 چ جۆرە سیڤییەک <span className="bg-gradient-to-r from-sky-500 to-blue-600 bg-clip-text text-transparent">دروست بکەین؟</span>
@@ -254,16 +276,15 @@ function DashboardIndex() {
                 What kind of resume <span className="bg-gradient-to-r from-sky-500 to-blue-600 bg-clip-text text-transparent">shall we craft?</span>
               </>
             )}
-          </h1>
+          </motion.h1>
           <p className="mt-3 max-w-xl text-sm sm:text-base font-medium text-slate-500">
             {isKu
               ? 'سیڤییەکەت، پوختەی لینکدین، یان کورتەیەک دەربارەی خۆت دابنێ — من سیڤییەکی پیشەیی بۆ دروست دەکەم لە چەند چرکەیەکدا.'
               : 'Paste your resume, LinkedIn summary, or a quick intro about yourself — I’ll turn it into a polished CV in seconds.'}
           </p>
 
-          {/* Chat input card */}
           <div className="mt-8 w-full max-w-2xl">
-            <div className="group rounded-[26px] border border-slate-200/70 bg-white/80 shadow-[0_10px_40px_-18px_rgba(15,23,42,0.18)] ring-4 ring-transparent backdrop-blur-xl transition-all duration-300 focus-within:border-sky-200 focus-within:bg-white focus-within:ring-sky-400/10 overflow-hidden">
+            <motion.div className="group rounded-[26px] border border-slate-200/70 bg-white/80 dark:border-border dark:bg-background shadow-[0_10px_40px_-18px_rgba(15,23,42,0.18)] ring-4 ring-transparent backdrop-blur-xl transition-all duration-300 focus-within:border-sky-200 focus-within:bg-white focus-within:ring-sky-400/10 overflow-hidden">
               <textarea
                 ref={textareaRef}
                 value={prompt}
@@ -279,11 +300,11 @@ function DashboardIndex() {
                     handleSubmit();
                   }
                 }}
-                className="w-full resize-none bg-transparent px-6 pt-6 pb-3 text-[15px] leading-relaxed text-slate-800 outline-none placeholder:text-slate-400"
+                className="w-full resize-none bg-transparent px-6 pt-6 pb-3 text-[15px] leading-relaxed text-slate-800 dark:text-foreground outline-none placeholder:text-slate-400"
                 style={{ minHeight: '140px' }}
               />
 
-              <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 border-t border-slate-100 bg-slate-50/60 px-3 py-2.5 sm:px-4">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 border-t border-slate-100 bg-slate-50/60 dark:bg-muted/20 dark:border-border px-3 py-2.5 sm:px-4">
                 <div className="flex items-center gap-1.5 sm:gap-2">
                   <input
                     type="file"
@@ -326,9 +347,8 @@ function DashboardIndex() {
                   </button>
                 </div>
               </div>
-            </div>
+            </motion.div>
 
-            {/* Quick prompt chips */}
             <div className="mt-5 flex flex-wrap items-center justify-center gap-2">
               {quickPrompts.map((item) => (
                 <button
@@ -353,11 +373,10 @@ function DashboardIndex() {
         </div>
       </motion.section>
 
-      {/* ───────── Templates gallery ───────── */}
       <motion.section variants={itemVariants} className="space-y-6">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900">
+            <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-foreground">
               {isKu ? 'تیمپڵەیتەکان' : 'Templates'}
             </h2>
             <p className="mt-1 text-sm font-medium text-slate-500">
@@ -393,7 +412,7 @@ function DashboardIndex() {
             <Link
               key={t.id}
               to="/onboarding"
-              className="group relative flex flex-col items-center gap-3 rounded-[1.5rem] border border-slate-200 bg-white p-4 transition-all duration-500 hover:-translate-y-1 hover:border-sky-300 hover:bg-sky-50/30 hover:shadow-[0_20px_40px_-12px_rgba(14,165,233,0.18)]"
+              className="group relative flex flex-col items-center gap-3 rounded-[1.5rem] border border-slate-200 bg-white p-4 transition-all duration-500 hover:-translate-y-1 hover:border-sky-300 hover:bg-sky-50/30 hover:shadow-[0_20px_40px_-12px_rgba(14,165,233,0.18)] dark:bg-card dark:border-border dark:hover:border-primary/50"
             >
               <div className="relative aspect-[1/1.4] w-full overflow-hidden rounded-xl border border-slate-100 bg-slate-100 shadow-[0_4px_20px_rgba(0,0,0,0.06)]">
                 <Thumbnail id={t.id} />
@@ -405,7 +424,7 @@ function DashboardIndex() {
               </div>
 
               <div className="w-full px-2 text-left">
-                <h3 className="flex items-center justify-between text-base font-bold text-slate-900">
+                <h3 className="flex items-center justify-between text-base font-bold text-slate-900 dark:text-foreground">
                   {t.label}
                   {t.isNew && (
                     <span className="rounded-full bg-sky-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-sky-700">
@@ -421,6 +440,7 @@ function DashboardIndex() {
           ))}
         </div>
       </motion.section>
-    </motion.div>
+      </motion.div>
+    </div>
   );
 }
