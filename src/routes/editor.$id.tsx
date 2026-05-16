@@ -576,7 +576,7 @@ function ResumeEditor() {
                   }`}
                 >
                   <Bot className="size-3.5" />
-                  {isKu ? "ژیاری" : "Chat"}
+                  {isKu ? "ژیریی دەستکرد" : "Chat"}
                 </button>
                 <button
                   onClick={() => setSidebarTab("design")}
@@ -587,7 +587,7 @@ function ResumeEditor() {
                   }`}
                 >
                   <Sliders className="size-3.5" />
-                  {isKu ? "ستایل" : "Design"}
+                  {isKu ? "دیزاین" : "Design"}
                 </button>
               </div>
 

@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from "framer-motion";
-import { X, Languages } from "lucide-react";
+import { MessageSquare, Languages } from "lucide-react";
 import { type RefObject, useEffect, useState } from "react";
 import type { ResumeData, TemplateId, DesignSettings } from "@/lib/types";
 import { ExportButtons, ClientPDFPreview } from "@/components/resume/editor-helpers";
@@ -50,10 +50,10 @@ export function EditorPreviewPanel({
         {mode === "overlay" && (
           <button
             onClick={onClose}
-            className="flex items-center gap-1 px-2.5 py-1.5 rounded-full text-[12px] font-bold text-slate-700 bg-white shadow-[0_2px_6px_rgba(0,0,0,0.08),0_1px_0_rgba(255,255,255,0.9)_inset] border border-white/60 hover:shadow-[0_3px_10px_rgba(0,0,0,0.1)] active:scale-[0.97] transition-all"
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-[12px] font-bold text-slate-700 bg-white shadow-[0_2px_6px_rgba(0,0,0,0.08),0_1px_0_rgba(255,255,255,0.9)_inset] border border-white/60 hover:shadow-[0_3px_10px_rgba(0,0,0,0.1)] active:scale-[0.97] transition-all"
           >
-            <X className="size-3.5" />
-            <span className="hidden xs:inline">{isKu ? "گەڕانەوە" : "Close"}</span>
+            <MessageSquare className="size-3.5" />
+            <span>{isKu ? "چات" : "Chat"}</span>
           </button>
         )}
 
