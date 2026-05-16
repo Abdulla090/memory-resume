@@ -1,11 +1,12 @@
 /**
  * Screenshot-based PDF export using html-to-image + jsPDF.
  *
- * Strategy: clone the scaled previewRef element into an off-screen container
- * at 1:1 scale (no transform, no overflow clipping), capture it, then clean up.
- * This guarantees pixel-perfect output regardless of zoom level or overflow-hidden.
- *
- * Pass pixelRatio=2 for standard quality (retina), pixelRatio=3 for print quality.
+ * KEY POINTS:
+ * - `skipFonts: true` avoids CORS SecurityError from Google Fonts stylesheets
+ *   (fonts are already loaded in the browser, so they still render correctly)
+ * - The `style` override on toCanvas resets transform:scale() and overflow:hidden
+ *   so html-to-image captures the full document at 1:1 scale
+ * - pixelRatio=2 → standard retina quality, pixelRatio=3 → print quality
  */
 export async function exportPreviewAsPDF(
   previewElement: HTMLElement,
@@ -17,81 +18,60 @@ export async function exportPreviewAsPDF(
     import("jspdf"),
   ]);
 
-  // ── 1. Clone into a fixed off-screen wrapper at natural 1:1 size ─────────
-  const RESUME_W = 794; // A4 width in px at 96 dpi
-  const naturalH = previewElement.scrollHeight;
+  const fullHeight = previewElement.scrollHeight;
 
-  // Build a wrapper div that sits off-screen, no clipping, correct dimensions
-  const wrapper = document.createElement("div");
-  wrapper.style.cssText = `
-    position: fixed;
-    top: -99999px;
-    left: -99999px;
-    width: ${RESUME_W}px;
-    height: ${naturalH}px;
-    overflow: visible;
-    pointer-events: none;
-    z-index: -1;
-  `;
+  const canvas = await toCanvas(previewElement, {
+    pixelRatio,
+    // skipFonts prevents the CORS SecurityError from Google Fonts.
+    // Fonts are already loaded in the browser so they render fine.
+    skipFonts: true,
+    backgroundColor: "#ffffff",
+    width: 794,
+    height: fullHeight,
+    // Override the element's CSS so html-to-image captures at 1:1 scale,
+    // undoing the transform:scale(zoom) and overflow:hidden from the live preview.
+    style: {
+      transform: "scale(1)",
+      transformOrigin: "top left",
+      width: "794px",
+      height: `${fullHeight}px`,
+      maxHeight: "none",
+      maxWidth: "none",
+      overflow: "visible",
+      borderRadius: "0",
+      boxShadow: "none",
+    },
+  });
 
-  // Clone the resume node — this preserves all computed styles
-  const clone = previewElement.cloneNode(true) as HTMLElement;
-  clone.style.cssText = `
-    position: relative !important;
-    transform: none !important;
-    transform-origin: top left !important;
-    width: ${RESUME_W}px !important;
-    height: ${naturalH}px !important;
-    overflow: visible !important;
-    border-radius: 0 !important;
-    box-shadow: none !important;
-  `;
+  // ── Slice canvas into A4 pages ────────────────────────────────────────────
+  const A4_W_MM = 210;
+  const A4_H_MM = 297;
 
-  wrapper.appendChild(clone);
-  document.body.appendChild(wrapper);
+  const canvasW = canvas.width;
+  const canvasH = canvas.height;
+  const mmPerPx = A4_W_MM / canvasW;
+  const totalHeightMm = canvasH * mmPerPx;
+  const numPages = Math.ceil(totalHeightMm / A4_H_MM);
 
-  try {
-    // ── 2. Capture the clean, unclipped clone ─────────────────────────────
-    const canvas = await toCanvas(clone, {
-      pixelRatio,
-      backgroundColor: "#ffffff",
-      width: RESUME_W,
-      height: naturalH,
-    });
+  const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
 
-    // ── 3. Slice into A4 pages ────────────────────────────────────────────
-    const A4_W_MM = 210;
-    const A4_H_MM = 297;
+  for (let page = 0; page < numPages; page++) {
+    if (page > 0) pdf.addPage();
 
-    const canvasW = canvas.width;
-    const canvasH = canvas.height;
-    const mmPerPx = A4_W_MM / canvasW;
-    const totalHeightMm = canvasH * mmPerPx;
-    const numPages = Math.ceil(totalHeightMm / A4_H_MM);
+    const srcYPx = (page * A4_H_MM) / mmPerPx;
+    const srcHPx = Math.min(A4_H_MM / mmPerPx, canvasH - srcYPx);
 
-    const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
+    const pageCanvas = document.createElement("canvas");
+    pageCanvas.width = canvasW;
+    pageCanvas.height = Math.ceil(srcHPx);
 
-    for (let page = 0; page < numPages; page++) {
-      if (page > 0) pdf.addPage();
+    const ctx = pageCanvas.getContext("2d")!;
+    ctx.drawImage(canvas, 0, -srcYPx);
 
-      const srcYPx = (page * A4_H_MM) / mmPerPx;
-      const srcHPx = Math.min(A4_H_MM / mmPerPx, canvasH - srcYPx);
-
-      const pageCanvas = document.createElement("canvas");
-      pageCanvas.width = canvasW;
-      pageCanvas.height = Math.ceil(srcHPx);
-
-      const ctx = pageCanvas.getContext("2d")!;
-      ctx.drawImage(canvas, 0, -srcYPx);
-
-      const quality = pixelRatio >= 3 ? 0.99 : 0.97;
-      const pageImg = pageCanvas.toDataURL("image/jpeg", quality);
-      pdf.addImage(pageImg, "JPEG", 0, 0, A4_W_MM, srcHPx * mmPerPx);
-    }
-
-    pdf.save(filename.endsWith(".pdf") ? filename : `${filename}.pdf`);
-  } finally {
-    // ── 4. Always clean up the off-screen clone ────────────────────────────
-    document.body.removeChild(wrapper);
+    const quality = pixelRatio >= 3 ? 0.99 : 0.97;
+    const pageImg = pageCanvas.toDataURL("image/jpeg", quality);
+    pdf.addImage(pageImg, "JPEG", 0, 0, A4_W_MM, srcHPx * mmPerPx);
   }
+
+  pdf.save(filename.endsWith(".pdf") ? filename : `${filename}.pdf`);
 }
