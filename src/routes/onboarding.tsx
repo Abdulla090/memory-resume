@@ -7,6 +7,7 @@ import {
   generateResume,
   getFollowUpQuestions,
   patchProfileWithAnswers,
+  generateFieldContent,
 } from "@/lib/ai.functions";
 import { useAppStore } from "@/lib/store";
 import type {
@@ -30,6 +31,7 @@ import {
   ImagePlus,
   Star,
   Bot,
+  ArrowLeft,
 } from "lucide-react";
 import { toast } from "sonner";
 import { SAMPLE_MEMORIES } from "@/lib/sample-memories";
@@ -117,6 +119,7 @@ export function ChatOnboarding({
   const [showLoader, setShowLoader] = useState(false);
   const [loaderResumeId, setLoaderResumeId] = useState<string | null>(null);
   const [selectedTemplate, setSelectedTemplate] = useState<TemplateId>("minimal");
+  const [intakeMethod, setIntakeMethod] = useState<"choose" | "form" | "raw">("choose");
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -456,6 +459,7 @@ export function ChatOnboarding({
         (p) => p + (p ? "\n\n" : "") + `[${file.name}]\n` + (ev.target?.result as string),
       );
       toast.success(isKu ? `بارکرا ${file.name}` : `Loaded ${file.name}`);
+      setIntakeMethod("raw");
     };
     reader.readAsText(file);
     e.target.value = "";
@@ -567,7 +571,101 @@ export function ChatOnboarding({
       )}
 
       {/* ── INTAKE ── */}
-      {!inChat && (
+      <AnimatePresence>
+        {!inChat && intakeMethod === "choose" && (
+          <motion.div
+            className="fixed inset-0 z-50 flex items-center justify-center p-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
+            <motion.div
+              initial={{ scale: 0.95, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.95, y: 20 }}
+              className="relative z-10 bg-white rounded-[2rem] p-6 sm:p-10 max-w-3xl w-full shadow-2xl border border-slate-200"
+            >
+              <h2 className="text-2xl sm:text-4xl font-extrabold text-slate-900 mb-3 tracking-tight">
+                {isKu ? "زانیارییەکانت پێویستە" : "We need your information"}
+              </h2>
+              <p className="text-slate-500 font-medium mb-3 text-sm sm:text-base">
+                {isKu
+                  ? "بۆ دروستکردنی باشترین سیڤی، پێویستمان بە زانیارییەکانتە. چۆن دەتەوێت زانیارییەکانت بنووسیت؟"
+                  : "To create your CV and add all the necessary information, how would you like to provide your details?"}
+              </p>
+
+              <div className="flex items-center gap-2 bg-blue-50/80 text-blue-700 p-3 sm:px-4 rounded-xl mb-8 border border-blue-100/50">
+                <Sparkles className="w-5 h-5 shrink-0" />
+                <p className="text-xs sm:text-sm font-medium">
+                  {isKu 
+                    ? "نیگەران مەبە لە هەڵەی ڕێنووس یان ڕێکخستن. زیرەکی دەستکرد هەموو شتێک ڕێکدەخات و هەڵەکان چاک دەکاتەوە!" 
+                    : "Don't worry about being messy or typos. We use AI to organize everything and fix any mistakes!"}
+                </p>
+              </div>
+
+              <div className="grid gap-4 sm:grid-cols-3">
+                <button
+                  onClick={() => setIntakeMethod("form")}
+                  className="flex flex-col items-center text-center p-6 rounded-[1.5rem] border border-slate-200 hover:border-blue-500 hover:bg-blue-50 hover:shadow-md transition-all group"
+                >
+                  <div className="w-14 h-14 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                    <FileText className="w-7 h-7" />
+                  </div>
+                  <h3 className="font-bold text-slate-800 mb-1">{isKu ? "پڕکردنەوەی فۆڕم" : "Fill a Form"}</h3>
+                  <p className="text-xs text-slate-500">{isKu ? "فۆڕمێکی سادە پڕ بکەرەوە" : "Fill out a structured form"}</p>
+                </button>
+
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  className="flex flex-col items-center text-center p-6 rounded-[1.5rem] border border-slate-200 hover:border-emerald-500 hover:bg-emerald-50 hover:shadow-md transition-all group"
+                >
+                  <div className="w-14 h-14 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                    <Paperclip className="w-7 h-7" />
+                  </div>
+                  <h3 className="font-bold text-slate-800 mb-1">{isKu ? "بارکردنی سیڤی" : "Upload CV"}</h3>
+                  <p className="text-xs text-slate-500">{isKu ? "سیڤییە کۆنەکەت یان فایلێک بار بکە" : "Upload your previous CV"}</p>
+                </button>
+
+                <button
+                  onClick={() => setIntakeMethod("raw")}
+                  className="flex flex-col items-center text-center p-6 rounded-[1.5rem] border border-slate-200 hover:border-purple-500 hover:bg-purple-50 hover:shadow-md transition-all group"
+                >
+                  <div className="w-14 h-14 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                    <Sparkles className="w-7 h-7" />
+                  </div>
+                  <h3 className="font-bold text-slate-800 mb-1">{isKu ? "نووسینی ئازاد" : "Raw Text"}</h3>
+                  <p className="text-xs text-slate-500">{isKu ? "زانیارییەکانت کۆپی بکە یان بنووسە" : "Paste or write your info freely"}</p>
+                </button>
+              </div>
+
+              {/* Hidden file input for the Upload option */}
+              <input
+                type="file"
+                ref={fileInputRef}
+                onChange={handleFileUpload}
+                className="hidden"
+                accept=".txt,.md,.pdf,.docx,.doc,.rtf"
+              />
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {!inChat && intakeMethod === "form" && (
+        <div className="relative z-10 flex-1 flex flex-col items-center justify-start px-4 pb-12 pt-10 overflow-y-auto">
+          <IntakeForm
+            isKu={isKu}
+            onSubmit={(formDataStr) => {
+              setInputText(formDataStr);
+              setIntakeMethod("raw");
+            }}
+            onBack={() => setIntakeMethod("choose")}
+          />
+        </div>
+      )}
+
+      {!inChat && intakeMethod === "raw" && (
         <div className="relative z-10 flex-1 flex flex-col items-center justify-center px-4 pb-12">
           <motion.h1
             initial={{ opacity: 0, y: -12 }}
@@ -580,12 +678,26 @@ export function ChatOnboarding({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.1 }}
-            className="text-slate-500 font-medium text-base sm:text-lg mb-10 text-center max-w-md"
+            className="text-slate-500 font-medium text-base sm:text-lg mb-4 text-center max-w-md"
           >
             {isKu
               ? "سیڤییەکەت، بایۆی لینکدین، مێژووی کارکردنت دابنێ - یان تەنها بە ئازادی بنووسە."
               : "Paste your resume, LinkedIn bio, career history — or just write freely."}
           </motion.p>
+          
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.2 }}
+            className="flex items-center gap-2 bg-blue-50 text-blue-700 px-4 py-2.5 rounded-2xl mb-10 border border-blue-100/50 shadow-sm max-w-md w-full justify-center"
+          >
+            <Sparkles className="w-4 h-4 shrink-0" />
+            <span className="text-[13px] font-medium text-center">
+              {isKu 
+                ? "کێشە نییە ئەگەر زانیارییەکانت ڕێکنەخراو بن، زیرەکی دەستکرد هەمووی ڕێکدەخاتەوە." 
+                : "It's ok to be messy! Our AI will organize everything and fix typos."}
+            </span>
+          </motion.div>
 
           <motion.div
             initial={{ opacity: 0, scale: 0.96, y: 16 }}
@@ -639,6 +751,12 @@ export function ChatOnboarding({
                     <span className="sm:hidden">{isKu ? "نموونە" : "Sample"}</span>
                   </button>
                 )}
+                <button
+                  onClick={() => setIntakeMethod("choose")}
+                  className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 rounded-xl text-[13px] font-semibold text-slate-600 hover:bg-white hover:text-blue-600 hover:shadow-sm transition-all border border-transparent hover:border-slate-200"
+                >
+                  {isKu ? "گۆڕین" : "Change"}
+                </button>
               </div>
               <button
                 onClick={handleExtract}
@@ -660,69 +778,43 @@ export function ChatOnboarding({
       {/* ── CHAT VIEW ── */}
       {inChat && (
         <div className="relative z-10 flex-1 flex flex-col min-h-0">
-          <div
-            className="flex-1 overflow-y-auto px-4 pt-6 pb-4 scroll-smooth"
-            style={{ scrollbarWidth: "none" }}
-          >
-            <div className="max-w-3xl mx-auto flex flex-col gap-6">
-              <AnimatePresence initial={false}>
-                {messages.map((msg) => (
-                  <motion.div
-                    key={msg.id}
-                    layout="position"
-                    initial={{ opacity: 0, y: 20, scale: 0.95 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    transition={{ type: "spring", stiffness: 300, damping: 25 }}
-                    className={`flex gap-3 w-full ${msg.from === "user" ? "justify-end" : "justify-start"}`}
-                  >
-                    {msg.from === "ai" && (
-                      <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center shrink-0 mt-0.5 shadow-md shadow-blue-500/20">
-                        <Sparkles className="w-4 h-4 text-white" />
-                      </div>
-                    )}
-                    <div
-                      className={`max-w-[80%] rounded-[24px] px-5 py-3.5 text-[15px] leading-relaxed shadow-sm ${
-                        msg.from === "user"
-                          ? "bg-blue-600 text-white rounded-br-sm font-medium shadow-blue-200"
-                          : "bg-white text-slate-800 rounded-bl-sm border border-slate-100 shadow-[0_4px_20px_rgba(0,0,0,0.03)]"
-                      }`}
-                    >
-                      {msg.content}
-                    </div>
-                  </motion.div>
-                ))}
-
-                {isThinking && (
-                  <motion.div
-                    layout="position"
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.9 }}
-                    className="flex gap-3 w-full justify-start"
-                  >
-                    <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-slate-200 to-slate-300 flex items-center justify-center shrink-0 shadow-sm mt-0.5">
-                      <Bot className="w-4 h-4 text-slate-500" />
-                    </div>
-                    <div className="bg-white border border-slate-100 rounded-[24px] rounded-bl-sm px-5 py-4 flex gap-1.5 items-center shadow-[0_4px_20px_rgba(0,0,0,0.03)] h-[52px]">
-                      {[0, 1, 2].map((i) => (
-                        <motion.div
-                          key={i}
-                          className="w-2 h-2 rounded-full bg-slate-300"
-                          animate={{ y: ["0%", "-40%", "0%"] }}
-                          transition={{
-                            repeat: Infinity,
-                            duration: 0.8,
-                            delay: i * 0.15,
-                            ease: "easeInOut",
-                          }}
-                        />
-                      ))}
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-              <div ref={messagesEndRef} className="h-32" />
-            </div>
+          <div className="flex-1 flex flex-col items-center justify-center px-4 pb-32">
+            <AnimatePresence mode="wait">
+              {isThinking ? (
+                <motion.div
+                  key="thinking"
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.9 }}
+                  className="flex flex-col items-center gap-6"
+                >
+                  <div className="w-20 h-20 rounded-[2rem] bg-gradient-to-br from-blue-50 to-indigo-50 flex items-center justify-center shadow-xl shadow-blue-500/5 border border-blue-100/50 relative">
+                    <div className="absolute inset-0 bg-blue-400/20 rounded-[2rem] animate-ping" style={{ animationDuration: '2s' }} />
+                    <Sparkles className="w-10 h-10 text-blue-500 relative z-10 animate-pulse" />
+                  </div>
+                  <p className="text-sm font-bold text-slate-400 uppercase tracking-widest animate-pulse">
+                    {isKu ? "بیردەکاتەوە..." : "Thinking..."}
+                  </p>
+                </motion.div>
+              ) : (
+                <motion.div
+                  key={messages.filter(m => m.from === "ai").pop()?.id || "empty"}
+                  initial={{ opacity: 0, y: 20, filter: "blur(10px)" }}
+                  animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                  exit={{ opacity: 0, y: -20, filter: "blur(10px)" }}
+                  transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+                  className="flex flex-col items-center max-w-3xl text-center"
+                >
+                  <div className="w-16 h-16 rounded-[1.5rem] bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center mb-8 shadow-2xl shadow-blue-500/30">
+                    <Sparkles className="w-8 h-8 text-white" />
+                  </div>
+                  
+                  <h2 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-slate-800 leading-relaxed tracking-tight">
+                    {messages.filter(m => m.from === "ai").pop()?.content || ""}
+                  </h2>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
 
           {/* ── Sticky Bottom Input ── */}
@@ -928,24 +1020,39 @@ export function ChatOnboarding({
                       : "First pick a template, then enter the target role and generate the resume."}
                   </p>
                 </div>
-                <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-                  {TEMPLATES.slice(0, 9).map((t) => (
+                <div className="grid gap-4 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 h-[60vh] overflow-y-auto p-2" style={{ scrollbarWidth: 'thin' }}>
+                  {[...TEMPLATES].sort((a, b) => (b.isNew ? 1 : 0) - (a.isNew ? 1 : 0)).map((t) => (
                     <button
                       key={t.id}
                       type="button"
                       onClick={() => setSelectedTemplate(t.id)}
-                      className={`group rounded-[1.5rem] border p-4 text-left transition-all ${selectedTemplate === t.id ? "border-blue-500 bg-white shadow-[0_18px_45px_-24px_rgba(37,99,235,0.45)] ring-2 ring-blue-200" : "border-slate-200 bg-white/80 hover:border-slate-300 hover:shadow-sm"}`}
+                      className={`group rounded-2xl border p-3 text-left transition-all ${selectedTemplate === t.id ? "border-blue-500 bg-white shadow-[0_18px_45px_-24px_rgba(37,99,235,0.45)] ring-2 ring-blue-200" : "border-slate-200 bg-white/80 hover:border-slate-300 hover:shadow-sm"}`}
                     >
-                      <div className="aspect-[1/1.2] rounded-2xl bg-slate-100 border border-slate-200 overflow-hidden mb-3">
-                        <ResumePreview data={TEMPLATE_SAMPLE} template={t.id} />
+                      <div className="w-full aspect-[1/1.4] rounded-xl overflow-hidden relative shadow-[0_2px_10px_rgba(0,0,0,0.06)] bg-slate-100 border border-slate-100 mb-3">
+                        <div className="absolute inset-0 bg-slate-100 overflow-hidden pointer-events-none flex items-center justify-center">
+                          <svg viewBox="0 0 794 1123" className="w-full h-full">
+                            <foreignObject width="794" height="1123">
+                              <div className="w-[794px] h-[1123px] bg-white text-left">
+                                <ResumePreview data={TEMPLATE_SAMPLE} template={t.id} />
+                              </div>
+                            </foreignObject>
+                          </svg>
+                        </div>
                       </div>
-                      <div className="flex items-center justify-between gap-3">
-                        <div>
-                          <div className="font-bold text-slate-900">{t.label}</div>
-                          <div className="text-xs text-slate-500">{t.desc}</div>
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="min-w-0">
+                          <div className="font-bold text-slate-900 text-xs sm:text-sm truncate flex items-center gap-1">
+                            {t.label}
+                            {t.isNew && (
+                              <span className="px-1.5 py-0.5 rounded bg-blue-100 text-blue-700 text-[9px] font-bold uppercase tracking-wider shrink-0">
+                                New
+                              </span>
+                            )}
+                          </div>
+                          <div className="text-[10px] sm:text-xs text-slate-500 truncate">{t.desc}</div>
                         </div>
                         {selectedTemplate === t.id && (
-                          <CheckCircle2 className="h-5 w-5 text-blue-600" />
+                          <CheckCircle2 className="h-5 w-5 shrink-0 text-blue-600" />
                         )}
                       </div>
                     </button>
@@ -1068,6 +1175,383 @@ function GeneratingLoader({ onDone }: { onDone: () => void }) {
           />
         ))}
       </div>
+    </motion.div>
+  );
+}
+
+// ── INTAKE FORM ──────────────────────────────────────────────────────────────
+function IntakeForm({
+  isKu,
+  onSubmit,
+  onBack,
+}: {
+  isKu: boolean;
+  onSubmit: (data: string) => void;
+  onBack: () => void;
+}) {
+  const apiKey = useAppStore((s) => s.apiKey);
+  const generateFieldFn = useServerFn(generateFieldContent);
+  const [loadingFields, setLoadingFields] = useState<Record<string, boolean>>({});
+
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    location: "",
+    jobTitle: "",
+    website: "",
+    summary: "",
+    experience: "",
+    education: "",
+    skills: "",
+    certifications: "",
+    languages: "",
+  });
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const str = `
+Name: ${formData.name}
+Email: ${formData.email}
+Phone: ${formData.phone}
+Location: ${formData.location}
+Website: ${formData.website}
+Target Job Title: ${formData.jobTitle}
+
+Summary:
+${formData.summary}
+
+Experience:
+${formData.experience}
+
+Education:
+${formData.education}
+
+Skills:
+${formData.skills}
+
+Certifications:
+${formData.certifications}
+
+Languages:
+${formData.languages}
+    `.trim();
+    onSubmit(str);
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleGenerateAI = async (field: keyof typeof formData) => {
+    if (loadingFields[field]) return;
+    setLoadingFields((prev) => ({ ...prev, [field]: true }));
+    try {
+      const res = await generateFieldFn({
+        data: {
+          apiKey,
+          field,
+          formData,
+          language: isKu ? "ku" : "en",
+        }
+      });
+      if (res && res.content) {
+        setFormData((prev) => ({
+          ...prev,
+          [field]: prev[field] ? prev[field] + "\n\n" + res.content : res.content,
+        }));
+      }
+    } catch (e) {
+      toast.error(isKu ? "هەڵەیەک ڕوویدا لە دروستکردندا" : "Failed to generate content");
+    } finally {
+      setLoadingFields((prev) => ({ ...prev, [field]: false }));
+    }
+  };
+
+  const aiButton = (field: keyof typeof formData) => (
+    <button
+      type="button"
+      onClick={() => handleGenerateAI(field)}
+      disabled={loadingFields[field]}
+      className="flex items-center gap-1 text-xs font-bold text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 px-2 py-1 rounded-md transition-colors disabled:opacity-50"
+    >
+      {loadingFields[field] ? (
+        <Loader2 className="w-3 h-3 animate-spin" />
+      ) : (
+        <Sparkles className="w-3 h-3" />
+      )}
+      {isKu ? "بە AI دروستی بکە" : "Generate with AI"}
+    </button>
+  );
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -16 }}
+      className="w-full max-w-2xl bg-white rounded-[28px] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-200/60 p-6 sm:p-8 relative max-h-[85vh] overflow-y-auto"
+      style={{ scrollbarWidth: "none" }}
+    >
+      <button
+        type="button"
+        onClick={onBack}
+        className="absolute top-6 right-6 p-2 rounded-full hover:bg-slate-100 text-slate-500 transition-colors"
+      >
+        <ArrowLeft className="w-5 h-5" />
+      </button>
+      
+      <h2 className="text-2xl font-bold text-slate-900 mb-2">
+        {isKu ? "فۆڕمی زانیارییەکان" : "Information Form"}
+      </h2>
+      
+      <div className="flex items-start sm:items-center gap-2 bg-blue-50/80 text-blue-700 p-3 rounded-xl mb-6 border border-blue-100/50">
+        <Sparkles className="w-5 h-5 shrink-0 mt-0.5 sm:mt-0" />
+        <p className="text-xs sm:text-sm font-medium">
+          {isKu 
+            ? "پێویست ناکات بە تەواوی ڕێکیبخەیت، کێشە نییە ئەگەر هەڵەی ڕێنووسیشت هەبێت. زیرەکی دەستکردەکەمان هەمووی ڕێکدەخاتەوە." 
+            : "No need to be perfect! It's completely ok to be messy or have typos. Our AI will organize everything beautifully."}
+        </p>
+      </div>
+      
+      <form onSubmit={handleSubmit} className="space-y-5 text-left">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">
+              {isKu ? "ناوی تەواو" : "Full Name"}
+            </label>
+            <input
+              type="text"
+              name="name"
+              value={formData.name}
+              onChange={handleChange}
+              className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 outline-none focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-slate-800"
+              placeholder={isKu ? "ناوی تەواوت" : "e.g. John Doe"}
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">
+              {isKu ? "پۆستی مەبەست" : "Target Job Title"}
+            </label>
+            <input
+              type="text"
+              name="jobTitle"
+              list="job-titles"
+              value={formData.jobTitle}
+              onChange={handleChange}
+              className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 outline-none focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-slate-800"
+              placeholder={isKu ? "بۆ نموونە: ئەندازیاری نەرمەکاڵا" : "e.g. Software Engineer"}
+            />
+            <datalist id="job-titles">
+              <option value="Software Engineer" />
+              <option value="Frontend Developer" />
+              <option value="Backend Developer" />
+              <option value="Product Manager" />
+              <option value="Data Scientist" />
+              <option value="UI/UX Designer" />
+              <option value="Marketing Manager" />
+              <option value="Sales Representative" />
+              <option value="Project Manager" />
+              <option value="Graphic Designer" />
+              <option value="Accountant" />
+              <option value="Teacher" />
+              <option value="Doctor" />
+              <option value="Nurse" />
+              <option value="Civil Engineer" />
+            </datalist>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">
+              {isKu ? "ئیمەیڵ" : "Email"}
+            </label>
+            <input
+              type="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 outline-none focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-slate-800"
+              placeholder="email@example.com"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">
+              {isKu ? "ژمارەی مۆبایل" : "Phone"}
+            </label>
+            <input
+              type="text"
+              name="phone"
+              value={formData.phone}
+              onChange={handleChange}
+              className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 outline-none focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-slate-800"
+              placeholder="+1 234 567 890"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">
+              {isKu ? "ناونیشان" : "Location"}
+            </label>
+            <input
+              type="text"
+              name="location"
+              list="locations"
+              value={formData.location}
+              onChange={handleChange}
+              className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 outline-none focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-slate-800"
+              placeholder={isKu ? "شار، وڵات" : "City, Country"}
+            />
+            <datalist id="locations">
+              <option value="Erbil, Iraq" />
+              <option value="Sulaymaniyah, Iraq" />
+              <option value="Duhok, Iraq" />
+              <option value="Baghdad, Iraq" />
+              <option value="London, UK" />
+              <option value="New York, USA" />
+              <option value="San Francisco, USA" />
+              <option value="Berlin, Germany" />
+              <option value="Dubai, UAE" />
+              <option value="Remote" />
+            </datalist>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">
+              {isKu ? "وێبسایت / پۆرتفۆلیۆ" : "Website / Portfolio"}
+            </label>
+            <input
+              type="text"
+              name="website"
+              value={formData.website}
+              onChange={handleChange}
+              className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 outline-none focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-slate-800"
+              placeholder="github.com/johndoe"
+            />
+          </div>
+        </div>
+
+        <div>
+          <div className="flex items-center justify-between mb-1">
+            <label className="block text-sm font-medium text-slate-700">
+              {isKu ? "پوختە" : "Summary"}
+            </label>
+            {aiButton("summary")}
+          </div>
+          <textarea
+            name="summary"
+            value={formData.summary}
+            onChange={handleChange}
+            rows={3}
+            className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 outline-none focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-slate-800 resize-y"
+            placeholder={isKu ? "کورتەیەک دەربارەی خۆت بنووسە..." : "Write a brief summary about yourself..."}
+          />
+        </div>
+
+        <div>
+          <div className="flex items-center justify-between mb-1">
+            <label className="block text-sm font-medium text-slate-700">
+              {isKu ? "ئەزموونی کارکردن" : "Experience"}
+            </label>
+            {aiButton("experience")}
+          </div>
+          <textarea
+            name="experience"
+            value={formData.experience}
+            onChange={handleChange}
+            rows={4}
+            className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 outline-none focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-slate-800 resize-y"
+            placeholder={isKu ? "ناوی کۆمپانیا، ڕۆڵەکەت، و کاتەکان..." : "Company names, roles, and dates..."}
+          />
+        </div>
+
+        <div>
+          <div className="flex items-center justify-between mb-1">
+            <label className="block text-sm font-medium text-slate-700">
+              {isKu ? "خوێندن" : "Education"}
+            </label>
+            {aiButton("education")}
+          </div>
+          <textarea
+            name="education"
+            value={formData.education}
+            onChange={handleChange}
+            rows={3}
+            className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 outline-none focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-slate-800 resize-y"
+            placeholder={isKu ? "بڕوانامە و زانکۆ..." : "Degrees and universities..."}
+          />
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+          <div>
+            <div className="flex items-center justify-between mb-1">
+              <label className="block text-sm font-medium text-slate-700">
+                {isKu ? "کارامەییەکان" : "Skills"}
+              </label>
+              {aiButton("skills")}
+            </div>
+            <textarea
+              name="skills"
+              value={formData.skills}
+              onChange={handleChange}
+              rows={3}
+              className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 outline-none focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-slate-800 resize-y"
+              placeholder={isKu ? "جیابکەرەوە بە فاریزە" : "Comma separated..."}
+            />
+          </div>
+          <div>
+            <div className="flex items-center justify-between mb-1">
+              <label className="block text-sm font-medium text-slate-700">
+                {isKu ? "بڕوانامەکان" : "Certifications"}
+              </label>
+              {aiButton("certifications")}
+            </div>
+            <textarea
+              name="certifications"
+              value={formData.certifications}
+              onChange={handleChange}
+              rows={3}
+              className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 outline-none focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-slate-800 resize-y"
+              placeholder={isKu ? "بڕوانامە پیشەییەکان..." : "Professional certs..."}
+            />
+          </div>
+          <div>
+            <div className="flex items-center justify-between mb-1">
+              <label className="block text-sm font-medium text-slate-700">
+                {isKu ? "زمانەکان" : "Languages"}
+              </label>
+              {aiButton("languages")}
+            </div>
+            <textarea
+              name="languages"
+              value={formData.languages}
+              onChange={handleChange}
+              rows={3}
+              className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 outline-none focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-slate-800 resize-y"
+              placeholder={isKu ? "ئینگلیزی، کوردی..." : "English, Kurdish..."}
+            />
+          </div>
+        </div>
+
+        <div className="pt-4 border-t border-slate-100 flex justify-end gap-3 sticky bottom-0 bg-white py-2">
+          <button
+            type="button"
+            onClick={onBack}
+            className="px-6 py-2.5 rounded-xl font-medium text-slate-600 bg-white border border-slate-200 hover:bg-slate-50 transition-colors"
+          >
+            {isKu ? "پاشگەزبوونەوە" : "Cancel"}
+          </button>
+          <button
+            type="submit"
+            disabled={!formData.name && !formData.jobTitle && !formData.experience && !formData.education}
+            className="px-6 py-2.5 rounded-xl font-medium text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          >
+            {isKu ? "پەسەندکردن" : "Submit"}
+          </button>
+        </div>
+      </form>
     </motion.div>
   );
 }

@@ -3,16 +3,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Download, Heart, Sparkles, Loader2, CheckCircle2 } from "lucide-react";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
-import {
-  THANKS_TEMPLATES,
-  ThanksPreview,
-} from "@/components/thanks/registry";
-import {
-  CARD_H,
-  CARD_W,
-  type ThanksData,
-  type ThanksTemplateId,
-} from "@/components/thanks/types";
+import { THANKS_TEMPLATES, ThanksPreview } from "@/components/thanks/registry";
+import { CARD_H, CARD_W, type ThanksData, type ThanksTemplateId } from "@/components/thanks/types";
 import { exportLandscapeCardAsPDF } from "@/lib/pdf-landscape";
 import { useAppStore } from "@/lib/store";
 
@@ -28,13 +20,11 @@ const MixedText = ({
   dir?: "rtl" | "ltr";
 }) => (
   <span className={className} dir={dir ?? "auto"} style={{ unicodeBidi: "plaintext" }}>
-    {value.split(/(\s+)/).map((part, i) =>
-      isEnglishWord(part) ? (
-        <bdi key={i}>{part}</bdi>
-      ) : (
-        <span key={i}>{part}</span>
-      ),
-    )}
+    {value
+      .split(/(\s+)/)
+      .map((part, i) =>
+        isEnglishWord(part) ? <bdi key={i}>{part}</bdi> : <span key={i}>{part}</span>,
+      )}
   </span>
 );
 
@@ -142,7 +132,7 @@ function ThanksPage() {
 
   const activeTemplate = useMemo(
     () => THANKS_TEMPLATES.find((t) => t.id === template) ?? THANKS_TEMPLATES[0],
-    [template]
+    [template],
   );
 
   const update = <K extends keyof ThanksData>(key: K, value: ThanksData[K]) =>
@@ -166,11 +156,7 @@ function ThanksPage() {
       toast.success(isKu ? "PDF دابەزێنرا" : "Vector PDF downloaded");
     } catch (e) {
       toast.error(
-        e instanceof Error
-          ? e.message
-          : isKu
-            ? "دابەزاندن سەرکەوتوو نەبوو."
-            : "Download failed."
+        e instanceof Error ? e.message : isKu ? "دابەزاندن سەرکەوتوو نەبوو." : "Download failed.",
       );
     } finally {
       setExporting(false);
@@ -195,7 +181,10 @@ function ThanksPage() {
   }, [pane]);
 
   return (
-    <div className="mx-auto flex w-full max-w-[1600px] flex-col gap-6 pb-12" dir={isKu ? "rtl" : "ltr"}>
+    <div
+      className="mx-auto flex w-full max-w-[1600px] flex-col gap-6 pb-12"
+      dir={isKu ? "rtl" : "ltr"}
+    >
       {/* Header */}
       <motion.header
         initial={{ opacity: 0, y: 10 }}

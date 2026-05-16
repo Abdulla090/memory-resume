@@ -9,6 +9,18 @@ import { Download, FileText, ChevronDown } from "lucide-react";
 import { useLayoutEffect, useRef, useState, useEffect } from "react";
 import { toast } from "sonner";
 
+/** Returns a high-contrast text color (white or near-black) for the given hex background. */
+function contrastTextFor(hex: string, darkText = "#1a1a1a", lightText = "#ffffff"): string {
+  const h = hex.replace("#", "");
+  if (h.length < 6) return darkText;
+  const r = parseInt(h.slice(0, 2), 16);
+  const g = parseInt(h.slice(2, 4), 16);
+  const b = parseInt(h.slice(4, 6), 16);
+  const yiq = (r * 299 + g * 587 + b * 114) / 1000;
+  return yiq >= 128 ? darkText : lightText;
+}
+
+
 const rtlTextPattern = /[\u0600-\u06ff\u0750-\u077f\u08a0-\u08ff]/;
 
 export function hasRTLText(data: ResumeData) {
@@ -392,11 +404,83 @@ export function ClientPDFPreview({
   border-top-color: ${d.accentColor}55 !important;
 }
 .ds-live ul li::marker { content: ${bullet}; color: ${d.accentColor} !important; }
+
+/* ── Sidebar / dark-panel contrast fix ────────────────────────────────── */
 .ds-live aside,
 .ds-live [class*="bg-neutral-900"],
 .ds-live [class*="bg-slate-900"],
 .ds-live [class*="bg-gray-900"],
-.ds-live [class*="bg-neutral-800"] { background-color: ${d.sidebarColor} !important; }
+.ds-live [class*="bg-neutral-800"],
+.ds-live [class*="bg-\\[#0"],
+.ds-live [class*="bg-\\[#1"],
+.ds-live [class*="bg-\\[#2"],
+.ds-live [class*="col-span-1"] > div:first-child:not([class*="p-0"]) {
+  background-color: ${d.sidebarColor} !important;
+}
+
+/* Force all text inside sidebar containers to be readable */
+.ds-live aside *,
+.ds-live [class*="bg-neutral-900"] *,
+.ds-live [class*="bg-slate-900"] *,
+.ds-live [class*="bg-gray-900"] *,
+.ds-live [class*="bg-neutral-800"] * {
+  color: ${contrastTextFor(d.sidebarColor)} !important;
+}
+.ds-live aside h1,
+.ds-live aside h2,
+.ds-live aside h3,
+.ds-live [class*="bg-neutral-900"] h1,
+.ds-live [class*="bg-neutral-900"] h2,
+.ds-live [class*="bg-neutral-900"] h3,
+.ds-live [class*="bg-slate-900"] h1,
+.ds-live [class*="bg-slate-900"] h2,
+.ds-live [class*="bg-slate-900"] h3 {
+  color: ${contrastTextFor(d.sidebarColor, "#1a1a1a", "#ffffff")} !important;
+}
+
+/* ── Main body background contrast fix ─────────────────────────────────── */
+/* Covers templates where the whole background is dark (Noir, Prism, etc.) */
+.ds-live > div[style],
+.ds-live > div > div[style] {
+  color: ${contrastTextFor(d.backgroundColor, d.textColor, "#e5e7eb")} !important;
+}
+/* Specifically re-apply heading colors for main body — but not inside sidebars */
+.ds-live main *:not(aside):not(aside *),
+.ds-live [class*="col-span-2"] *,
+.ds-live [class*="col-span-7"] *,
+.ds-live [class*="col-span-8"] *,
+.ds-live [class*="col-span-9"] * {
+  color: ${contrastTextFor(d.backgroundColor, d.textColor, "#e5e7eb")} !important;
+}
+.ds-live main h1, .ds-live main h2, .ds-live main h3,
+.ds-live [class*="col-span-2"] h1, .ds-live [class*="col-span-2"] h2, .ds-live [class*="col-span-2"] h3,
+.ds-live [class*="col-span-7"] h1, .ds-live [class*="col-span-7"] h2, .ds-live [class*="col-span-7"] h3,
+.ds-live [class*="col-span-8"] h1, .ds-live [class*="col-span-8"] h2, .ds-live [class*="col-span-8"] h3 {
+  color: ${contrastTextFor(d.backgroundColor, d.headingColor, "#ffffff")} !important;
+}
+
+/* ── Full-dark-bg templates (e.g. Noir, Prism, Cipher) ─────────────────── */
+/* When the main background is dark, force global text to light */
+${(() => {
+  const mainBgDark = (()=>{ const h=d.backgroundColor.replace("#",""); const r=parseInt(h.slice(0,2),16); const g=parseInt(h.slice(2,4),16); const b=parseInt(h.slice(4,6),16); return (r*299+g*587+b*114)/1000 < 128; })();
+  if (!mainBgDark) return "";
+  return `.ds-live, .ds-live p, .ds-live span, .ds-live div, .ds-live li { color: ${contrastTextFor(d.backgroundColor, d.textColor, "#d1d5db")} !important; }
+.ds-live h1, .ds-live h2, .ds-live h3 { color: ${contrastTextFor(d.backgroundColor, d.headingColor, "#ffffff")} !important; }`;
+})()}
+
+/* ── Headers with hardcoded dark backgrounds ──────────────────────────── */
+.ds-live header[class*="bg-slate-900"],
+.ds-live header[class*="bg-neutral-900"],
+.ds-live header[class*="bg-gray-900"],
+.ds-live [class*="bg-\\[#0a0a"],
+.ds-live [class*="bg-\\[#12"] {
+  background-color: ${d.sidebarColor} !important;
+}
+.ds-live header[class*="bg-slate-900"] *,
+.ds-live header[class*="bg-neutral-900"] *,
+.ds-live header[class*="bg-gray-900"] * {
+  color: ${contrastTextFor(d.sidebarColor)} !important;
+}
 
 .ds-live .canvas-decoration {
   position: absolute;
@@ -436,6 +520,53 @@ export function ClientPDFPreview({
 .ds-live .canvas-decoration.corner.br { bottom: 16px; right: 16px; border-left: 0; border-top: 0; }
 `
     : "";
+
+  // ── Always-on contrast baseline (no design system required) ─────────────
+  // Guarantees white text on every dark-background element in all templates.
+  const baseCss = `
+.ds-live [class*="bg-neutral-900"],
+.ds-live [class*="bg-neutral-800"],
+.ds-live [class*="bg-slate-900"],
+.ds-live [class*="bg-slate-800"],
+.ds-live [class*="bg-gray-900"],
+.ds-live [class*="bg-gray-800"],
+.ds-live [class*="bg-zinc-900"],
+.ds-live [class*="bg-zinc-800"],
+.ds-live [class*="bg-indigo-950"],
+.ds-live [class*="bg-indigo-900"],
+.ds-live [class*="bg-blue-950"],
+.ds-live [class*="bg-blue-900"],
+.ds-live aside[class*="bg-"],
+.ds-live header[class*="bg-slate"],
+.ds-live header[class*="bg-neutral"],
+.ds-live header[class*="bg-gray"],
+.ds-live header[class*="bg-indigo"],
+.ds-live header[class*="bg-zinc"] { color: #ffffff !important; }
+
+.ds-live [class*="bg-neutral-900"] *,
+.ds-live [class*="bg-neutral-800"] *,
+.ds-live [class*="bg-slate-900"] *,
+.ds-live [class*="bg-slate-800"] *,
+.ds-live [class*="bg-gray-900"] *,
+.ds-live [class*="bg-gray-800"] *,
+.ds-live [class*="bg-zinc-900"] *,
+.ds-live [class*="bg-zinc-800"] *,
+.ds-live [class*="bg-indigo-950"] *,
+.ds-live [class*="bg-indigo-900"] *,
+.ds-live [class*="bg-blue-950"] *,
+.ds-live [class*="bg-blue-900"] *,
+.ds-live aside[class*="bg-"] *,
+.ds-live header[class*="bg-slate"] *,
+.ds-live header[class*="bg-neutral"] *,
+.ds-live header[class*="bg-gray"] *,
+.ds-live header[class*="bg-indigo"] *,
+.ds-live header[class*="bg-zinc"] * { color: #ffffff !important; }
+
+.ds-live [class*="bg-[#0"] { color: #e5e7eb !important; }
+.ds-live [class*="bg-[#0"] * { color: #e5e7eb !important; }
+.ds-live [class*="bg-[#1"] { color: #e5e7eb !important; }
+.ds-live [class*="bg-[#1"] * { color: #e5e7eb !important; }
+`;
 
   const handlePreviewClick = (e: React.MouseEvent) => {
     if (!onSectionClick) return;
@@ -526,6 +657,7 @@ export function ClientPDFPreview({
             </>
           )}
           {d && <style dangerouslySetInnerHTML={{ __html: css }} />}
+          <style dangerouslySetInnerHTML={{ __html: baseCss }} />
           <UpdateDataContext.Provider value={updateData}>
             <ResumePreview
               data={data}

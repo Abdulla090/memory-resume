@@ -59,7 +59,9 @@ export function EditorPreviewPanel({
 
         <div className="flex items-center gap-1 px-2 py-1 rounded-full bg-emerald-50 border border-emerald-100">
           <div className="size-1.5 rounded-full bg-emerald-500 animate-pulse" />
-          <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-600">Live</span>
+          <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-600">
+            Live
+          </span>
         </div>
 
         <div className="flex-1" />
@@ -85,7 +87,9 @@ export function EditorPreviewPanel({
           >
             −
           </button>
-          <span className="px-1.5 text-[11px] font-bold text-slate-700 tabular-nums min-w-[36px] text-center">{Math.round(zoom * 100)}%</span>
+          <span className="px-1.5 text-[11px] font-bold text-slate-700 tabular-nums min-w-[36px] text-center">
+            {Math.round(zoom * 100)}%
+          </span>
           <button
             onClick={() => setZoom((z) => Math.min(2, z + 0.1))}
             className="w-7 h-7 flex items-center justify-center text-slate-600 hover:bg-slate-100 transition-colors font-bold text-base"
@@ -96,7 +100,12 @@ export function EditorPreviewPanel({
         </div>
 
         <div className="shrink-0">
-          <ExportButtons data={previewData} template={template} name={previewData.name} previewRef={previewRef} />
+          <ExportButtons
+            data={previewData}
+            template={template}
+            name={previewData.name}
+            previewRef={previewRef}
+          />
         </div>
       </div>
 
@@ -123,7 +132,11 @@ export function EditorPreviewPanel({
   );
 
   if (mode === "inline") {
-    return <div className="relative flex h-full min-h-0 w-full flex-col rounded-3xl bg-white/70 shadow-[0_8px_40px_-12px_rgba(15,23,42,0.15),0_0_0_1px_rgba(255,255,255,0.8)] backdrop-blur-sm">{chrome}</div>;
+    return (
+      <div className="relative flex h-full min-h-0 w-full flex-col rounded-3xl bg-white/70 shadow-[0_8px_40px_-12px_rgba(15,23,42,0.15),0_0_0_1px_rgba(255,255,255,0.8)] backdrop-blur-sm">
+        {chrome}
+      </div>
+    );
   }
 
   return (
@@ -144,7 +157,11 @@ export function EditorPreviewPanel({
             transition={{ type: "spring", stiffness: 300, damping: 30 }}
             onAnimationComplete={() => setIsReady(true)}
             className="fixed top-0 right-0 bottom-0 z-[70] w-full max-w-2xl flex flex-col"
-            style={{ background: "rgba(248,250,252,0.97)", backdropFilter: "blur(24px)", boxShadow: "-20px 0 60px rgba(15,23,42,0.15)" }}
+            style={{
+              background: "rgba(248,250,252,0.97)",
+              backdropFilter: "blur(24px)",
+              boxShadow: "-20px 0 60px rgba(15,23,42,0.15)",
+            }}
           >
             {chrome}
           </motion.div>

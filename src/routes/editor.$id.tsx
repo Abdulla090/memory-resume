@@ -3,12 +3,24 @@ import { useState, useRef, useEffect } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import {
-  ChevronDown, LayoutTemplate, RotateCcw, Wand2,
-  CheckCircle2, X, FileText, FileUser, PanelRight, Play, EyeOff,
+  ChevronDown,
+  LayoutTemplate,
+  RotateCcw,
+  Wand2,
+  CheckCircle2,
+  X,
+  FileText,
+  FileUser,
+  PanelRight,
+  Play,
+  EyeOff,
 } from "lucide-react";
 import {
-  improveBullet, tailorToJob, chatEditResume,
-  fixResumeErrors, generateCoverLetter,
+  improveBullet,
+  tailorToJob,
+  chatEditResume,
+  fixResumeErrors,
+  generateCoverLetter,
 } from "@/lib/ai.functions";
 import { useAppStore } from "@/lib/store";
 import type { ExperienceItem, ResumeData, TemplateId, DesignSettings } from "@/lib/types";
@@ -20,13 +32,18 @@ import { getValueAtPath } from "@/components/resume/editor-helpers";
 import { EditorChatPane } from "@/components/editor/EditorChatPane";
 import { EditorPreviewPanel } from "@/components/editor/EditorPreviewPanel";
 import {
-  TailorModal, CoverLetterModal, TemplateModal,
-  ATSModal, InlineEditModal,
+  TailorModal,
+  CoverLetterModal,
+  TemplateModal,
+  ATSModal,
+  InlineEditModal,
 } from "@/components/editor/EditorModals";
 
 // Constants
 import {
-  DEV_SAMPLE_ID, DEV_RESUME, TEMPLATES,
+  DEV_SAMPLE_ID,
+  DEV_RESUME,
+  TEMPLATES,
   type Category,
 } from "@/components/editor/editor.constants";
 
@@ -35,7 +52,10 @@ export const Route = createFileRoute("/editor/$id")({
   head: () => ({
     meta: [
       { title: "Resume Editor — MemoryCV" },
-      { name: "description", content: "Edit, tailor, and export a resume generated from your memory profile." },
+      {
+        name: "description",
+        content: "Edit, tailor, and export a resume generated from your memory profile.",
+      },
     ],
   }),
   component: ResumeEditor,
@@ -85,18 +105,29 @@ function ResumeEditor() {
 
   const [chatInput, setChatInput] = useState("");
   const [chatLoading, setChatLoading] = useState(false);
-  const [messages, setMessages] = useState<{ role: "user" | "assistant"; content: string; snapshotId?: string }[]>([
-    { role: "assistant", content: isKu
-      ? "سڵاو! دەتوانم یارمەتیت بدەم لە دەستکاریکردنی ئەم سیڤییە."
-      : "Hi! I can help you edit this resume. Tell me what you'd like to change." },
+  const [messages, setMessages] = useState<
+    { role: "user" | "assistant"; content: string; snapshotId?: string }[]
+  >([
+    {
+      role: "assistant",
+      content: isKu
+        ? "سڵاو! دەتوانم یارمەتیت بدەم لە دەستکاریکردنی ئەم سیڤییە."
+        : "Hi! I can help you edit this resume. Tell me what you'd like to change.",
+    },
   ]);
-  const [history, setHistory] = useState<{ id: string; label: string; timestamp: number; snapshot: ResumeData }[]>([]);
+  const [history, setHistory] = useState<
+    { id: string; label: string; timestamp: number; snapshot: ResumeData }[]
+  >([]);
   const [showHistory, setShowHistory] = useState(false);
   const [showResumeMenu, setShowResumeMenu] = useState(false);
   const [zoom, setZoom] = useState(1.08);
   const [showResume, setShowResume] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
-  const [inlineEdit, setInlineEdit] = useState<{ path: string; value: string; section: string } | null>(null);
+  const [inlineEdit, setInlineEdit] = useState<{
+    path: string;
+    value: string;
+    section: string;
+  } | null>(null);
 
   useEffect(() => {
     if (!didAutoOpen.current && window.innerWidth >= 1024) {
@@ -107,8 +138,8 @@ function ResumeEditor() {
 
   useEffect(() => {
     if (window.matchMedia("(max-width: 1023px)").matches) {
-        setZoom(1.08);
-      } else {
+      setZoom(1.08);
+    } else {
       setZoom(1.08);
     }
   }, []);
@@ -149,7 +180,10 @@ function ResumeEditor() {
           <p className="text-muted-foreground">
             {isKu ? "ئەم ڕەشنووسی سیڤییە نەدۆزرایەوە." : "This resume draft could not be found."}
           </p>
-          <button onClick={() => navigate({ to: "/onboarding" })} className="primary-button mt-6 px-5 py-3 text-sm font-medium">
+          <button
+            onClick={() => navigate({ to: "/onboarding" })}
+            className="primary-button mt-6 px-5 py-3 text-sm font-medium"
+          >
             {isKu ? "سەرلەنوێ دەستپێبکەرەوە" : "Start over"}
           </button>
         </div>
@@ -178,21 +212,42 @@ function ResumeEditor() {
     }
   };
 
-  const setTemplate = (t: TemplateId) => updateResume(id, { template: t, design: getTemplateDefaults(t) });
+  const setTemplate = (t: TemplateId) =>
+    updateResume(id, { template: t, design: getTemplateDefaults(t) });
 
   // ── Debounced preview ─────────────────────────────────────────────────────────
   const toSoraniResume = (d: ResumeData): ResumeData => ({
-    ...d, name: "شوان کەمال", title: "ئەندازیاری سینێری نەرمەکاڵا",
-    email: d.email ?? "shwan@example.com", phone: d.phone ?? "+964 750 000 0000",
+    ...d,
+    name: "شوان کەمال",
+    title: "ئەندازیاری سینێری نەرمەکاڵا",
+    email: d.email ?? "shwan@example.com",
+    phone: d.phone ?? "+964 750 000 0000",
     location: "هەولێر، کوردستان",
     summary: "ئەندازیاری نەرمەکاڵا بە ئەزموونی فراوان لە دروستکردنی سیستەمی پێوەندیدار.",
     experience: d.experience.map((exp) => ({
-      ...exp, title: "ئەندازیاری سینێری نەرمەکاڵا", company: exp.company || "کۆمپانیای تەکنەلۆژی",
-      duration: "٢٠٢٢ – ئێستا", description: "سەرپەرشتیاری بنیاتنانی خزمەتگوزارییە سەرەکییەکان.",
-      achievements: ["خێرایی وەڵامدانەوەی سیستەم باشترکرا.", "ڕێنمایی تیمی جیاواز کرا بۆ پڕۆژەیەکی گەورە."],
+      ...exp,
+      title: "ئەندازیاری سینێری نەرمەکاڵا",
+      company: exp.company || "کۆمپانیای تەکنەلۆژی",
+      duration: "٢٠٢٢ – ئێستا",
+      description: "سەرپەرشتیاری بنیاتنانی خزمەتگوزارییە سەرەکییەکان.",
+      achievements: [
+        "خێرایی وەڵامدانەوەی سیستەم باشترکرا.",
+        "ڕێنمایی تیمی جیاواز کرا بۆ پڕۆژەیەکی گەورە.",
+      ],
     })),
-    projects: d.projects.map((p) => ({ ...p, name: "پڕۆژەی نوێ", description: "ئامرازێکی ناوخۆیی.", tech: ["TypeScript", "React", "PostgreSQL"], impact: "بەکارهاتووە." })),
-    education: d.education.map((e) => ({ ...e, degree: "بەکالۆریۆس لە زانستی کۆمپیوتەر", institution: "زانکۆی سەڵاحەدین", year: "٢٠١٦" })),
+    projects: d.projects.map((p) => ({
+      ...p,
+      name: "پڕۆژەی نوێ",
+      description: "ئامرازێکی ناوخۆیی.",
+      tech: ["TypeScript", "React", "PostgreSQL"],
+      impact: "بەکارهاتووە.",
+    })),
+    education: d.education.map((e) => ({
+      ...e,
+      degree: "بەکالۆریۆس لە زانستی کۆمپیوتەر",
+      institution: "زانکۆی سەڵاحەدین",
+      year: "٢٠١٦",
+    })),
     skills: ["TypeScript", "React", "Node.js", "PostgreSQL", "Docker", "AWS"],
     certifications: ["بڕوانامەی پیشەیی AWS", "بڕوانامەی بەڕێوەبردنی پڕۆژە"],
   });
@@ -207,69 +262,167 @@ function ResumeEditor() {
       setAtsLoading(true);
       setTimeout(() => {
         setAtsScore(92);
-        setAtsFeedback(isKu
-          ? ["بەکارهێنانی باشی کردارەکان.", "هیچ خشتەی ئاڵۆز نییە.", "وشە سەرەکییەکان گونجاون."]
-          : ["Excellent use of action verbs.", "No complex tables or columns detected.", "Keyword match is strong for target role."]);
+        setAtsFeedback(
+          isKu
+            ? ["بەکارهێنانی باشی کردارەکان.", "هیچ خشتەی ئاڵۆز نییە.", "وشە سەرەکییەکان گونجاون."]
+            : [
+                "Excellent use of action verbs.",
+                "No complex tables or columns detected.",
+                "Keyword match is strong for target role.",
+              ],
+        );
         setAtsLoading(false);
       }, 2500);
     }
   };
 
   const handleTailor = async () => {
-    if (jobDescription.trim().length < 20) { toast.error(isKu ? "تکایە وەسفێکی درێژتری کارەکە دابنێ." : "Paste a longer job description."); return; }
+    if (jobDescription.trim().length < 20) {
+      toast.error(isKu ? "تکایە وەسفێکی درێژتری کارەکە دابنێ." : "Paste a longer job description.");
+      return;
+    }
     setTailoring(true);
     try {
-      const { resume: tailored } = await tailorFn({ data: { apiKey, resume: data, jobDescription, language: isKu ? "ku" : "en" } });
+      const { resume: tailored } = await tailorFn({
+        data: { apiKey, resume: data, jobDescription, language: isKu ? "ku" : "en" },
+      });
       updateData(tailored);
       toast.success(isKu ? "سیڤییەکە گونجێندرا" : "Resume tailored to job description");
-      setTailorOpen(false); setJobDescription("");
-    } catch (e) { toast.error(e instanceof Error ? e.message : isKu ? "گونجاندنی سیڤییەکە سەرکەوتوو نەبوو." : "Failed to tailor resume."); }
-    finally { setTailoring(false); }
+      setTailorOpen(false);
+      setJobDescription("");
+    } catch (e) {
+      toast.error(
+        e instanceof Error
+          ? e.message
+          : isKu
+            ? "گونجاندنی سیڤییەکە سەرکەوتوو نەبوو."
+            : "Failed to tailor resume.",
+      );
+    } finally {
+      setTailoring(false);
+    }
   };
 
   const handleChatSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!chatInput.trim() || chatLoading) return;
     const userMsg = chatInput.trim();
-    setChatInput(""); setMessages((p) => [...p, { role: "user", content: userMsg }]); setChatLoading(true);
+    setChatInput("");
+    setMessages((p) => [...p, { role: "user", content: userMsg }]);
+    setChatLoading(true);
     const snapshotId = crypto.randomUUID();
-    setHistory((p) => [{ id: snapshotId, label: userMsg.slice(0, 60), timestamp: Date.now(), snapshot: { ...data, experience: data.experience.map((e) => ({ ...e, achievements: [...e.achievements] })) } }, ...p]);
+    setHistory((p) => [
+      {
+        id: snapshotId,
+        label: userMsg.slice(0, 60),
+        timestamp: Date.now(),
+        snapshot: {
+          ...data,
+          experience: data.experience.map((e) => ({ ...e, achievements: [...e.achievements] })),
+        },
+      },
+      ...p,
+    ]);
     try {
-      const { resume: updated, reply } = await chatEditFn({ data: { apiKey, resume: data, userMessage: userMsg, language: isKu ? "ku" : "en" } });
-      updateData(updated); setMessages((p) => [...p, { role: "assistant", content: reply, snapshotId }]);
+      const { resume: updated, reply } = await chatEditFn({
+        data: { apiKey, resume: data, userMessage: userMsg, language: isKu ? "ku" : "en" },
+      });
+      updateData(updated);
+      setMessages((p) => [...p, { role: "assistant", content: reply, snapshotId }]);
       toast.success(isKu ? "سیڤی نوێکرایەوە" : "Resume updated");
     } catch (e) {
       setHistory((p) => p.filter((h) => h.id !== snapshotId));
-      toast.error(e instanceof Error ? e.message : isKu ? "نوێکردنەوەی سیڤی سەرکەوتوو نەبوو." : "Failed to update resume.");
-      setMessages((p) => [...p, { role: "assistant", content: isKu ? "کێشەیەکم بۆ دروست بوو. تکایە دووبارە هەوڵ بدەرەوە." : "I ran into an issue. Please try again." }]);
-    } finally { setChatLoading(false); }
+      toast.error(
+        e instanceof Error
+          ? e.message
+          : isKu
+            ? "نوێکردنەوەی سیڤی سەرکەوتوو نەبوو."
+            : "Failed to update resume.",
+      );
+      setMessages((p) => [
+        ...p,
+        {
+          role: "assistant",
+          content: isKu
+            ? "کێشەیەکم بۆ دروست بوو. تکایە دووبارە هەوڵ بدەرەوە."
+            : "I ran into an issue. Please try again.",
+        },
+      ]);
+    } finally {
+      setChatLoading(false);
+    }
   };
 
   const handleFixErrors = async () => {
     if (chatLoading) return;
-    const userMsg = isKu ? "تکایە هەموو هەڵەکانی سیڤییەکەم چاک بکە." : "Please fix all errors in my resume and give me a full HR evaluation.";
-    setMessages((p) => [...p, { role: "user", content: userMsg }]); setChatLoading(true);
+    const userMsg = isKu
+      ? "تکایە هەموو هەڵەکانی سیڤییەکەم چاک بکە."
+      : "Please fix all errors in my resume and give me a full HR evaluation.";
+    setMessages((p) => [...p, { role: "user", content: userMsg }]);
+    setChatLoading(true);
     const snapshotId = crypto.randomUUID();
-    setHistory((p) => [{ id: snapshotId, label: "Before Auto-Fix", timestamp: Date.now(), snapshot: { ...data, experience: data.experience.map((e) => ({ ...e, achievements: [...e.achievements] })) } }, ...p]);
+    setHistory((p) => [
+      {
+        id: snapshotId,
+        label: "Before Auto-Fix",
+        timestamp: Date.now(),
+        snapshot: {
+          ...data,
+          experience: data.experience.map((e) => ({ ...e, achievements: [...e.achievements] })),
+        },
+      },
+      ...p,
+    ]);
     try {
-      const { resume: updated, reply } = await fixErrorsFn({ data: { apiKey, resume: data, language: isKu ? "ku" : "en" } });
-      updateData(updated); setMessages((p) => [...p, { role: "assistant", content: reply, snapshotId }]);
+      const { resume: updated, reply } = await fixErrorsFn({
+        data: { apiKey, resume: data, language: isKu ? "ku" : "en" },
+      });
+      updateData(updated);
+      setMessages((p) => [...p, { role: "assistant", content: reply, snapshotId }]);
       toast.success(isKu ? "سیڤییەکە چاککرا" : "Resume fixed and evaluated");
     } catch (e) {
       setHistory((p) => p.filter((h) => h.id !== snapshotId));
-      toast.error(e instanceof Error ? e.message : isKu ? "چاککردنی سیڤی سەرکەوتوو نەبوو." : "Failed to fix resume.");
-      setMessages((p) => [...p, { role: "assistant", content: isKu ? "کێشەیەکم بۆ دروست بوو. تکایە دووبارە هەوڵ بدەرەوە." : "I ran into an issue fixing the resume. Please try again." }]);
-    } finally { setChatLoading(false); }
+      toast.error(
+        e instanceof Error
+          ? e.message
+          : isKu
+            ? "چاککردنی سیڤی سەرکەوتوو نەبوو."
+            : "Failed to fix resume.",
+      );
+      setMessages((p) => [
+        ...p,
+        {
+          role: "assistant",
+          content: isKu
+            ? "کێشەیەکم بۆ دروست بوو. تکایە دووبارە هەوڵ بدەرەوە."
+            : "I ran into an issue fixing the resume. Please try again.",
+        },
+      ]);
+    } finally {
+      setChatLoading(false);
+    }
   };
 
   const handleGenerateCoverLetter = async () => {
     if (coverLetterLoading) return;
-    setCoverLetterModalOpen(true); setCoverLetterLoading(true);
+    setCoverLetterModalOpen(true);
+    setCoverLetterLoading(true);
     try {
-      const { coverLetter } = await generateCoverLetterFn({ data: { apiKey, resume: data, language: isKu ? "ku" : "en" } });
+      const { coverLetter } = await generateCoverLetterFn({
+        data: { apiKey, resume: data, language: isKu ? "ku" : "en" },
+      });
       setCoverLetterContent(coverLetter);
-    } catch (e) { toast.error(e instanceof Error ? e.message : isKu ? "دروستکردنی نامەی داواکاری سەرکەوتوو نەبوو." : "Failed to generate cover letter."); }
-    finally { setCoverLetterLoading(false); }
+    } catch (e) {
+      toast.error(
+        e instanceof Error
+          ? e.message
+          : isKu
+            ? "دروستکردنی نامەی داواکاری سەرکەوتوو نەبوو."
+            : "Failed to generate cover letter.",
+      );
+    } finally {
+      setCoverLetterLoading(false);
+    }
   };
 
   const handleRevert = (snapshotId: string) => {
@@ -290,7 +443,15 @@ function ResumeEditor() {
     setMessages((p) => [...p, { role: "user", content: userMsg }]);
     setChatLoading(true);
     setTimeout(() => {
-      setMessages((p) => [...p, { role: "assistant", content: isKu ? "زۆر باشە، فایلم وەرگرت. چۆن دەتەوێت ئەم زانیارییانە لە سیڤییەکەتدا بەکاربهێنم؟" : "I've received your file. How would you like me to use this information in your resume?" }]);
+      setMessages((p) => [
+        ...p,
+        {
+          role: "assistant",
+          content: isKu
+            ? "زۆر باشە، فایلم وەرگرت. چۆن دەتەوێت ئەم زانیارییانە لە سیڤییەکەتدا بەکاربهێنم؟"
+            : "I've received your file. How would you like me to use this information in your resume?",
+        },
+      ]);
       setChatLoading(false);
     }, 1000);
   };
@@ -303,13 +464,19 @@ function ResumeEditor() {
         <div className="absolute inset-0 bg-gradient-to-br from-slate-100 via-blue-50/30 to-slate-100 pointer-events-none" />
 
         {/* ── Top Bar ── */}
-        <header className="relative z-50 shrink-0 flex items-center justify-between px-4 py-3 border-b border-white/60"
-          style={{ background: "rgba(255,255,255,0.82)", backdropFilter: "blur(20px)" }}>
+        <header
+          className="relative z-50 shrink-0 flex items-center justify-between px-4 py-3 border-b border-white/60"
+          style={{ background: "rgba(255,255,255,0.82)", backdropFilter: "blur(20px)" }}
+        >
           {/* Left */}
           <div className="flex items-center gap-3">
             <Link to="/" className="flex items-center gap-2 group cursor-pointer">
               <div className="size-8 rounded-xl bg-white shadow-[0_2px_8px_rgba(0,0,0,0.12),0_1px_0_rgba(255,255,255,0.8)_inset] flex items-center justify-center">
-                <img src="/logo/MemoryCV Logo Icon Only.png" alt="MemoryCV" className="size-5 object-contain" />
+                <img
+                  src="/logo/MemoryCV Logo Icon Only.png"
+                  alt="MemoryCV"
+                  className="size-5 object-contain"
+                />
               </div>
             </Link>
             <div className="relative" ref={resumeMenuRef}>
@@ -319,8 +486,12 @@ function ResumeEditor() {
                 className="flex items-center gap-1.5 rounded-full px-3 py-1 bg-white shadow-[0_2px_8px_rgba(0,0,0,0.08),0_1px_0_rgba(255,255,255,0.9)_inset] border border-white/60 hover:bg-slate-50 transition-colors"
               >
                 <FileUser className="size-3.5 text-slate-500" />
-                <span className="text-[13px] font-semibold text-slate-700 max-w-[160px] truncate">{data.name || "My Resume"}</span>
-                <ChevronDown className={`size-3 text-slate-400 transition-transform ${showResumeMenu ? "rotate-180" : ""}`} />
+                <span className="text-[13px] font-semibold text-slate-700 max-w-[160px] truncate">
+                  {data.name || "My Resume"}
+                </span>
+                <ChevronDown
+                  className={`size-3 text-slate-400 transition-transform ${showResumeMenu ? "rotate-180" : ""}`}
+                />
               </button>
               {showResumeMenu && recentResumes.length > 0 && (
                 <div className="absolute left-0 top-full z-50 mt-2 w-[min(92vw,18rem)] overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_18px_40px_-18px_rgba(15,23,42,0.35)]">
@@ -342,9 +513,15 @@ function ResumeEditor() {
                           <FileText className="size-3.5" />
                         </div>
                         <div className="min-w-0 flex-1">
-                          <div className="truncate text-[13px] font-semibold text-slate-800">{item.title || item.data.name || "My Resume"}</div>
+                          <div className="truncate text-[13px] font-semibold text-slate-800">
+                            {item.title || item.data.name || "My Resume"}
+                          </div>
                           <div className="truncate text-[11px] text-slate-500">
-                            {new Date(item.createdAt).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}
+                            {new Date(item.createdAt).toLocaleDateString(undefined, {
+                              month: "short",
+                              day: "numeric",
+                              year: "numeric",
+                            })}
                           </div>
                         </div>
                       </button>
@@ -360,12 +537,14 @@ function ResumeEditor() {
 
           {/* Right: View resume toggle */}
           <div className="flex items-center gap-2">
-            <button onClick={() => setShowResume((v) => !v)}
+            <button
+              onClick={() => setShowResume((v) => !v)}
               className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-[13px] font-bold transition-all duration-200 ${
                 showResume
                   ? "bg-slate-900 text-white shadow-[0_4px_12px_rgba(15,23,42,0.25),0_1px_0_rgba(255,255,255,0.1)_inset]"
                   : "bg-white text-slate-800 shadow-[0_2px_8px_rgba(0,0,0,0.1),0_1px_0_rgba(255,255,255,0.9)_inset] border border-white/60 hover:shadow-[0_4px_12px_rgba(0,0,0,0.14)]"
-              } active:scale-[0.97]`}>
+              } active:scale-[0.97]`}
+            >
               {showResume ? <EyeOff className="size-4" /> : <Play className="size-4" />}
               <span>{isKu ? "سیڤی" : showResume ? "Hide Resume" : "View Resume"}</span>
             </button>
@@ -377,7 +556,9 @@ function ResumeEditor() {
           <div className="flex h-full min-h-0 flex-col gap-4 p-3 md:p-4 lg:grid lg:grid-cols-[360px_minmax(0,1.35fr)] lg:gap-4">
             <aside className="relative flex min-h-0 flex-1 flex-col lg:max-w-none max-lg:min-h-0 max-lg:overflow-hidden">
               <div className="flex items-center justify-between px-1 pb-2 lg:hidden">
-                <div className="text-[11px] font-semibold uppercase tracking-[0.25em] text-slate-500">Assistant</div>
+                <div className="text-[11px] font-semibold uppercase tracking-[0.25em] text-slate-500">
+                  Assistant
+                </div>
               </div>
               <div className="relative flex min-h-0 flex-1 flex-col max-lg:min-h-0 max-lg:overflow-hidden">
                 <EditorChatPane
@@ -461,23 +642,53 @@ function ResumeEditor() {
         </div>
 
         {/* ── Modals ── */}
-        <TailorModal open={tailorOpen} onClose={() => setTailorOpen(false)} isKu={isKu}
-          jobDescription={jobDescription} setJobDescription={setJobDescription}
-          tailoring={tailoring} onTailor={handleTailor} />
+        <TailorModal
+          open={tailorOpen}
+          onClose={() => setTailorOpen(false)}
+          isKu={isKu}
+          jobDescription={jobDescription}
+          setJobDescription={setJobDescription}
+          tailoring={tailoring}
+          onTailor={handleTailor}
+        />
 
-        <CoverLetterModal open={coverLetterModalOpen} onClose={() => setCoverLetterModalOpen(false)}
-          isKu={isKu} loading={coverLetterLoading} content={coverLetterContent} />
+        <CoverLetterModal
+          open={coverLetterModalOpen}
+          onClose={() => setCoverLetterModalOpen(false)}
+          isKu={isKu}
+          loading={coverLetterLoading}
+          content={coverLetterContent}
+        />
 
-        <TemplateModal open={templateModalOpen} onClose={() => setTemplateModalOpen(false)}
-          isKu={isKu} templates={TEMPLATES} categories={categories} filter={filter}
-          setFilter={setFilter} activeTemplate={resume.template} design={design}
-          resumeData={data} onSelect={setTemplate} />
+        <TemplateModal
+          open={templateModalOpen}
+          onClose={() => setTemplateModalOpen(false)}
+          isKu={isKu}
+          templates={TEMPLATES}
+          categories={categories}
+          filter={filter}
+          setFilter={setFilter}
+          activeTemplate={resume.template}
+          design={design}
+          resumeData={data}
+          onSelect={setTemplate}
+        />
 
-        <ATSModal open={atsModalOpen} onClose={() => setAtsModalOpen(false)}
-          isKu={isKu} loading={atsLoading} score={atsScore} feedback={atsFeedback} />
+        <ATSModal
+          open={atsModalOpen}
+          onClose={() => setAtsModalOpen(false)}
+          isKu={isKu}
+          loading={atsLoading}
+          score={atsScore}
+          feedback={atsFeedback}
+        />
 
-        <InlineEditModal inlineEdit={inlineEdit} setInlineEdit={setInlineEdit}
-          updateData={updateData} data={data} />
+        <InlineEditModal
+          inlineEdit={inlineEdit}
+          setInlineEdit={setInlineEdit}
+          updateData={updateData}
+          data={data}
+        />
       </div>
     </DesignContext.Provider>
   );

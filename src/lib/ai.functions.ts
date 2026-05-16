@@ -979,3 +979,36 @@ RULES:
 
     return { nextQuestion: extractText(json).trim() };
   });
+
+// ───────────────── generateFieldContent ─────────────────
+
+export const generateFieldContent = createServerFn({ method: "POST" })
+  .inputValidator(
+    z.object({
+      apiKey: z.string().optional(),
+      field: z.string(),
+      formData: z.any(),
+      language: z.enum(["en", "ku"]).default("en"),
+    }),
+  )
+  .handler(async ({ data }): Promise<{ content: string }> => {
+    const isKu = data.language === "ku";
+    const json = await callGateway({
+      apiKey: data.apiKey,
+      messages: [
+        {
+          role: "system",
+          content: `You are an expert resume writer. The user is filling out a form and clicked "Generate with AI" for the field: ${data.field}. 
+Write professional content for this specific field based on the context provided in the rest of the form.
+Do not use markdown formatting. Write pure text suitable for a textarea. 
+For example, if field is "experience", write a few bullet points of standard achievements for their role.
+Write in ${isKu ? "Kurdish (Sorani)" : "English"}.`,
+        },
+        {
+          role: "user",
+          content: `Current form data context:\n${JSON.stringify(data.formData, null, 2)}\n\nPlease generate the content for: ${data.field}`,
+        },
+      ],
+    });
+    return { content: extractText(json).trim() };
+  });
