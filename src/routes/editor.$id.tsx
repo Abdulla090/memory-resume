@@ -11,9 +11,10 @@ import {
   X,
   FileText,
   FileUser,
-  PanelRight,
   Play,
   EyeOff,
+  Bot,
+  Sliders,
 } from "lucide-react";
 import {
   improveBullet,
@@ -25,7 +26,8 @@ import {
 import { useAppStore } from "@/lib/store";
 import type { ExperienceItem, ResumeData, TemplateId, DesignSettings } from "@/lib/types";
 import { DesignContext } from "@/components/resume/DesignContext";
-import { DEFAULT_DESIGN, getTemplateDefaults } from "@/components/DesignPanel";
+import { DEFAULT_DESIGN, getTemplateDefaults, DesignPanel } from "@/components/DesignPanel";
+import type { SectionId } from "@/components/DesignPanel";
 import { getValueAtPath } from "@/components/resume/editor-helpers";
 
 // Sub-components
@@ -123,6 +125,8 @@ function ResumeEditor() {
   const [zoom, setZoom] = useState(1.08);
   const [showResume, setShowResume] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
+  const [sidebarTab, setSidebarTab] = useState<"chat" | "design">("chat");
+  const [selectedSection, setSelectedSection] = useState<SectionId>("global");
   const [inlineEdit, setInlineEdit] = useState<{
     path: string;
     value: string;
@@ -214,6 +218,9 @@ function ResumeEditor() {
 
   const setTemplate = (t: TemplateId) =>
     updateResume(id, { template: t, design: getTemplateDefaults(t) });
+
+  const updateDesign = (patch: Partial<DesignSettings>) =>
+    updateResume(id, { design: { ...design, ...patch } });
 
   // ── Debounced preview ─────────────────────────────────────────────────────────
   const toSoraniResume = (d: ResumeData): ResumeData => ({
@@ -555,33 +562,70 @@ function ResumeEditor() {
         <main className="relative z-10 flex-1 min-h-0 overflow-hidden">
           <div className="flex h-full min-h-0 flex-col gap-4 p-3 md:p-4 lg:grid lg:grid-cols-[360px_minmax(0,1.35fr)] lg:gap-4">
             <aside className="relative flex min-h-0 flex-1 flex-col lg:max-w-none max-lg:min-h-0 max-lg:overflow-hidden">
-              <div className="flex items-center justify-between px-1 pb-2 lg:hidden">
-                <div className="text-[11px] font-semibold uppercase tracking-[0.25em] text-slate-500">
-                  Assistant
-                </div>
+              {/* ── Chat / Design tab switcher ── */}
+              <div
+                className="shrink-0 flex items-center gap-1 rounded-2xl p-1 mb-2"
+                style={{ background: "rgba(255,255,255,0.72)", boxShadow: "0 2px 8px rgba(15,23,42,0.08), 0 0 0 1px rgba(255,255,255,0.8)", backdropFilter: "blur(12px)" }}
+              >
+                <button
+                  onClick={() => setSidebarTab("chat")}
+                  className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-[13px] font-semibold transition-all duration-150 ${
+                    sidebarTab === "chat"
+                      ? "bg-slate-900 text-white shadow-[0_2px_8px_rgba(15,23,42,0.22)]"
+                      : "text-slate-500 hover:text-slate-800 hover:bg-white/60"
+                  }`}
+                >
+                  <Bot className="size-3.5" />
+                  {isKu ? "ژیاری" : "Chat"}
+                </button>
+                <button
+                  onClick={() => setSidebarTab("design")}
+                  className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-[13px] font-semibold transition-all duration-150 ${
+                    sidebarTab === "design"
+                      ? "bg-slate-900 text-white shadow-[0_2px_8px_rgba(15,23,42,0.22)]"
+                      : "text-slate-500 hover:text-slate-800 hover:bg-white/60"
+                  }`}
+                >
+                  <Sliders className="size-3.5" />
+                  {isKu ? "ستایل" : "Design"}
+                </button>
               </div>
-              <div className="relative flex min-h-0 flex-1 flex-col max-lg:min-h-0 max-lg:overflow-hidden">
-                <EditorChatPane
-                  isKu={isKu}
-                  messages={messages}
-                  chatLoading={chatLoading}
-                  chatInput={chatInput}
-                  setChatInput={setChatInput}
-                  onSubmit={handleChatSubmit}
-                  isRecording={isRecording}
-                  setIsRecording={setIsRecording}
-                  history={history}
-                  showHistory={showHistory}
-                  setShowHistory={setShowHistory}
-                  onRevert={handleRevert}
-                  messagesEndRef={messagesEndRef}
-                  onCheckATS={handleCheckATS}
-                  onFixErrors={handleFixErrors}
-                  onOpenTemplates={() => setTemplateModalOpen(true)}
-                  onGenerateCoverLetter={handleGenerateCoverLetter}
-                  onImageUpload={handleImageUpload}
-                  onDocumentUpload={handleDocumentUpload}
-                />
+
+              <div className="relative flex min-h-0 flex-1 flex-col max-lg:min-h-0 max-lg:overflow-hidden overflow-hidden rounded-3xl">
+                {sidebarTab === "chat" && (
+                  <EditorChatPane
+                    isKu={isKu}
+                    messages={messages}
+                    chatLoading={chatLoading}
+                    chatInput={chatInput}
+                    setChatInput={setChatInput}
+                    onSubmit={handleChatSubmit}
+                    isRecording={isRecording}
+                    setIsRecording={setIsRecording}
+                    history={history}
+                    showHistory={showHistory}
+                    setShowHistory={setShowHistory}
+                    onRevert={handleRevert}
+                    messagesEndRef={messagesEndRef}
+                    onCheckATS={handleCheckATS}
+                    onFixErrors={handleFixErrors}
+                    onOpenTemplates={() => setTemplateModalOpen(true)}
+                    onGenerateCoverLetter={handleGenerateCoverLetter}
+                    onImageUpload={handleImageUpload}
+                    onDocumentUpload={handleDocumentUpload}
+                  />
+                )}
+                {sidebarTab === "design" && (
+                  <DesignPanel
+                    design={design}
+                    data={data}
+                    onChange={updateDesign}
+                    updateData={updateData}
+                    onClose={() => setSidebarTab("chat")}
+                    selected={selectedSection}
+                    setSelected={setSelectedSection}
+                  />
+                )}
               </div>
             </aside>
 

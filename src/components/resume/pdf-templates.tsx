@@ -1502,43 +1502,56 @@ function PalmerstonExactPDF({ data }: { data: ResumeData }) {
 
 export function GetPDFDocument({ data, template }: { data: ResumeData; template: TemplateId }) {
   switch (template) {
-    case 'executive': return <ExecutivePDF data={data} />;
-    case 'nexus': return <NexusPDF data={data} />;
-    case 'orbit': return <OrbitPDF data={data} />;
-    case 'metric': return <MetricPDF data={data} />;
-    case 'prism': return <PrismDarkPDF data={data} />;
-    case 'carbon': return <CarbonPDF data={data} />;
-    case 'atlas': return <AtlasPDF data={data} />;
-    case 'forge': return <ForgePDF data={data} />;
-    case 'zenith': return <ZenithPDF data={data} />;
-    case 'vector': return <VectorPDF data={data} />;
-    case 'new-sleek': return <NewSleekPDF data={data} />;
+    // ── Core templates ──────────────────────────────────────────────────────
+    case 'minimal':          return <MinimalPDF data={data} />;
+    case 'executive':        return <ExecutivePDF data={data} />;
+    case 'nexus':            return <NexusPDF data={data} />;
+    case 'orbit':            return <OrbitPDF data={data} />;
+    case 'metric':           return <MetricPDF data={data} />;
+    case 'prism':            return <PrismDarkPDF data={data} />;
+    case 'carbon':           return <CarbonPDF data={data} />;
+    case 'atlas':            return <AtlasPDF data={data} />;
+    case 'forge':            return <ForgePDF data={data} />;
+    case 'zenith':           return <ZenithPDF data={data} />;
+    case 'vector':           return <VectorPDF data={data} />;
+    // ── New templates ──────────────────────────────────────────────────────
+    case 'new-sleek':        return <NewSleekPDF data={data} />;
     case 'new-professional': return <NewProfessionalPDF data={data} />;
-    case 'new-academic': return <NewAcademicPDF data={data} />;
-    case 'ref-torres': return <AtlasPDF data={data} />;
-    case 'ref-silva': return <ExecutivePDF data={data} />;
-    case 'ref-schumacher': return <ForgePDF data={data} />;
-    case 'ref-palmerston': return <PalmerstonExactPDF data={data} />;
-    case 'ref-alvarado': return <PalmerstonExactPDF data={data} />;
-    case 'ref-sanchez': return <CarbonPDF data={data} />;
-    case 'gallego': return <GallegoPDF data={data} />;
-    case 'leroy': return <LeroyPDF data={data} />;
-    case 'dubois': return <DuboisPDF data={data} />;
-    case 'claudia-alves': return <PalmerstonExactPDF data={data} />;
-    // Dedicated renderers matching live preview designs
-    case 'noir': return <NoirPDF data={data} />;
-    case 'apex': return <AtlasPDF data={data} />;
-    case 'slate': return <SlatePDF data={data} />;
-    case 'cipher': return <CipherPDF data={data} />;
-    case 'monolith': return <CarbonPDF data={data} />;
-    case 'pinnacle': return <PinnaclePDF data={data} />;
-    case 'avant': return <AvantPDF data={data} />;
-    case 'vanguard': return <VanguardPDF data={data} />;
-    default: return <MinimalPDF data={data} />;
+    case 'new-academic':     return <NewAcademicPDF data={data} />;
+    // ── Ref/named templates — best matching PDF renderer ───────────────────
+    case 'ref-torres':       return <AtlasPDF data={data} />;     // wide header band
+    case 'ref-silva':        return <ExecutivePDF data={data} />; // dark sidebar
+    case 'ref-schumacher':   return <ForgePDF data={data} />;     // industrial bars
+    case 'ref-palmerston':   return <PalmerstonExactPDF data={data} />;
+    case 'ref-alvarado':     return <PalmerstonExactPDF data={data} />;
+    case 'ref-sanchez':      return <CarbonPDF data={data} />;    // light side panel
+    case 'claudia-alves':    return <PalmerstonExactPDF data={data} />;
+    case 'new-alvarado':     return <PalmerstonExactPDF data={data} />; // Lorna Pixel / Alvarado clone
+    case 'mercer':           return <ExecutivePDF data={data} />;       // clean two-col
+    // ── Extra templates ────────────────────────────────────────────────────
+    case 'gallego':          return <GallegoPDF data={data} />;
+    case 'leroy':            return <LeroyPDF data={data} />;
+    case 'dubois':           return <DuboisPDF data={data} />;
+    // ── Dark / styled templates ────────────────────────────────────────────
+    case 'noir':             return <NoirPDF data={data} />;      // full dark
+    case 'apex':             return <AtlasPDF data={data} />;     // dark header + clean grid
+    case 'slate':            return <SlatePDF data={data} />;
+    case 'cipher':           return <CipherPDF data={data} />;    // terminal green
+    case 'monolith':         return <ExecutivePDF data={data} />; // two-col, dark labels
+    case 'pinnacle':         return <PinnaclePDF data={data} />;  // indigo header
+    case 'avant':            return <AvantPDF data={data} />;
+    case 'vanguard':         return <VanguardPDF data={data} />;
+    default:                 return <MinimalPDF data={data} />;
   }
 }
 
-export async function exportResumePDF(data: ResumeData, template: TemplateId, filename: string) {
+export async function exportResumePDF(
+  data: ResumeData,
+  template: TemplateId,
+  filename: string,
+  // design reserved for future color theming of vector PDF
+  _design?: import("@/lib/types").DesignSettings,
+) {
   const doc = <GetPDFDocument data={data} template={template} />;
   const blob = await pdf(doc).toBlob();
   const url = URL.createObjectURL(blob);

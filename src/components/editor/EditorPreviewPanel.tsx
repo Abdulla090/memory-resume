@@ -105,6 +105,7 @@ export function EditorPreviewPanel({
             template={template}
             name={previewData.name}
             previewRef={previewRef}
+            design={design}
           />
         </div>
       </div>

@@ -165,11 +165,13 @@ export function ExportButtons({
   template,
   name,
   previewRef,
+  design,
 }: {
   data: ResumeData;
   template: TemplateId;
   name: string;
   previewRef: RefObject<HTMLDivElement | null>;
+  design?: import("@/lib/types").DesignSettings;
 }) {
   const [pdfLoading, setPdfLoading] = useState(false);
   const [vectorLoading, setVectorLoading] = useState(false);
@@ -206,7 +208,7 @@ export function ExportButtons({
     setVectorLoading(true);
     try {
       const { exportResumePDF } = await import("@/components/resume/pdf-templates");
-      await exportResumePDF(data, template, filename);
+      await exportResumePDF(data, template, filename, design);
     } catch (err) {
       console.error(err);
       toast.error("Failed to generate Vector PDF");
