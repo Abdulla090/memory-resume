@@ -165,16 +165,14 @@ export function ExportButtons({
   template,
   name,
   previewRef,
-  design,
 }: {
   data: ResumeData;
   template: TemplateId;
   name: string;
   previewRef: RefObject<HTMLDivElement | null>;
-  design?: import("@/lib/types").DesignSettings;
 }) {
   const [pdfLoading, setPdfLoading] = useState(false);
-  const [vectorLoading, setVectorLoading] = useState(false);
+  const [printLoading, setPrintLoading] = useState(false);
   const [docxLoading, setDocxLoading] = useState(false);
   const [open, setOpen] = useState(false);
   const filename = name.replace(/\s+/g, "_") || "resume";
@@ -192,7 +190,7 @@ export function ExportButtons({
     setPdfLoading(true);
     try {
       if (previewRef.current) {
-        await exportPreviewAsPDF(previewRef.current, filename);
+        await exportPreviewAsPDF(previewRef.current, filename, 2);
       }
     } catch (err) {
       console.error(err);
@@ -202,18 +200,20 @@ export function ExportButtons({
     }
   };
 
-  const handleVectorPDF = async (e: React.MouseEvent) => {
+  /** Print quality — 3× resolution, pixel-perfect match to live preview */
+  const handlePrintPDF = async (e: React.MouseEvent) => {
     e.stopPropagation();
     setOpen(false);
-    setVectorLoading(true);
+    setPrintLoading(true);
     try {
-      const { exportResumePDF } = await import("@/components/resume/pdf-templates");
-      await exportResumePDF(data, template, filename, design);
+      if (previewRef.current) {
+        await exportPreviewAsPDF(previewRef.current, `${filename}_print`, 3);
+      }
     } catch (err) {
       console.error(err);
-      toast.error("Failed to generate Vector PDF");
+      toast.error("Failed to generate PDF");
     } finally {
-      setVectorLoading(false);
+      setPrintLoading(false);
     }
   };
 
@@ -229,7 +229,7 @@ export function ExportButtons({
     }
   };
 
-  const anyLoading = pdfLoading || vectorLoading || docxLoading;
+  const anyLoading = pdfLoading || printLoading || docxLoading;
 
   return (
     <div className="relative">
@@ -248,20 +248,24 @@ export function ExportButtons({
       </button>
 
       {open && (
-        <div className="absolute right-0 top-full mt-2 w-[220px] bg-white border border-slate-200 rounded-xl shadow-[0_8px_40px_rgba(15,23,42,0.14)] overflow-hidden z-[100] flex flex-col p-1.5 animate-in fade-in zoom-in-95 duration-100 origin-top-right">
+        <div className="absolute right-0 top-full mt-2 w-[236px] bg-white border border-slate-200 rounded-xl shadow-[0_8px_40px_rgba(15,23,42,0.14)] overflow-hidden z-[100] flex flex-col p-1.5 animate-in fade-in zoom-in-95 duration-100 origin-top-right">
+          <div className="px-3 pt-2 pb-1">
+            <p className="text-[10px] text-slate-400 font-medium">Both PDFs match your live preview exactly</p>
+          </div>
+          <div className="h-px bg-slate-100 mx-2 mb-1" />
           <button
             onClick={handlePDF}
             className="flex items-center justify-between px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 hover:text-blue-600 rounded-lg transition-colors text-left group"
           >
-            <span>PDF (Canvas)</span>
-            <span className="text-[10px] text-slate-400 font-normal group-hover:text-blue-400">All Langs</span>
+            <span>PDF (Standard)</span>
+            <span className="text-[10px] text-slate-400 font-normal group-hover:text-blue-400">Fast · 2×</span>
           </button>
           <button
-            onClick={handleVectorPDF}
+            onClick={handlePrintPDF}
             className="flex items-center justify-between px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 hover:text-blue-600 rounded-lg transition-colors text-left group"
           >
-            <span>PDF (Vector)</span>
-            <span className="text-[10px] text-slate-400 font-normal group-hover:text-blue-400">EN Only</span>
+            <span>PDF (Print Quality)</span>
+            <span className="text-[10px] text-slate-400 font-normal group-hover:text-blue-400">Sharp · 3×</span>
           </button>
           <div className="h-px bg-slate-100 my-1 mx-2" />
           <button
