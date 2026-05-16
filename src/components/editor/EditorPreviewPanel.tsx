@@ -1,6 +1,6 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { MessageSquare, Languages } from "lucide-react";
-import { type RefObject, useEffect, useState } from "react";
+import { type RefObject, useState } from "react";
 import type { ResumeData, TemplateId, DesignSettings } from "@/lib/types";
 import { ExportButtons, ClientPDFPreview } from "@/components/resume/editor-helpers";
 import type { UpdateDataFn } from "@/components/resume/DesignContext";
@@ -38,11 +38,8 @@ export function EditorPreviewPanel({
   onSectionClick,
   previewRef,
 }: EditorPreviewPanelProps) {
-  const [isReady, setIsReady] = useState(mode === "inline");
-
-  useEffect(() => {
-    if (mode === "inline") setIsReady(true);
-  }, [mode]);
+  // Always ready — don't gate the preview behind animation completion
+  const [isReady] = useState(true);
 
   const chrome = (
     <>
@@ -147,6 +144,7 @@ export function EditorPreviewPanel({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
+            transition={{ duration: 0.15 }}
             className="fixed inset-0 bg-slate-900/30 backdrop-blur-[2px] z-[60]"
             onClick={onClose}
           />
@@ -154,8 +152,7 @@ export function EditorPreviewPanel({
             initial={{ x: "100%" }}
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
-            transition={{ type: "spring", stiffness: 300, damping: 30 }}
-            onAnimationComplete={() => setIsReady(true)}
+            transition={{ duration: 0.22, ease: [0.25, 0.46, 0.45, 0.94] }}
             className="fixed top-0 right-0 bottom-0 z-[70] w-full max-w-2xl flex flex-col"
             style={{
               background: "rgba(248,250,252,0.97)",
@@ -170,3 +167,4 @@ export function EditorPreviewPanel({
     </AnimatePresence>
   );
 }
+

@@ -117,7 +117,7 @@ export function EditorChatPane({
             <Bot className="size-3.5 text-white" />
           </div>
           <span className="text-[14px] font-bold text-slate-800">
-            {isKu ? "ژیاری دەستکرد" : "AI Assistant"}
+            {isKu ? "ژیریی دەستکرد" : "AI Assistant"}
           </span>
           {chatLoading && <Loader2 className="size-3.5 text-blue-500 animate-spin" />}
         </div>
