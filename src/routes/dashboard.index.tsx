@@ -42,8 +42,8 @@ function DashboardIndex() {
     return undefined;
   };
 
-  const handleContinue = () => {
-    const trimmed = request.trim();
+  const handleDirectContinue = (val: string) => {
+    const trimmed = val.trim();
     const value = trimmed.toLowerCase();
     if (!trimmed) return;
     if (
@@ -108,78 +108,59 @@ function DashboardIndex() {
                 : "Choose a CV, thank-you card, or cover letter. I’ll guide you from there."}
             </p>
 
-            <div className="mt-8 grid gap-3 sm:grid-cols-3">
+            <div className="mt-8 grid gap-4 sm:grid-cols-3">
               <button
                 type="button"
-                onClick={() => setRequest(isKu ? "سیڤی" : "CV")}
-                className={`rounded-[1.4rem] border p-4 text-left transition-all ${request === (isKu ? "سیڤی" : "CV") ? "border-blue-500 bg-blue-50/40 shadow-sm" : "border-neutral-200 bg-white hover:border-neutral-300"}`}
+                onClick={() => handleDirectContinue("CV")}
+                className="group rounded-[1.4rem] border border-neutral-200 bg-white p-5 text-left transition-all hover:border-blue-500 hover:bg-blue-50/50 hover:shadow-md"
               >
-                <BriefcaseIcon className="h-5 w-5 text-blue-600" />
-                <div className="mt-3 font-bold text-black">{isKu ? "سیڤی" : "CV"}</div>
-                <div className="text-xs text-neutral-500 mt-1">
+                <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                  <BriefcaseIcon className="h-6 w-6 text-blue-600" />
+                </div>
+                <div className="font-bold text-black text-lg">{isKu ? "سیڤی" : "CV"}</div>
+                <div className="text-sm text-neutral-500 mt-1">
                   {isKu ? "بۆ کار و ئەدیتەر" : "For jobs and editor flow"}
                 </div>
               </button>
               <button
                 type="button"
-                onClick={() => setRequest(isKu ? "کارتی سوپاس" : "Thank-you card")}
-                className={`rounded-[1.4rem] border p-4 text-left transition-all ${request === (isKu ? "کارتی سوپاس" : "Thank-you card") ? "border-blue-500 bg-blue-50/40 shadow-sm" : "border-neutral-200 bg-white hover:border-neutral-300"}`}
+                onClick={() => handleDirectContinue("Thank-you card")}
+                className="group rounded-[1.4rem] border border-neutral-200 bg-white p-5 text-left transition-all hover:border-emerald-500 hover:bg-emerald-50/50 hover:shadow-md"
               >
-                <FileText className="h-5 w-5 text-blue-600" />
-                <div className="mt-3 font-bold text-black">
+                <div className="w-12 h-12 rounded-full bg-emerald-100 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                  <FileText className="h-6 w-6 text-emerald-600" />
+                </div>
+                <div className="font-bold text-black text-lg">
                   {isKu ? "کارتی سوپاس" : "Thank-you card"}
                 </div>
-                <div className="text-xs text-neutral-500 mt-1">
+                <div className="text-sm text-neutral-500 mt-1">
                   {isKu ? "بۆ سوپاس و بانگەشت" : "For gratitude and invites"}
                 </div>
               </button>
               <button
                 type="button"
-                onClick={() => setRequest(isKu ? "نامەی ڕووپۆش" : "Cover letter")}
-                className={`rounded-[1.4rem] border p-4 text-left transition-all ${request === (isKu ? "نامەی ڕووپۆش" : "Cover letter") ? "border-blue-500 bg-blue-50/40 shadow-sm" : "border-neutral-200 bg-white hover:border-neutral-300"}`}
+                onClick={() => handleDirectContinue("Cover letter")}
+                className="group rounded-[1.4rem] border border-neutral-200 bg-white p-5 text-left transition-all hover:border-purple-500 hover:bg-purple-50/50 hover:shadow-md"
               >
-                <MessageSquare className="h-5 w-5 text-blue-600" />
-                <div className="mt-3 font-bold text-black">
+                <div className="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                  <MessageSquare className="h-6 w-6 text-purple-600" />
+                </div>
+                <div className="font-bold text-black text-lg">
                   {isKu ? "نامەی ڕووپۆش" : "Cover letter"}
                 </div>
-                <div className="text-xs text-neutral-500 mt-1">
+                <div className="text-sm text-neutral-500 mt-1">
                   {isKu ? "بۆ پێشکەشکردن لەگەڵ سیڤی" : "For job applications"}
                 </div>
               </button>
             </div>
 
-            <div className="mt-6 rounded-[1.6rem] border border-neutral-200 bg-neutral-50 p-3 sm:p-4 text-left shadow-sm">
-              <div className="text-[11px] font-bold uppercase tracking-[0.24em] text-neutral-400 mb-2">
-                {isKu ? "بۆ نموونە" : "Describe it"}
-              </div>
-              <textarea
-                value={request}
-                onChange={(e) => setRequest(e.target.value)}
-                placeholder={
-                  isKu
-                    ? "مثال: سیڤی بۆ ئەندازیاری سۆفتوێر، یان کارتی سوپاس بۆ زۆرجار"
-                    : "Example: a CV for a software engineer, or a thank-you card for graduation"
-                }
-                className="w-full resize-none bg-transparent text-[15px] text-black outline-none placeholder:text-neutral-400"
-                style={{ minHeight: "96px" }}
-              />
-              <div className="mt-3 flex items-center justify-end gap-2">
-                <button
-                  type="button"
-                  onClick={handleContinue}
-                  className="inline-flex items-center gap-2 rounded-full bg-black px-4 py-2.5 text-sm font-bold text-white shadow-sm transition-transform hover:-translate-y-0.5"
-                >
-                  {isKu ? "دەستپێبکە" : "Continue"}
-                  <ArrowUp className="h-4 w-4" />
-                </button>
-              </div>
-            </div>
+
           </div>
         </section>
       ) : (
-        <section className="rounded-[2rem] border border-neutral-200 bg-white p-4 sm:p-6 lg:p-8 shadow-sm">
+        <div className="w-full h-full flex flex-col">
           <ChatOnboarding embedded initialPrompt={seedPrompt} initialTarget={seedTarget} />
-        </section>
+        </div>
       )}
     </div>
   );

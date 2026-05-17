@@ -4,7 +4,7 @@ import type { DesignSettings, ResumeData, TemplateId } from "@/lib/types";
 import type { SectionId } from "@/components/DesignPanel";
 import { exportPreviewAsPDF } from "@/lib/pdf-screenshot";
 import { ResumePreview } from "@/components/resume/ResumePreview";
-import { UpdateDataContext, type UpdateDataFn } from "@/components/resume/DesignContext";
+import { UpdateDataContext, type UpdateDataFn, DesignModeContext } from "@/components/resume/DesignContext";
 import { Download, FileText, ChevronDown } from "lucide-react";
 import { useLayoutEffect, useRef, useState, useEffect } from "react";
 import { toast } from "sonner";
@@ -84,6 +84,83 @@ export function getValueAtPath(data: ResumeData, path: string) {
     ];
   }
   return typeof current === "string" ? current : current == null ? "" : String(current);
+}
+
+/**
+ * FieldPathAnnotator — Zero-render component that tags preview DOM elements
+ * with `data-field-path` attributes so field-override CSS can target them.
+ * Runs after every render where fieldOverrides change.
+ */
+function FieldPathAnnotator({
+  previewRef,
+  data,
+  fieldOverrides,
+}: {
+  previewRef: RefObject<HTMLDivElement | null>;
+  data: ResumeData;
+  fieldOverrides?: Record<string, unknown>;
+}) {
+  useEffect(() => {
+    const root = previewRef.current;
+    if (!root || !fieldOverrides) return;
+
+    const paths = Object.keys(fieldOverrides);
+    if (paths.length === 0) return;
+
+    // Clear old annotations
+    root.querySelectorAll("[data-field-path]").forEach((el) => {
+      el.removeAttribute("data-field-path");
+    });
+
+    // Build lookup: value → path
+    const valueToPaths: Map<string, string> = new Map();
+    for (const path of paths) {
+      const val = getValueAtPath(data, path);
+      if (typeof val === "string" && val.trim().length > 0) {
+        valueToPaths.set(val.trim(), path);
+      }
+    }
+
+    if (valueToPaths.size === 0) return;
+
+    // Walk all leaf text-carrying elements
+    const walker = document.createTreeWalker(root, NodeFilter.SHOW_ELEMENT, {
+      acceptNode: (node) => {
+        const el = node as HTMLElement;
+        // Skip style, script, and already-tagged elements
+        if (["STYLE", "SCRIPT", "SVG"].includes(el.tagName)) return NodeFilter.FILTER_REJECT;
+        // Only consider elements that directly contain text children
+        const hasTextChild = Array.from(el.childNodes).some(
+          (n) => n.nodeType === Node.TEXT_NODE && n.textContent?.trim(),
+        );
+        return hasTextChild ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_SKIP;
+      },
+    });
+
+    const tagged = new Set<string>();
+    let current = walker.nextNode();
+    while (current) {
+      const el = current as HTMLElement;
+      const text = el.textContent?.trim() || "";
+      if (text.length > 0) {
+        // Try exact match first
+        for (const [val, path] of valueToPaths) {
+          if (!tagged.has(path) && (text === val || text.includes(val) || val.includes(text))) {
+            // Only tag the most specific (innermost) element
+            const existingTagged = el.querySelector(`[data-field-path="${path}"]`);
+            if (!existingTagged) {
+              el.setAttribute("data-field-path", path);
+              tagged.add(path);
+            }
+            break;
+          }
+        }
+      }
+      current = walker.nextNode();
+    }
+  }, [previewRef, data, fieldOverrides]);
+
+  return null; // Zero-render component
 }
 
 export function findFieldMatch(
@@ -289,6 +366,7 @@ export function ClientPDFPreview({
   design,
   updateData,
   onSectionClick,
+  isDesignMode,
 }: {
   data: ResumeData;
   template: TemplateId;
@@ -296,11 +374,14 @@ export function ClientPDFPreview({
   zoom?: number;
   design?: DesignSettings;
   updateData?: UpdateDataFn;
-  onSectionClick?: (s: SectionId, path?: string) => void;
+  onSectionClick?: (s: SectionId, path?: string, e?: React.MouseEvent) => void;
+  isDesignMode?: boolean;
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [contentHeight, setContentHeight] = useState(1122);
   const [fitScale, setFitScale] = useState(1);
+  // Store last mousedown position so onFieldFocus (from Editable) can use it
+  const lastMouseDown = useRef<{ clientX: number; clientY: number }>({ clientX: 0, clientY: 0 });
 
   useEffect(() => {
     if (!design) return;
@@ -585,13 +666,15 @@ ${(() => {
         onSectionClick(
           inferSectionFromPath(editable.dataset.path) as SectionId,
           editable.dataset.path,
+          e,
         );
         return;
       }
       if (node.matches(selectors)) {
         const matched = findFieldMatch(data, node.textContent || "");
         if (matched) {
-          onSectionClick(inferSectionFromPath(matched.path), matched.path);
+          node.setAttribute("data-field-path", matched.path);
+          onSectionClick(inferSectionFromPath(matched.path), matched.path, e);
           return;
         }
       }
@@ -638,7 +721,8 @@ ${(() => {
           <div
             ref={previewRef}
             onClick={handlePreviewClick}
-            className="ds-live absolute left-0 top-0 z-10 overflow-hidden rounded-[28px] border border-slate-200/70 shadow-[0_20px_50px_-24px_rgba(15,23,42,0.45)] transition-all duration-300 ease-in-out hover:ring-2 hover:ring-blue-400/50"
+            onMouseDown={(e) => { lastMouseDown.current = { clientX: e.clientX, clientY: e.clientY }; }}
+            className={`ds-live absolute left-0 top-0 z-10 overflow-hidden rounded-[28px] border border-slate-200/70 shadow-[0_20px_50px_-24px_rgba(15,23,42,0.45)] transition-all duration-300 ease-in-out hover:ring-2 hover:ring-blue-400/50 ${isDesignMode ? "design-mode" : ""}`}
             style={{
               width: "794px",
               height: `${contentHeight}px`,
@@ -647,6 +731,19 @@ ${(() => {
               backgroundColor: d?.backgroundColor ?? "#ffffff",
             }}
           >
+          {isDesignMode && (
+            <style dangerouslySetInnerHTML={{ __html: `
+              .ds-live.design-mode [data-field-path]:hover,
+              .ds-live.design-mode [data-path]:hover {
+                outline: 2px dashed #3b82f6 !important;
+                outline-offset: 4px !important;
+                cursor: pointer !important;
+                background-color: rgba(59, 130, 246, 0.1) !important;
+                border-radius: 4px !important;
+                transition: all 0.2s ease-in-out;
+              }
+            `}} />
+          )}
           {d?.showCanvasDecorations && d.canvasDecorationStyle !== "none" && (
             <>
               {d.canvasDecorationStyle === "blobs" && <div className="canvas-decoration blob-a" />}
@@ -664,6 +761,25 @@ ${(() => {
           )}
           {d && <style dangerouslySetInnerHTML={{ __html: css }} />}
           <style dangerouslySetInnerHTML={{ __html: baseCss }} />
+          {d?.fieldOverrides && Object.keys(d.fieldOverrides).length > 0 && (
+            <style dangerouslySetInnerHTML={{ __html: Object.entries(d.fieldOverrides).map(([path, ov]) => {
+              const rules: string[] = [];
+              if (ov.fontSize) rules.push(`font-size: ${ov.fontSize}px !important`);
+              if (ov.fontWeight) rules.push(`font-weight: ${ov.fontWeight} !important`);
+              if (ov.color) rules.push(`color: ${ov.color} !important`);
+              if (ov.fontFamily) rules.push(`font-family: '${ov.fontFamily}', sans-serif !important`);
+              if (ov.letterSpacing !== undefined) rules.push(`letter-spacing: ${ov.letterSpacing}em !important`);
+              if (ov.textTransform && ov.textTransform !== "none") rules.push(`text-transform: ${ov.textTransform} !important`);
+              if (rules.length === 0) return "";
+              // Target both Editable elements (data-path) and annotated DOM elements (data-field-path)
+              return [
+                `.ds-live [data-path="${path}"] { ${rules.join("; ")}; }`,
+                `.ds-live [data-field-path="${path}"] { ${rules.join("; ")}; }`,
+              ].join("\n");
+            }).filter(Boolean).join("\n") }} />
+          )}
+          <FieldPathAnnotator previewRef={previewRef} data={data} fieldOverrides={d?.fieldOverrides} />
+          <DesignModeContext.Provider value={!!isDesignMode}>
           <UpdateDataContext.Provider value={updateData}>
             <ResumePreview
               data={data}
@@ -688,10 +804,16 @@ ${(() => {
                               path.startsWith("location")
                             ? "header"
                             : "summary";
-                onSectionClick?.(section as SectionId, path);
+                // Create a synthetic event-like object with stored mouse coordinates
+                const syntheticEvent = {
+                  clientX: lastMouseDown.current.clientX,
+                  clientY: lastMouseDown.current.clientY,
+                } as unknown as React.MouseEvent;
+                onSectionClick?.(section as SectionId, path, syntheticEvent);
               }}
             />
           </UpdateDataContext.Provider>
+          </DesignModeContext.Provider>
           </div>
         </div>
       </div>

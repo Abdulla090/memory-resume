@@ -112,6 +112,18 @@ export interface DesignSettings {
   // Layout
   columnLayout: "single" | "two-col" | "sidebar-left" | "sidebar-right";
   contentOrder: string[]; // section ordering
+
+  // Per-field style overrides (keyed by data path, e.g. "name", "title", "experience.0.title")
+  fieldOverrides?: Record<string, FieldStyleOverride>;
+}
+
+export interface FieldStyleOverride {
+  fontSize?: number;     // px
+  fontWeight?: number;   // 100-900
+  color?: string;        // hex
+  fontFamily?: string;   // font name
+  letterSpacing?: number; // em
+  textTransform?: "none" | "uppercase" | "lowercase" | "capitalize";
 }
 
 export type TemplateId =

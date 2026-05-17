@@ -18,8 +18,9 @@ interface EditorPreviewPanelProps {
   template: TemplateId;
   design: DesignSettings;
   updateData: UpdateDataFn;
-  onSectionClick: (s: string, path?: string) => void;
+  onSectionClick: (s: string, path?: string, e?: React.MouseEvent) => void;
   previewRef: RefObject<HTMLDivElement | null>;
+  isDesignMode?: boolean;
 }
 
 export function EditorPreviewPanel({
@@ -37,6 +38,7 @@ export function EditorPreviewPanel({
   updateData,
   onSectionClick,
   previewRef,
+  isDesignMode,
 }: EditorPreviewPanelProps) {
   // Always ready — don't gate the preview behind animation completion
   const [isReady] = useState(true);
@@ -116,7 +118,8 @@ export function EditorPreviewPanel({
               zoom={zoom}
               design={design}
               updateData={updateData}
-              onSectionClick={onSectionClick}
+              onSectionClick={(s, path, e) => onSectionClick(s, path, e)}
+              isDesignMode={isDesignMode}
             />
           ) : (
             <div className="absolute inset-0 flex items-center justify-center bg-slate-50/50">

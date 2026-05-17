@@ -238,6 +238,42 @@ export function ChatOnboarding({
     }
   };
 
+  const handleAiStart = async () => {
+    const memory = isKu 
+      ? "دەمەوێت سیڤییەک دروست بکەم. تکایە ٥ بۆ ١٠ پرسیارم لێ بکە بۆ دروستکردنی پرۆفایلەکەم."
+      : "I want to create a CV. Please ask me 5 to 10 questions step by step to build my profile.";
+    setRawMemory(memory);
+    setIsThinking(true);
+    setStage("parsing");
+    
+    try {
+      const { profile: parsed } = await parseMemoryFn({ data: { apiKey, memory } });
+      setProfile(parsed);
+      const { state, message, questions } = await getQuestionsFn({
+        data: { apiKey, profile: parsed, rawMemory: memory },
+      });
+      setIsThinking(false);
+      
+      addMsg({
+        from: "ai",
+        content: message || (isKu ? "با دەست پێبکەین! چەند پرسیارێکت لێ دەکەم بۆ کۆکردنەوەی زانیارییەکانت." : "Let's get started! I'll ask you a few questions to gather your info.")
+      });
+      
+      if (questions.length > 0) {
+        setPendingQs(questions);
+        setQIdx(0);
+        setStage("questions");
+        setTimeout(() => addMsg({ from: "ai", content: questions[0].question, question: questions[0] }), 350);
+      } else {
+        setStage("templates");
+      }
+    } catch (err) {
+      setIsThinking(false);
+      toast.error(isKu ? "هەڵەیەک ڕوویدا. تکایە دووبارە هەوڵ بدەرەوە." : "Failed to start AI. Try again.");
+      setStage("intake");
+    }
+  };
+
   // Auto-run intake when arriving from the dashboard with a seeded prompt
   const autoRanRef = useRef(false);
   useEffect(() => {
@@ -252,7 +288,10 @@ export function ChatOnboarding({
       void (async () => {
         // Re-read the latest value by using the memory directly
         const memory = incomingPrompt.trim();
-        if (memory.length < 20) return;
+        if (memory.length < 20) {
+          void handleAiStart();
+          return;
+        }
         setRawMemory(memory);
         setInputText("");
         setIsThinking(true);
@@ -628,14 +667,14 @@ export function ChatOnboarding({
                 </button>
 
                 <button
-                  onClick={() => setIntakeMethod("raw")}
+                  onClick={handleAiStart}
                   className="flex flex-col items-center text-center p-6 rounded-[1.5rem] border border-slate-200 hover:border-purple-500 hover:bg-purple-50 hover:shadow-md transition-all group"
                 >
                   <div className="w-14 h-14 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                    <Sparkles className="w-7 h-7" />
+                    <Bot className="w-7 h-7" />
                   </div>
-                  <h3 className="font-bold text-slate-800 mb-1">{isKu ? "نووسینی ئازاد" : "Raw Text"}</h3>
-                  <p className="text-xs text-slate-500">{isKu ? "زانیارییەکانت کۆپی بکە یان بنووسە" : "Paste or write your info freely"}</p>
+                  <h3 className="font-bold text-slate-800 mb-1">{isKu ? "نووسین بە زیرەکی دەستکرد" : "Write with AI"}</h3>
+                  <p className="text-xs text-slate-500">{isKu ? "با زیرەکی دەستکرد پرسیارت لێ بکات" : "Let the AI agent ask you questions"}</p>
                 </button>
               </div>
 
@@ -775,234 +814,249 @@ export function ChatOnboarding({
         </div>
       )}
 
-      {/* ── CHAT VIEW ── */}
+      {/* ── PLAN MODE WIZARD ── */}
       {inChat && (
-        <div className="relative z-10 flex-1 flex flex-col min-h-0">
-          <div className="flex-1 flex flex-col items-center justify-center px-4 pb-32">
-            <AnimatePresence mode="wait">
-              {isThinking ? (
-                <motion.div
-                  key="thinking"
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.9 }}
-                  className="flex flex-col items-center gap-6"
-                >
-                  <div className="w-20 h-20 rounded-[2rem] bg-gradient-to-br from-blue-50 to-indigo-50 flex items-center justify-center shadow-xl shadow-blue-500/5 border border-blue-100/50 relative">
-                    <div className="absolute inset-0 bg-blue-400/20 rounded-[2rem] animate-ping" style={{ animationDuration: '2s' }} />
-                    <Sparkles className="w-10 h-10 text-blue-500 relative z-10 animate-pulse" />
-                  </div>
-                  <p className="text-sm font-bold text-slate-400 uppercase tracking-widest animate-pulse">
-                    {isKu ? "بیردەکاتەوە..." : "Thinking..."}
-                  </p>
-                </motion.div>
-              ) : (
-                <motion.div
-                  key={messages.filter(m => m.from === "ai").pop()?.id || "empty"}
-                  initial={{ opacity: 0, y: 20, filter: "blur(10px)" }}
-                  animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-                  exit={{ opacity: 0, y: -20, filter: "blur(10px)" }}
-                  transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-                  className="flex flex-col items-center max-w-3xl text-center"
-                >
-                  <div className="w-16 h-16 rounded-[1.5rem] bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center mb-8 shadow-2xl shadow-blue-500/30">
-                    <Sparkles className="w-8 h-8 text-white" />
-                  </div>
-                  
-                  <h2 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-slate-800 leading-relaxed tracking-tight">
-                    {messages.filter(m => m.from === "ai").pop()?.content || ""}
-                  </h2>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-
-          {/* ── Sticky Bottom Input ── */}
-          <div className="fixed bottom-0 left-0 right-0 px-4 pt-2 pb-6 sm:pb-12 flex justify-center z-40 pointer-events-none">
-            <div className="max-w-3xl w-full pointer-events-auto">
-              {/* Q&A Choices */}
-              <AnimatePresence mode="wait">
-                {inQA && curQ && (
-                  <motion.div
-                    key={curQ.id}
-                    layout="position"
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    className="mb-4 ml-2"
-                  >
-                    <p className="text-[12px] font-semibold text-slate-400 mb-2.5 uppercase tracking-wider">
-                      {curQ.helperText}
-                    </p>
-
-                    {curQ.inputType === "rating" && (
-                      <div className="flex gap-2 mb-3">
-                        {[1, 2, 3, 4, 5].map((star) => (
-                          <motion.button
-                            key={star}
-                            whileHover={{ scale: 1.1 }}
-                            whileTap={{ scale: 0.9 }}
-                            onClick={() => handleAnswer(star.toString(), qIdx)}
-                            className="p-1 rounded-full text-slate-200 hover:text-amber-400 transition-colors drop-shadow-sm"
-                          >
-                            <Star className="w-9 h-9 fill-current" />
-                          </motion.button>
-                        ))}
-                      </div>
-                    )}
-
-                    {curQ.inputType !== "rating" && curQ.options.length > 0 && (
-                      <div className="flex flex-wrap gap-2.5 mb-3">
-                        {curQ.options.map((opt) => {
-                          const sel = selectedOpts.includes(opt);
-                          return (
-                            <motion.button
-                              key={opt}
-                              whileTap={{ scale: 0.95 }}
-                              onClick={() => {
-                                if (curQ.inputType === "multiselect") {
-                                  setSelectedOpts((p) =>
-                                    p.includes(opt) ? p.filter((o) => o !== opt) : [...p, opt],
-                                  );
-                                } else {
-                                  handleAnswer(opt, qIdx);
-                                }
-                              }}
-                              className={`px-4 py-2.5 rounded-full text-[14px] font-medium transition-all duration-200 border ${
-                                sel
-                                  ? "bg-slate-900 text-white border-slate-900 shadow-md shadow-slate-900/20"
-                                  : "bg-white text-slate-700 border-slate-200 hover:border-slate-400 hover:shadow-sm"
-                              }`}
-                            >
-                              {sel && (
-                                <CheckCircle2 className="w-4 h-4 inline mr-1.5 -mt-0.5 text-blue-400" />
-                              )}
-                              {opt}
-                            </motion.button>
-                          );
-                        })}
-                      </div>
-                    )}
-                    {curQ.inputType === "multiselect" && selectedOpts.length > 0 && (
-                      <button
-                        onClick={() => handleAnswer(selectedOpts.join(", "), qIdx)}
-                        className="mt-1 text-sm font-bold text-blue-600 hover:text-blue-800 flex items-center gap-1 transition-colors"
-                      >
-                        {isKu ? "پشتڕاستکردنەوە" : "Confirm"}{" "}
-                        <ArrowUp className={`w-4 h-4 ${isKu ? "-rotate-90" : "rotate-90"}`} />
-                      </button>
-                    )}
-                  </motion.div>
-                )}
-              </AnimatePresence>
-
-              {/* Input Bar */}
+        <div className="relative z-10 flex-1 flex flex-col min-h-0 bg-transparent items-center justify-center p-4">
+          <AnimatePresence mode="wait">
+            {isThinking ? (
               <motion.div
-                layout="position"
-                className="flex items-center gap-2 sm:gap-3 rounded-full px-1.5 sm:px-2 py-1.5 sm:py-2 bg-white/80 backdrop-blur-2xl border border-slate-200 shadow-[0_8px_30px_rgb(0,0,0,0.06)] ring-4 ring-transparent focus-within:ring-blue-500/10 focus-within:bg-white focus-within:border-blue-300 transition-all duration-300"
+                key="thinking"
+                initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95, y: -10 }}
+                transition={{ duration: 0.3 }}
+                className="w-full max-w-2xl bg-white border border-slate-200 shadow-2xl shadow-blue-500/10 rounded-[2rem] p-12 flex flex-col items-center justify-center gap-6"
               >
-                {inQA && curQ && (
-                  <input
-                    ref={chatInputRef}
-                    value={customInput}
-                    onChange={(e) => setCustomInput(e.target.value)}
-                    placeholder={
-                      curQ.placeholder || (isKu ? "وەڵامەکەت بنووسە..." : "Type your answer...")
-                    }
-                    className="flex-1 bg-transparent outline-none text-slate-800 font-medium text-[15px] placeholder:text-slate-400 pl-4"
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" && customInput.trim())
-                        handleAnswer(customInput.trim(), qIdx);
-                    }}
-                  />
-                )}
-
-                {(inBuild || stage === "templates") && (
-                  <input
-                    value={jobTarget}
-                    onChange={(e) => setJobTarget(e.target.value)}
-                    placeholder={
-                      isKu
-                        ? "چ ڕۆڵێک دەکەیتە ئامانج؟"
-                        : "What role are you targeting? e.g. Senior PM..."
-                    }
-                    className="flex-1 bg-transparent outline-none text-slate-800 font-medium text-[15px] placeholder:text-slate-400 pl-4"
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") handleBuild();
-                    }}
-                    autoFocus={inBuild}
-                  />
-                )}
-
-                {!inQA && !(inBuild || stage === "templates") && (
-                  <span className="flex-1 text-slate-400 font-medium text-[14px] select-none pl-4">
-                    {stage === "generating"
-                      ? isKu
-                        ? "خەریکی دروستکردنی سیڤییەکەت..."
-                        : "Generating your resume..."
-                      : isKu
-                        ? "کەمێک چاوەڕێ بکە..."
-                        : "Hang on a second..."}
-                  </span>
-                )}
-
-                <div className="flex items-center gap-1.5 pr-1 shrink-0">
-                  <input
-                    type="file"
-                    ref={chatPhotoInputRef}
-                    onChange={handleChatPhotoUpload}
-                    className="hidden"
-                    accept="image/*"
-                  />
-                  {(inQA || inBuild) && (
-                    <button
-                      onClick={() => chatPhotoInputRef.current?.click()}
-                      className={`w-9 h-9 rounded-full flex items-center justify-center transition-all ${profile?.photoUrl ? "ring-2 ring-blue-500 ring-offset-1 p-0.5" : "bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-700"}`}
-                      title={profile?.photoUrl ? "Change photo" : "Attach a photo"}
-                    >
-                      {profile?.photoUrl ? (
-                        <img
-                          src={profile.photoUrl}
-                          className="w-full h-full rounded-full object-cover"
-                          alt="Profile"
-                        />
-                      ) : (
-                        <ImagePlus className="w-4 h-4" />
-                      )}
-                    </button>
-                  )}
-                  {inQA && (
-                    <>
-                      <button
-                        onClick={handleSkip}
-                        className="flex items-center gap-1 text-[13px] font-semibold text-slate-400 hover:text-slate-600 transition-colors px-2 sm:px-3 h-8 sm:h-9 rounded-full hover:bg-slate-100"
-                      >
-                        {isKu ? "بازدان" : "Skip"}
-                      </button>
-                      <button
-                        onClick={() => {
-                          if (customInput.trim()) handleAnswer(customInput.trim(), qIdx);
-                        }}
-                        disabled={!customInput.trim()}
-                        className="w-9 h-9 rounded-full bg-slate-900 disabled:bg-slate-200 hover:bg-blue-600 flex items-center justify-center transition-all disabled:text-slate-400 text-white shadow-sm"
-                      >
-                        <ArrowUp className="w-4 h-4" />
-                      </button>
-                    </>
-                  )}
-                  {(inBuild || stage === "templates") && (
-                    <button
-                      onClick={handleBuild}
-                      disabled={jobTarget.trim().length < 2}
-                      className="flex items-center gap-2 bg-slate-900 hover:bg-blue-600 disabled:bg-slate-200 disabled:text-slate-400 disabled:cursor-not-allowed text-white px-5 h-9 rounded-full text-[13.5px] font-bold transition-all active:scale-95 shadow-sm"
-                    >
-                      {isKu ? "دروستکردن" : "Generate"} <Sparkles className="w-3.5 h-3.5" />
-                    </button>
-                  )}
+                <div className="w-20 h-20 rounded-[2rem] bg-gradient-to-br from-blue-50 to-indigo-50 flex items-center justify-center shadow-xl shadow-blue-500/5 border border-blue-100/50 relative">
+                  <div className="absolute inset-0 bg-blue-400/20 rounded-[2rem] animate-ping" style={{ animationDuration: '2s' }} />
+                  <Sparkles className="w-10 h-10 text-blue-500 relative z-10 animate-pulse" />
+                </div>
+                <div className="text-center">
+                  <h3 className="text-xl font-bold text-slate-800 mb-2">
+                    {isKu ? "بیردەکاتەوە..." : "Thinking..."}
+                  </h3>
+                  <p className="text-sm font-medium text-slate-500">
+                    {isKu ? "پڕۆفایلەکەت شیدەکاتەوە و پرسیارەکان ئامادە دەکات" : "Analyzing your profile and preparing questions"}
+                  </p>
                 </div>
               </motion.div>
-            </div>
-          </div>
+            ) : inQA && curQ ? (
+              <motion.div
+                key={curQ.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+                className="w-full max-w-2xl bg-white border border-slate-200 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.05)] rounded-[1.5rem] overflow-hidden flex flex-col"
+              >
+                {/* Header */}
+                <div className="px-6 py-5 border-b border-slate-100 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center">
+                      <Bot className="w-4 h-4 text-blue-600" />
+                    </div>
+                    <span className="text-sm font-bold text-slate-800">
+                      {isKu ? "یاریدەدەری زیرەکی دەستکرد" : "AI Assistant"}
+                    </span>
+                  </div>
+                  <span className="bg-slate-100 text-slate-500 px-2.5 py-1 rounded-md text-[11px] font-bold tracking-widest">
+                    {qIdx + 1} / {pendingQs.length}
+                  </span>
+                </div>
+
+                {/* Question */}
+                <div className="p-6 pb-4">
+                  <h2 className="text-[1.35rem] font-bold text-slate-900 leading-snug mb-1">
+                    {curQ.question}
+                  </h2>
+                  <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide">
+                    {curQ.helperText || (curQ.inputType === "multiselect" ? (isKu ? "چەند وەڵامێک هەڵبژێرە" : "Select multiple answers") : (isKu ? "یەکێک هەڵبژێرە یان خۆت بنووسە" : "Select an option or write your own"))}
+                  </p>
+                </div>
+
+                {/* Options List */}
+                <div className="px-6 pb-6 flex flex-col gap-2.5">
+                  {curQ.inputType === "rating" && (
+                    <div className="flex gap-3 justify-center py-4 bg-slate-50 rounded-2xl border border-slate-100">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <motion.button
+                          key={star}
+                          whileHover={{ scale: 1.1 }}
+                          whileTap={{ scale: 0.9 }}
+                          onClick={() => handleAnswer(star.toString(), qIdx)}
+                          className="p-2 rounded-full text-slate-300 hover:text-amber-400 transition-colors drop-shadow-sm"
+                        >
+                          <Star className="w-10 h-10 fill-current" />
+                        </motion.button>
+                      ))}
+                    </div>
+                  )}
+
+                  {curQ.inputType !== "rating" && curQ.options.length > 0 && curQ.options.map((opt) => {
+                    const sel = selectedOpts.includes(opt);
+                    return (
+                      <button
+                        key={opt}
+                        onClick={() => {
+                          if (curQ.inputType === "multiselect") {
+                            setSelectedOpts((p) =>
+                              p.includes(opt) ? p.filter((o) => o !== opt) : [...p, opt]
+                            );
+                          } else {
+                            handleAnswer(opt, qIdx);
+                          }
+                        }}
+                        className={`flex items-start gap-4 w-full text-left p-4 rounded-xl border transition-all duration-200 group ${
+                          sel
+                            ? "bg-blue-50/50 border-blue-500 shadow-sm ring-1 ring-blue-500/20"
+                            : "bg-white border-slate-200 hover:border-slate-300 hover:bg-slate-50"
+                        }`}
+                      >
+                        <div className={`mt-0.5 shrink-0 w-5 h-5 rounded-[0.4rem] border flex items-center justify-center transition-colors ${
+                          sel ? "bg-blue-600 border-blue-600" : "bg-white border-slate-300 group-hover:border-slate-400"
+                        }`}>
+                          {sel && <CheckCircle2 className="w-3.5 h-3.5 text-white" />}
+                        </div>
+                        <span className={`text-[15px] font-medium leading-snug ${sel ? "text-slate-900" : "text-slate-700"}`}>
+                          {opt}
+                        </span>
+                      </button>
+                    );
+                  })}
+
+                  {/* Write your own... */}
+                  {curQ.inputType !== "rating" && (
+                    <div className="relative mt-1">
+                      <input
+                        ref={chatInputRef}
+                        value={customInput}
+                        onChange={(e) => setCustomInput(e.target.value)}
+                        onKeyDown={(e) => {
+                           if (e.key === "Enter" && customInput.trim()) {
+                             handleAnswer(customInput.trim(), qIdx);
+                           }
+                        }}
+                        placeholder={curQ.placeholder || (isKu ? "وەڵامەکەت بنووسە..." : "Write your own...")}
+                        className="w-full bg-white border border-slate-200 rounded-xl p-4 pl-12 text-[15px] text-slate-800 font-medium placeholder:text-slate-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all shadow-[0_2px_8px_rgba(0,0,0,0.02)]"
+                      />
+                      <div className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 rounded-full border border-slate-300 flex items-center justify-center bg-slate-50">
+                         {/* empty radio circle */}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Footer Actions */}
+                <div className="p-4 px-6 border-t border-slate-100 bg-slate-50/80 flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => finishQA(answers)}
+                      className="px-4 py-2 text-[14px] font-bold text-slate-500 hover:text-slate-800 transition-colors rounded-lg hover:bg-slate-200"
+                    >
+                      {isKu ? "کۆتایی پێ بهێنە" : "Skip all"}
+                    </button>
+                  </div>
+                  
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={handleSkip}
+                      className="px-4 py-2 text-[14px] font-bold text-slate-500 hover:text-slate-800 transition-colors rounded-lg hover:bg-slate-200"
+                    >
+                      {isKu ? "بازدان" : "Skip"}
+                    </button>
+                    <button
+                      onClick={() => {
+                        if (curQ.inputType === "multiselect" && selectedOpts.length > 0) {
+                          handleAnswer(selectedOpts.join(", "), qIdx);
+                        } else if (customInput.trim()) {
+                          handleAnswer(customInput.trim(), qIdx);
+                        } else {
+                          handleSkip();
+                        }
+                      }}
+                      className="px-6 py-2 rounded-xl bg-blue-600 text-white text-[14px] font-bold hover:bg-blue-700 transition-colors shadow-sm disabled:opacity-50"
+                    >
+                      {isKu ? "دواتر" : "Next"}
+                    </button>
+                  </div>
+                </div>
+              </motion.div>
+            ) : null}
+          </AnimatePresence>
+
+          {/* Sticky Bottom Input for templates/builder stage ONLY */}
+          <AnimatePresence>
+            {(!inQA && !isThinking && (inBuild || stage === "templates" || stage === "generating")) && (
+              <motion.div
+                initial={{ opacity: 0, y: 50 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 50 }}
+                className="fixed bottom-0 left-0 right-0 px-4 pt-2 pb-6 sm:pb-12 flex justify-center z-40 pointer-events-none"
+              >
+                <div className="max-w-3xl w-full pointer-events-auto">
+                  <div className="flex items-center gap-2 sm:gap-3 rounded-[2rem] px-2 py-2 bg-white/90 backdrop-blur-2xl border border-slate-200 shadow-[0_8px_30px_rgb(0,0,0,0.06)] ring-4 ring-transparent focus-within:ring-blue-500/10 focus-within:bg-white focus-within:border-blue-300 transition-all duration-300">
+                    
+                    {stage === "generating" ? (
+                      <span className="flex-1 text-slate-400 font-medium text-[15px] select-none pl-4 flex items-center gap-2">
+                        <Loader2 className="w-4 h-4 animate-spin text-blue-500" />
+                        {isKu ? "خەریکی دروستکردنی سیڤییەکەت..." : "Generating your resume..."}
+                      </span>
+                    ) : (
+                      <input
+                        value={jobTarget}
+                        onChange={(e) => setJobTarget(e.target.value)}
+                        placeholder={
+                          isKu
+                            ? "چ ڕۆڵێک دەکەیتە ئامانج؟"
+                            : "What role are you targeting? e.g. Senior PM..."
+                        }
+                        className="flex-1 bg-transparent outline-none text-slate-800 font-medium text-[15px] placeholder:text-slate-400 pl-4"
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") handleBuild();
+                        }}
+                        autoFocus={inBuild}
+                      />
+                    )}
+                    
+                    <div className="flex items-center gap-1.5 pr-1 shrink-0">
+                      <input
+                        type="file"
+                        ref={chatPhotoInputRef}
+                        onChange={handleChatPhotoUpload}
+                        className="hidden"
+                        accept="image/*"
+                      />
+                      <button
+                        onClick={() => chatPhotoInputRef.current?.click()}
+                        className={`w-9 h-9 rounded-full flex items-center justify-center transition-all ${profile?.photoUrl ? "ring-2 ring-blue-500 ring-offset-1 p-0.5" : "bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-700"}`}
+                        title={profile?.photoUrl ? "Change photo" : "Attach a photo"}
+                      >
+                        {profile?.photoUrl ? (
+                          <img
+                            src={profile.photoUrl}
+                            className="w-full h-full rounded-full object-cover"
+                            alt="Profile"
+                          />
+                        ) : (
+                          <ImagePlus className="w-4 h-4" />
+                        )}
+                      </button>
+                      
+                      {stage !== "generating" && (
+                        <button
+                          onClick={handleBuild}
+                          disabled={jobTarget.trim().length < 2}
+                          className="flex items-center gap-2 bg-slate-900 hover:bg-blue-600 disabled:bg-slate-200 disabled:text-slate-400 disabled:cursor-not-allowed text-white px-5 h-9 rounded-full text-[13.5px] font-bold transition-all active:scale-95 shadow-sm"
+                        >
+                          {isKu ? "دروستکردن" : "Generate"} <Sparkles className="w-3.5 h-3.5" />
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           {stage === "templates" && (
             <div className="relative z-10 px-4 pb-44 pt-4">

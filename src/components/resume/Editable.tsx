@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState, useContext } from "react";
-import { UpdateDataContext, FieldFocusContext } from "./DesignContext";
+import { UpdateDataContext, FieldFocusContext, DesignModeContext } from "./DesignContext";
 
 export function Editable({
   value,
@@ -20,6 +20,7 @@ export function Editable({
   const [isEditing, setIsEditing] = useState(false);
   const updateData = useContext(UpdateDataContext);
   const focusField = useContext(FieldFocusContext);
+  const isDesignMode = useContext(DesignModeContext);
   const [initialValue] = useState(value);
 
   // Sync internal DOM state with external value only when not editing
@@ -47,6 +48,19 @@ export function Editable({
     }
   };
 
+  // In design mode, disable contentEditable so clicks pass through to handlePreviewClick
+  if (isDesignMode) {
+    return (
+      <Component
+        ref={elementRef}
+        className={`cursor-pointer hover:outline hover:outline-2 hover:outline-blue-400/40 hover:outline-offset-2 rounded px-0.5 -mx-0.5 transition-all ${className}`}
+        data-editable="true"
+        data-path={path}
+        dangerouslySetInnerHTML={{ __html: value }}
+      />
+    );
+  }
+
   return (
     <Component
       ref={elementRef}
@@ -69,3 +83,4 @@ export function Editable({
     />
   );
 }
+

@@ -251,7 +251,7 @@ IMPORTANT FOR UI COMPONENTS:
 - For 'languages' and 'skills', you MUST use the inputType "rating".
 - For multiple choice, use inputType "multiselect".
 - For standard text, use inputType "text".
-Return at most 4 questions. If READY_TO_TEMPLATE, return an empty questions array.`,
+Return 5 to 10 questions if you need to build a comprehensive profile from scratch, or fewer if just clarifying. If READY_TO_TEMPLATE, return an empty questions array.`,
           },
           {
             role: "user",
@@ -594,7 +594,7 @@ export const suggestFollowUpQuestions = createServerFn({ method: "POST" })
         {
           role: "system",
           content:
-            "You are a career intake assistant. Review this extracted profile and identify missing, unclear, or weak resume-critical information. Ask at most 4 short, high-value follow-up questions. Use select inputs when you can offer strong options. Use text input when the answer must be free-form. Do not ask for information already clearly present. Prioritize current title, contact details, location clarity, career target, strongest achievements, portfolio/photo, and missing education or project context.",
+            "You are a career intake assistant. Review this extracted profile and identify missing, unclear, or weak resume-critical information. Ask 5 to 10 short, high-value follow-up questions. Use select inputs when you can offer strong options. Use text input when the answer must be free-form. Do not ask for information already clearly present. Prioritize current title, contact details, location clarity, career target, strongest achievements, portfolio/photo, and missing education or project context.",
         },
         {
           role: "user",
@@ -615,7 +615,7 @@ export const suggestFollowUpQuestions = createServerFn({ method: "POST" })
     });
 
     const { questions } = extractToolArgs<{ questions: FollowUpQuestion[] }>(json);
-    return { questions: questions.slice(0, 4) };
+    return { questions: questions.slice(0, 10) };
   });
 
 export const applyFollowUpAnswers = createServerFn({ method: "POST" })

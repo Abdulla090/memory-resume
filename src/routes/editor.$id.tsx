@@ -1,7 +1,8 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
+import { AnimatePresence } from "framer-motion";
 import {
   ChevronDown,
   LayoutTemplate,
@@ -24,7 +25,7 @@ import {
   generateCoverLetter,
 } from "@/lib/ai.functions";
 import { useAppStore } from "@/lib/store";
-import type { ExperienceItem, ResumeData, TemplateId, DesignSettings } from "@/lib/types";
+import type { ExperienceItem, ResumeData, TemplateId, DesignSettings, FieldStyleOverride } from "@/lib/types";
 import { DesignContext } from "@/components/resume/DesignContext";
 import { DEFAULT_DESIGN, getTemplateDefaults, DesignPanel } from "@/components/DesignPanel";
 import type { SectionId } from "@/components/DesignPanel";
@@ -40,6 +41,7 @@ import {
   ATSModal,
   InlineEditModal,
 } from "@/components/editor/EditorModals";
+import { TextToolbar } from "@/components/editor/TextToolbar";
 
 // Constants
 import {
@@ -132,6 +134,12 @@ function ResumeEditor() {
     value: string;
     section: string;
   } | null>(null);
+  const [textToolbar, setTextToolbar] = useState<{
+    path: string;
+    value: string;
+    section: string;
+    position: { x: number; y: number };
+  } | null>(null);
 
   useEffect(() => {
     if (!didAutoOpen.current && window.innerWidth >= 1024) {
@@ -221,6 +229,24 @@ function ResumeEditor() {
 
   const updateDesign = (patch: Partial<DesignSettings>) =>
     updateResume(id, { design: { ...design, ...patch } });
+
+  const updateFieldOverride = useCallback(
+    (fieldPath: string, fieldOverride: FieldStyleOverride) => {
+      const existingOverrides = design.fieldOverrides ?? {};
+      // Remove override if it's empty
+      const clean = Object.fromEntries(
+        Object.entries(fieldOverride).filter(([, v]) => v !== undefined),
+      );
+      const newOverrides = { ...existingOverrides };
+      if (Object.keys(clean).length === 0) {
+        delete newOverrides[fieldPath];
+      } else {
+        newOverrides[fieldPath] = clean;
+      }
+      updateDesign({ fieldOverrides: newOverrides });
+    },
+    [design, updateDesign],
+  );
 
   // ── Debounced preview ─────────────────────────────────────────────────────────
   const toSoraniResume = (d: ResumeData): ResumeData => ({
@@ -643,16 +669,27 @@ function ResumeEditor() {
                 template={resume.template}
                 design={design}
                 updateData={updateData}
-                onSectionClick={(s, path) => {
+                onSectionClick={(s, path, e) => {
                   if (path) {
-                    setInlineEdit({
-                      section: s,
-                      path,
-                      value: String(getValueAtPath(data, path) || ""),
-                    });
+                    // If on Design tab, show the contextual toolbar
+                    if (sidebarTab === "design" && e) {
+                      setTextToolbar({
+                        section: s,
+                        path,
+                        value: String(getValueAtPath(data, path) || ""),
+                        position: { x: e.clientX, y: e.clientY },
+                      });
+                    } else {
+                      setInlineEdit({
+                        section: s,
+                        path,
+                        value: String(getValueAtPath(data, path) || ""),
+                      });
+                    }
                   }
                 }}
                 previewRef={previewRef}
+                isDesignMode={sidebarTab === "design"}
               />
             </section>
           </div>
@@ -672,16 +709,26 @@ function ResumeEditor() {
             template={resume.template}
             design={design}
             updateData={updateData}
-            onSectionClick={(s, path) => {
+            onSectionClick={(s, path, e) => {
               if (path) {
-                setInlineEdit({
-                  section: s,
-                  path,
-                  value: String(getValueAtPath(data, path) || ""),
-                });
+                if (sidebarTab === "design" && e) {
+                  setTextToolbar({
+                    section: s,
+                    path,
+                    value: String(getValueAtPath(data, path) || ""),
+                    position: { x: e.clientX, y: e.clientY },
+                  });
+                } else {
+                  setInlineEdit({
+                    section: s,
+                    path,
+                    value: String(getValueAtPath(data, path) || ""),
+                  });
+                }
               }
             }}
             previewRef={previewRef}
+            isDesignMode={sidebarTab === "design"}
           />
         </div>
 
@@ -733,6 +780,33 @@ function ResumeEditor() {
           updateData={updateData}
           data={data}
         />
+
+        {/* ── Text Toolbar (contextual popover on Design tab) ── */}
+        <AnimatePresence>
+          {textToolbar && (
+            <TextToolbar
+              path={textToolbar.path}
+              value={textToolbar.value}
+              override={design.fieldOverrides?.[textToolbar.path] ?? {}}
+              position={textToolbar.position}
+              onUpdateOverride={updateFieldOverride}
+              onEdit={() => {
+                setInlineEdit({
+                  section: textToolbar.section,
+                  path: textToolbar.path,
+                  value: textToolbar.value,
+                });
+                setTextToolbar(null);
+              }}
+              onClose={() => setTextToolbar(null)}
+              defaults={{
+                fontSize: design.baseFontSize,
+                fontFamily: design.fontFamily,
+                color: design.textColor,
+              }}
+            />
+          )}
+        </AnimatePresence>
       </div>
     </DesignContext.Provider>
   );

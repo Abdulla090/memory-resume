@@ -6,3 +6,5 @@ export type UpdateDataFn = (patchOrPath: Partial<ResumeData> | string, value?: u
 export const UpdateDataContext = createContext<UpdateDataFn | undefined>(undefined);
 export type FieldFocusFn = (path: string) => void;
 export const FieldFocusContext = createContext<FieldFocusFn | undefined>(undefined);
+/** When true, Editable components should disable contentEditable (Design tab active). */
+export const DesignModeContext = createContext<boolean>(false);
