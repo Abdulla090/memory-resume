@@ -3,14 +3,14 @@ import type { ReactNode } from "react";
 import { DesignContext } from "../DesignContext";
 import { Editable } from "../Editable";
 import { StarRating, BarRating } from "../templates";
-import { ContactLines, ExperienceList, PhotoBlock, Section, isRTL, labels, pickLanguages, skillRating, skillLevel, initials } from "../template-helpers";
+import { ContactLines, ExperienceList, PhotoBlock, Section, useLayoutRtl, labels, pickLanguages, skillRating, skillLevel, initials } from "../template-helpers";
 import { BriefcaseBusiness, Globe, GraduationCap, Mail, MapPin, Phone, UserRound } from "lucide-react";
 import type { ResumeData } from "@/lib/types";
 import { optimizeResumeForOnePage } from "@/lib/resume-utils";
 
 export function DuboisTemplate({ data }: { data: ResumeData }) {
   const c = optimizeResumeForOnePage(data);
-  const rtl = isRTL(c);
+  const rtl = useLayoutRtl(c);
   const design = useContext(DesignContext);
   const showSkillBars = design?.showSkillBars !== false;
   const photoShape = design?.photoShape || "square";
@@ -65,8 +65,8 @@ export function DuboisTemplate({ data }: { data: ResumeData }) {
       </aside>
 
       <header className="absolute left-[210px] right-[11px] top-[52px] h-[145px] bg-[#153f68] px-[65px] py-[38px] text-white">
-        <h1 className="text-[39px] font-black leading-none tracking-tight">{c.name}</h1>
-        <p className="mt-4 text-[25px] font-semibold italic leading-none">{c.title}</p>
+        <h1 className="text-[39px] font-black leading-none tracking-tight text-white">{c.name}</h1>
+        <p className="mt-4 text-[25px] font-semibold italic leading-none text-white">{c.title}</p>
       </header>
 
       <main className="absolute left-[306px] right-[39px] top-[255px]">

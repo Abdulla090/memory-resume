@@ -1,7 +1,8 @@
 import React from 'react';
 import type { ResumeData, TemplateId, DesignSettings } from "@/lib/types";
 import { DesignContext, FieldFocusContext } from "./DesignContext";
-import { isRTL } from "./template-helpers";
+import { useLayoutRtl } from "./template-helpers";
+import { ResumeLayoutContext } from "./DesignContext";
 
 function labels(rtl: boolean) {
   return rtl
@@ -53,7 +54,7 @@ export function BarRating({ level, max = 5 }: { level: number, max?: number }) {
 }
 
 export function MinimalTemplate({ data }: { data: ResumeData }) {
-  const rtl = isRTL(data);
+  const rtl = useLayoutRtl(data);
   const l = labels(rtl);
   return (
     <div dir={rtl ? "rtl" : "ltr"} className="bg-white p-12 text-[#111] font-sans" style={{ minHeight: "1122px", width: "100%" }}>
@@ -157,7 +158,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 }
 
 export function ExecutiveTemplate({ data }: { data: ResumeData }) {
-  const rtl = isRTL(data);
+  const rtl = useLayoutRtl(data);
   const l = labels(rtl);
   return (
     <div
@@ -324,13 +325,39 @@ export function ResumePreview({
   template,
   design,
   onFieldFocus,
+  layoutRtl = null,
+}: {
+  data: ResumeData;
+  template: TemplateId;
+  design?: DesignSettings;
+  onFieldFocus?: (path: string) => void;
+  /** Force LTR/RTL layout; null = auto from content script */
+  layoutRtl?: boolean | null;
+}) {
+  return (
+    <ResumeLayoutContext.Provider value={layoutRtl}>
+      <ResumePreviewBody
+        data={data}
+        template={template}
+        design={design}
+        onFieldFocus={onFieldFocus}
+      />
+    </ResumeLayoutContext.Provider>
+  );
+}
+
+function ResumePreviewBody({
+  data,
+  template,
+  design,
+  onFieldFocus,
 }: {
   data: ResumeData;
   template: TemplateId;
   design?: DesignSettings;
   onFieldFocus?: (path: string) => void;
 }) {
-  const rtl = isRTL(data);
+  const rtl = useLayoutRtl(data);
   let preview: React.ReactNode;
   switch (template) {
     case "executive": preview = <ExecutiveTemplate data={data} />; break;
@@ -361,6 +388,11 @@ export function ResumePreview({
     case "leroy": preview = <LeroyTemplate data={data} />; break;
     case "dubois": preview = <DuboisTemplate data={data} />; break;
     case "claudia-alves": preview = <ClaudiaAlvesTemplate data={data} />; break;
+    case "carbon": preview = <RefSanchezTemplate data={data} />; break;
+    case "atlas": preview = <RefTorresTemplate data={data} />; break;
+    case "forge": preview = <RefSchumacherTemplate data={data} />; break;
+    case "zenith": preview = <MercerTemplate data={data} />; break;
+    case "vector": preview = <CipherTemplate data={data} />; break;
     case "minimal":
     default: preview = <MinimalTemplate data={data} />;
   }

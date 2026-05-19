@@ -2,6 +2,8 @@ import { Link, useNavigate } from "@tanstack/react-router";
 import { motion } from "framer-motion";
 import { ArrowLeft, ArrowRight, ArrowUpRight, Sparkles } from "lucide-react";
 import { useState } from "react";
+import { useAuth } from "@/components/auth/AuthProvider";
+import { landingCtaPath } from "@/lib/landing-cta";
 import { useAppStore } from "@/lib/store";
 import {
   LeftCardSVG,
@@ -99,13 +101,20 @@ export function HeroV2({ language }: { language: Language }) {
   const [starting, setStarting] = useState(false);
   const navigate = useNavigate();
   const onboardingDone = useAppStore((s) => s.onboardingDone);
+  const { clerkEnabled, isSignedIn } = useAuth();
   const handleStart = () => {
     setStarting(true);
-    void navigate({ to: onboardingDone ? "/dashboard" : "/onboarding" });
+    void navigate({
+      to: landingCtaPath({
+        clerkEnabled,
+        isSignedIn,
+        onboardingDone,
+        mode: isSignedIn ? "dashboard" : "start",
+      }),
+    });
   };
-
   return (
-    <section className="flex-1 max-w-[1600px] w-full mx-auto px-3 sm:px-6 relative z-10 pt-4 sm:pt-6">
+    <section className="flex-1 max-w-[1600px] w-full mx-auto px-4 sm:px-6 relative z-10 pt-4 sm:pt-6">
       {/* HERO SECTION */}
       <div className="relative overflow-hidden hero-gradient rounded-[2rem] sm:rounded-[2.5rem]">
         {/*
@@ -126,9 +135,9 @@ export function HeroV2({ language }: { language: Language }) {
           {/* ── Left: text content ── */}
           <div
             className={`relative z-10 flex flex-col overflow-hidden ${
-              language === "ku"
-                ? "order-1 py-8 pr-4 pl-4 sm:px-10 sm:py-14 md:order-2 md:py-20 lg:px-16 lg:py-24"
-                : "order-1 py-8 pl-4 pr-3 sm:px-10 sm:py-14 md:px-14 md:py-20 lg:px-16 lg:py-24"
+            language === "ku"
+              ? "order-1 py-8 pr-5 pl-5 sm:px-10 sm:py-14 md:order-2 md:py-20 lg:px-16 lg:py-24"
+              : "order-1 py-8 pl-5 pr-4 sm:px-10 sm:py-14 md:px-14 md:py-20 lg:px-16 lg:py-24"
             }`}
             dir={t.dir}
           >
@@ -205,7 +214,15 @@ export function HeroV2({ language }: { language: Language }) {
                 <span className="pointer-events-none absolute inset-0 rounded-full ring-1 ring-inset ring-white/0 transition-[box-shadow,opacity] duration-500 group-hover:ring-white/24 group-hover:shadow-[inset_0_0_22px_rgba(255,255,255,0.12)]" />
                 <span className="pointer-events-none absolute inset-y-[-20%] left-[-50%] w-[34%] rotate-12 bg-gradient-to-r from-transparent via-white/24 to-transparent opacity-0 blur-[2px] transition-[transform,opacity] duration-700 ease-out group-hover:translate-x-[430%] group-hover:opacity-100" />
                 <span className="relative z-10">
-                  {starting ? (language === "ku" ? "ئامادەکردن..." : "Preparing...") : t.heroCta}
+                  {starting
+                    ? language === "ku"
+                      ? "ئامادەکردن..."
+                      : "Preparing..."
+                    : isSignedIn
+                      ? language === "ku"
+                        ? "داشبۆرد"
+                        : "Dashboard"
+                      : t.heroCta}
                 </span>
                 <span className="relative z-10 grid h-6 w-6 place-items-center rounded-full bg-white/12 shadow-[inset_0_1px_0_rgba(255,255,255,0.14)] transition-[background-color,box-shadow,filter] duration-300 group-hover:bg-white/20 group-hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.28),inset_0_0_10px_rgba(255,255,255,0.08)] group-hover:brightness-105">
                   <DirectionArrow language={language} className="h-3.5 w-3.5" />

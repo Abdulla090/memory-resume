@@ -3,24 +3,34 @@ import type { ReactNode } from "react";
 import { DesignContext } from "../DesignContext";
 import { Editable } from "../Editable";
 import { StarRating, BarRating } from "../templates";
-import { ContactLines, ExperienceList, PhotoBlock, Section, isRTL, labels, pickLanguages, skillRating, skillLevel, initials } from "../template-helpers";
+import { ContactLines, ExperienceList, PhotoBlock, Section, useLayoutRtl, labels, pickLanguages, skillRating, skillLevel, initials } from "../template-helpers";
 import { BriefcaseBusiness, Globe, GraduationCap, Mail, MapPin, Phone, UserRound } from "lucide-react";
 import type { ResumeData } from "@/lib/types";
 import { optimizeResumeForOnePage } from "@/lib/resume-utils";
 
 export function RefSanchezTemplate({ data }: { data: ResumeData }) {
   const c = optimizeResumeForOnePage(data);
-  const rtl = isRTL(c);
+  const rtl = useLayoutRtl(c);
   const l = labels(c, rtl);
   const design = useContext(DesignContext);
   const showSkillBars = design?.showSkillBars !== false;
   const photoShape = design?.photoShape || "circle";
   const photoBlockShape = photoShape === "square" ? "rounded" : photoShape;
 
-  const TimelineSection = ({ title, icon, children }: { title: ReactNode; icon: string; children: ReactNode }) => (
+  const TimelineSection = ({
+    title,
+    icon,
+    children,
+  }: {
+    title: ReactNode;
+    icon: ReactNode;
+    children: ReactNode;
+  }) => (
     <section className="relative pl-16 rtl:pl-0 rtl:pr-16">
       <span className="absolute left-[17px] top-0 grid h-[140px] w-[1px] bg-[#99a1ab] rtl:left-auto rtl:right-[17px]" />
-      <span className="absolute left-0 top-0 grid h-9 w-9 place-items-center rounded-full bg-[#303b4e] text-[12px] font-black text-white rtl:left-auto rtl:right-0">{icon}</span>
+      <span className="absolute left-0 top-0 grid h-9 w-9 place-items-center rounded-full bg-[#303b4e] text-white rtl:left-auto rtl:right-0">
+        {icon}
+      </span>
       <h2 className="mb-3 border-b border-[#7d8792] pb-2 text-[19px] font-black uppercase tracking-[0.17em] rtl:tracking-normal text-[#303b4e]">{title}</h2>
       {children}
     </section>
@@ -33,8 +43,8 @@ export function RefSanchezTemplate({ data }: { data: ResumeData }) {
           <PhotoBlock data={c} shape={photoBlockShape} />
         </div>
         <div className="pl-[315px] pt-[62px] rtl:pl-0 rtl:pr-[315px]">
-          <h1 className="text-[38px] font-black uppercase leading-none">{c.name}</h1>
-          <p className="mt-4 text-[18px] font-bold uppercase">{c.title}</p>
+          <h1 className="text-[38px] font-black uppercase leading-none text-white">{c.name}</h1>
+          <p className="mt-4 text-[18px] font-bold uppercase text-white">{c.title}</p>
         </div>
       </header>
 
@@ -82,14 +92,14 @@ export function RefSanchezTemplate({ data }: { data: ResumeData }) {
             </section>
           )}
           <section className="mt-9">
-            <h2 className="mb-4 border-b-2 border-[#8c939a] pb-2 text-[18px] font-black uppercase tracking-[0.15em] rtl:tracking-normal">{rtl ? "╪▓┘à╪º┘å█ò┌⌐╪º┘å" : "Languages"}</h2>
+            <h2 className="mb-4 border-b-2 border-[#8c939a] pb-2 text-[18px] font-black uppercase tracking-[0.15em] rtl:tracking-normal">{rtl ? "زمانەکان" : "Languages"}</h2>
             <ul className="list-disc space-y-1 pl-4 text-[12px] rtl:pl-0 rtl:pr-4">
-              {(rtl ? ["┌⌐┘ê╪▒╪»█î", "╪ª█î┘å┌»┘ä█î╪▓█î"] : ["English", "Kurdish"]).map((item) => <li key={item}>{item}</li>)}
+              {(rtl ? ["کوردی", "ئینگلیزی"] : ["English", "Kurdish"]).map((item) => <li key={item}>{item}</li>)}
             </ul>
           </section>
           {c.projects.length > 0 && (
             <section className="mt-9">
-              <h2 className="mb-4 border-b-2 border-[#8c939a] pb-2 text-[18px] font-black uppercase tracking-[0.15em] rtl:tracking-normal">{rtl ? "╪│█ò╪▒┌å╪º┘ê█ò" : "Reference"}</h2>
+              <h2 className="mb-4 border-b-2 border-[#8c939a] pb-2 text-[18px] font-black uppercase tracking-[0.15em] rtl:tracking-normal">{rtl ? "سەرچاوە" : "Reference"}</h2>
               <p className="text-[12px] font-bold">{c.projects[0].name}</p>
               <p className="mt-2 text-[11px] leading-5">{c.projects[0].description}</p>
             </section>
@@ -97,11 +107,11 @@ export function RefSanchezTemplate({ data }: { data: ResumeData }) {
         </aside>
 
         <main className="space-y-9 px-11 py-12 ">
-          <TimelineSection title={l.profile} icon="i">
+          <TimelineSection title={l.profile} icon={<UserRound size={16} strokeWidth={2.5} aria-hidden />}>
             <p className="text-[12px] leading-5">{c.summary}</p>
           </TimelineSection>
           {c.experience.length > 0 && (
-            <TimelineSection title={l.experience} icon="W">
+            <TimelineSection title={l.experience} icon={<BriefcaseBusiness size={16} strokeWidth={2.5} aria-hidden />}>
               <div className="space-y-5">
                 {c.experience.slice(0, 3).map((item, index) => (
                   <article key={`${item.company}-${index}`}>
@@ -121,7 +131,7 @@ export function RefSanchezTemplate({ data }: { data: ResumeData }) {
             </TimelineSection>
           )}
           {c.education.length > 0 && (
-            <TimelineSection title={l.education} icon="E">
+            <TimelineSection title={l.education} icon={<GraduationCap size={16} strokeWidth={2.5} aria-hidden />}>
               <div className="space-y-4">
                 {c.education.slice(0, 2).map((item, index) => (
                   <div key={`${item.institution}-${index}`} className="text-[12px] leading-5">

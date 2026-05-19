@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 import { DesignContext } from "../DesignContext";
 import { Editable } from "../Editable";
 import { StarRating, BarRating } from "../templates";
-import { ContactLines, ExperienceList, PhotoBlock, Section, isRTL, labels, pickLanguages, skillRating, skillLevel, initials } from "../template-helpers";
+import { ContactLines, ExperienceList, PhotoBlock, Section, useLayoutRtl, labels, pickLanguages, skillRating, skillLevel, initials } from "../template-helpers";
 import { BriefcaseBusiness, Globe, GraduationCap, Mail, MapPin, Phone, UserRound } from "lucide-react";
 import type { ResumeData } from "@/lib/types";
 import { optimizeResumeForOnePage } from "@/lib/resume-utils";
@@ -29,7 +29,7 @@ function SidebarTitle({ children }: { children: ReactNode }) {
 
 export function GallegoTemplate({ data }: { data: ResumeData }) {
   const c = optimizeResumeForOnePage(data);
-  const rtl = isRTL(c);
+  const rtl = useLayoutRtl(c);
   const design = use(DesignContext);
   const showSkillBars = design?.showSkillBars !== false;
   const photoShape = design?.photoShape || "circle";
@@ -109,7 +109,7 @@ export function GallegoTemplate({ data }: { data: ResumeData }) {
 
       <main className="relative z-20 ml-[325px] min-h-[1122px] pb-10 pl-0 pr-[30px] pt-[64px] rtl:ml-0 rtl:mr-[325px] rtl:pl-[30px] rtl:pr-0">
         <header className="ml-[-28px] h-[204px] bg-[#075a7c] px-[42px] pt-[38px] text-white shadow-[0_8px_0_rgba(0,0,0,0.14)] rtl:ml-0 rtl:mr-[-28px]">
-          <h1 className="max-w-[430px] text-[37px] font-black leading-[1.03] tracking-tight rtl:tracking-normal">{c.name}</h1>
+          <h1 className="max-w-[430px] text-[37px] font-black leading-[1.03] tracking-tight rtl:tracking-normal text-white">{c.name}</h1>
           <p className="mt-4 max-w-[360px] text-[18px] font-bold leading-[1.18] text-white/90">{c.title}</p>
         </header>
 

@@ -50,6 +50,13 @@ export const useAppStore = create<AppState>()(
       storage: createJSONStorage(() =>
         typeof window !== "undefined" ? window.localStorage : (undefined as never),
       ),
+      partialize: (state) => ({
+        profile: state.profile,
+        resumes: state.resumes,
+        preferences: state.preferences,
+        language: state.language,
+        onboardingDone: state.onboardingDone,
+      }),
     },
   ),
 );

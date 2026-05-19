@@ -2,7 +2,7 @@ import { use } from "react";
 import type { ReactNode } from "react";
 import { DesignContext } from "../DesignContext";
 import { Editable } from "../Editable";
-import { isRTL, labels, pickLanguages, skillRating } from "../template-helpers";
+import { useLayoutRtl, labels, pickLanguages, skillRating } from "../template-helpers";
 import type { ResumeData } from "@/lib/types";
 import { optimizeResumeForOnePage } from "@/lib/resume-utils";
 import { Phone, Mail, MapPin, Globe } from "lucide-react";
@@ -20,7 +20,7 @@ function SectionTitle({ title, className = "" }: { title: ReactNode; className?:
 
 export function NewAlvaradoTemplate({ data }: { data: ResumeData }) {
   const c = optimizeResumeForOnePage(data);
-  const rtl = isRTL(c);
+  const rtl = useLayoutRtl(c);
   const l = labels(c, rtl);
   const design = use(DesignContext);
   const showSkillBars = design?.showSkillBars !== false;

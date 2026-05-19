@@ -1,3 +1,5 @@
+import { preparePreviewExportClone, RESUME_PAGE_WIDTH_PX } from "@/lib/pdf-export-clone";
+
 /**
  * Screenshot-based PDF export using html-to-image + jsPDF.
  *
@@ -18,30 +20,7 @@ export async function exportPreviewAsPDF(
     import("jspdf"),
   ]);
 
-  // Create an off-screen container to prevent parent clipping (overflow: hidden, etc.)
-  const container = document.createElement("div");
-  container.style.position = "absolute";
-  container.style.top = "-10000px";
-  container.style.left = "-10000px";
-  container.style.width = "794px";
-  container.style.overflow = "visible";
-  
-  // Clone the preview element to modify safely
-  const clone = previewElement.cloneNode(true) as HTMLElement;
-  
-  // Override clone styles to be 1:1 scale
-  clone.style.transform = "scale(1)";
-  clone.style.transformOrigin = "top left";
-  clone.style.width = "794px";
-  clone.style.height = "auto";
-  clone.style.maxHeight = "none";
-  clone.style.maxWidth = "none";
-  clone.style.overflow = "visible";
-  clone.style.borderRadius = "0";
-  clone.style.boxShadow = "none";
-  clone.style.margin = "0";
-
-  container.appendChild(clone);
+  const { container, clone } = preparePreviewExportClone(previewElement);
   document.body.appendChild(container);
 
   try {
@@ -56,13 +35,13 @@ export async function exportPreviewAsPDF(
       // Fonts are already loaded in the browser so they render fine.
       skipFonts: true,
       backgroundColor: "#ffffff",
-      width: 794,
+      width: RESUME_PAGE_WIDTH_PX,
       height: fullHeight,
       // Also apply style overrides to html-to-image directly just in case
       style: {
         transform: "scale(1)",
         transformOrigin: "top left",
-        width: "794px",
+        width: `${RESUME_PAGE_WIDTH_PX}px`,
         height: `${fullHeight}px`,
         maxHeight: "none",
         maxWidth: "none",

@@ -1,5 +1,6 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { Settings } from "lucide-react";
+import { useAuth } from "@/components/auth/AuthProvider";
 import { useAppStore } from "@/lib/store";
 
 export const Route = createFileRoute("/dashboard/settings")({
@@ -11,6 +12,7 @@ function SettingsPage() {
   const setLanguage = useAppStore((state) => state.setLanguage);
   const apiKey = useAppStore((state) => state.apiKey ?? "");
   const setApiKey = useAppStore((state) => state.setApiKey);
+  const { user, cloudEnabled, clerkEnabled, syncToCloud, importFromCloud, signOut } = useAuth();
   const isKu = language === "ku";
 
   return (
@@ -68,8 +70,8 @@ function SettingsPage() {
         </h2>
         <p className="mt-1 text-xs text-muted-foreground">
           {isKu
-            ? "ئەگەر سێرڤەرەکەت کلیلی ژینگەی هەبێت، پێویست نییە لێرە بنووسیت."
-            : "Leave blank if your server already has GEMINI_API_KEY configured."}
+            ? "لە بەرهەمهێناندن کلیلی سێرڤەر بەکاردێت. ئەم خانەیە تەنها بۆ تاقیکردنەوەی ناوخۆییە و پاش ئەپدەیت ناهێڵرێتەوە."
+            : "Production uses the server GEMINI_API_KEY. This field is for local development only and is not saved to storage."}
         </p>
         <input
           type="password"
@@ -80,6 +82,73 @@ function SettingsPage() {
           className="mt-4 w-full rounded-xl border border-input bg-background px-4 py-2.5 text-sm text-foreground shadow-sm outline-none ring-offset-background focus-visible:ring-2 focus-visible:ring-ring"
         />
       </section>
+
+      {!clerkEnabled && (
+        <section className="rounded-2xl border border-dashed border-border bg-muted/20 p-6 text-sm text-muted-foreground">
+          {isKu
+            ? "کلێرک و سوبابەیس ڕێک نەخراون. داتاکان لە وێبگەڕ دەمێننەوە."
+            : "Clerk and Supabase are not configured. Data stays in this browser only."}{" "}
+          <a href="/docs/SUPABASE_CLERK_SETUP.md" className="text-primary underline">
+            Setup guide
+          </a>
+        </section>
+      )}
+
+      {cloudEnabled && (
+        <section className="rounded-2xl border border-border bg-card p-6 shadow-sm">
+          <h2 className="text-sm font-semibold text-foreground">
+            {isKu ? "هاوشێوەی هەور" : "Cloud sync"}
+          </h2>
+          <p className="mt-1 text-xs text-muted-foreground">
+            {user
+              ? isKu
+                ? user.username
+                  ? `${user.displayName} (@${user.username}) · ${user.email ?? ""}`
+                  : `${user.displayName} · ${user.email ?? ""}`
+                : user.username
+                  ? `Signed in as ${user.displayName} (@${user.username}) · ${user.email ?? ""}`
+                  : `Signed in as ${user.displayName} · ${user.email ?? ""}`
+              : isKu
+                ? "چوونەژوورەوە بۆ پاشەکەوتکردنی داتا لە هەور."
+                : "Sign in to back up data to the cloud."}
+          </p>
+          <div className="mt-4 flex flex-wrap gap-2">
+            {!user && (
+              <Link
+                to="/login"
+                className="rounded-xl gradient-bg px-4 py-2 text-sm font-semibold text-primary-foreground"
+              >
+                {isKu ? "چوونەژوورەوە" : "Sign in"}
+              </Link>
+            )}
+            {user && (
+              <>
+                <button
+                  type="button"
+                  onClick={() => void syncToCloud()}
+                  className="rounded-xl border border-border px-4 py-2 text-sm font-semibold"
+                >
+                  {isKu ? "ناردن بۆ هەور" : "Push to cloud"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => void importFromCloud()}
+                  className="rounded-xl border border-border px-4 py-2 text-sm font-semibold"
+                >
+                  {isKu ? "هێنان لە هەور" : "Pull from cloud"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => void signOut()}
+                  className="rounded-xl px-4 py-2 text-sm text-muted-foreground underline"
+                >
+                  {isKu ? "چوونەدەرەوە" : "Sign out"}
+                </button>
+              </>
+            )}
+          </div>
+        </section>
+      )}
     </div>
   );
 }

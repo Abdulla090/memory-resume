@@ -8,6 +8,8 @@ type PreviewProps = {
   template: TemplateId;
   design?: DesignSettings;
   onFieldFocus?: (path: string) => void;
+  /** Force LTR/RTL layout in editor; null = auto from content script */
+  layoutRtl?: boolean | null;
 };
 
 type PreviewComponent = ComponentType<PreviewProps>;

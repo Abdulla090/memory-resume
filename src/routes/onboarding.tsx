@@ -366,6 +366,10 @@ export function ChatOnboarding({
   };
 
   const finishQA = async (all: FollowUpAnswer[]) => {
+    if (!profile) {
+      toast.error(isKu ? "پرۆفایل نییە" : "Profile is missing");
+      return;
+    }
     setIsThinking(true);
     setStage("patching");
     try {

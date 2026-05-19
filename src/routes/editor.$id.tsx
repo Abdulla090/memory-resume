@@ -100,7 +100,7 @@ function ResumeEditor() {
   const [filter, setFilter] = useState<Category>("All");
   const [jobDescription, setJobDescription] = useState("");
   const [tailoring, setTailoring] = useState(false);
-  const [soraniMode, setSoraniMode] = useState(false);
+  const [previewLayoutRtl, setPreviewLayoutRtl] = useState(() => useAppStore.getState().language === "ku");
   const [atsModalOpen, setAtsModalOpen] = useState(false);
   const [atsLoading, setAtsLoading] = useState(false);
   const [atsScore, setAtsScore] = useState<number | null>(null);
@@ -253,44 +253,8 @@ function ResumeEditor() {
     updateDesign({ fieldOverrides: newOverrides });
   };
 
-  // ── Debounced preview ─────────────────────────────────────────────────────────
-  const toSoraniResume = (d: ResumeData): ResumeData => ({
-    ...d,
-    name: "شوان کەمال",
-    title: "ئەندازیاری سینێری نەرمەکاڵا",
-    email: d.email ?? "shwan@example.com",
-    phone: d.phone ?? "+964 750 000 0000",
-    location: "هەولێر، کوردستان",
-    summary: "ئەندازیاری نەرمەکاڵا بە ئەزموونی فراوان لە دروستکردنی سیستەمی پێوەندیدار.",
-    experience: d.experience.map((exp) => ({
-      ...exp,
-      title: "ئەندازیاری سینێری نەرمەکاڵا",
-      company: exp.company || "کۆمپانیای تەکنەلۆژی",
-      duration: "٢٠٢٢ – ئێستا",
-      description: "سەرپەرشتیاری بنیاتنانی خزمەتگوزارییە سەرەکییەکان.",
-      achievements: [
-        "خێرایی وەڵامدانەوەی سیستەم باشترکرا.",
-        "ڕێنمایی تیمی جیاواز کرا بۆ پڕۆژەیەکی گەورە.",
-      ],
-    })),
-    projects: d.projects.map((p) => ({
-      ...p,
-      name: "پڕۆژەی نوێ",
-      description: "ئامرازێکی ناوخۆیی.",
-      tech: ["TypeScript", "React", "PostgreSQL"],
-      impact: "بەکارهاتووە.",
-    })),
-    education: d.education.map((e) => ({
-      ...e,
-      degree: "بەکالۆریۆس لە زانستی کۆمپیوتەر",
-      institution: "زانکۆی سەڵاحەدین",
-      year: "٢٠١٦",
-    })),
-    skills: ["TypeScript", "React", "Node.js", "PostgreSQL", "Docker", "AWS"],
-    certifications: ["بڕوانامەی پیشەیی AWS", "بڕوانامەی بەڕێوەبردنی پڕۆژە"],
-  });
-
-  const previewData = soraniMode ? toSoraniResume(debouncedData ?? data) : (debouncedData ?? data);
+  // ── Debounced preview (layout direction via previewLayoutRtl, not content swap) ──
+  const previewData = debouncedData ?? data;
   const categories: Category[] = ["All", "Minimal", "Professional", "Academic", "Creative"];
 
   // ── Handlers ──────────────────────────────────────────────────────────────────
@@ -650,8 +614,8 @@ function ResumeEditor() {
                     mode="inline"
                     onClose={() => setShowResume(false)}
                     isKu={isKu}
-                    soraniMode={soraniMode}
-                    setSoraniMode={setSoraniMode}
+                    previewLayoutRtl={previewLayoutRtl}
+                    setPreviewLayoutRtl={setPreviewLayoutRtl}
                     zoom={zoom}
                     setZoom={setZoom}
                     previewData={previewData}
@@ -700,8 +664,8 @@ function ResumeEditor() {
                 show={showResume}
                 onClose={() => setShowResume(false)}
                 isKu={isKu}
-                soraniMode={soraniMode}
-                setSoraniMode={setSoraniMode}
+                previewLayoutRtl={previewLayoutRtl}
+                setPreviewLayoutRtl={setPreviewLayoutRtl}
                 zoom={zoom}
                 setZoom={setZoom}
                 previewData={previewData}

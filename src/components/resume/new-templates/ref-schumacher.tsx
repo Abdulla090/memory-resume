@@ -3,14 +3,14 @@ import type { ReactNode } from "react";
 import { DesignContext } from "../DesignContext";
 import { Editable } from "../Editable";
 import { StarRating, BarRating } from "../templates";
-import { ContactLines, ExperienceList, PhotoBlock, Section, isRTL, labels, pickLanguages, skillRating, skillLevel, initials } from "../template-helpers";
+import { ContactLines, ExperienceList, PhotoBlock, Section, useLayoutRtl, labels, pickLanguages, skillRating, skillLevel, initials } from "../template-helpers";
 import { BriefcaseBusiness, Globe, GraduationCap, Mail, MapPin, Phone, UserRound } from "lucide-react";
 import type { ResumeData } from "@/lib/types";
 import { optimizeResumeForOnePage } from "@/lib/resume-utils";
 
 export function RefSchumacherTemplate({ data }: { data: ResumeData }) {
   const c = optimizeResumeForOnePage(data);
-  const rtl = isRTL(c);
+  const rtl = useLayoutRtl(c);
   const l = labels(c, rtl);
   const contact = [c.location, c.email, c.phone].filter(Boolean);
   const design = useContext(DesignContext);

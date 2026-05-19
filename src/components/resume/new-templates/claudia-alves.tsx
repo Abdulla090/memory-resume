@@ -1,7 +1,7 @@
 import { Globe, Home, Mail, Phone } from "lucide-react";
 import type { ReactNode } from "react";
 import { Editable } from "../Editable";
-import { isRTL } from "../template-helpers";
+import { useLayoutRtl } from "../template-helpers";
 import type { ResumeData } from "@/lib/types";
 import { optimizeResumeForOnePage } from "@/lib/resume-utils";
 
@@ -113,7 +113,7 @@ function ExperienceBlock({ data, index }: { data: ResumeData; index: number }) {
 
 export function ClaudiaAlvesTemplate({ data }: { data: ResumeData }) {
   const c = optimizeResumeForOnePage(data);
-  const rtl = isRTL(c);
+  const rtl = useLayoutRtl(c);
   const skills = c.skills.slice(0, 5);
   const references = c.projects.length > 0
     ? c.projects.slice(0, 1).map((project) => ({

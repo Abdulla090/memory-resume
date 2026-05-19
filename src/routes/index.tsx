@@ -22,6 +22,8 @@ import React, { useEffect, useRef, useState } from "react";
 import { HeroV2 } from "@/components/HeroV2";
 import { useAppStore } from "@/lib/store";
 import { useMobileOptimized } from "@/lib/performance";
+import { useAuth } from "@/components/auth/AuthProvider";
+import { landingCtaPath } from "@/lib/landing-cta";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -51,6 +53,7 @@ export const copy = {
       { label: "FAQ", to: "/", hash: "faq" },
     ],
     navCta: "Get started",
+    navSignIn: "Sign in",
     badge: "Memory to Resume Generation",
     badgeMobile: "AI · Free",
     heroTitle: "Turn your professional memory into a resume",
@@ -134,6 +137,7 @@ export const copy = {
       { label: "پرسیارە باوەکان", to: "/", hash: "faq" },
     ],
     navCta: "دەست پێبکە",
+    navSignIn: "چوونەژوورەوە",
     badge: "گەڕاندنەوەی یادەوەری بۆ سیڤی",
     badgeMobile: "زیرەکی دەستکرد · خۆڕایی",
     heroTitle: "بیرەوەرییە پیشەییەکانت،",
@@ -245,7 +249,7 @@ function Counter({ to, suffix = "" }: { to: number; suffix?: string }) {
   );
 }
 
-/** Smart CTA button: first-timers → /onboarding, returning users → /dashboard */
+/** Smart CTA: signed in → dashboard; else signup or onboarding */
 function CtaButton({
   id,
   className,
@@ -258,11 +262,21 @@ function CtaButton({
   children: React.ReactNode;
 }) {
   const navigate = useNavigate();
+  const { clerkEnabled, isSignedIn } = useAuth();
   return (
     <button
       id={id}
       className={className}
-      onClick={() => navigate({ to: onboardingDone ? "/dashboard" : "/onboarding" })}
+      onClick={() =>
+        navigate({
+          to: landingCtaPath({
+            clerkEnabled,
+            isSignedIn,
+            onboardingDone,
+            mode: isSignedIn ? "dashboard" : "start",
+          }),
+        })
+      }
     >
       {children}
     </button>
@@ -281,7 +295,20 @@ export function Header({
   const t = copy[language];
   const navigate = useNavigate();
   const onboardingDone = useAppStore((s) => s.onboardingDone);
-  const handleStart = () => navigate({ to: onboardingDone ? "/dashboard" : "/onboarding" });
+  const { clerkEnabled, isSignedIn } = useAuth();
+  const handleStart = () =>
+    navigate({
+      to: landingCtaPath({
+        clerkEnabled,
+        isSignedIn,
+        onboardingDone,
+        mode: isSignedIn ? "dashboard" : "start",
+      }),
+    });
+  const handleSignIn = () =>
+    navigate({
+      to: landingCtaPath({ clerkEnabled, isSignedIn, onboardingDone, mode: "login" }),
+    });
 
   // Zero-cost scroll detection — IntersectionObserver fires once on threshold cross, not per frame
   useEffect(() => {
@@ -376,12 +403,21 @@ export function Header({
               </span>
             </button>
 
+            {!isSignedIn && clerkEnabled && (
+              <button
+                type="button"
+                onClick={handleSignIn}
+                className="hidden rounded-lg px-3 py-2 text-sm font-semibold text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900 md:block"
+              >
+                {t.navSignIn}
+              </button>
+            )}
             <button
               onClick={handleStart}
               id="nav-free-trial"
               className="hidden md:block rounded-full bg-blue-600 px-5 py-2 text-sm font-bold text-white shadow-sm transition-all hover:bg-blue-700 hover:shadow-md"
             >
-              {t.navCta}
+              {isSignedIn ? (language === "ku" ? "داشبۆرد" : "Dashboard") : t.navCta}
             </button>
 
             <button
@@ -530,11 +566,35 @@ export function Header({
                 </button>
               </motion.div>
 
+              {!isSignedIn && clerkEnabled && (
+                <motion.div
+                  initial={{ opacity: 0, y: 18 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{
+                    delay: 0.08 + (t.nav.length + 1) * 0.06,
+                    duration: 0.24,
+                    ease: "easeOut",
+                  }}
+                  className="mt-4 w-full max-w-xs"
+                >
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMobileOpen(false);
+                      void handleSignIn();
+                    }}
+                    className="flex w-full items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-6 py-4 text-base font-semibold text-slate-800 shadow-sm transition-all active:scale-95 hover:border-blue-200 hover:text-blue-600"
+                  >
+                    {t.navSignIn}
+                  </button>
+                </motion.div>
+              )}
+
               <motion.div
                 initial={{ opacity: 0, y: 18 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{
-                  delay: 0.08 + (t.nav.length + 1) * 0.06,
+                  delay: 0.08 + (t.nav.length + 2) * 0.06,
                   duration: 0.24,
                   ease: "easeOut",
                 }}
@@ -544,7 +604,7 @@ export function Header({
                   onClick={() => { setMobileOpen(false); void handleStart(); }}
                   className="flex w-full items-center justify-center gap-2 rounded-2xl bg-blue-600 px-6 py-4 text-base font-bold text-white shadow-[0_8px_24px_rgba(37,99,235,0.28)] transition-all active:scale-95 hover:bg-blue-700"
                 >
-                  {t.navCta}
+                  {isSignedIn ? (language === "ku" ? "داشبۆرد" : "Dashboard") : t.navCta}
                 </button>
               </motion.div>
             </div>
@@ -1220,7 +1280,7 @@ function Hero({ language }: { language: Language }) {
   const onboardingDone = useAppStore((s) => s.onboardingDone);
 
   return (
-    <section className="app-frame px-3 pb-0 pt-4 sm:px-6 sm:pt-6">
+    <section className="app-frame px-4 pb-0 pt-4 sm:px-6 sm:pt-6">
       <div className="hero-gradient relative pb-16 sm:pb-20">
         <div className="relative px-4 pb-4 pt-8 text-center sm:px-6 sm:pt-16">
           <motion.h1
@@ -1289,7 +1349,7 @@ export function StatsSection({ language }: { language: Language }) {
 
   return (
     <section
-      className="perf-defer-section app-frame relative px-4 pb-12 sm:px-6 sm:pb-24"
+      className="perf-defer-section app-frame relative px-5 pb-12 sm:px-8 sm:pb-24"
       style={{ paddingTop: "clamp(60px,10vw,140px)" }}
     >
       <div className="absolute right-10 top-20 -z-10 h-96 w-96 rounded-full bg-[radial-gradient(circle_at_center,rgba(219,234,254,0.4)_0%,transparent_70%)]" />
@@ -1568,7 +1628,7 @@ export function FAQSection({ language }: { language: Language }) {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
 
   return (
-    <div id="faq" className="mt-16 mb-10 w-full max-w-4xl mx-auto px-4 sm:px-0" dir={t.dir}>
+    <div id="faq" className="mt-16 mb-10 w-full max-w-4xl mx-auto px-5 sm:px-4" dir={t.dir}>
       <h2 className="mb-8 text-[clamp(1.5rem,4vw,2.25rem)] font-extrabold tracking-tight text-slate-900 text-center">
         {t.faqTitle}
       </h2>
@@ -1621,7 +1681,7 @@ export function BentoGridSection({ language }: { language: Language }) {
   return (
     <section
       id="features"
-      className="relative overflow-hidden bg-[#f4f9ff] px-4 pb-12 pt-12 sm:px-6 sm:pb-24 sm:pt-28 md:pt-40"
+      className="relative overflow-hidden bg-[#f4f9ff] px-5 pb-12 pt-12 sm:px-8 sm:pb-24 sm:pt-28 md:pt-40"
     >
       <div className="pointer-events-none absolute right-1/4 top-0 h-[600px] w-[800px] -translate-y-1/2 rounded-full bg-[radial-gradient(circle_at_center,rgba(219,234,254,0.3)_0%,transparent_70%)]" />
       <div className="pointer-events-none absolute left-0 top-1/4 h-[500px] w-[600px] rounded-full bg-[radial-gradient(circle_at_center,rgba(224,242,254,0.3)_0%,transparent_70%)]" />

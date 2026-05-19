@@ -3,8 +3,11 @@ import { createRootRoute, HeadContent, Link, Outlet, Scripts } from "@tanstack/r
 import { MotionConfig, LazyMotion, domAnimation } from "framer-motion";
 import { Toaster } from "sonner";
 
+import { ClerkProvider } from "@clerk/tanstack-react-start";
+import { AuthProvider } from "@/components/auth/AuthProvider";
 import { useAppStore } from "@/lib/store";
 import { initPerfMobileClass, useMobileOptimized } from "@/lib/performance";
+import { initObservability } from "@/lib/observability";
 
 
 import appCss from "../styles.css?url";
@@ -84,7 +87,9 @@ function RootShell({ children }: { children: React.ReactNode }) {
         <HeadContent />
       </head>
       <body style={{ overflowX: "hidden", minHeight: "100dvh" }}>
-        <div style={{ overflowX: "hidden", position: "relative" }}>{children}</div>
+        <ClerkProvider>
+          <div style={{ overflowX: "hidden", position: "relative" }}>{children}</div>
+        </ClerkProvider>
         <Scripts />
       </body>
     </html>
@@ -94,7 +99,10 @@ function RootShell({ children }: { children: React.ReactNode }) {
 function RootComponent() {
   const mobileOptimized = useMobileOptimized();
 
-  useEffect(() => initPerfMobileClass(), []);
+  useEffect(() => {
+    void initObservability();
+    initPerfMobileClass();
+  }, []);
 
   useEffect(() => {
     if (import.meta.env.DEV && !mobileOptimized) {
@@ -113,9 +121,11 @@ function RootComponent() {
   }, [language]);
 
   return (
-    <LazyMotion features={domAnimation} strict>
+    <LazyMotion features={domAnimation}>
       <MotionConfig reducedMotion={mobileOptimized ? "always" : "user"}>
-        <Outlet />
+        <AuthProvider>
+          <Outlet />
+        </AuthProvider>
 
       <Toaster
         theme="light"

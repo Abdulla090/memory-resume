@@ -1,0 +1,2 @@
+-- Applied via Supabase MCP to project memorycv (nrlznfnmbeijkoubezvr)
+-- See supabase/schema.sql for the canonical definition.

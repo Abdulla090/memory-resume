@@ -8,6 +8,7 @@ import { UpdateDataContext, type UpdateDataFn, DesignModeContext } from "@/compo
 import { Download, FileText, ChevronDown } from "lucide-react";
 import { useLayoutEffect, useRef, useState, useEffect } from "react";
 import { toast } from "sonner";
+import { buildFieldOverrideCss } from "@/lib/sanitize";
 
 /** Returns a high-contrast text color (white or near-black) for the given hex background. */
 function contrastTextFor(hex: string, darkText = "#1a1a1a", lightText = "#ffffff"): string {
@@ -242,12 +243,15 @@ export function ExportButtons({
   template,
   name,
   previewRef,
+  design,
 }: {
   data: ResumeData;
   template: TemplateId;
   name: string;
   previewRef: RefObject<HTMLDivElement | null>;
+  design?: DesignSettings;
 }) {
+  const [vectorLoading, setVectorLoading] = useState(false);
   const [pdfLoading, setPdfLoading] = useState(false);
   const [printLoading, setPrintLoading] = useState(false);
   const [docxLoading, setDocxLoading] = useState(false);
@@ -260,6 +264,29 @@ export function ExportButtons({
     document.addEventListener("click", close);
     return () => document.removeEventListener("click", close);
   }, [open]);
+
+  const handleVectorPDF = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setOpen(false);
+    setVectorLoading(true);
+    try {
+      if (!previewRef.current) return;
+      const { exportPreviewAsVectorPDF } = await import("@/lib/pdf-vector-preview");
+      await exportPreviewAsVectorPDF(previewRef.current, filename);
+      toast.success("Vector PDF downloaded");
+    } catch (err) {
+      console.error("Vector preview export failed:", err);
+      try {
+        const { exportResumePDF } = await import("@/components/resume/pdf-templates");
+        await exportResumePDF(data, template, filename, design);
+        toast.message("Downloaded template PDF (preview vector export failed for this layout)");
+      } catch {
+        toast.error("Failed to generate vector PDF");
+      }
+    } finally {
+      setVectorLoading(false);
+    }
+  };
 
   const handlePDF = async (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -306,7 +333,7 @@ export function ExportButtons({
     }
   };
 
-  const anyLoading = pdfLoading || printLoading || docxLoading;
+  const anyLoading = vectorLoading || pdfLoading || printLoading || docxLoading;
 
   return (
     <div className="relative">
@@ -327,22 +354,33 @@ export function ExportButtons({
       {open && (
         <div className="absolute right-0 top-full mt-2 w-[236px] bg-white border border-slate-200 rounded-xl shadow-[0_8px_40px_rgba(15,23,42,0.14)] overflow-hidden z-[100] flex flex-col p-1.5 animate-in fade-in zoom-in-95 duration-100 origin-top-right">
           <div className="px-3 pt-2 pb-1">
-            <p className="text-[10px] text-slate-400 font-medium">Both PDFs match your live preview exactly</p>
+            <p className="text-[10px] text-slate-400 font-medium">
+              Vector PDF matches your live preview (all templates)
+            </p>
           </div>
           <div className="h-px bg-slate-100 mx-2 mb-1" />
+          <button
+            onClick={handleVectorPDF}
+            className="flex items-center justify-between px-3 py-2 text-sm font-semibold text-slate-800 hover:bg-blue-50 hover:text-blue-700 rounded-lg transition-colors text-left group"
+          >
+            <span>PDF (Vector)</span>
+            <span className="text-[10px] text-blue-500 font-normal group-hover:text-blue-600">
+              Sharp · selectable
+            </span>
+          </button>
           <button
             onClick={handlePDF}
             className="flex items-center justify-between px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 hover:text-blue-600 rounded-lg transition-colors text-left group"
           >
-            <span>PDF (Standard)</span>
+            <span>PDF (Raster)</span>
             <span className="text-[10px] text-slate-400 font-normal group-hover:text-blue-400">Fast · 2×</span>
           </button>
           <button
             onClick={handlePrintPDF}
             className="flex items-center justify-between px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 hover:text-blue-600 rounded-lg transition-colors text-left group"
           >
-            <span>PDF (Print Quality)</span>
-            <span className="text-[10px] text-slate-400 font-normal group-hover:text-blue-400">Sharp · 3×</span>
+            <span>PDF (Raster Print)</span>
+            <span className="text-[10px] text-slate-400 font-normal group-hover:text-blue-400">Backup · 3×</span>
           </button>
           <div className="h-px bg-slate-100 my-1 mx-2" />
           <button
@@ -367,6 +405,7 @@ export function ClientPDFPreview({
   updateData,
   onSectionClick,
   isDesignMode,
+  layoutRtl = null,
 }: {
   data: ResumeData;
   template: TemplateId;
@@ -376,6 +415,7 @@ export function ClientPDFPreview({
   updateData?: UpdateDataFn;
   onSectionClick?: (s: SectionId, path?: string, e?: React.MouseEvent) => void;
   isDesignMode?: boolean;
+  layoutRtl?: boolean | null;
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [contentHeight, setContentHeight] = useState(1122);
@@ -653,6 +693,42 @@ ${(() => {
 .ds-live [class*="bg-[#0"] * { color: #e5e7eb !important; }
 .ds-live [class*="bg-[#1"] { color: #e5e7eb !important; }
 .ds-live [class*="bg-[#1"] * { color: #e5e7eb !important; }
+.ds-live [class*="bg-[#2"],
+.ds-live [class*="bg-[#3"],
+.ds-live [class*="bg-[#4"],
+.ds-live [class*="bg-[#5"],
+.ds-live [class*="bg-[#6"],
+.ds-live [class*="bg-[#7"],
+.ds-live [class*="bg-[#8"],
+.ds-live [class*="bg-[#9"] { color: #f8fafc !important; }
+.ds-live [class*="bg-[#2"] *,
+.ds-live [class*="bg-[#3"] *,
+.ds-live [class*="bg-[#4"] *,
+.ds-live [class*="bg-[#5"] *,
+.ds-live [class*="bg-[#6"] *,
+.ds-live [class*="bg-[#7"] *,
+.ds-live [class*="bg-[#8"] *,
+.ds-live [class*="bg-[#9"] * { color: #f8fafc !important; }
+
+.ds-live .text-white,
+.ds-live .text-white h1,
+.ds-live .text-white h2,
+.ds-live .text-white h3,
+.ds-live .text-white p,
+.ds-live .text-white span,
+.ds-live .text-white li,
+.ds-live header.text-white h1,
+.ds-live header.text-white h2,
+.ds-live header.text-white h3,
+.ds-live header.text-white p,
+.ds-live header.text-white span { color: #ffffff !important; }
+
+.ds-live aside.text-white h1,
+.ds-live aside.text-white h2,
+.ds-live aside.text-white h3,
+.ds-live aside[class*="text-white"] h1,
+.ds-live aside[class*="text-white"] h2,
+.ds-live aside[class*="text-white"] h3 { color: #ffffff !important; }
 `;
 
   const handlePreviewClick = (e: React.MouseEvent) => {
@@ -762,21 +838,11 @@ ${(() => {
           {d && <style dangerouslySetInnerHTML={{ __html: css }} />}
           <style dangerouslySetInnerHTML={{ __html: baseCss }} />
           {d?.fieldOverrides && Object.keys(d.fieldOverrides).length > 0 && (
-            <style dangerouslySetInnerHTML={{ __html: Object.entries(d.fieldOverrides).map(([path, ov]) => {
-              const rules: string[] = [];
-              if (ov.fontSize) rules.push(`font-size: ${ov.fontSize}px !important`);
-              if (ov.fontWeight) rules.push(`font-weight: ${ov.fontWeight} !important`);
-              if (ov.color) rules.push(`color: ${ov.color} !important`);
-              if (ov.fontFamily) rules.push(`font-family: '${ov.fontFamily}', sans-serif !important`);
-              if (ov.letterSpacing !== undefined) rules.push(`letter-spacing: ${ov.letterSpacing}em !important`);
-              if (ov.textTransform && ov.textTransform !== "none") rules.push(`text-transform: ${ov.textTransform} !important`);
-              if (rules.length === 0) return "";
-              // Target both Editable elements (data-path) and annotated DOM elements (data-field-path)
-              return [
-                `.ds-live [data-path="${path}"] { ${rules.join("; ")}; }`,
-                `.ds-live [data-field-path="${path}"] { ${rules.join("; ")}; }`,
-              ].join("\n");
-            }).filter(Boolean).join("\n") }} />
+            <style
+              dangerouslySetInnerHTML={{
+                __html: buildFieldOverrideCss(d.fieldOverrides),
+              }}
+            />
           )}
           <FieldPathAnnotator previewRef={previewRef} data={data} fieldOverrides={d?.fieldOverrides} />
           <DesignModeContext.Provider value={!!isDesignMode}>
@@ -785,6 +851,7 @@ ${(() => {
               data={data}
               template={template}
               design={design}
+              layoutRtl={layoutRtl}
               onFieldFocus={(path) => {
                 const section = path.startsWith("experience")
                   ? "experience"

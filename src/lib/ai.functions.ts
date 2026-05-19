@@ -1,80 +1,23 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
+import {
+  callGateway,
+  extractText,
+  extractToolArgs,
+  guardAiRequest,
+  type GatewayMessage,
+} from "./ai-security";
+import {
+  apiKeyInputSchema,
+  followUpAnswerSchema,
+  interviewHistoryItemSchema,
+  languageSchema,
+  profileInputSchema,
+  profileSchema as profileZodSchema,
+  resumeInputSchema,
+} from "./schemas/resume";
 import type { CareerPath, FollowUpQuestion, Profile, ResumeData } from "./types";
 import { optimizeResumeForOnePage } from "./resume-utils";
-
-const AI_ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions";
-const DEFAULT_MODEL = "gemini-2.5-flash";
-
-interface GatewayMessage {
-  role: "system" | "user" | "assistant";
-  content: string;
-}
-
-interface ToolDef {
-  type: "function";
-  function: {
-    name: string;
-    description: string;
-    parameters: Record<string, unknown>;
-  };
-}
-
-async function callGateway(opts: {
-  messages: GatewayMessage[];
-  tools?: ToolDef[];
-  toolChoice?: { type: "function"; function: { name: string } };
-  model?: string;
-  apiKey?: string;
-}) {
-  const authKey = process.env.GEMINI_API_KEY || opts.apiKey;
-  const modelName = opts.model ?? DEFAULT_MODEL;
-
-  if (!authKey) {
-    throw new Error("MISSING_API_KEY");
-  }
-
-  const body: Record<string, unknown> = { model: modelName, messages: opts.messages };
-  if (opts.tools) body.tools = opts.tools;
-  if (opts.toolChoice) body.tool_choice = opts.toolChoice;
-
-  const res = await fetch(AI_ENDPOINT, {
-    method: "POST",
-    headers: {
-      Authorization: "Bearer " + authKey,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(body),
-  });
-
-  if (!res.ok) {
-    if (res.status === 429) throw new Error("AI_RATE_LIMIT");
-    if (res.status === 401 || res.status === 403) throw new Error("INVALID_API_KEY");
-    if (res.status >= 500) throw new Error("AI_SERVICE_UNAVAILABLE");
-    throw new Error("AI_REQUEST_FAILED");
-  }
-
-  return res.json();
-}
-
-function extractToolArgs<T>(json: unknown): T {
-  const call = (
-    json as {
-      choices?: Array<{ message?: { tool_calls?: Array<{ function?: { arguments?: string } }> } }>;
-    }
-  )?.choices?.[0]?.message?.tool_calls?.[0];
-  if (!call?.function?.arguments) {
-    throw new Error("AI did not return structured output");
-  }
-  return JSON.parse(call.function.arguments) as T;
-}
-
-function extractText(json: unknown): string {
-  return (
-    (json as { choices?: Array<{ message?: { content?: string } }> })?.choices?.[0]?.message
-      ?.content ?? ""
-  );
-}
 
 // ───────────────── parseMemory ─────────────────
 
@@ -174,13 +117,14 @@ const profileSchema = {
 export const parseMemory = createServerFn({ method: "POST" })
   .inputValidator(
     z.object({
-      apiKey: z.string().optional(),
+      apiKey: apiKeyInputSchema,
       memory: z.string().min(20).max(50000),
     }),
   )
   .handler(async ({ data }): Promise<{ profile: Profile }> => {
+    const apiKey = await guardAiRequest("parseMemory", data.apiKey);
     const json = await callGateway({
-      apiKey: data.apiKey,
+      apiKey,
       messages: [
         {
           role: "system",
@@ -210,9 +154,9 @@ export const parseMemory = createServerFn({ method: "POST" })
 export const getFollowUpQuestions = createServerFn({ method: "POST" })
   .inputValidator(
     z.object({
-      apiKey: z.string().optional(),
-      profile: z.any(),
-      rawMemory: z.string(),
+      apiKey: apiKeyInputSchema,
+      profile: profileInputSchema,
+      rawMemory: z.string().max(50000),
     }),
   )
   .handler(
@@ -223,9 +167,10 @@ export const getFollowUpQuestions = createServerFn({ method: "POST" })
       message: string;
       questions: import("./types").FollowUpQuestion[];
     }> => {
+      const apiKey = await guardAiRequest("getFollowUpQuestions", data.apiKey);
       const profileStr = JSON.stringify(data.profile);
       const json = await callGateway({
-        apiKey: data.apiKey,
+        apiKey,
         messages: [
           {
             role: "system",
@@ -330,14 +275,15 @@ Return 5 to 10 questions if you need to build a comprehensive profile from scrat
 export const patchProfileWithAnswers = createServerFn({ method: "POST" })
   .inputValidator(
     z.object({
-      apiKey: z.string().optional(),
-      profile: z.any(),
-      answers: z.array(z.object({ questionId: z.string(), field: z.string(), answer: z.string() })),
+      apiKey: apiKeyInputSchema,
+      profile: profileInputSchema,
+      answers: z.array(followUpAnswerSchema).max(50),
     }),
   )
   .handler(async ({ data }): Promise<{ profile: import("./types").Profile }> => {
+    const apiKey = await guardAiRequest("patchProfileWithAnswers", data.apiKey);
     const json = await callGateway({
-      apiKey: data.apiKey,
+      apiKey,
       messages: [
         {
           role: "system",
@@ -448,14 +394,15 @@ const resumeSchema = {
 export const generateResume = createServerFn({ method: "POST" })
   .inputValidator(
     z.object({
-      apiKey: z.string().optional(),
-      profile: z.any(),
+      apiKey: apiKeyInputSchema,
+      profile: profileInputSchema,
       jobTarget: z.string().min(2).max(5000),
     }),
   )
   .handler(async ({ data }): Promise<{ resume: ResumeData }> => {
+    const apiKey = await guardAiRequest("generateResume", data.apiKey);
     const json = await callGateway({
-      apiKey: data.apiKey,
+      apiKey,
       messages: [
         {
           role: "system",
@@ -503,16 +450,17 @@ You must output the final resume using the provided schema tool.`,
 export const chatEditResume = createServerFn({ method: "POST" })
   .inputValidator(
     z.object({
-      apiKey: z.string().optional(),
-      resume: z.any(),
+      apiKey: apiKeyInputSchema,
+      resume: resumeInputSchema,
       userMessage: z.string().min(1).max(2000),
-      language: z.enum(["en", "ku"]).default("en"),
+      language: languageSchema.default("en"),
     }),
   )
   .handler(async ({ data }): Promise<{ resume: ResumeData; reply: string }> => {
+    const apiKey = await guardAiRequest("chatEditResume", data.apiKey);
     const isKu = data.language === "ku";
     const json = await callGateway({
-      apiKey: data.apiKey,
+      apiKey,
       messages: [
         {
           role: "system",
@@ -585,10 +533,11 @@ const profileWithPhotoSchema = {
 };
 
 export const suggestFollowUpQuestions = createServerFn({ method: "POST" })
-  .inputValidator(z.object({ apiKey: z.string().optional(), profile: z.any() }))
+  .inputValidator(z.object({ apiKey: apiKeyInputSchema, profile: profileZodSchema }))
   .handler(async ({ data }): Promise<{ questions: FollowUpQuestion[] }> => {
+    const apiKey = await guardAiRequest("suggestFollowUpQuestions", data.apiKey);
     const json = await callGateway({
-      apiKey: data.apiKey,
+      apiKey,
       messages: [
         {
           role: "system",
@@ -620,20 +569,15 @@ export const suggestFollowUpQuestions = createServerFn({ method: "POST" })
 export const applyFollowUpAnswers = createServerFn({ method: "POST" })
   .inputValidator(
     z.object({
-      apiKey: z.string().optional(),
-      profile: z.any(),
-      answers: z.array(
-        z.object({
-          questionId: z.string(),
-          field: z.string(),
-          answer: z.string(),
-        }),
-      ),
+      apiKey: apiKeyInputSchema,
+      profile: profileInputSchema,
+      answers: z.array(followUpAnswerSchema).max(50),
     }),
   )
   .handler(async ({ data }): Promise<{ profile: Profile }> => {
+    const apiKey = await guardAiRequest("applyFollowUpAnswers", data.apiKey);
     const json = await callGateway({
-      apiKey: data.apiKey,
+      apiKey,
       messages: [
         {
           role: "system",
@@ -666,13 +610,14 @@ export const applyFollowUpAnswers = createServerFn({ method: "POST" })
 export const improveBullet = createServerFn({ method: "POST" })
   .inputValidator(
     z.object({
-      apiKey: z.string().optional(),
+      apiKey: apiKeyInputSchema,
       bullet: z.string().min(2).max(2000),
       jobTitle: z.string().max(200).optional(),
       mode: z.enum(["impact", "technical", "quantify", "concise"]).default("impact"),
     }),
   )
   .handler(async ({ data }): Promise<{ bullet: string }> => {
+    const apiKey = await guardAiRequest("improveBullet", data.apiKey);
     const modeMap: Record<string, string> = {
       impact: "Make it more impactful and achievement-oriented.",
       technical: "Make it more technical and specific.",
@@ -680,7 +625,7 @@ export const improveBullet = createServerFn({ method: "POST" })
       concise: "Make it more concise — under 18 words.",
     };
     const json = await callGateway({
-      apiKey: data.apiKey,
+      apiKey,
       messages: [
         {
           role: "system",
@@ -724,10 +669,11 @@ const careerPathsSchema = {
 };
 
 export const suggestCareerPaths = createServerFn({ method: "POST" })
-  .inputValidator(z.object({ apiKey: z.string().optional(), profile: z.any() }))
+  .inputValidator(z.object({ apiKey: apiKeyInputSchema, profile: profileZodSchema }))
   .handler(async ({ data }): Promise<{ paths: CareerPath[] }> => {
+    const apiKey = await guardAiRequest("suggestCareerPaths", data.apiKey);
     const json = await callGateway({
-      apiKey: data.apiKey,
+      apiKey,
       messages: [
         {
           role: "system",
@@ -756,16 +702,17 @@ export const suggestCareerPaths = createServerFn({ method: "POST" })
 export const tailorToJob = createServerFn({ method: "POST" })
   .inputValidator(
     z.object({
-      apiKey: z.string().optional(),
-      resume: z.any(),
+      apiKey: apiKeyInputSchema,
+      resume: resumeInputSchema,
       jobDescription: z.string().min(20).max(10000),
-      language: z.enum(["en", "ku"]).default("en"),
+      language: languageSchema.default("en"),
     }),
   )
   .handler(async ({ data }): Promise<{ resume: ResumeData }> => {
+    const apiKey = await guardAiRequest("tailorToJob", data.apiKey);
     const isKu = data.language === "ku";
     const json = await callGateway({
-      apiKey: data.apiKey,
+      apiKey,
       messages: [
         {
           role: "system",
@@ -796,15 +743,16 @@ export const tailorToJob = createServerFn({ method: "POST" })
 export const fixResumeErrors = createServerFn({ method: "POST" })
   .inputValidator(
     z.object({
-      apiKey: z.string().optional(),
-      resume: z.any(),
-      language: z.enum(["en", "ku"]).default("en"),
+      apiKey: apiKeyInputSchema,
+      resume: resumeInputSchema,
+      language: languageSchema.default("en"),
     }),
   )
   .handler(async ({ data }): Promise<{ resume: ResumeData; reply: string }> => {
+    const apiKey = await guardAiRequest("fixResumeErrors", data.apiKey);
     const isKu = data.language === "ku";
     const json = await callGateway({
-      apiKey: data.apiKey,
+      apiKey,
       model: "gemini-2.5-flash",
       messages: [
         {
@@ -857,14 +805,15 @@ Use the save_resume tool. The 'resume' parameter should contain the ACTUALLY FIX
 export const generateCoverLetter = createServerFn({ method: "POST" })
   .inputValidator(
     z.object({
-      apiKey: z.string().optional(),
-      resume: z.any(),
-      language: z.enum(["en", "ku"]),
+      apiKey: apiKeyInputSchema,
+      resume: resumeInputSchema,
+      language: languageSchema,
     }),
   )
   .handler(async ({ data }): Promise<{ coverLetter: string }> => {
+    const apiKey = await guardAiRequest("generateCoverLetter", data.apiKey);
     const json = await callGateway({
-      apiKey: data.apiKey,
+      apiKey,
       model: "gemini-2.5-flash",
       messages: [
         {
@@ -919,17 +868,16 @@ The Cover Letter must be written in ${data.language === "ku" ? "fluent Kurdish (
 export const generateInterviewQuestion = createServerFn({ method: "POST" })
   .inputValidator(
     z.object({
-      apiKey: z.string().optional(),
-      history: z.array(
-        z.object({ role: z.enum(["ai", "user", "system", "assistant"]), content: z.string() }),
-      ),
-      targetRole: z.string().optional(),
-      language: z.enum(["en", "ku"]).default("en"),
-      questionIndex: z.number(),
-      totalQuestions: z.number(),
+      apiKey: apiKeyInputSchema,
+      history: z.array(interviewHistoryItemSchema).max(100),
+      targetRole: z.string().max(300).optional(),
+      language: languageSchema.default("en"),
+      questionIndex: z.number().min(0).max(100),
+      totalQuestions: z.number().min(1).max(100),
     }),
   )
   .handler(async ({ data }): Promise<{ nextQuestion: string }> => {
+    const apiKey = await guardAiRequest("generateInterviewQuestion", data.apiKey);
     const isKu = data.language === "ku";
     const rolePrompt = data.targetRole
       ? `The user is interviewing for the role of: ${data.targetRole}. You ALREADY KNOW this role, DO NOT ask them what role they are applying for.`
@@ -971,7 +919,7 @@ RULES:
     }
 
     const json = await callGateway({
-      apiKey: data.apiKey,
+      apiKey,
       model: "gemini-2.5-flash",
       messages,
     });
@@ -984,16 +932,19 @@ RULES:
 export const generateFieldContent = createServerFn({ method: "POST" })
   .inputValidator(
     z.object({
-      apiKey: z.string().optional(),
-      field: z.string(),
-      formData: z.any(),
-      language: z.enum(["en", "ku"]).default("en"),
+      apiKey: apiKeyInputSchema,
+      field: z.string().max(200),
+      formData: z.record(z.string(), z.unknown()).refine((o) => JSON.stringify(o).length <= 100_000, {
+        message: "Form data too large",
+      }),
+      language: languageSchema.default("en"),
     }),
   )
   .handler(async ({ data }): Promise<{ content: string }> => {
+    const apiKey = await guardAiRequest("generateFieldContent", data.apiKey);
     const isKu = data.language === "ku";
     const json = await callGateway({
-      apiKey: data.apiKey,
+      apiKey,
       messages: [
         {
           role: "system",

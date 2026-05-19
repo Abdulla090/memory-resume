@@ -28,7 +28,7 @@ npm run lint
    - Open a saved resume.
    - On mobile, verify preview loads only after tapping View Resume.
    - Chat edit, Tailor, Fix Errors, and Cover Letter should show clear errors if AI is unavailable.
-   - Export standard PDF, print PDF, and DOCX.
+   - Export vector PDF (true vector, matches preview), raster PDF, and DOCX.
 
 4. Dashboard
    - Open sidebar on mobile and close it by tapping outside.

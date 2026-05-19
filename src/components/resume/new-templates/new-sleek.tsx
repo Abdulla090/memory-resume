@@ -9,7 +9,7 @@ import {
   ExperienceList,
   PhotoBlock,
   Section,
-  isRTL,
+  useLayoutRtl,
   labels,
   pickLanguages,
   skillRating,
@@ -31,7 +31,7 @@ import { optimizeResumeForOnePage } from "@/lib/resume-utils";
 
 export function NewSleekTemplate({ data }: { data: ResumeData }) {
   const c = optimizeResumeForOnePage(data);
-  const rtl = isRTL(c);
+  const rtl = useLayoutRtl(c);
   const l = labels(c, rtl);
   const design = useContext(DesignContext);
 

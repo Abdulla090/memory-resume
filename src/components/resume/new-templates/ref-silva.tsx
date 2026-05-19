@@ -3,14 +3,14 @@ import type { ReactNode } from "react";
 import { DesignContext } from "../DesignContext";
 import { Editable } from "../Editable";
 import { StarRating, BarRating } from "../templates";
-import { ContactLines, ExperienceList, PhotoBlock, Section, isRTL, labels, pickLanguages, skillRating, skillLevel, initials } from "../template-helpers";
+import { ContactLines, ExperienceList, PhotoBlock, Section, useLayoutRtl, labels, pickLanguages, skillRating, skillLevel, initials } from "../template-helpers";
 import { BriefcaseBusiness, Globe, GraduationCap, Mail, MapPin, Phone, UserRound } from "lucide-react";
 import type { ResumeData } from "@/lib/types";
 import { optimizeResumeForOnePage } from "@/lib/resume-utils";
 
 export function RefSilvaTemplate({ data }: { data: ResumeData }) {
   const c = optimizeResumeForOnePage(data);
-  const rtl = isRTL(c);
+  const rtl = useLayoutRtl(c);
   const l = labels(c, rtl);
   const design = use(DesignContext);
   const showSkillBars = design?.showSkillBars !== false;
@@ -22,7 +22,7 @@ export function RefSilvaTemplate({ data }: { data: ResumeData }) {
       <header className="flex h-[190px] items-center gap-11 bg-[#342820] px-12 text-white rtl:flex-row-reverse">
         <PhotoBlock data={c} shape={photoBlockShape} />
         <div className="border-l-[7px] border-white pl-8 rtl:border-l-0 rtl:border-r-[7px] rtl:pl-0 rtl:pr-8">
-          <h1 className="text-[45px] font-black leading-none tracking-tight rtl:tracking-normal">{c.name}</h1>
+          <h1 className="text-[45px] font-black leading-none tracking-tight rtl:tracking-normal text-white">{c.name}</h1>
           <p className="mt-2 text-[23px] font-bold">{c.title}</p>
         </div>
       </header>

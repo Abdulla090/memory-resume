@@ -1,8 +1,9 @@
 import type { ResumeData } from "@/lib/types";
 import { StarRating, BarRating } from "./templates";
-import { isRTL, label } from "./template-helpers";
+import { useLayoutRtl, label } from "./template-helpers";
 
 export function NoirTemplate({ data }: { data: ResumeData }) {
+  const rtl = useLayoutRtl(data);
   return (
     <div className="bg-[#0a0a0a] text-neutral-300 p-12 font-sans" style={{ minHeight: "1122px", width: "100%", display: "flex", flexDirection: "column" }}>
       <header className="border-b border-neutral-800 pb-6 text-center">
@@ -20,7 +21,7 @@ export function NoirTemplate({ data }: { data: ResumeData }) {
       <div className="mt-12 space-y-8">
         {data.experience.length > 0 && (
           <section>
-            <h2 className="mb-4 text-[10px] font-bold uppercase tracking-[0.3em] rtl:tracking-normal text-neutral-600 border-b border-neutral-800 pb-2">{label(data, "experience")}</h2>
+            <h2 className="mb-4 text-[10px] font-bold uppercase tracking-[0.3em] rtl:tracking-normal text-neutral-600 border-b border-neutral-800 pb-2">{label(data, "experience", rtl)}</h2>
             <div className="space-y-6">
               {data.experience.map((e, i) => (
                 <div key={i}>
@@ -43,7 +44,7 @@ export function NoirTemplate({ data }: { data: ResumeData }) {
         <div className="grid rtl:[direction:rtl] grid-cols-2 gap-8 flex-1">
           {data.projects.length > 0 && (
             <section>
-              <h2 className="mb-4 text-[10px] font-bold uppercase tracking-[0.3em] rtl:tracking-normal text-neutral-600 border-b border-neutral-800 pb-2">{label(data, "projects")}</h2>
+              <h2 className="mb-4 text-[10px] font-bold uppercase tracking-[0.3em] rtl:tracking-normal text-neutral-600 border-b border-neutral-800 pb-2">{label(data, "projects", rtl)}</h2>
               <div className="space-y-4">
                 {data.projects.map((p, i) => (
                   <div key={i}>
@@ -59,7 +60,7 @@ export function NoirTemplate({ data }: { data: ResumeData }) {
           <div>
             {(data.skillItems?.length ? data.skillItems.length > 0 : data.skills.length > 0) && (
               <section className="mb-8">
-                <h2 className="mb-4 text-[10px] font-bold uppercase tracking-[0.3em] rtl:tracking-normal text-neutral-600 border-b border-neutral-800 pb-2">{label(data, "skills")}</h2>
+                <h2 className="mb-4 text-[10px] font-bold uppercase tracking-[0.3em] rtl:tracking-normal text-neutral-600 border-b border-neutral-800 pb-2">{label(data, "skills", rtl)}</h2>
                 {data.skillItems && data.skillItems.length > 0 ? (
                   <div className="grid grid-cols-1 gap-y-3">
                     {data.skillItems.map((s, i) => (
@@ -81,7 +82,7 @@ export function NoirTemplate({ data }: { data: ResumeData }) {
 
             {data.education.length > 0 && (
               <section>
-                <h2 className="mb-4 text-[10px] font-bold uppercase tracking-[0.3em] rtl:tracking-normal text-neutral-600 border-b border-neutral-800 pb-2">{label(data, "education")}</h2>
+                <h2 className="mb-4 text-[10px] font-bold uppercase tracking-[0.3em] rtl:tracking-normal text-neutral-600 border-b border-neutral-800 pb-2">{label(data, "education", rtl)}</h2>
                 <div className="space-y-3">
                   {data.education.map((e, i) => (
                     <div key={i} className="text-xs">
@@ -100,6 +101,7 @@ export function NoirTemplate({ data }: { data: ResumeData }) {
 }
 
 export function ApexTemplate({ data }: { data: ResumeData }) {
+  const rtl = useLayoutRtl(data);
   return (
     <div className="bg-white text-slate-800 font-sans" style={{ minHeight: "1122px", width: "100%", display: "flex", flexDirection: "column" }}>
       <header className="bg-slate-900 text-white p-12">
@@ -119,7 +121,7 @@ export function ApexTemplate({ data }: { data: ResumeData }) {
           <div className="col-span-2 space-y-8">
             {data.experience.length > 0 && (
               <section>
-                <h2 className="text-lg font-bold text-slate-900 mb-4 border-b-2 border-slate-100 pb-2">{label(data, "experience")}</h2>
+                <h2 className="text-lg font-bold text-slate-900 mb-4 border-b-2 border-slate-100 pb-2">{label(data, "experience", rtl)}</h2>
                 <div className="space-y-5">
                   {data.experience.map((e, i) => (
                     <div key={i}>
@@ -140,7 +142,7 @@ export function ApexTemplate({ data }: { data: ResumeData }) {
             
             {data.projects.length > 0 && (
               <section>
-                <h2 className="text-lg font-bold text-slate-900 mb-4 border-b-2 border-slate-100 pb-2">{label(data, "projects")}</h2>
+                <h2 className="text-lg font-bold text-slate-900 mb-4 border-b-2 border-slate-100 pb-2">{label(data, "projects", rtl)}</h2>
                 <div className="space-y-4">
                   {data.projects.map((p, i) => (
                     <div key={i}>
@@ -157,7 +159,7 @@ export function ApexTemplate({ data }: { data: ResumeData }) {
           <aside className="col-span-1 space-y-8">
             {(data.skillItems?.length ? data.skillItems.length > 0 : data.skills.length > 0) && (
               <section>
-                <h2 className="text-lg font-bold text-slate-900 mb-4 border-b-2 border-slate-100 pb-2">{label(data, "skills")}</h2>
+                <h2 className="text-lg font-bold text-slate-900 mb-4 border-b-2 border-slate-100 pb-2">{label(data, "skills", rtl)}</h2>
                 {data.skillItems && data.skillItems.length > 0 ? (
                   <div className="flex flex-col gap-3">
                     {data.skillItems.map((s, i) => (
@@ -179,7 +181,7 @@ export function ApexTemplate({ data }: { data: ResumeData }) {
 
             {data.education.length > 0 && (
               <section>
-                <h2 className="text-lg font-bold text-slate-900 mb-4 border-b-2 border-slate-100 pb-2">{label(data, "education")}</h2>
+                <h2 className="text-lg font-bold text-slate-900 mb-4 border-b-2 border-slate-100 pb-2">{label(data, "education", rtl)}</h2>
                 <div className="space-y-4">
                   {data.education.map((e, i) => (
                     <div key={i}>
@@ -194,7 +196,7 @@ export function ApexTemplate({ data }: { data: ResumeData }) {
 
             {data.certifications.length > 0 && (
               <section>
-                <h2 className="text-lg font-bold text-slate-900 mb-4 border-b-2 border-slate-100 pb-2">{label(data, "certifications")}</h2>
+                <h2 className="text-lg font-bold text-slate-900 mb-4 border-b-2 border-slate-100 pb-2">{label(data, "certifications", rtl)}</h2>
                 <ul className="space-y-2">
                   {data.certifications.map((c, i) => (
                     <li key={i} className="text-sm text-slate-600 font-medium">{c}</li>
@@ -210,6 +212,7 @@ export function ApexTemplate({ data }: { data: ResumeData }) {
 }
 
 export function NexusTemplate({ data }: { data: ResumeData }) {
+  const rtl = useLayoutRtl(data);
   return (
     <div className="bg-white text-slate-800 p-12 font-sans" style={{ minHeight: "1122px", width: "100%", display: "flex", flexDirection: "column" }}>
       <header className="flex justify-between rtl:flex-row-reverse items-end border-b-4 border-blue-600 pb-6 mb-8">
@@ -234,7 +237,7 @@ export function NexusTemplate({ data }: { data: ResumeData }) {
             <section>
               <h2 className="text-xl font-black text-slate-900 mb-6 flex items-center gap-2">
                 <div className="w-4 h-4 bg-blue-600 rounded-sm"></div>
-                {label(data, "experience")}
+                {label(data, "experience", rtl)}
               </h2>
               <div className="space-y-6 relative before:absolute before:inset-0 before:ml-[5px] before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-slate-200 before:to-transparent">
                 {data.experience.map((e, i) => (
@@ -261,7 +264,7 @@ export function NexusTemplate({ data }: { data: ResumeData }) {
             <section>
               <h2 className="text-xl font-black text-slate-900 mb-4 flex items-center gap-2">
                 <div className="w-4 h-4 bg-blue-600 rounded-sm"></div>
-                {label(data, "skills")}
+                {label(data, "skills", rtl)}
               </h2>
               {data.skillItems && data.skillItems.length > 0 ? (
                  <div className="flex flex-col gap-3">
@@ -286,7 +289,7 @@ export function NexusTemplate({ data }: { data: ResumeData }) {
             <section>
               <h2 className="text-xl font-black text-slate-900 mb-4 flex items-center gap-2">
                 <div className="w-4 h-4 bg-blue-600 rounded-sm"></div>
-                {label(data, "projects")}
+                {label(data, "projects", rtl)}
               </h2>
               <div className="space-y-4">
                 {data.projects.map((p, i) => (
@@ -303,7 +306,7 @@ export function NexusTemplate({ data }: { data: ResumeData }) {
             <section>
               <h2 className="text-xl font-black text-slate-900 mb-4 flex items-center gap-2">
                 <div className="w-4 h-4 bg-blue-600 rounded-sm"></div>
-                {label(data, "education")}
+                {label(data, "education", rtl)}
               </h2>
               <div className="space-y-3">
                 {data.education.map((e, i) => (
@@ -323,6 +326,7 @@ export function NexusTemplate({ data }: { data: ResumeData }) {
 }
 
 export function OrbitTemplate({ data }: { data: ResumeData }) {
+  const rtl = useLayoutRtl(data);
   return (
     <div className="bg-[#fafafa] text-neutral-800 p-12 font-sans" style={{ minHeight: "1122px", width: "100%", display: "flex", flexDirection: "column" }}>
       <header className="text-center mb-10 pb-8 border-b border-neutral-200">
@@ -342,7 +346,7 @@ export function OrbitTemplate({ data }: { data: ResumeData }) {
         <div className="col-span-8 space-y-10">
           {data.experience.length > 0 && (
             <section>
-              <h2 className="text-[10px] font-bold uppercase tracking-[0.3em] rtl:tracking-normal text-neutral-400 mb-6 border-b border-neutral-200 pb-2">{label(data, "experience")}</h2>
+              <h2 className="text-[10px] font-bold uppercase tracking-[0.3em] rtl:tracking-normal text-neutral-400 mb-6 border-b border-neutral-200 pb-2">{label(data, "experience", rtl)}</h2>
               <div className="space-y-8">
                 {data.experience.map((e, i) => (
                   <div key={i}>
@@ -369,13 +373,13 @@ export function OrbitTemplate({ data }: { data: ResumeData }) {
 
         <div className="col-span-4 space-y-10">
           <section>
-            <h2 className="text-[10px] font-bold uppercase tracking-[0.3em] rtl:tracking-normal text-neutral-400 mb-6 border-b border-neutral-200 pb-2">{label(data, "profile")}</h2>
+            <h2 className="text-[10px] font-bold uppercase tracking-[0.3em] rtl:tracking-normal text-neutral-400 mb-6 border-b border-neutral-200 pb-2">{label(data, "profile", rtl)}</h2>
             <p className="text-sm leading-relaxed text-neutral-600">{data.summary}</p>
           </section>
 
           {(data.skillItems?.length ? data.skillItems.length > 0 : data.skills.length > 0) && (
             <section>
-              <h2 className="text-[10px] font-bold uppercase tracking-[0.3em] rtl:tracking-normal text-neutral-400 mb-6 border-b border-neutral-200 pb-2">{label(data, "expertise")}</h2>
+              <h2 className="text-[10px] font-bold uppercase tracking-[0.3em] rtl:tracking-normal text-neutral-400 mb-6 border-b border-neutral-200 pb-2">{label(data, "expertise", rtl)}</h2>
               <div className="space-y-3">
                 {data.skillItems && data.skillItems.length > 0 ? (
                   data.skillItems.map((s, i) => (
@@ -406,7 +410,7 @@ export function OrbitTemplate({ data }: { data: ResumeData }) {
 
           {data.education.length > 0 && (
             <section>
-              <h2 className="text-[10px] font-bold uppercase tracking-[0.3em] rtl:tracking-normal text-neutral-400 mb-6 border-b border-neutral-200 pb-2">{label(data, "education")}</h2>
+              <h2 className="text-[10px] font-bold uppercase tracking-[0.3em] rtl:tracking-normal text-neutral-400 mb-6 border-b border-neutral-200 pb-2">{label(data, "education", rtl)}</h2>
               <div className="space-y-4">
                 {data.education.map((e, i) => (
                   <div key={i}>
@@ -425,6 +429,7 @@ export function OrbitTemplate({ data }: { data: ResumeData }) {
 }
 
 export function MetricTemplate({ data }: { data: ResumeData }) {
+  const rtl = useLayoutRtl(data);
   return (
     <div className="bg-white text-black p-10 font-sans" style={{ minHeight: "1122px", width: "100%", display: "flex", flexDirection: "column" }}>
       <header className="border-4 border-black p-8 mb-10">
@@ -441,7 +446,7 @@ export function MetricTemplate({ data }: { data: ResumeData }) {
         <div className="col-span-4 space-y-10">
           {(data.skillItems?.length ? data.skillItems.length > 0 : data.skills.length > 0) && (
             <section>
-              <h2 className="text-xs font-black uppercase tracking-widest rtl:tracking-normal border-b-4 border-black pb-2 mb-6">{label(data, "metrics")}</h2>
+              <h2 className="text-xs font-black uppercase tracking-widest rtl:tracking-normal border-b-4 border-black pb-2 mb-6">{label(data, "metrics", rtl)}</h2>
               <div className="space-y-4">
                 {data.skillItems && data.skillItems.length > 0 ? (
                   data.skillItems.map((s, i) => {
@@ -480,7 +485,7 @@ export function MetricTemplate({ data }: { data: ResumeData }) {
 
           {data.education.length > 0 && (
             <section>
-              <h2 className="text-xs font-black uppercase tracking-widest rtl:tracking-normal border-b-4 border-black pb-2 mb-6">{label(data, "education")}</h2>
+              <h2 className="text-xs font-black uppercase tracking-widest rtl:tracking-normal border-b-4 border-black pb-2 mb-6">{label(data, "education", rtl)}</h2>
               <div className="space-y-6">
                 {data.education.map((e, i) => (
                   <div key={i}>
@@ -496,13 +501,13 @@ export function MetricTemplate({ data }: { data: ResumeData }) {
 
         <div className="col-span-8 space-y-10">
           <section>
-            <h2 className="text-xs font-black uppercase tracking-widest rtl:tracking-normal border-b-4 border-black pb-2 mb-6">{label(data, "summary")}</h2>
+            <h2 className="text-xs font-black uppercase tracking-widest rtl:tracking-normal border-b-4 border-black pb-2 mb-6">{label(data, "summary", rtl)}</h2>
             <p className="text-sm font-medium leading-relaxed">{data.summary}</p>
           </section>
 
           {data.experience.length > 0 && (
             <section>
-              <h2 className="text-xs font-black uppercase tracking-widest rtl:tracking-normal border-b-4 border-black pb-2 mb-6">{label(data, "experience")}</h2>
+              <h2 className="text-xs font-black uppercase tracking-widest rtl:tracking-normal border-b-4 border-black pb-2 mb-6">{label(data, "experience", rtl)}</h2>
               <div className="space-y-8">
                 {data.experience.map((e, i) => (
                   <div key={i} className="border-l-4 border-black pl-5 rtl:border-l-0 rtl:border-r-4 rtl:pl-0 rtl:pr-5">
@@ -531,6 +536,7 @@ export function MetricTemplate({ data }: { data: ResumeData }) {
 }
 
 export function PrismTemplate({ data }: { data: ResumeData }) {
+  const rtl = useLayoutRtl(data);
   return (
     <div className="bg-[#121212] text-gray-300 p-12 font-sans" style={{ minHeight: "1122px", width: "100%", display: "flex", flexDirection: "column" }}>
       <header className="text-center mb-12">
@@ -561,7 +567,7 @@ export function PrismTemplate({ data }: { data: ResumeData }) {
             <section>
               <h2 className="flex items-center gap-3 text-xs font-bold uppercase tracking-[0.2em] rtl:tracking-normal text-white mb-6">
                 <div className="w-2 h-2 bg-indigo-500 rotate-45"></div>
-                {label(data, "experience")}
+                {label(data, "experience", rtl)}
                 <div className="flex-1 h-px bg-gray-800 ml-2"></div>
               </h2>
               <div className="space-y-8">
@@ -592,7 +598,7 @@ export function PrismTemplate({ data }: { data: ResumeData }) {
             <section>
               <h2 className="flex items-center gap-3 text-xs font-bold uppercase tracking-[0.2em] rtl:tracking-normal text-white mb-6">
                 <div className="w-2 h-2 bg-indigo-500 rotate-45"></div>
-                {label(data, "skills")}
+                {label(data, "skills", rtl)}
                 <div className="flex-1 h-px bg-gray-800 ml-2"></div>
               </h2>
               {data.skillItems && data.skillItems.length > 0 ? (
@@ -620,7 +626,7 @@ export function PrismTemplate({ data }: { data: ResumeData }) {
             <section>
               <h2 className="flex items-center gap-3 text-xs font-bold uppercase tracking-[0.2em] rtl:tracking-normal text-white mb-6">
                 <div className="w-2 h-2 bg-indigo-500 rotate-45"></div>
-                {label(data, "education")}
+                {label(data, "education", rtl)}
                 <div className="flex-1 h-px bg-gray-800 ml-2"></div>
               </h2>
               <div className="space-y-5">
@@ -641,6 +647,7 @@ export function PrismTemplate({ data }: { data: ResumeData }) {
 }
 
 export function SlateTemplate({ data }: { data: ResumeData }) {
+  const rtl = useLayoutRtl(data);
   return (
     <div className="bg-slate-50 text-slate-900 p-12 font-sans" style={{ minHeight: "1122px", width: "100%", display: "flex", flexDirection: "column" }}>
       <header className="border-b border-slate-300 pb-8 mb-8 flex justify-between items-end">
@@ -662,7 +669,7 @@ export function SlateTemplate({ data }: { data: ResumeData }) {
       <div className="space-y-10">
         {data.experience.length > 0 && (
           <section>
-            <h2 className="text-sm font-semibold uppercase tracking-wider rtl:tracking-normal text-slate-900 mb-6 border-b border-slate-200 pb-2">{label(data, "professionalExperience")}</h2>
+            <h2 className="text-sm font-semibold uppercase tracking-wider rtl:tracking-normal text-slate-900 mb-6 border-b border-slate-200 pb-2">{label(data, "professionalExperience", rtl)}</h2>
             <div className="space-y-8">
               {data.experience.map((e, i) => (
                 <div key={i}>
@@ -684,7 +691,7 @@ export function SlateTemplate({ data }: { data: ResumeData }) {
         <div className="grid rtl:[direction:rtl] grid-cols-2 gap-10 flex-1">
            {(data.skillItems?.length ? data.skillItems.length > 0 : data.skills.length > 0) && (
             <section>
-              <h2 className="text-sm font-semibold uppercase tracking-wider rtl:tracking-normal text-slate-900 mb-4 border-b border-slate-200 pb-2">{label(data, "skills")}</h2>
+              <h2 className="text-sm font-semibold uppercase tracking-wider rtl:tracking-normal text-slate-900 mb-4 border-b border-slate-200 pb-2">{label(data, "skills", rtl)}</h2>
               {data.skillItems && data.skillItems.length > 0 ? (
                 <div className="flex flex-col gap-3">
                   {data.skillItems.map((s, i) => (
@@ -702,7 +709,7 @@ export function SlateTemplate({ data }: { data: ResumeData }) {
 
           {data.education.length > 0 && (
             <section>
-              <h2 className="text-sm font-semibold uppercase tracking-wider rtl:tracking-normal text-slate-900 mb-4 border-b border-slate-200 pb-2">{label(data, "education")}</h2>
+              <h2 className="text-sm font-semibold uppercase tracking-wider rtl:tracking-normal text-slate-900 mb-4 border-b border-slate-200 pb-2">{label(data, "education", rtl)}</h2>
               <div className="space-y-4">
                 {data.education.map((e, i) => (
                   <div key={i}>
@@ -721,6 +728,7 @@ export function SlateTemplate({ data }: { data: ResumeData }) {
 }
 
 export function AvantTemplate({ data }: { data: ResumeData }) {
+  const rtl = useLayoutRtl(data);
   return (
     <div className="bg-white text-black p-12 font-serif" style={{ minHeight: "1122px", width: "100%", display: "flex", flexDirection: "column" }}>
       <header className="border-b-4 border-black pb-6 mb-8 text-center">
@@ -738,7 +746,7 @@ export function AvantTemplate({ data }: { data: ResumeData }) {
       <div className="space-y-10">
         {data.experience.length > 0 && (
           <section>
-            <h2 className="text-2xl font-black uppercase tracking-tighter rtl:tracking-normal border-b-2 border-black pb-2 mb-6">{label(data, "experience")}</h2>
+            <h2 className="text-2xl font-black uppercase tracking-tighter rtl:tracking-normal border-b-2 border-black pb-2 mb-6">{label(data, "experience", rtl)}</h2>
             <div className="space-y-8">
               {data.experience.map((e, i) => (
                 <div key={i} className="grid rtl:[direction:rtl] grid-cols-12 gap-6 flex-1">
@@ -762,7 +770,7 @@ export function AvantTemplate({ data }: { data: ResumeData }) {
         <div className="grid rtl:[direction:rtl] grid-cols-2 gap-12 flex-1">
           {(data.skillItems?.length ? data.skillItems.length > 0 : data.skills.length > 0) && (
             <section>
-              <h2 className="text-2xl font-black uppercase tracking-tighter rtl:tracking-normal border-b-2 border-black pb-2 mb-6">{label(data, "skills")}</h2>
+              <h2 className="text-2xl font-black uppercase tracking-tighter rtl:tracking-normal border-b-2 border-black pb-2 mb-6">{label(data, "skills", rtl)}</h2>
               <div className="flex flex-col gap-3">
                 {data.skillItems && data.skillItems.length > 0 ? (
                   data.skillItems.map((s, i) => (
@@ -782,7 +790,7 @@ export function AvantTemplate({ data }: { data: ResumeData }) {
 
           {data.education.length > 0 && (
             <section>
-              <h2 className="text-2xl font-black uppercase tracking-tighter rtl:tracking-normal border-b-2 border-black pb-2 mb-6">{label(data, "education")}</h2>
+              <h2 className="text-2xl font-black uppercase tracking-tighter rtl:tracking-normal border-b-2 border-black pb-2 mb-6">{label(data, "education", rtl)}</h2>
               <div className="space-y-6">
                 {data.education.map((e, i) => (
                   <div key={i}>
@@ -801,6 +809,7 @@ export function AvantTemplate({ data }: { data: ResumeData }) {
 }
 
 export function VanguardTemplate({ data }: { data: ResumeData }) {
+  const rtl = useLayoutRtl(data);
   return (
     <div className="bg-white text-neutral-900 p-12 font-sans overflow-hidden" style={{ minHeight: "1122px", width: "100%", display: "flex", flexDirection: "column" }}>
       <header className="relative mb-16 pt-8">
@@ -826,7 +835,7 @@ export function VanguardTemplate({ data }: { data: ResumeData }) {
 
           {data.experience.length > 0 && (
             <section>
-              <h2 className="text-sm font-black uppercase tracking-widest rtl:tracking-normal text-neutral-400 mb-6">{label(data, "experience")}</h2>
+              <h2 className="text-sm font-black uppercase tracking-widest rtl:tracking-normal text-neutral-400 mb-6">{label(data, "experience", rtl)}</h2>
               <div className="space-y-10">
                 {data.experience.map((e, i) => (
                   <div key={i}>
@@ -852,7 +861,7 @@ export function VanguardTemplate({ data }: { data: ResumeData }) {
         <div className="col-span-4 space-y-12">
            {data.skills.length > 0 && (
             <section>
-              <h2 className="text-sm font-black uppercase tracking-widest rtl:tracking-normal text-neutral-400 mb-6">{label(data, "expertise")}</h2>
+              <h2 className="text-sm font-black uppercase tracking-widest rtl:tracking-normal text-neutral-400 mb-6">{label(data, "expertise", rtl)}</h2>
               <div className="flex flex-wrap gap-2">
                 {data.skills.map((s, i) => (
                   <span key={i} className="text-sm font-bold bg-neutral-900 text-white px-3 py-2 uppercase">{s}</span>
@@ -863,7 +872,7 @@ export function VanguardTemplate({ data }: { data: ResumeData }) {
 
           {data.education.length > 0 && (
             <section>
-              <h2 className="text-sm font-black uppercase tracking-widest rtl:tracking-normal text-neutral-400 mb-6">{label(data, "education")}</h2>
+              <h2 className="text-sm font-black uppercase tracking-widest rtl:tracking-normal text-neutral-400 mb-6">{label(data, "education", rtl)}</h2>
               <div className="space-y-6">
                 {data.education.map((e, i) => (
                   <div key={i}>
@@ -882,6 +891,7 @@ export function VanguardTemplate({ data }: { data: ResumeData }) {
 }
 
 export function MonolithTemplate({ data }: { data: ResumeData }) {
+  const rtl = useLayoutRtl(data);
   return (
     <div className="bg-neutral-100 p-12 font-sans" style={{ minHeight: "1122px", width: "100%", display: "flex", flexDirection: "column" }}>
       <div className="bg-white border border-neutral-300 shadow-sm p-10 h-full">
@@ -901,7 +911,7 @@ export function MonolithTemplate({ data }: { data: ResumeData }) {
           <div className="col-span-8 space-y-8">
             {data.experience.length > 0 && (
               <section>
-                <div className="bg-neutral-900 text-white px-4 py-2 text-xs font-bold uppercase tracking-widest rtl:tracking-normal mb-6 inline-block">{label(data, "professionalExperience")}</div>
+                <div className="bg-neutral-900 text-white px-4 py-2 text-xs font-bold uppercase tracking-widest rtl:tracking-normal mb-6 inline-block">{label(data, "professionalExperience", rtl)}</div>
                 <div className="space-y-8">
                   {data.experience.map((e, i) => (
                     <div key={i} className="border border-neutral-200 p-5 bg-neutral-50">
@@ -923,7 +933,7 @@ export function MonolithTemplate({ data }: { data: ResumeData }) {
           <div className="col-span-4 space-y-8">
              {data.skills.length > 0 && (
               <section>
-                <div className="bg-neutral-900 text-white px-4 py-2 text-xs font-bold uppercase tracking-widest rtl:tracking-normal mb-6 inline-block">{label(data, "skills")}</div>
+                <div className="bg-neutral-900 text-white px-4 py-2 text-xs font-bold uppercase tracking-widest rtl:tracking-normal mb-6 inline-block">{label(data, "skills", rtl)}</div>
                 <div className="flex flex-wrap gap-2">
                   {data.skills.map((s, i) => (
                     <span key={i} className="text-xs font-semibold text-neutral-700 bg-neutral-100 border border-neutral-200 px-2 py-1">{s}</span>
@@ -934,7 +944,7 @@ export function MonolithTemplate({ data }: { data: ResumeData }) {
 
             {data.education.length > 0 && (
               <section>
-                <div className="bg-neutral-900 text-white px-4 py-2 text-xs font-bold uppercase tracking-widest rtl:tracking-normal mb-6 inline-block">{label(data, "education")}</div>
+                <div className="bg-neutral-900 text-white px-4 py-2 text-xs font-bold uppercase tracking-widest rtl:tracking-normal mb-6 inline-block">{label(data, "education", rtl)}</div>
                 <div className="space-y-4">
                   {data.education.map((e, i) => (
                     <div key={i} className="border border-neutral-200 p-4 bg-neutral-50">
@@ -954,6 +964,7 @@ export function MonolithTemplate({ data }: { data: ResumeData }) {
 }
 
 export function CipherTemplate({ data }: { data: ResumeData }) {
+  const rtl = useLayoutRtl(data);
   return (
     <div className="bg-[#050505] text-[#00ff41] p-12 font-mono selection:bg-[#00ff41] selection:text-black" style={{ minHeight: "1122px", width: "100%", display: "flex", flexDirection: "column" }}>
       <header className="mb-10 border-b border-[#00ff41]/30 pb-6">
@@ -974,7 +985,7 @@ export function CipherTemplate({ data }: { data: ResumeData }) {
         <div className="col-span-8 space-y-10">
           {data.experience.length > 0 && (
             <section>
-              <h2 className="text-lg font-bold mb-6 text-[#008f11]">{label(data, "terminalExperience")}</h2>
+              <h2 className="text-lg font-bold mb-6 text-[#008f11]">{label(data, "terminalExperience", rtl)}</h2>
               <div className="space-y-8">
                 {data.experience.map((e, i) => (
                   <div key={i}>
@@ -1000,7 +1011,7 @@ export function CipherTemplate({ data }: { data: ResumeData }) {
         <div className="col-span-4 space-y-10">
           {data.skills.length > 0 && (
             <section>
-              <h2 className="text-lg font-bold mb-6 text-[#008f11]">{label(data, "terminalSkills")}</h2>
+              <h2 className="text-lg font-bold mb-6 text-[#008f11]">{label(data, "terminalSkills", rtl)}</h2>
               <div className="flex flex-col gap-2">
                 {data.skills.map((s, i) => (
                   <span key={i} className="text-sm">[{s}]</span>
@@ -1011,7 +1022,7 @@ export function CipherTemplate({ data }: { data: ResumeData }) {
 
           {data.education.length > 0 && (
             <section>
-              <h2 className="text-lg font-bold mb-6 text-[#008f11]">{label(data, "terminalEducation")}</h2>
+              <h2 className="text-lg font-bold mb-6 text-[#008f11]">{label(data, "terminalEducation", rtl)}</h2>
               <div className="space-y-6">
                 {data.education.map((e, i) => (
                   <div key={i}>
@@ -1030,6 +1041,7 @@ export function CipherTemplate({ data }: { data: ResumeData }) {
 }
 
 export function PinnacleTemplate({ data }: { data: ResumeData }) {
+  const rtl = useLayoutRtl(data);
   return (
     <div className="bg-white text-slate-800 font-sans" style={{ minHeight: "1122px", width: "100%", display: "flex", flexDirection: "column" }}>
       <header className="bg-indigo-950 text-indigo-50 p-12">
@@ -1046,7 +1058,7 @@ export function PinnacleTemplate({ data }: { data: ResumeData }) {
 
       <div className="max-w-4xl mx-auto p-12">
         <section className="mb-12">
-          <h2 className="text-sm font-bold uppercase tracking-widest rtl:tracking-normal text-indigo-900 mb-4">{label(data, "executiveProfile")}</h2>
+          <h2 className="text-sm font-bold uppercase tracking-widest rtl:tracking-normal text-indigo-900 mb-4">{label(data, "executiveProfile", rtl)}</h2>
           <p className="text-base leading-relaxed text-slate-700">{data.summary}</p>
         </section>
 
@@ -1054,7 +1066,7 @@ export function PinnacleTemplate({ data }: { data: ResumeData }) {
           <div className="col-span-8 space-y-12">
             {data.experience.length > 0 && (
               <section>
-                <h2 className="text-sm font-bold uppercase tracking-widest rtl:tracking-normal text-indigo-900 mb-6">{label(data, "professionalExperience")}</h2>
+                <h2 className="text-sm font-bold uppercase tracking-widest rtl:tracking-normal text-indigo-900 mb-6">{label(data, "professionalExperience", rtl)}</h2>
                 <div className="space-y-8">
                   {data.experience.map((e, i) => (
                     <div key={i} className="relative pl-6 border-l-2 border-indigo-100 rtl:border-l-0 rtl:border-r-2 rtl:pl-0 rtl:pr-6">
@@ -1078,7 +1090,7 @@ export function PinnacleTemplate({ data }: { data: ResumeData }) {
           <div className="col-span-4 space-y-12">
             {data.skills.length > 0 && (
               <section>
-                <h2 className="text-sm font-bold uppercase tracking-widest rtl:tracking-normal text-indigo-900 mb-6">{label(data, "keySkills")}</h2>
+                <h2 className="text-sm font-bold uppercase tracking-widest rtl:tracking-normal text-indigo-900 mb-6">{label(data, "keySkills", rtl)}</h2>
                 <div className="flex flex-wrap gap-2">
                   {data.skills.map((s, i) => (
                     <span key={i} className="text-xs font-semibold text-slate-700 bg-indigo-50 border border-indigo-100 px-3 py-1.5 rounded-full">{s}</span>
@@ -1089,7 +1101,7 @@ export function PinnacleTemplate({ data }: { data: ResumeData }) {
 
             {data.education.length > 0 && (
               <section>
-                <h2 className="text-sm font-bold uppercase tracking-widest rtl:tracking-normal text-indigo-900 mb-6">{label(data, "education")}</h2>
+                <h2 className="text-sm font-bold uppercase tracking-widest rtl:tracking-normal text-indigo-900 mb-6">{label(data, "education", rtl)}</h2>
                 <div className="space-y-5">
                   {data.education.map((e, i) => (
                     <div key={i}>

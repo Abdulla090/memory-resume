@@ -11,8 +11,8 @@ interface EditorPreviewPanelProps {
   mode?: "overlay" | "inline";
   onClose: () => void;
   isKu: boolean;
-  soraniMode: boolean;
-  setSoraniMode: (fn: (v: boolean) => boolean) => void;
+  previewLayoutRtl: boolean;
+  setPreviewLayoutRtl: (fn: (v: boolean) => boolean) => void;
   zoom: number;
   setZoom: (fn: (z: number) => number) => void;
   previewData: ResumeData;
@@ -29,8 +29,8 @@ export function EditorPreviewPanel({
   mode = "overlay",
   onClose,
   isKu,
-  soraniMode,
-  setSoraniMode,
+  previewLayoutRtl,
+  setPreviewLayoutRtl,
   zoom,
   setZoom,
   previewData,
@@ -74,16 +74,24 @@ export function EditorPreviewPanel({
         <div className="flex-1" />
 
         <button
-          onClick={() => setSoraniMode((v) => !v)}
-          title={soraniMode ? "Switch to English" : "Kurdish RTL"}
+          onClick={() => setPreviewLayoutRtl((v) => !v)}
+          title={
+            previewLayoutRtl
+              ? isKu
+                ? "گۆڕین بۆ LTR (چەپ بۆ ڕاست)"
+                : "Switch to LTR layout (left-to-right)"
+              : isKu
+                ? "گۆڕین بۆ RTL (ڕاست بۆ چەپ)"
+                : "Switch to RTL layout (mirrors sidebars & columns)"
+          }
           className={`flex items-center gap-1 px-2.5 py-1.5 rounded-full text-[11px] font-semibold transition-all ${
-            soraniMode
+            previewLayoutRtl
               ? "bg-slate-900 text-white"
               : "bg-white text-slate-600 shadow-[0_2px_6px_rgba(0,0,0,0.08),0_1px_0_rgba(255,255,255,0.9)_inset] border border-white/60"
           } active:scale-[0.97]`}
         >
           <Languages className="size-3.5" />
-          <span className="hidden sm:inline text-[11px]">{soraniMode ? "RTL" : "EN"}</span>
+          <span className="hidden sm:inline text-[11px]">{previewLayoutRtl ? "RTL" : "LTR"}</span>
         </button>
 
         <div className="flex items-center rounded-full bg-white shadow-[0_2px_6px_rgba(0,0,0,0.08),0_0_0_1px_rgba(0,0,0,0.06)] overflow-hidden">
@@ -112,6 +120,7 @@ export function EditorPreviewPanel({
             template={template}
             name={previewData.name}
             previewRef={previewRef}
+            design={design}
           />
         </div>
       </div>
@@ -126,6 +135,7 @@ export function EditorPreviewPanel({
               zoom={zoom}
               design={design}
               updateData={updateData}
+              layoutRtl={previewLayoutRtl}
               onSectionClick={(s, path, e) => onSectionClick(s, path, e)}
               isDesignMode={isDesignMode}
             />

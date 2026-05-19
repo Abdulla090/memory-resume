@@ -1,5 +1,6 @@
-import type { ReactNode } from "react";
+import { useContext, type ReactNode } from "react";
 import { Editable } from "./Editable";
+import { ResumeLayoutContext } from "./DesignContext";
 import type { ResumeData } from "@/lib/types";
 
 const rtlPattern = /[\u0600-\u06ff\u0750-\u077f\u08a0-\u08ff]/;
@@ -14,7 +15,7 @@ export function getContrastTheme(hexColor?: string): "light" | "dark" {
   return yiq >= 128 ? "light" : "dark";
 }
 
-export function isRTL(data: ResumeData) {
+export function detectRtlFromContent(data: ResumeData): boolean {
   return rtlPattern.test(
     [
       data.name,
@@ -28,6 +29,13 @@ export function isRTL(data: ResumeData) {
       ...data.education.flatMap((item) => [item.degree, item.institution]),
     ].filter(Boolean).join(" "),
   );
+}
+
+/** Editor layout toggle or auto-detect from resume script. */
+export function useLayoutRtl(data: ResumeData): boolean {
+  const forced = useContext(ResumeLayoutContext);
+  if (forced !== null) return forced;
+  return detectRtlFromContent(data);
 }
 
 export function labels(data: ResumeData, rtl: boolean) {
@@ -49,8 +57,11 @@ export function labels(data: ResumeData, rtl: boolean) {
   };
 }
 
-export function label(data: ResumeData, key: "profile" | "executiveProfile" | "summary" | "experience" | "professionalExperience" | "projects" | "skills" | "keySkills" | "expertise" | "metrics" | "education" | "certifications" | "terminalExperience" | "terminalSkills" | "terminalEducation") {
-  const rtl = isRTL(data);
+export function label(
+  data: ResumeData,
+  key: "profile" | "executiveProfile" | "summary" | "experience" | "professionalExperience" | "projects" | "skills" | "keySkills" | "expertise" | "metrics" | "education" | "certifications" | "terminalExperience" | "terminalSkills" | "terminalEducation",
+  rtl: boolean,
+) {
   const mapRtl: Record<string, string> = {
     profile: "پڕۆفایل",
     executiveProfile: "پڕۆفایلی پیشەیی",

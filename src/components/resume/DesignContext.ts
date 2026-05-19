@@ -8,3 +8,9 @@ export type FieldFocusFn = (path: string) => void;
 export const FieldFocusContext = createContext<FieldFocusFn | undefined>(undefined);
 /** When true, Editable components should disable contentEditable (Design tab active). */
 export const DesignModeContext = createContext<boolean>(false);
+
+/**
+ * When set (true/false), overrides layout direction for the resume preview.
+ * null = auto-detect from script in resume content.
+ */
+export const ResumeLayoutContext = createContext<boolean | null>(null);

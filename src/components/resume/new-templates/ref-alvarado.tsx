@@ -2,14 +2,14 @@ import { useContext } from "react";
 import type { ReactNode } from "react";
 import { DesignContext } from "../DesignContext";
 import { Editable } from "../Editable";
-import { ContactLines, ExperienceList, PhotoBlock, Section, isRTL, labels, pickLanguages, initials } from "../template-helpers";
+import { ContactLines, ExperienceList, PhotoBlock, Section, useLayoutRtl, labels, pickLanguages, initials } from "../template-helpers";
 import { BriefcaseBusiness, Globe, GraduationCap, Mail, MapPin, Phone, UserRound } from "lucide-react";
 import type { ResumeData } from "@/lib/types";
 import { optimizeResumeForOnePage } from "@/lib/resume-utils";
 
 export function RefAlvaradoTemplate({ data }: { data: ResumeData }) {
   const c = optimizeResumeForOnePage(data);
-  const rtl = isRTL(c);
+  const rtl = useLayoutRtl(c);
   const design = useContext(DesignContext);
   const colLayout = design?.columnLayout || "sidebar-left";
   const showSkillBars = design?.showSkillBars !== false;

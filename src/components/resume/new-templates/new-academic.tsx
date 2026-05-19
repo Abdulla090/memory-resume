@@ -9,7 +9,7 @@ import {
   ExperienceList,
   PhotoBlock,
   Section,
-  isRTL,
+  useLayoutRtl,
   labels,
   initials,
   getContrastTheme,
@@ -28,7 +28,7 @@ import { optimizeResumeForOnePage } from "@/lib/resume-utils";
 
 export function NewAcademicTemplate({ data }: { data: ResumeData }) {
   const c = optimizeResumeForOnePage(data);
-  const rtl = isRTL(c);
+  const rtl = useLayoutRtl(c);
   const l = labels(c, rtl);
   const design = useContext(DesignContext);
 
