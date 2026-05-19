@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from "framer-motion";
-import { X, Target, Sparkles, Loader2, FileText, LayoutTemplate, CheckCircle2 } from "lucide-react";
+import { X, Target, Sparkles, Loader2, FileText, LayoutTemplate, CheckCircle2, Bot } from "lucide-react";
 import type { ResumeData, TemplateId, DesignSettings } from "@/lib/types";
 import { ResumePreview } from "@/components/resume/ResumePreview";
 import { isMultilinePath, getValueAtPath } from "@/components/resume/editor-helpers";
@@ -34,7 +34,7 @@ export function TailorModal({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[200] flex items-center justify-center p-4"
+          className="fixed inset-0 bg-slate-900/70 md:bg-slate-900/60 md:backdrop-blur-sm z-[200] flex items-center justify-center p-4"
         >
           <motion.div
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
@@ -62,7 +62,7 @@ export function TailorModal({
                 <X className="w-5 h-5" />
               </button>
             </div>
-            <div className="p-6 flex-1 overflow-y-auto">
+            <div className="perf-scroll p-6 flex-1 overflow-y-auto">
               <textarea
                 value={jobDescription}
                 onChange={(e) => setJobDescription(e.target.value)}
@@ -114,7 +114,7 @@ export function CoverLetterModal({ open, onClose, loading, content, isKu }: Cove
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[200] flex items-center justify-center p-4"
+          className="fixed inset-0 bg-slate-900/70 md:bg-slate-900/60 md:backdrop-blur-sm z-[200] flex items-center justify-center p-4"
         >
           <motion.div
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
@@ -122,7 +122,7 @@ export function CoverLetterModal({ open, onClose, loading, content, isKu }: Cove
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
             className="bg-white rounded-[2rem] w-full max-w-2xl overflow-hidden shadow-2xl flex flex-col"
           >
-            <div className="p-5 border-b border-slate-100 flex items-center justify-between shrink-0 bg-white/50 backdrop-blur-md">
+            <div className="p-5 border-b border-slate-100 flex items-center justify-between shrink-0 bg-white/95 md:bg-white/50 md:backdrop-blur-md">
               <h3 className="text-xl font-bold text-slate-900 flex items-center gap-2">
                 <FileText className="w-5 h-5 text-indigo-600" />
                 {isKu ? "نامەی داواکاری (Cover Letter)" : "Cover Letter"}
@@ -134,7 +134,7 @@ export function CoverLetterModal({ open, onClose, loading, content, isKu }: Cove
                 <X className="w-5 h-5" />
               </button>
             </div>
-            <div className="p-6 bg-slate-50/50 max-h-[60vh] overflow-y-auto">
+            <div className="perf-scroll p-6 bg-slate-50/50 max-h-[60vh] overflow-y-auto">
               {loading ? (
                 <div className="flex flex-col items-center justify-center py-10 gap-3">
                   <Loader2 className="w-8 h-8 animate-spin text-indigo-600" />
@@ -189,7 +189,7 @@ export function TemplateModal({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[200] flex items-center justify-center p-4"
+          className="fixed inset-0 bg-slate-900/70 md:bg-slate-900/60 md:backdrop-blur-sm z-[200] flex items-center justify-center p-4"
         >
           <motion.div
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
@@ -198,7 +198,7 @@ export function TemplateModal({
             transition={{ type: "spring", stiffness: 300, damping: 30 }}
             className="bg-white rounded-[2rem] w-full max-w-5xl h-[90vh] overflow-hidden shadow-2xl flex flex-col"
           >
-            <div className="p-5 border-b border-slate-100 flex items-center justify-between shrink-0 bg-white/50 backdrop-blur-md">
+            <div className="p-5 border-b border-slate-100 flex items-center justify-between shrink-0 bg-white/95 md:bg-white/50 md:backdrop-blur-md">
               <h3 className="text-xl font-bold text-slate-900 flex items-center gap-2">
                 <LayoutTemplate className="w-5 h-5 text-purple-600" />
                 {isKu ? "هەڵبژاردنی نەخشە" : "Template Library"}
@@ -224,7 +224,7 @@ export function TemplateModal({
                   ))}
                 </div>
               </div>
-              <div className="flex-1 overflow-y-auto p-4 sm:p-6 scrollbar-thin scrollbar-thumb-slate-200 scrollbar-track-transparent">
+              <div className="perf-scroll flex-1 overflow-y-auto p-4 sm:p-6 scrollbar-thin scrollbar-thumb-slate-200 scrollbar-track-transparent">
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
                   {filtered.map(({ id: templateId, label, isNew }) => {
                     const isActive = activeTemplate === templateId;
@@ -251,7 +251,7 @@ export function TemplateModal({
                             </div>
                           </div>
                           {isActive && (
-                            <div className="absolute inset-0 bg-blue-600/10 flex items-center justify-center backdrop-blur-[1px] z-10">
+                            <div className="absolute inset-0 bg-blue-600/10 flex items-center justify-center md:backdrop-blur-[1px] z-10">
                               <CheckCircle2 className="w-10 h-10 text-blue-600 drop-shadow-md bg-white rounded-full" />
                             </div>
                           )}
@@ -297,7 +297,7 @@ export function ATSModal({ open, onClose, loading, score, feedback, isKu }: ATSM
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[200] flex items-center justify-center p-4"
+          className="fixed inset-0 bg-slate-900/70 md:bg-slate-900/60 md:backdrop-blur-sm z-[200] flex items-center justify-center p-4"
         >
           <motion.div
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
@@ -424,7 +424,7 @@ export function InlineEditModal({
   if (!inlineEdit) return null;
   return (
     <div
-      className="fixed inset-0 z-[250] bg-slate-950/30 backdrop-blur-[2px] p-4 flex items-start justify-center pt-24"
+      className="fixed inset-0 z-[250] bg-slate-950/40 md:bg-slate-950/30 md:backdrop-blur-[2px] p-4 flex items-start justify-center pt-24"
       onClick={() => setInlineEdit(null)}
     >
       <div

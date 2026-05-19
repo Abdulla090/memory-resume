@@ -151,11 +151,25 @@
 }
 
 @layer base {
-  * {
+  *,
+  *::before,
+  *::after {
     border-color: var(--color-border);
-    transition-property: background-color, border-color, color, fill, stroke, box-shadow;
-    transition-duration: 700ms;
-    transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  :where(
+    a,
+    button,
+    input,
+    textarea,
+    select,
+    summary,
+    label[role="button"],
+    [role="button"]
+  ) {
+    transition-property: background-color, border-color, color, box-shadow, opacity;
+    transition-duration: 150ms;
+    transition-timing-function: ease;
   }
 
   html, body {
@@ -546,4 +560,135 @@
 @keyframes pulse-glow {
   0%, 100% { box-shadow: 0 0 0 0 rgba(37,99,235,0.3); }
   50%       { box-shadow: 0 0 0 8px rgba(37,99,235,0); }
+}
+
+/* ── Marquee tracks (GPU-friendly transforms) ─────────────── */
+@keyframes marquee-down {
+  0%   { transform: translate3d(0, 0, 0); }
+  100% { transform: translate3d(0, -50%, 0); }
+}
+
+@keyframes marquee-up {
+  0%   { transform: translate3d(0, -50%, 0); }
+  100% { transform: translate3d(0, 0, 0); }
+}
+
+@keyframes marquee-left {
+  0%   { transform: translate3d(0, 0, 0); }
+  100% { transform: translate3d(-50%, 0, 0); }
+}
+
+.marquee-lane {
+  contain: layout style paint;
+  overflow: hidden;
+}
+
+.marquee-track-down {
+  animation: marquee-down 22s linear infinite;
+  will-change: transform;
+}
+
+.marquee-track-up {
+  animation: marquee-up 20s linear infinite;
+  will-change: transform;
+}
+
+.marquee-track-left {
+  animation: marquee-left 14s linear infinite;
+  will-change: transform;
+}
+
+.perf-soft-enter {
+  animation: perf-soft-enter 0.45s ease-out both;
+}
+
+@keyframes perf-soft-enter {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 10px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+/* ── Mobile / reduced-motion performance layer ────────────── */
+html.perf-mobile {
+  --marquee-speed: 1.65;
+}
+
+html.perf-mobile .marquee-track-down {
+  animation-duration: calc(22s * var(--marquee-speed));
+}
+
+html.perf-mobile .marquee-track-up {
+  animation-duration: calc(20s * var(--marquee-speed));
+}
+
+html.perf-mobile .marquee-track-left {
+  animation-duration: calc(14s * var(--marquee-speed));
+}
+
+html.perf-mobile [class*="backdrop-blur"],
+html.perf-mobile .hero-deco,
+html.perf-mobile .perf-no-blur {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+html.perf-mobile .perf-surface {
+  background-color: rgba(255, 255, 255, 0.98) !important;
+}
+
+html.perf-mobile .hero-gradient::before {
+  opacity: 0.35;
+}
+
+html.perf-mobile .stat-card:hover,
+html.perf-mobile .step-card:hover {
+  transform: none;
+}
+
+html.perf-mobile .perf-defer-section {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 480px;
+}
+
+html.perf-mobile .perf-gpu {
+  transform: translateZ(0);
+}
+
+html.perf-mobile .perf-contain {
+  contain: layout style paint;
+}
+
+html.perf-mobile .perf-scroll {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
+
+html.perf-mobile button,
+html.perf-mobile a,
+html.perf-mobile [role="button"] {
+  touch-action: manipulation;
+}
+
+html.perf-mobile .blur-\[180px\],
+html.perf-mobile .blur-3xl {
+  display: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marquee-track-down,
+  .marquee-track-up,
+  .marquee-track-left {
+    animation-play-state: paused !important;
+  }
+
+  .perf-soft-enter {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
 }

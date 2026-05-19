@@ -194,7 +194,7 @@ export function VintagePostcard({ data, svgRef }: TemplateProps) {
           x={80}
           y={CARD_H - 78}
           fill={ink}
-          fontOpacity={0.7}
+          opacity={0.7}
           fontSize={12}
           fontStyle="italic"
           style={{ fontFamily: '"Playfair Display", serif' }}

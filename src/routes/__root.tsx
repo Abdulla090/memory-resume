@@ -1,8 +1,10 @@
 import { useEffect } from "react";
 import { createRootRoute, HeadContent, Link, Outlet, Scripts } from "@tanstack/react-router";
+import { MotionConfig, LazyMotion, domAnimation } from "framer-motion";
 import { Toaster } from "sonner";
 
 import { useAppStore } from "@/lib/store";
+import { initPerfMobileClass, useMobileOptimized } from "@/lib/performance";
 
 
 import appCss from "../styles.css?url";
@@ -90,11 +92,15 @@ function RootShell({ children }: { children: React.ReactNode }) {
 }
 
 function RootComponent() {
+  const mobileOptimized = useMobileOptimized();
+
+  useEffect(() => initPerfMobileClass(), []);
+
   useEffect(() => {
-    if (import.meta.env.DEV) {
+    if (import.meta.env.DEV && !mobileOptimized) {
       void import("react-grab");
     }
-  }, []);
+  }, [mobileOptimized]);
 
   const language = useAppStore((state) => state.language);
   const dir = language === "ku" ? "rtl" : "ltr";
@@ -107,8 +113,9 @@ function RootComponent() {
   }, [language]);
 
   return (
-    <>
-      <Outlet />
+    <LazyMotion features={domAnimation} strict>
+      <MotionConfig reducedMotion={mobileOptimized ? "always" : "user"}>
+        <Outlet />
 
       <Toaster
         theme="light"
@@ -123,6 +130,7 @@ function RootComponent() {
           },
         }}
       />
-    </>
+      </MotionConfig>
+    </LazyMotion>
   );
 }

@@ -35,6 +35,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { SAMPLE_MEMORIES } from "@/lib/sample-memories";
+import { getAiErrorMessage } from "@/lib/ai-errors";
 
 const TEMPLATE_SAMPLE: ResumeData = {
   name: "Jane Doe",
@@ -215,25 +216,7 @@ export function ChatOnboarding({
       }
     } catch (err) {
       setIsThinking(false);
-      const errorMsg = err instanceof Error ? err.message : String(err);
-      if (
-        errorMsg.includes("500") ||
-        errorMsg.includes("HTTPError") ||
-        errorMsg.includes("MISSING_API_KEY")
-      ) {
-        toast.error(
-          isKu
-            ? "تکایە کلیلی API لە Vercel دابنێ"
-            : "Please configure your GEMINI_API_KEY in Vercel settings.",
-        );
-      } else {
-        toast.error(
-          errorMsg ||
-            (isKu
-              ? "شیکردنەوەکە سەرکەوتوو نەبوو. دووبارە هەوڵ بدەرەوە."
-              : "Failed to analyze. Try again."),
-        );
-      }
+      toast.error(getAiErrorMessage(err, isKu, isKu ? "شیکردنەوەکە سەرکەوتوو نەبوو." : "Failed to analyze."));
       setStage("intake");
     }
   };
@@ -269,7 +252,7 @@ export function ChatOnboarding({
       }
     } catch (err) {
       setIsThinking(false);
-      toast.error(isKu ? "هەڵەیەک ڕوویدا. تکایە دووبارە هەوڵ بدەرەوە." : "Failed to start AI. Try again.");
+      toast.error(getAiErrorMessage(err, isKu, isKu ? "دەستپێکردنی AI سەرکەوتوو نەبوو." : "Failed to start AI."));
       setStage("intake");
     }
   };
@@ -333,25 +316,7 @@ export function ChatOnboarding({
           }
         } catch (err) {
           setIsThinking(false);
-          const errorMsg = err instanceof Error ? err.message : String(err);
-          if (
-            errorMsg.includes("500") ||
-            errorMsg.includes("HTTPError") ||
-            errorMsg.includes("MISSING_API_KEY")
-          ) {
-            toast.error(
-              isKu
-                ? "تکایە کلیلی API لە Vercel دابنێ"
-                : "Please configure your GEMINI_API_KEY in Vercel settings.",
-            );
-          } else {
-            toast.error(
-              errorMsg ||
-                (isKu
-                  ? "شیکردنەوەکە سەرکەوتوو نەبوو. دووبارە هەوڵ بدەرەوە."
-                  : "Failed to analyze. Try again."),
-            );
-          }
+          toast.error(getAiErrorMessage(err, isKu, isKu ? "شیکردنەوەکە سەرکەوتوو نەبوو." : "Failed to analyze."));
           setStage("intake");
           setInputText(incomingPrompt);
         }
@@ -418,25 +383,8 @@ export function ChatOnboarding({
       setStage("templates");
     } catch (err) {
       setIsThinking(false);
-      const errorMsg = err instanceof Error ? err.message : String(err);
-      if (
-        errorMsg.includes("500") ||
-        errorMsg.includes("HTTPError") ||
-        errorMsg.includes("MISSING_API_KEY")
-      ) {
-        toast.error(
-          isKu
-            ? "تکایە کلیلی API لە Vercel دابنێ"
-            : "Please configure your GEMINI_API_KEY in Vercel settings.",
-        );
-        setStage("questions");
-      } else {
-        addMsg({
-          from: "ai",
-          content: isKu ? "پرۆفایلەکە نوێکرایەوە!" : "Profile updated!",
-        });
-        setStage("templates");
-      }
+      toast.error(getAiErrorMessage(err, isKu, isKu ? "نوێکردنەوەی پرۆفایل سەرکەوتوو نەبوو." : "Failed to update profile."));
+      setStage("questions");
     }
   };
 
@@ -471,20 +419,7 @@ export function ChatOnboarding({
       setLoaderResumeId(saved.id);
     } catch (e) {
       setIsThinking(false);
-      const errorMsg = e instanceof Error ? e.message : String(e);
-      if (
-        errorMsg.includes("500") ||
-        errorMsg.includes("HTTPError") ||
-        errorMsg.includes("MISSING_API_KEY")
-      ) {
-        toast.error(
-          isKu
-            ? "تکایە کلیلی API لە Vercel دابنێ"
-            : "Please configure your GEMINI_API_KEY in Vercel settings.",
-        );
-      } else {
-        toast.error(errorMsg || (isKu ? "دروستکردنەکە سەرکەوتوو نەبوو." : "Generation failed."));
-      }
+      toast.error(getAiErrorMessage(e, isKu, isKu ? "دروستکردنەکە سەرکەوتوو نەبوو." : "Generation failed."));
       setStage("templates");
     }
   };
@@ -692,7 +627,7 @@ export function ChatOnboarding({
       </AnimatePresence>
 
       {!inChat && intakeMethod === "form" && (
-        <div className="relative z-10 flex-1 flex flex-col items-center justify-start px-4 pb-12 pt-10 overflow-y-auto">
+        <div className="perf-scroll relative z-10 flex-1 flex flex-col items-center justify-start px-4 pb-12 pt-10 overflow-y-auto">
           <IntakeForm
             isKu={isKu}
             onSubmit={(formDataStr) => {
@@ -1317,7 +1252,7 @@ ${formData.languages}
         }));
       }
     } catch (e) {
-      toast.error(isKu ? "هەڵەیەک ڕوویدا لە دروستکردندا" : "Failed to generate content");
+      toast.error(getAiErrorMessage(e, isKu, isKu ? "هەڵەیەک ڕوویدا لە دروستکردندا" : "Failed to generate content"));
     } finally {
       setLoadingFields((prev) => ({ ...prev, [field]: false }));
     }

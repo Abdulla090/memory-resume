@@ -4,6 +4,7 @@ import { memo, useState, useMemo, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAppStore } from "@/lib/store";
 import { generateInterviewQuestion } from "@/lib/ai.functions";
+import { getAiErrorMessage } from "@/lib/ai-errors";
 
 export const Route = createFileRoute("/interview")({
   component: InterviewPage,
@@ -91,7 +92,7 @@ const MessageBubble = memo(function MessageBubble({
   return (
     <div className={`flex ${role === "user" ? "justify-end" : "justify-start"}`}>
       <div
-        className={`max-w-[85%] sm:max-w-[75%] rounded-3xl px-6 py-4 text-[15px] leading-relaxed shadow-lg backdrop-blur-md ${
+        className={`max-w-[85%] sm:max-w-[75%] rounded-3xl px-6 py-4 text-[15px] leading-relaxed shadow-lg md:backdrop-blur-md ${
           role === "user"
             ? "bg-primary/90 text-white rounded-tr-sm"
             : "bg-white/5 border border-white/10 text-white rounded-tl-sm"
@@ -181,13 +182,10 @@ function InterviewPage() {
         setInterviewStage("active");
       }, 780);
     } catch (e) {
-      console.error(e);
       setInterviewMessages([
         {
           role: "ai",
-          content: isKu
-            ? "ببورە! نەمتوانی پەیوەندی بکەم بە زیرەکی دەستکرد، تکایە دڵنیابە لە API Key."
-            : "Sorry! I could not connect to the AI. Please verify your API Key.",
+          content: getAiErrorMessage(e, isKu),
         },
       ]);
       if (introTimerRef.current !== null) {
@@ -254,10 +252,9 @@ function InterviewPage() {
         }, 2500);
       }
     } catch (err) {
-      console.error(err);
       setInterviewMessages((prev) => [
         ...prev,
-        { role: "ai", content: isKu ? "ببورە کێشەیەک ڕوویدا." : "Sorry, an error occurred." },
+        { role: "ai", content: getAiErrorMessage(err, isKu) },
       ]);
     } finally {
       setIsGenerating(false);
@@ -267,7 +264,7 @@ function InterviewPage() {
 
   return (
     <div
-      className="fixed inset-0 w-screen h-screen bg-black text-foreground overflow-hidden flex flex-col items-center justify-center"
+      className="fixed inset-0 flex min-h-[100dvh] w-screen flex-col items-center justify-center overflow-hidden bg-black text-foreground"
       dir={isKu ? "rtl" : "ltr"}
     >
       {/* Background Ambient Lights */}
@@ -276,7 +273,7 @@ function InterviewPage() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 0.15 }}
           transition={{ duration: 2 }}
-          className="absolute top-[10%] left-1/2 -translate-x-1/2 w-[800px] h-[800px] bg-primary/30 blur-[180px] rounded-full"
+          className="absolute top-[10%] left-1/2 hidden w-[800px] h-[800px] -translate-x-1/2 rounded-full bg-primary/30 blur-[180px] md:block"
         />
       </div>
 
@@ -315,7 +312,7 @@ function InterviewPage() {
               </p>
             </div>
 
-            <div className="space-y-8 bg-white/[0.03] backdrop-blur-3xl border border-white/10 rounded-3xl p-8 shadow-2xl">
+            <div className="space-y-8 rounded-3xl border border-white/10 bg-white/[0.04] p-8 shadow-2xl md:backdrop-blur-3xl">
               <div className="space-y-4">
                 <label className="flex items-center gap-2 text-sm font-bold text-white/80 uppercase tracking-wider">
                   <Briefcase className="w-4 h-4 text-primary" />
@@ -388,7 +385,7 @@ function InterviewPage() {
                   animate={{ opacity: 0.16 }}
                   exit={{ opacity: 0 }}
                   transition={{ duration: 1.4 }}
-                  className="absolute top-[14%] left-1/2 -translate-x-1/2 w-[760px] h-[760px] bg-primary/25 blur-[180px] rounded-full pointer-events-none -z-10"
+                  className="absolute top-[14%] left-1/2 hidden w-[760px] h-[760px] -translate-x-1/2 rounded-full bg-primary/25 blur-[180px] pointer-events-none -z-10 md:block"
                 />
               )}
             </AnimatePresence>
@@ -440,7 +437,7 @@ function InterviewPage() {
               {showInterviewContent && (
                 <motion.div
                   key="messages"
-                  className="flex-1 w-full max-w-4xl mx-auto overflow-y-auto px-4 pb-56 sm:pb-48 pt-4 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent"
+                  className="perf-scroll flex-1 w-full max-w-4xl mx-auto overflow-y-auto px-4 pb-56 sm:pb-48 pt-4 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ delay: 0.12 }}
@@ -490,7 +487,7 @@ function InterviewPage() {
                         key="score-card"
                         initial={{ opacity: 0, y: 20, scale: 0.95 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
-                        className="w-full rounded-[2.5rem] border border-sky-500/30 bg-sky-500/10 backdrop-blur-3xl shadow-[0_0_80px_rgba(14,165,233,0.3)] p-6 sm:p-8 flex items-center justify-between"
+                        className="w-full rounded-[2.5rem] border border-sky-500/30 bg-sky-500/10 shadow-[0_0_80px_rgba(14,165,233,0.3)] p-6 sm:p-8 flex items-center justify-between md:backdrop-blur-3xl"
                       >
                         <div>
                           <h3 className="text-2xl sm:text-3xl font-extrabold text-white mb-2 drop-shadow-[0_0_15px_rgba(37,99,235,0.5)]">
@@ -547,7 +544,7 @@ function InterviewPage() {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: 20 }}
-                        className="w-full rounded-[2.5rem] border border-white/10 bg-white/[0.02] backdrop-blur-3xl shadow-[0_30px_100px_-20px_rgba(0,0,0,0.8)] p-3 sm:p-4 text-left will-change-transform"
+                        className="w-full rounded-[2.5rem] border border-white/10 bg-white/[0.03] shadow-[0_30px_100px_-20px_rgba(0,0,0,0.8)] p-3 sm:p-4 text-left will-change-transform md:backdrop-blur-3xl"
                       >
                         {interviewMode === "text" ? (
                           <div className="relative flex items-center gap-3">

@@ -372,7 +372,7 @@ export function TextToolbar({
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: 8 }}
               transition={{ duration: 0.12 }}
-              className="p-2 max-h-[240px] overflow-y-auto space-y-0.5 scrollbar-thin scrollbar-thumb-slate-200"
+              className="perf-scroll p-2 max-h-[240px] overflow-y-auto space-y-0.5 scrollbar-thin scrollbar-thumb-slate-200"
             >
               {FONT_OPTIONS.map((f) => {
                 const active = (override.fontFamily ?? defaults.fontFamily) === f || (f === "System Default" && !override.fontFamily);

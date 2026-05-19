@@ -205,7 +205,7 @@ export function MidnightBloom({ data, svgRef }: TemplateProps) {
           y={CARD_H - 64}
           textAnchor="middle"
           fill={ink}
-          fontOpacity={0.55}
+          opacity={0.55}
           fontSize={9}
           letterSpacing={3}
           fontWeight={700}
@@ -240,7 +240,7 @@ export function MidnightBloom({ data, svgRef }: TemplateProps) {
           y={CARD_H - 64}
           textAnchor="middle"
           fill={ink}
-          fontOpacity={0.55}
+          opacity={0.55}
           fontSize={9}
           letterSpacing={3}
           fontWeight={700}

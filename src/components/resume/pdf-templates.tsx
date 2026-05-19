@@ -1314,6 +1314,7 @@ function LeroyPDF({ data }: { data: ResumeData }) {
   const mid = Math.ceil(nameParts.length / 2);
   const displayName = `${nameParts.slice(0, mid).join(" ") || c.name}\n${nameParts.slice(mid).join(" ")}`.trim();
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const Panel = ({ title, children, style }: { title: string; children: ReactNode; style: any }) => (
     <View style={[leroy.panel, style]}>
       <Text style={leroy.panelTitle}>{title}</Text>

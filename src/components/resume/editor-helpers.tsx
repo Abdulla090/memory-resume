@@ -269,8 +269,7 @@ export function ExportButtons({
       if (previewRef.current) {
         await exportPreviewAsPDF(previewRef.current, filename, 2);
       }
-    } catch (err) {
-      console.error(err);
+    } catch {
       toast.error("Failed to generate PDF");
     } finally {
       setPdfLoading(false);
@@ -286,8 +285,7 @@ export function ExportButtons({
       if (previewRef.current) {
         await exportPreviewAsPDF(previewRef.current, `${filename}_print`, 3);
       }
-    } catch (err) {
-      console.error(err);
+    } catch {
       toast.error("Failed to generate PDF");
     } finally {
       setPrintLoading(false);
@@ -301,6 +299,8 @@ export function ExportButtons({
     try {
       const { exportResumeDocx } = await import("@/components/resume/docx-templates");
       await exportResumeDocx(data, template, filename);
+    } catch {
+      toast.error("Failed to generate DOCX");
     } finally {
       setDocxLoading(false);
     }
@@ -316,7 +316,7 @@ export function ExportButtons({
           setOpen(!open);
         }}
         disabled={anyLoading}
-        className="flex items-center gap-1.5 px-4 py-2.5 sm:py-1.5 rounded-xl sm:rounded-full bg-blue-600 backdrop-blur-md border border-blue-500 text-xs font-bold tracking-wide text-white shadow-sm hover:bg-blue-700 hover:shadow-md transition-all disabled:opacity-50"
+        className="flex items-center gap-1.5 px-4 py-2.5 sm:py-1.5 rounded-xl sm:rounded-full bg-blue-600 border border-blue-500 text-xs font-bold tracking-wide text-white shadow-sm hover:bg-blue-700 hover:shadow-md transition-all disabled:opacity-50"
       >
         <Download className="w-4 h-4 sm:w-3.5 sm:h-3.5" />
         <span className="hidden sm:inline">{anyLoading ? "Exporting..." : "Download"}</span>
@@ -715,14 +715,14 @@ ${(() => {
   };
 
   return (
-    <div ref={containerRef} className="absolute inset-0 overflow-auto bg-slate-100/50">
+    <div ref={containerRef} className="perf-scroll absolute inset-0 overflow-auto bg-slate-100/50">
       <div className="flex min-h-full min-w-max items-start justify-center p-2 sm:p-4">
-        <div className="relative shrink-0 transition-all duration-300 ease-in-out" style={{ width: `${794 * scale}px`, height: `${contentHeight * scale}px` }}>
+        <div className="relative shrink-0 transition-transform duration-200 ease-out" style={{ width: `${794 * scale}px`, height: `${contentHeight * scale}px` }}>
           <div
             ref={previewRef}
             onClick={handlePreviewClick}
             onMouseDown={(e) => { lastMouseDown.current = { clientX: e.clientX, clientY: e.clientY }; }}
-            className={`ds-live absolute left-0 top-0 z-10 overflow-hidden rounded-[28px] border border-slate-200/70 shadow-[0_20px_50px_-24px_rgba(15,23,42,0.45)] transition-all duration-300 ease-in-out hover:ring-2 hover:ring-blue-400/50 ${isDesignMode ? "design-mode" : ""}`}
+            className={`ds-live perf-contain absolute left-0 top-0 z-10 overflow-hidden rounded-[28px] border border-slate-200/70 shadow-[0_20px_50px_-24px_rgba(15,23,42,0.45)] transition-shadow duration-200 ease-out hover:ring-2 hover:ring-blue-400/50 ${isDesignMode ? "design-mode" : ""}`}
             style={{
               width: "794px",
               height: `${contentHeight}px`,

@@ -1,5 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { PenTool } from 'lucide-react';
+import { DashboardComingSoon } from '@/components/dashboard/DashboardComingSoon';
 
 export const Route = createFileRoute('/dashboard/ai-writer')({
   component: AiWriterPage,
@@ -7,12 +8,12 @@ export const Route = createFileRoute('/dashboard/ai-writer')({
 
 function AiWriterPage() {
   return (
-    <div className="h-full flex flex-col items-center justify-center text-center">
-      <div className="w-16 h-16 bg-blue-50 text-blue-500 rounded-2xl flex items-center justify-center mb-6 shadow-sm">
-        <PenTool className="w-8 h-8" />
-      </div>
-      <h1 className="text-3xl font-extrabold text-slate-900 mb-2">AI Writer</h1>
-      <p className="text-slate-500 font-medium">This page is under construction.</p>
-    </div>
+    <DashboardComingSoon
+      icon={PenTool}
+      title="AI Writer"
+      titleKu="نووسەری AI"
+      description="AI writing for bullet points and summaries is coming soon. Use the resume editor to tailor content for now."
+      descriptionKu="نووسینی AI بۆ خاڵ و کورتەنامە بەم زووانە دێت. ئێستا دەتوانیت لە دەستکاریکەری سیڤی ناوەڕۆک ڕێک بخەیت."
+    />
   );
 }

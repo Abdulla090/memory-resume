@@ -21,6 +21,7 @@ import {
 import React, { useEffect, useRef, useState } from "react";
 import { HeroV2 } from "@/components/HeroV2";
 import { useAppStore } from "@/lib/store";
+import { useMobileOptimized } from "@/lib/performance";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -213,8 +214,18 @@ export const copy = {
 } as const;
 
 function Counter({ to, suffix = "" }: { to: number; suffix?: string }) {
-  const [val, setVal] = useState(0);
+  const mobile = useMobileOptimized();
+  const [val, setVal] = useState(mobile ? to : 0);
   const ref = useRef(false);
+
+  if (mobile) {
+    return (
+      <span>
+        {to.toLocaleString("en-US")}
+        {suffix}
+      </span>
+    );
+  }
 
   return (
     <motion.span
@@ -408,14 +419,8 @@ export function Header({
 
       {/* ── MOBILE solid header (md:hidden) ── */}
       <header
-        className="fixed left-0 right-0 top-0 z-50 flex items-center justify-between px-4 md:hidden"
-        style={{
-          height: "60px",
-          backgroundColor: "rgba(255,255,255,0.97)",
-          backdropFilter: "blur(16px)",
-          WebkitBackdropFilter: "blur(16px)",
-          borderBottom: "1px solid rgba(226,232,240,0.8)",
-        }}
+        className="perf-surface fixed left-0 right-0 top-0 z-50 flex items-center justify-between border-b border-slate-200/80 bg-white/98 px-4 md:hidden"
+        style={{ height: "60px" }}
         dir="ltr"
       >
         <Link to="/" className="flex shrink-0 items-center gap-2" id="nav-logo-mobile">
@@ -466,12 +471,7 @@ export function Header({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.22, ease: "easeInOut" }}
-            className="fixed inset-0 z-40 md:hidden"
-            style={{
-              backdropFilter: "blur(24px)",
-              WebkitBackdropFilter: "blur(24px)",
-              backgroundColor: "rgba(255,255,255,0.96)",
-            }}
+            className="perf-surface fixed inset-0 z-40 bg-white/98 md:hidden"
           >
             <div className="absolute inset-0" onClick={() => setMobileOpen(false)} />
 
@@ -1105,7 +1105,39 @@ export const RightCardSVG = () => (
   </svg>
 );
 
-function HeroCards() {
+function HeroCardsStatic() {
+  const cardW = "clamp(108px,17vw,190px)";
+  const centerW = "clamp(145px,23vw,245px)";
+
+  return (
+    <div
+      className="relative flex w-full origin-top items-center justify-center perf-contain"
+      style={{ height: "clamp(340px,46vw,430px)" }}
+      dir="ltr"
+    >
+      <div
+        className="absolute rounded-2xl shadow-[0_20px_40px_rgba(0,0,0,0.15)]"
+        style={{ width: cardW, zIndex: 10, left: "4%", top: "14%", transform: "rotate(-8deg)" }}
+      >
+        <LeftCardSVG />
+      </div>
+      <div
+        className="absolute rounded-2xl shadow-[0_20px_40px_rgba(0,0,0,0.15)]"
+        style={{ width: cardW, zIndex: 10, right: "4%", top: "14%", transform: "rotate(8deg)" }}
+      >
+        <RightCardSVG />
+      </div>
+      <div
+        className="absolute rounded-lg shadow-[0_25px_50px_rgba(37,99,235,0.25)]"
+        style={{ width: centerW, zIndex: 20, left: "50%", top: "50%", transform: "translate(-50%, -50%)" }}
+      >
+        <CenterCardSVG />
+      </div>
+    </div>
+  );
+}
+
+function HeroCardsParallax() {
   const ref = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({
     target: ref,
@@ -1168,6 +1200,11 @@ function HeroCards() {
       </motion.div>
     </div>
   );
+}
+
+function HeroCards() {
+  const mobile = useMobileOptimized();
+  return mobile ? <HeroCardsStatic /> : <HeroCardsParallax />;
 }
 
 function DirectionArrow({ language, className }: { language: Language; className: string }) {
@@ -1252,7 +1289,7 @@ export function StatsSection({ language }: { language: Language }) {
 
   return (
     <section
-      className="app-frame relative px-4 pb-12 sm:px-6 sm:pb-24"
+      className="perf-defer-section app-frame relative px-4 pb-12 sm:px-6 sm:pb-24"
       style={{ paddingTop: "clamp(60px,10vw,140px)" }}
     >
       <div className="absolute right-10 top-20 -z-10 h-96 w-96 rounded-full bg-[radial-gradient(circle_at_center,rgba(219,234,254,0.4)_0%,transparent_70%)]" />

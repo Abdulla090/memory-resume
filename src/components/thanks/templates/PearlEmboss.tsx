@@ -41,7 +41,7 @@ export function PearlEmboss({ data, svgRef }: TemplateProps) {
         y={150}
         textAnchor="middle"
         fill={ink}
-        fontOpacity={0.7}
+        opacity={0.7}
         fontSize={12}
         letterSpacing={9}
         fontWeight={700}

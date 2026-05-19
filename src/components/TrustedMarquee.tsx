@@ -3,13 +3,6 @@
    Design: Premium, larger monochromatic blue logos for trust
 ───────────────────────────────────────────────────────────── */
 
-const marqueeX = `
-@keyframes marquee-left {
-  0%   { transform: translate3d(0, 0, 0); }
-  100% { transform: translate3d(-50%, 0, 0); }
-}
-`;
-
 const companies = [
   { 
     name: "Google", 
@@ -83,7 +76,7 @@ import { copy } from "@/routes/index";
 /* Pill chip per company */
 function Chip({ name, svg }: { name: string; svg: React.ReactNode }) {
   return (
-    <div className="mx-6 flex shrink-0 items-center gap-4 rounded-2xl border border-blue-100 bg-blue-50/30 px-8 py-5 shadow-[0_4px_20px_rgba(37,99,235,0.04)] backdrop-blur-md transition-all duration-300 hover:scale-105 hover:bg-blue-50/50 hover:shadow-[0_8px_30px_rgba(37,99,235,0.08)]">
+    <div className="mx-6 flex shrink-0 items-center gap-4 rounded-2xl border border-blue-100 bg-blue-50/50 px-8 py-5 shadow-[0_4px_20px_rgba(37,99,235,0.04)] transition-colors duration-200 md:backdrop-blur-md md:hover:scale-105 md:hover:bg-blue-50/50 md:hover:shadow-[0_8px_30px_rgba(37,99,235,0.08)]">
       <div className="text-blue-600/80">
         {svg}
       </div>
@@ -98,8 +91,7 @@ export function TrustedMarquee({ language }: { language: Language }) {
   const t = copy[language];
   
   return (
-    <section className="relative overflow-hidden py-16 sm:py-20" dir="ltr">
-      <style>{marqueeX}</style>
+    <section className="perf-defer-section relative overflow-hidden py-16 sm:py-20" dir="ltr">
 
       {/* Label */}
       <div className="mb-10 text-center" dir={t.dir}>
@@ -122,10 +114,12 @@ export function TrustedMarquee({ language }: { language: Language }) {
         }}
       >
         {/* Row 1 — scrolls LEFT */}
-        <div className="flex py-4" style={{ animation: "marquee-left 14s linear infinite", willChange: "transform" }}>
+        <div className="marquee-lane flex py-4">
+          <div className="flex marquee-track-left">
           {[...companies, ...companies].map((c, i) => (
             <Chip key={`r1-${i}`} name={c.name} svg={c.svg} />
           ))}
+          </div>
         </div>
       </div>
     </section>

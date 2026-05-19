@@ -41,18 +41,6 @@ function DirectionArrow({ language, className }: { language: Language; className
   return language === "ku" ? <ArrowLeft className={className} /> : <ArrowRight className={className} />;
 }
 
-/* ── Infinite marquee keyframes ─────────────────────────────── */
-const marqueeCSS = `
-@keyframes marquee-down {
-  0%   { transform: translate3d(0, 0, 0); }
-  100% { transform: translate3d(0, -50%, 0); }
-}
-@keyframes marquee-up {
-  0%   { transform: translate3d(0, -50%, 0); }
-  100% { transform: translate3d(0, 0, 0); }
-}
-`;
-
 /* Card arrays */
 const leftCards  = [LeftCardSVG, CVCard1, CVCard3, CenterCardSVG, CVCard5];
 const rightCards = [CVCard2, RightCardSVG, CVCard4, LeftCardSVG, CVCard3];
@@ -60,19 +48,15 @@ const rightCards = [CVCard2, RightCardSVG, CVCard4, LeftCardSVG, CVCard3];
 /* ── Unified marquee: adapts column widths via responsive classes ── */
 function MarqueeColumns() {
   return (
-    <>
-      <style>{marqueeCSS}</style>
-      <div className="relative flex h-full w-full items-start justify-center gap-2 overflow-hidden sm:gap-4 pointer-events-none" dir="ltr">
+    <div className="perf-contain">
+      <div className="relative flex h-full w-full items-start justify-center gap-2 overflow-hidden sm:gap-4 pointer-events-none perf-contain" dir="ltr">
 
         {/* Left column — scrolls DOWN */}
         <div
-          className="relative overflow-hidden"
+          className="marquee-lane relative overflow-hidden"
           style={{ width: "46%", maxWidth: "100%", height: "100%" }}
         >
-          <div
-            className="flex flex-col gap-2 sm:gap-4"
-            style={{ animation: "marquee-down 22s linear infinite", willChange: "transform" }}
-          >
+          <div className="flex flex-col gap-2 sm:gap-4 marquee-track-down">
             {leftCards.map((Card, i) => (
               <div key={`l-${i}`} className="shrink-0 overflow-hidden rounded-lg shadow-[0_6px_20px_rgba(0,0,0,0.12)] sm:rounded-xl">
                 <Card />
@@ -88,13 +72,10 @@ function MarqueeColumns() {
 
         {/* Right column — scrolls UP, starts offset */}
         <div
-          className="relative overflow-hidden pt-10 sm:pt-16"
+          className="marquee-lane relative overflow-hidden pt-10 sm:pt-16"
           style={{ width: "46%", maxWidth: "100%", height: "100%" }}
         >
-          <div
-            className="flex flex-col gap-2 sm:gap-4"
-            style={{ animation: "marquee-up 20s linear infinite", willChange: "transform" }}
-          >
+          <div className="flex flex-col gap-2 sm:gap-4 marquee-track-up">
             {rightCards.map((Card, i) => (
               <div key={`r-${i}`} className="shrink-0 overflow-hidden rounded-lg shadow-[0_6px_20px_rgba(0,0,0,0.12)] sm:rounded-xl">
                 <Card />
@@ -107,9 +88,8 @@ function MarqueeColumns() {
             ))}
           </div>
         </div>
-
       </div>
-    </>
+    </div>
   );
 }
 

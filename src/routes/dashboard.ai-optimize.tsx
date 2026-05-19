@@ -1,5 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { Wand2 } from 'lucide-react';
+import { DashboardComingSoon } from '@/components/dashboard/DashboardComingSoon';
 
 export const Route = createFileRoute('/dashboard/ai-optimize')({
   component: AiOptimizePage,
@@ -7,12 +8,12 @@ export const Route = createFileRoute('/dashboard/ai-optimize')({
 
 function AiOptimizePage() {
   return (
-    <div className="h-full flex flex-col items-center justify-center text-center">
-      <div className="size-16 bg-blue-50 text-blue-500 rounded-2xl flex items-center justify-center mb-6 shadow-sm">
-        <Wand2 className="size-8" />
-      </div>
-      <h1 className="text-3xl font-semibold text-zinc-900 mb-2">AI Optimize</h1>
-      <p className="text-zinc-500 font-medium">This page is under construction.</p>
-    </div>
+    <DashboardComingSoon
+      icon={Wand2}
+      title="AI Optimize"
+      titleKu="باشترکردنی AI"
+      description="Full-page AI optimization is on the way. Open any CV in the editor and use Optimize there today."
+      descriptionKu="باشترکردنی تەواوی AI بەم زووانە دێت. ئێستا سیڤیەکەت لە دەستکاریکەر بکەرەوە و Optimize بەکاربهێنە."
+    />
   );
 }

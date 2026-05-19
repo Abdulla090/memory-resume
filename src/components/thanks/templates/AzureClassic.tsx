@@ -136,7 +136,7 @@ export function AzureClassic({ data, svgRef }: TemplateProps) {
           y={CARD_H - 80}
           textAnchor="end"
           fill="#0b1220"
-          fontOpacity={0.6}
+          opacity={0.6}
           fontSize={11}
           fontWeight={700}
           letterSpacing={4}

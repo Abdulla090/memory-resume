@@ -233,7 +233,7 @@ export function RoyalDiploma({ data, svgRef }: TemplateProps) {
           y={CARD_H - 72}
           textAnchor="middle"
           fill={deepNavy}
-          fontOpacity={0.55}
+          opacity={0.55}
           fontSize={9}
           letterSpacing={3}
           fontWeight={700}
@@ -247,7 +247,7 @@ export function RoyalDiploma({ data, svgRef }: TemplateProps) {
             y={CARD_H - 54}
             textAnchor="middle"
             fill={deepNavy}
-            fontOpacity={0.55}
+            opacity={0.55}
             fontSize={10}
             fontStyle="italic"
             style={{ fontFamily: '"Playfair Display", serif' }}

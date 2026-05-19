@@ -28,7 +28,7 @@ export const useAppStore = create<AppState>()(
       resumes: [],
       preferences: { defaultTemplate: "new-professional" },
       language: "en",
-      apiKey: "AIzaSyC31fuY4cGzHyTrCaP3yMe9NJoPrqkXXJo",
+      apiKey: undefined,
       onboardingDone: false,
       setProfile: (profile) => set({ profile }),
       addResume: (resume) => set((s) => ({ resumes: [resume, ...s.resumes] })),

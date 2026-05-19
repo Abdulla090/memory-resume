@@ -39,7 +39,7 @@ function DashboardLayout() {
       {/* ── Mobile dim overlay ─────────────────────────────────────────── */}
       <div
         onClick={() => setIsOpen(false)}
-        className={`fixed inset-0 z-40 bg-black/60 backdrop-blur-sm lg:hidden transition-opacity duration-300 ${
+        className={`fixed inset-0 z-40 bg-black/70 lg:hidden transition-opacity duration-200 ${
           isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
         }`}
       />
@@ -50,8 +50,7 @@ function DashboardLayout() {
           background: '#0a0a0a',
           borderRight: isKu ? 'none' : '1px solid rgba(255,255,255,0.06)',
           borderLeft:  isKu ? '1px solid rgba(255,255,255,0.06)' : 'none',
-          transition: 'width 320ms cubic-bezier(0.4,0,0.2,1), transform 320ms cubic-bezier(0.4,0,0.2,1), box-shadow 320ms ease',
-          willChange: 'width, transform',
+          transition: 'width 280ms cubic-bezier(0.4,0,0.2,1), transform 280ms cubic-bezier(0.4,0,0.2,1)',
         }}
         className={`
           fixed lg:relative z-50 lg:z-auto inset-y-0
@@ -129,21 +128,14 @@ function DashboardLayout() {
                     <item.icon className="w-[18px] h-[18px]" />
                   </span>
 
-                  {/* Label — visible when open OR on mobile */}
+                  {/* Label — visible when sidebar is expanded */}
                   <span
-                    className={`text-[13px] truncate transition-all duration-200
-                      ${isOpen ? 'opacity-100 max-w-[160px]' : 'opacity-0 max-w-0 lg:hidden opacity-100 max-w-[160px]'}
-                    `}
-                    style={{ whiteSpace: 'nowrap' }}
+                    className={`text-[13px] truncate whitespace-nowrap transition-all duration-200 overflow-hidden ${
+                      isOpen ? 'opacity-100 max-w-[160px]' : 'max-w-0 opacity-0'
+                    }`}
                   >
                     {item.name}
                   </span>
-                  {/* Always visible on mobile when sidebar open  */}
-                  {!isOpen && (
-                    <span className="truncate text-[13px] lg:hidden" style={{ whiteSpace: 'nowrap' }}>
-                      {item.name}
-                    </span>
-                  )}
 
                   {/* Active dot */}
                   {isActive && (
@@ -225,7 +217,7 @@ function DashboardLayout() {
       </aside>
 
       {/* ── Main content ───────────────────────────────────────────────── */}
-      <main className="flex-1 h-full overflow-y-auto p-4 sm:p-6 lg:p-10 relative min-w-0 text-foreground bg-background">
+      <main className="perf-scroll flex-1 h-full overflow-y-auto p-4 sm:p-6 lg:p-10 relative min-w-0 text-foreground bg-background">
         {/* Mobile hamburger */}
         <button
           className="lg:hidden mb-6 w-10 h-10 rounded-xl bg-card border border-border flex items-center justify-center shadow-sm text-foreground cursor-pointer hover:bg-muted transition-colors"

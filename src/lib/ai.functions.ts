@@ -48,11 +48,10 @@ async function callGateway(opts: {
   });
 
   if (!res.ok) {
-    if (res.status === 429) throw new Error("Rate limit hit. Please wait and try again.");
-    if (res.status === 401 || res.status === 403) throw new Error("Invalid API key.");
-    const text = await res.text().catch(() => "");
-    console.error("API error:", res.status, text);
-    throw new Error("API error (" + res.status + ")");
+    if (res.status === 429) throw new Error("AI_RATE_LIMIT");
+    if (res.status === 401 || res.status === 403) throw new Error("INVALID_API_KEY");
+    if (res.status >= 500) throw new Error("AI_SERVICE_UNAVAILABLE");
+    throw new Error("AI_REQUEST_FAILED");
   }
 
   return res.json();

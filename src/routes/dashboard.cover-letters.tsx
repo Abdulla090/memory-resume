@@ -1,5 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { FileText } from 'lucide-react';
+import { DashboardComingSoon } from '@/components/dashboard/DashboardComingSoon';
 
 export const Route = createFileRoute('/dashboard/cover-letters')({
   component: CoverLettersPage,
@@ -7,12 +8,12 @@ export const Route = createFileRoute('/dashboard/cover-letters')({
 
 function CoverLettersPage() {
   return (
-    <div className="h-full flex flex-col items-center justify-center text-center">
-      <div className="w-16 h-16 bg-blue-50 text-blue-500 rounded-2xl flex items-center justify-center mb-6 shadow-sm">
-        <FileText className="w-8 h-8" />
-      </div>
-      <h1 className="text-3xl font-extrabold text-slate-900 mb-2">Cover Letters</h1>
-      <p className="text-slate-500 font-medium">This page is under construction.</p>
-    </div>
+    <DashboardComingSoon
+      icon={FileText}
+      title="Cover Letters"
+      titleKu="نامەی ڕووپۆش"
+      description="Cover letter generation is planned. Build your resume first, then we will match letters to each role."
+      descriptionKu="دروستکردنی نامەی ڕووپۆش لە پلاندایە. سەرەتا سیڤی دروست بکە، دواتر نامە بۆ هەر ڕۆڵێک دەگونجێنین."
+    />
   );
 }

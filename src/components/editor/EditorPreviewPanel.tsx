@@ -1,9 +1,10 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { MessageSquare, Languages } from "lucide-react";
-import { type RefObject, useState } from "react";
+import { type RefObject, useEffect, useState } from "react";
 import type { ResumeData, TemplateId, DesignSettings } from "@/lib/types";
 import { ExportButtons, ClientPDFPreview } from "@/components/resume/editor-helpers";
 import type { UpdateDataFn } from "@/components/resume/DesignContext";
+import { useMobileOptimized } from "@/lib/performance";
 
 interface EditorPreviewPanelProps {
   show: boolean;
@@ -42,6 +43,13 @@ export function EditorPreviewPanel({
 }: EditorPreviewPanelProps) {
   // Always ready — don't gate the preview behind animation completion
   const [isReady] = useState(true);
+  const mobileOptimized = useMobileOptimized();
+
+  useEffect(() => {
+    if (show && mode === "overlay" && mobileOptimized && zoom > 1) {
+      setZoom(() => 1);
+    }
+  }, [mobileOptimized, mode, setZoom, show, zoom]);
 
   const chrome = (
     <>
@@ -133,7 +141,7 @@ export function EditorPreviewPanel({
 
   if (mode === "inline") {
     return (
-      <div className="relative flex h-full min-h-0 w-full flex-col rounded-3xl bg-white/70 shadow-[0_8px_40px_-12px_rgba(15,23,42,0.15),0_0_0_1px_rgba(255,255,255,0.8)] backdrop-blur-sm">
+      <div className="relative flex h-full min-h-0 w-full flex-col rounded-3xl bg-white/95 shadow-[0_8px_40px_-12px_rgba(15,23,42,0.15),0_0_0_1px_rgba(255,255,255,0.8)] md:backdrop-blur-sm">
         {chrome}
       </div>
     );
@@ -148,7 +156,7 @@ export function EditorPreviewPanel({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.15 }}
-            className="fixed inset-0 bg-slate-900/30 backdrop-blur-[2px] z-[60]"
+            className="fixed inset-0 bg-slate-900/45 md:bg-slate-900/30 md:backdrop-blur-[2px] z-[60]"
             onClick={onClose}
           />
           <motion.div
@@ -158,8 +166,7 @@ export function EditorPreviewPanel({
             transition={{ duration: 0.22, ease: [0.25, 0.46, 0.45, 0.94] }}
             className="fixed top-0 right-0 bottom-0 z-[70] w-full max-w-2xl flex flex-col"
             style={{
-              background: "rgba(248,250,252,0.97)",
-              backdropFilter: "blur(24px)",
+              background: "rgba(248,250,252,0.99)",
               boxShadow: "-20px 0 60px rgba(15,23,42,0.15)",
             }}
           >

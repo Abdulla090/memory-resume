@@ -110,7 +110,7 @@ export function EditorChatPane({
   }, []);
 
   return (
-    <div className="relative flex flex-col flex-1 min-h-0 rounded-3xl bg-white/70 shadow-[0_8px_40px_-12px_rgba(15,23,42,0.15),0_0_0_1px_rgba(255,255,255,0.8)] backdrop-blur-sm lg:rounded-3xl max-lg:h-full max-lg:rounded-[28px] max-lg:border max-lg:border-slate-200/70 max-lg:overflow-hidden">
+    <div className="relative flex flex-col flex-1 min-h-0 rounded-3xl bg-white/95 shadow-[0_8px_40px_-12px_rgba(15,23,42,0.15),0_0_0_1px_rgba(255,255,255,0.8)] md:backdrop-blur-sm lg:rounded-3xl max-lg:h-full max-lg:rounded-[28px] max-lg:border max-lg:border-slate-200/70 max-lg:overflow-hidden">
       <div className="shrink-0 flex items-center justify-between px-5 pt-4 pb-3 border-b border-slate-100/80 max-lg:px-4 max-lg:pt-3 max-lg:pb-2.5">
         <div className="flex items-center gap-2">
           <div className="size-7 rounded-xl bg-gradient-to-br from-slate-700 to-slate-900 flex items-center justify-center shadow-[0_2px_6px_rgba(0,0,0,0.2)]">
@@ -163,7 +163,7 @@ export function EditorChatPane({
       )}
 
       <div
-        className="flex-1 min-h-0 overflow-y-auto space-y-5 px-5 py-4 max-lg:px-4 max-lg:py-3"
+        className="perf-scroll flex-1 min-h-0 overflow-y-auto space-y-5 px-5 py-4 max-lg:px-4 max-lg:py-3"
         style={{ scrollbarWidth: "thin", scrollbarColor: "#e2e8f0 transparent" }}
       >
         <AnimatePresence initial={false}>
@@ -287,7 +287,7 @@ export function EditorChatPane({
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.9, y: 10 }}
                         transition={{ type: "spring", stiffness: 400, damping: 25 }}
-                        className="absolute bottom-full mb-3 left-0 bg-white/90 backdrop-blur-xl border border-white shadow-[0_8px_32px_rgba(15,23,42,0.16)] rounded-[24px] p-2 flex flex-col gap-1 w-52 z-[100] origin-bottom-left"
+                        className="absolute bottom-full mb-3 left-0 bg-white/98 md:bg-white/90 md:backdrop-blur-xl border border-white shadow-[0_8px_32px_rgba(15,23,42,0.16)] rounded-[24px] p-2 flex flex-col gap-1 w-52 z-[100] origin-bottom-left"
                       >
                         <button
                           type="button"

@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
-import { useState, useRef, useEffect, useCallback } from "react";
+import { lazy, Suspense, useState, useRef, useEffect } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { AnimatePresence } from "framer-motion";
@@ -25,6 +25,8 @@ import {
   generateCoverLetter,
 } from "@/lib/ai.functions";
 import { useAppStore } from "@/lib/store";
+import { getAiErrorMessage } from "@/lib/ai-errors";
+import { useMobileOptimized } from "@/lib/performance";
 import type { ExperienceItem, ResumeData, TemplateId, DesignSettings, FieldStyleOverride } from "@/lib/types";
 import { DesignContext } from "@/components/resume/DesignContext";
 import { DEFAULT_DESIGN, getTemplateDefaults, DesignPanel } from "@/components/DesignPanel";
@@ -33,7 +35,6 @@ import { getValueAtPath } from "@/components/resume/editor-helpers";
 
 // Sub-components
 import { EditorChatPane } from "@/components/editor/EditorChatPane";
-import { EditorPreviewPanel } from "@/components/editor/EditorPreviewPanel";
 import {
   TailorModal,
   CoverLetterModal,
@@ -50,6 +51,12 @@ import {
   TEMPLATES,
   type Category,
 } from "@/components/editor/editor.constants";
+
+const EditorPreviewPanel = lazy(() =>
+  import("@/components/editor/EditorPreviewPanel").then((module) => ({
+    default: module.EditorPreviewPanel,
+  })),
+);
 
 // ─── Route ────────────────────────────────────────────────────────────────────
 export const Route = createFileRoute("/editor/$id")({
@@ -80,6 +87,7 @@ function ResumeEditor() {
   const updateResume = useAppStore((s) => s.updateResume);
   const apiKey = useAppStore((s) => s.apiKey);
   const isKu = useAppStore((s) => s.language) === "ku";
+  const mobileOptimized = useMobileOptimized();
 
   const tailorFn = useServerFn(tailorToJob);
   const chatEditFn = useServerFn(chatEditResume);
@@ -230,23 +238,20 @@ function ResumeEditor() {
   const updateDesign = (patch: Partial<DesignSettings>) =>
     updateResume(id, { design: { ...design, ...patch } });
 
-  const updateFieldOverride = useCallback(
-    (fieldPath: string, fieldOverride: FieldStyleOverride) => {
-      const existingOverrides = design.fieldOverrides ?? {};
-      // Remove override if it's empty
-      const clean = Object.fromEntries(
-        Object.entries(fieldOverride).filter(([, v]) => v !== undefined),
-      );
-      const newOverrides = { ...existingOverrides };
-      if (Object.keys(clean).length === 0) {
-        delete newOverrides[fieldPath];
-      } else {
-        newOverrides[fieldPath] = clean;
-      }
-      updateDesign({ fieldOverrides: newOverrides });
-    },
-    [design, updateDesign],
-  );
+  const updateFieldOverride = (fieldPath: string, fieldOverride: FieldStyleOverride) => {
+    const existingOverrides = design.fieldOverrides ?? {};
+    // Remove override if it's empty
+    const clean = Object.fromEntries(
+      Object.entries(fieldOverride).filter(([, v]) => v !== undefined),
+    );
+    const newOverrides = { ...existingOverrides };
+    if (Object.keys(clean).length === 0) {
+      delete newOverrides[fieldPath];
+    } else {
+      newOverrides[fieldPath] = clean;
+    }
+    updateDesign({ fieldOverrides: newOverrides });
+  };
 
   // ── Debounced preview ─────────────────────────────────────────────────────────
   const toSoraniResume = (d: ResumeData): ResumeData => ({
@@ -324,13 +329,7 @@ function ResumeEditor() {
       setTailorOpen(false);
       setJobDescription("");
     } catch (e) {
-      toast.error(
-        e instanceof Error
-          ? e.message
-          : isKu
-            ? "گونجاندنی سیڤییەکە سەرکەوتوو نەبوو."
-            : "Failed to tailor resume.",
-      );
+      toast.error(getAiErrorMessage(e, isKu, isKu ? "گونجاندنی سیڤییەکە سەرکەوتوو نەبوو." : "Failed to tailor resume."));
     } finally {
       setTailoring(false);
     }
@@ -365,13 +364,7 @@ function ResumeEditor() {
       toast.success(isKu ? "سیڤی نوێکرایەوە" : "Resume updated");
     } catch (e) {
       setHistory((p) => p.filter((h) => h.id !== snapshotId));
-      toast.error(
-        e instanceof Error
-          ? e.message
-          : isKu
-            ? "نوێکردنەوەی سیڤی سەرکەوتوو نەبوو."
-            : "Failed to update resume.",
-      );
+      toast.error(getAiErrorMessage(e, isKu, isKu ? "نوێکردنەوەی سیڤی سەرکەوتوو نەبوو." : "Failed to update resume."));
       setMessages((p) => [
         ...p,
         {
@@ -415,13 +408,7 @@ function ResumeEditor() {
       toast.success(isKu ? "سیڤییەکە چاککرا" : "Resume fixed and evaluated");
     } catch (e) {
       setHistory((p) => p.filter((h) => h.id !== snapshotId));
-      toast.error(
-        e instanceof Error
-          ? e.message
-          : isKu
-            ? "چاککردنی سیڤی سەرکەوتوو نەبوو."
-            : "Failed to fix resume.",
-      );
+      toast.error(getAiErrorMessage(e, isKu, isKu ? "چاککردنی سیڤی سەرکەوتوو نەبوو." : "Failed to fix resume."));
       setMessages((p) => [
         ...p,
         {
@@ -446,13 +433,7 @@ function ResumeEditor() {
       });
       setCoverLetterContent(coverLetter);
     } catch (e) {
-      toast.error(
-        e instanceof Error
-          ? e.message
-          : isKu
-            ? "دروستکردنی نامەی داواکاری سەرکەوتوو نەبوو."
-            : "Failed to generate cover letter.",
-      );
+      toast.error(getAiErrorMessage(e, isKu, isKu ? "دروستکردنی نامەی داواکاری سەرکەوتوو نەبوو." : "Failed to generate cover letter."));
     } finally {
       setCoverLetterLoading(false);
     }
@@ -655,10 +636,68 @@ function ResumeEditor() {
               </div>
             </aside>
 
-            <section className="hidden min-h-0 lg:flex lg:min-w-0">
+            {!mobileOptimized && (
+              <section className="hidden min-h-0 lg:flex lg:min-w-0">
+                <Suspense
+                  fallback={
+                    <div className="flex h-full w-full items-center justify-center rounded-3xl bg-white text-sm font-semibold text-slate-500">
+                      {isKu ? "پێشبینین ئامادە دەکرێت..." : "Loading preview..."}
+                    </div>
+                  }
+                >
+                  <EditorPreviewPanel
+                    show
+                    mode="inline"
+                    onClose={() => setShowResume(false)}
+                    isKu={isKu}
+                    soraniMode={soraniMode}
+                    setSoraniMode={setSoraniMode}
+                    zoom={zoom}
+                    setZoom={setZoom}
+                    previewData={previewData}
+                    template={resume.template}
+                    design={design}
+                    updateData={updateData}
+                    onSectionClick={(s, path, e) => {
+                      if (path) {
+                        // If on Design tab, show the contextual toolbar
+                        if (sidebarTab === "design" && e) {
+                          setTextToolbar({
+                            section: s,
+                            path,
+                            value: String(getValueAtPath(data, path) || ""),
+                            position: { x: e.clientX, y: e.clientY },
+                          });
+                        } else {
+                          setInlineEdit({
+                            section: s,
+                            path,
+                            value: String(getValueAtPath(data, path) || ""),
+                          });
+                        }
+                      }
+                    }}
+                    previewRef={previewRef}
+                    isDesignMode={sidebarTab === "design"}
+                  />
+                </Suspense>
+              </section>
+            )}
+          </div>
+        </main>
+
+        {/* ── Preview overlay ── */}
+        {showResume && (
+          <div className="lg:hidden">
+            <Suspense
+              fallback={
+                <div className="fixed inset-0 z-[70] flex items-center justify-center bg-slate-50 text-sm font-semibold text-slate-500">
+                  {isKu ? "پێشبینین ئامادە دەکرێت..." : "Loading preview..."}
+                </div>
+              }
+            >
               <EditorPreviewPanel
-                show
-                mode="inline"
+                show={showResume}
                 onClose={() => setShowResume(false)}
                 isKu={isKu}
                 soraniMode={soraniMode}
@@ -671,7 +710,6 @@ function ResumeEditor() {
                 updateData={updateData}
                 onSectionClick={(s, path, e) => {
                   if (path) {
-                    // If on Design tab, show the contextual toolbar
                     if (sidebarTab === "design" && e) {
                       setTextToolbar({
                         section: s,
@@ -691,46 +729,9 @@ function ResumeEditor() {
                 previewRef={previewRef}
                 isDesignMode={sidebarTab === "design"}
               />
-            </section>
+            </Suspense>
           </div>
-        </main>
-
-        {/* ── Preview overlay ── */}
-        <div className="lg:hidden">
-          <EditorPreviewPanel
-            show={showResume}
-            onClose={() => setShowResume(false)}
-            isKu={isKu}
-            soraniMode={soraniMode}
-            setSoraniMode={setSoraniMode}
-            zoom={zoom}
-            setZoom={setZoom}
-            previewData={previewData}
-            template={resume.template}
-            design={design}
-            updateData={updateData}
-            onSectionClick={(s, path, e) => {
-              if (path) {
-                if (sidebarTab === "design" && e) {
-                  setTextToolbar({
-                    section: s,
-                    path,
-                    value: String(getValueAtPath(data, path) || ""),
-                    position: { x: e.clientX, y: e.clientY },
-                  });
-                } else {
-                  setInlineEdit({
-                    section: s,
-                    path,
-                    value: String(getValueAtPath(data, path) || ""),
-                  });
-                }
-              }
-            }}
-            previewRef={previewRef}
-            isDesignMode={sidebarTab === "design"}
-          />
-        </div>
+        )}
 
         {/* ── Modals ── */}
         <TailorModal
