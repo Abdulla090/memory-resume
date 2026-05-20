@@ -28,6 +28,7 @@ import { Route as DashboardThanksRouteImport } from './routes/dashboard.thanks'
 import { Route as DashboardSettingsRouteImport } from './routes/dashboard.settings'
 import { Route as DashboardMyCvsRouteImport } from './routes/dashboard.my-cvs'
 import { Route as DashboardJobTrackerRouteImport } from './routes/dashboard.job-tracker'
+import { Route as DashboardJobAgentRouteImport } from './routes/dashboard.job-agent'
 import { Route as DashboardCoverLettersRouteImport } from './routes/dashboard.cover-letters'
 import { Route as DashboardAnalyticsRouteImport } from './routes/dashboard.analytics'
 import { Route as DashboardAiWriterRouteImport } from './routes/dashboard.ai-writer'
@@ -128,6 +129,11 @@ const DashboardJobTrackerRoute = DashboardJobTrackerRouteImport.update({
   path: '/job-tracker',
   getParentRoute: () => DashboardRoute,
 } as any)
+const DashboardJobAgentRoute = DashboardJobAgentRouteImport.update({
+  id: '/job-agent',
+  path: '/job-agent',
+  getParentRoute: () => DashboardRoute,
+} as any)
 const DashboardCoverLettersRoute = DashboardCoverLettersRouteImport.update({
   id: '/cover-letters',
   path: '/cover-letters',
@@ -165,6 +171,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/ai-writer': typeof DashboardAiWriterRoute
   '/dashboard/analytics': typeof DashboardAnalyticsRoute
   '/dashboard/cover-letters': typeof DashboardCoverLettersRoute
+  '/dashboard/job-agent': typeof DashboardJobAgentRoute
   '/dashboard/job-tracker': typeof DashboardJobTrackerRoute
   '/dashboard/my-cvs': typeof DashboardMyCvsRoute
   '/dashboard/settings': typeof DashboardSettingsRoute
@@ -189,6 +196,7 @@ export interface FileRoutesByTo {
   '/dashboard/ai-writer': typeof DashboardAiWriterRoute
   '/dashboard/analytics': typeof DashboardAnalyticsRoute
   '/dashboard/cover-letters': typeof DashboardCoverLettersRoute
+  '/dashboard/job-agent': typeof DashboardJobAgentRoute
   '/dashboard/job-tracker': typeof DashboardJobTrackerRoute
   '/dashboard/my-cvs': typeof DashboardMyCvsRoute
   '/dashboard/settings': typeof DashboardSettingsRoute
@@ -215,6 +223,7 @@ export interface FileRoutesById {
   '/dashboard/ai-writer': typeof DashboardAiWriterRoute
   '/dashboard/analytics': typeof DashboardAnalyticsRoute
   '/dashboard/cover-letters': typeof DashboardCoverLettersRoute
+  '/dashboard/job-agent': typeof DashboardJobAgentRoute
   '/dashboard/job-tracker': typeof DashboardJobTrackerRoute
   '/dashboard/my-cvs': typeof DashboardMyCvsRoute
   '/dashboard/settings': typeof DashboardSettingsRoute
@@ -242,6 +251,7 @@ export interface FileRouteTypes {
     | '/dashboard/ai-writer'
     | '/dashboard/analytics'
     | '/dashboard/cover-letters'
+    | '/dashboard/job-agent'
     | '/dashboard/job-tracker'
     | '/dashboard/my-cvs'
     | '/dashboard/settings'
@@ -266,6 +276,7 @@ export interface FileRouteTypes {
     | '/dashboard/ai-writer'
     | '/dashboard/analytics'
     | '/dashboard/cover-letters'
+    | '/dashboard/job-agent'
     | '/dashboard/job-tracker'
     | '/dashboard/my-cvs'
     | '/dashboard/settings'
@@ -291,6 +302,7 @@ export interface FileRouteTypes {
     | '/dashboard/ai-writer'
     | '/dashboard/analytics'
     | '/dashboard/cover-letters'
+    | '/dashboard/job-agent'
     | '/dashboard/job-tracker'
     | '/dashboard/my-cvs'
     | '/dashboard/settings'
@@ -451,6 +463,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardJobTrackerRouteImport
       parentRoute: typeof DashboardRoute
     }
+    '/dashboard/job-agent': {
+      id: '/dashboard/job-agent'
+      path: '/job-agent'
+      fullPath: '/dashboard/job-agent'
+      preLoaderRoute: typeof DashboardJobAgentRouteImport
+      parentRoute: typeof DashboardRoute
+    }
     '/dashboard/cover-letters': {
       id: '/dashboard/cover-letters'
       path: '/cover-letters'
@@ -487,6 +506,7 @@ interface DashboardRouteChildren {
   DashboardAiWriterRoute: typeof DashboardAiWriterRoute
   DashboardAnalyticsRoute: typeof DashboardAnalyticsRoute
   DashboardCoverLettersRoute: typeof DashboardCoverLettersRoute
+  DashboardJobAgentRoute: typeof DashboardJobAgentRoute
   DashboardJobTrackerRoute: typeof DashboardJobTrackerRoute
   DashboardMyCvsRoute: typeof DashboardMyCvsRoute
   DashboardSettingsRoute: typeof DashboardSettingsRoute
@@ -499,6 +519,7 @@ const DashboardRouteChildren: DashboardRouteChildren = {
   DashboardAiWriterRoute: DashboardAiWriterRoute,
   DashboardAnalyticsRoute: DashboardAnalyticsRoute,
   DashboardCoverLettersRoute: DashboardCoverLettersRoute,
+  DashboardJobAgentRoute: DashboardJobAgentRoute,
   DashboardJobTrackerRoute: DashboardJobTrackerRoute,
   DashboardMyCvsRoute: DashboardMyCvsRoute,
   DashboardSettingsRoute: DashboardSettingsRoute,

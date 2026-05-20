@@ -2,10 +2,16 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import {
   callGateway,
+  callManagedAgent,
+  cancelManagedAgentInteraction,
+  extractJsonFromAgentText,
   extractText,
   extractToolArgs,
+  getManagedAgentInteraction,
   guardAiRequest,
+  resolveGeminiApiKey,
   type GatewayMessage,
+  type ManagedAgentStatus,
 } from "./ai-security";
 import {
   apiKeyInputSchema,
@@ -961,4 +967,373 @@ Write in ${isKu ? "Kurdish (Sorani)" : "English"}.`,
       ],
     });
     return { content: extractText(json).trim() };
+  });
+
+// ───────────────── Telegram Jobs Agent (Gemini Managed Agent) ─────────────────
+//
+// Uses the Antigravity managed agent (Gemini Interactions API) to browse public
+// Telegram job channels, read the most recent messages, and surface a ranked
+// shortlist of jobs that match the user's professional memory.
+//
+// Why a managed agent: this task needs real web browsing and multi-step
+// reasoning, which the standard chat-completions endpoint cannot do.
+//
+// Architecture: the scan runs in the API's background mode. `startTelegramJobScan`
+// kicks it off (~1-2s) and returns an interaction id; the client then polls
+// `pollTelegramJobScan` every few seconds until status is "completed". Both
+// server functions finish in well under any free-tier serverless timeout
+// (Vercel Hobby 10s, Cloudflare, Netlify, Deno Deploy, etc.) — no need to pay
+// for extended runtimes.
+
+export type JobMatchTier = "A" | "B" | "C";
+
+export interface TelegramJobMatch {
+  title: string;
+  company?: string;
+  location?: string;
+  channel: string;
+  link?: string;
+  snippet: string;
+  postedAt?: string;
+  language?: string;
+  score: number;
+  tier: JobMatchTier;
+  whyFit: string;
+  skillGap?: string[];
+}
+
+export interface TelegramJobScanStats {
+  channelsScanned: number;
+  channelsFailed: number;
+  messagesRead: number;
+  matchesFound: number;
+  notes?: string;
+}
+
+export type TelegramJobScanPhase = "queued" | "running" | "completed" | "failed" | "cancelled";
+
+export interface TelegramJobScanHandle {
+  interactionId: string;
+  environmentId?: string;
+  phase: TelegramJobScanPhase;
+}
+
+export interface TelegramJobScanResult {
+  matches: TelegramJobMatch[];
+  stats: TelegramJobScanStats;
+  interactionId: string;
+  environmentId?: string;
+  phase: TelegramJobScanPhase;
+  rawOutput?: string;
+}
+
+const telegramChannelSchema = z
+  .string()
+  .min(2)
+  .max(64)
+  .regex(/^@?[a-zA-Z0-9_]{2,32}$/u, "Invalid Telegram channel handle");
+
+function mapAgentStatusToPhase(status: ManagedAgentStatus): TelegramJobScanPhase {
+  switch (status) {
+    case "completed":
+      return "completed";
+    case "failed":
+    case "incomplete":
+      return "failed";
+    case "cancelled":
+      return "cancelled";
+    case "in_progress":
+    case "requires_action":
+    default:
+      return "running";
+  }
+}
+
+function buildTelegramAgentPrompts(args: {
+  profile: Profile;
+  channels: string[];
+  messagesPerChannel: number;
+  maxMatches: number;
+  language: "en" | "ku";
+  targetRole?: string;
+}): { systemInstruction: string; userInput: string } {
+  const isKu = args.language === "ku";
+  const channelUrls = args.channels.map((h) => `https://t.me/s/${h}`);
+
+  const compactProfile = {
+    name: args.profile.name,
+    location: args.profile.location,
+    summary: args.profile.summary?.slice(0, 1500) ?? "",
+    careerGoals: args.profile.careerGoals?.slice(0, 800) ?? "",
+    languages: args.profile.languages ?? [],
+    skills: {
+      technical: args.profile.skills?.technical?.slice(0, 30) ?? [],
+      soft: args.profile.skills?.soft?.slice(0, 20) ?? [],
+      tools: args.profile.skills?.tools?.slice(0, 30) ?? [],
+      languages_spoken: args.profile.skills?.languages_spoken?.slice(0, 10) ?? [],
+    },
+    industryExperience: args.profile.industryExperience?.slice(0, 20) ?? [],
+    inferredStrengths: args.profile.inferredStrengths?.slice(0, 20) ?? [],
+    latestRole: args.profile.experience?.[0]?.title ?? "",
+    yearsOfExperience: args.profile.experience?.length ?? 0,
+    targetRole: args.targetRole ?? "",
+  };
+
+  const systemInstruction = `You are a Telegram job-channel research agent for the MemoryCV platform.
+Your job is to BROWSE public Telegram channels via their web preview pages, read the most
+recent posts, identify which posts are real job opportunities, and rank them against the
+user's professional memory.
+
+# Browsing rules
+- For each channel handle the user gives you, open: https://t.me/s/<handle>
+- Some channels do not expose a public web preview; in that case mark them as "failed"
+  in stats but keep going.
+- Only consider the most recent ${args.messagesPerChannel} messages per channel (typical
+  newest first ordering of the t.me/s page).
+- Read message text carefully. Ignore reposts, surveys, ads, fundraising posts.
+
+# What counts as a job
+- Posts that announce a vacancy, hiring, opening, internship, contract, freelance gig,
+  remote opportunity, scholarship-with-stipend, or similar paid role. Skip courses,
+  paid trainings, paid events, and pure promotional content.
+
+# Matching rules
+- Compare each job to the user's profile (skills, latest role, target role, location,
+  spoken languages, summary, career goals).
+- Tier A = strong fit (clear overlap on role + key skills + language/location).
+- Tier B = partial fit (some overlap; minor gaps in 1-2 skills, or different seniority).
+- Tier C = adjacent/stretch (worth knowing but real gaps).
+- Score is 0-100 (A: 80-100, B: 60-79, C: 40-59). Skip anything below 40.
+
+# Output
+Return EXACTLY one JSON object between these markers, and nothing else after the markers.
+Do NOT include code fences. Do NOT include commentary outside the markers.
+
+<<<JSON_START>>>
+{
+  "matches": [
+    {
+      "title": "string",
+      "company": "string (optional)",
+      "location": "string (optional)",
+      "channel": "@handle (no protocol)",
+      "link": "https://t.me/<handle>/<id> if you can determine it, else empty",
+      "snippet": "first ~220 chars of the original message text",
+      "postedAt": "ISO date or readable timestamp if visible, else empty",
+      "language": "en | ku | ar | other",
+      "score": 0,
+      "tier": "A" | "B" | "C",
+      "whyFit": "1-2 sentences in ${isKu ? "Kurdish (Sorani)" : "English"}",
+      "skillGap": ["short", "skill", "names"]
+    }
+  ],
+  "stats": {
+    "channelsScanned": 0,
+    "channelsFailed": 0,
+    "messagesRead": 0,
+    "matchesFound": 0,
+    "notes": "short status note, empty if nothing to report"
+  }
+}
+<<<JSON_END>>>
+
+# Hard limits
+- At most ${args.maxMatches} matches.
+- Sort matches by tier (A then B then C) and then by score descending.
+- Do NOT invent posts. Only include jobs you actually saw in the channels.
+- Do NOT translate the snippet; keep it in the original language.
+- The 'whyFit' field must be in ${isKu ? "Kurdish (Sorani)" : "English"}.`;
+
+  const userInput = `Scan these Telegram channels for jobs that match the user.
+
+Channels to scan (open each URL with your browsing tool):
+${channelUrls.map((u, i) => `${i + 1}. ${u}`).join("\n")}
+
+User professional memory (JSON):
+${JSON.stringify(compactProfile, null, 2)}
+
+Read up to ${args.messagesPerChannel} most recent posts per channel. Return at most
+${args.maxMatches} ranked matches in the JSON format described in your instructions.`;
+
+  return { systemInstruction, userInput };
+}
+
+function parseTelegramAgentOutput(
+  outputText: string,
+  maxMatches: number,
+  fallbackChannelsScanned: number,
+): { matches: TelegramJobMatch[]; stats: TelegramJobScanStats; rawOutput?: string } {
+  const parsed = extractJsonFromAgentText<{
+    matches?: TelegramJobMatch[];
+    stats?: TelegramJobScanStats;
+  }>(outputText);
+
+  const rawMatches = Array.isArray(parsed?.matches) ? parsed!.matches : [];
+  const cleanMatches: TelegramJobMatch[] = rawMatches
+    .slice(0, maxMatches)
+    .map((m): TelegramJobMatch => ({
+      title: String(m?.title ?? "").slice(0, 300),
+      company: m?.company ? String(m.company).slice(0, 200) : undefined,
+      location: m?.location ? String(m.location).slice(0, 200) : undefined,
+      channel: String(m?.channel ?? "").replace(/^@?/, "@").slice(0, 80),
+      link: m?.link ? String(m.link).slice(0, 500) : undefined,
+      snippet: String(m?.snippet ?? "").slice(0, 1000),
+      postedAt: m?.postedAt ? String(m.postedAt).slice(0, 100) : undefined,
+      language: m?.language ? String(m.language).slice(0, 20) : undefined,
+      score: Math.max(0, Math.min(100, Number(m?.score) || 0)),
+      tier: (["A", "B", "C"] as const).includes(m?.tier as JobMatchTier)
+        ? (m!.tier as JobMatchTier)
+        : "C",
+      whyFit: String(m?.whyFit ?? "").slice(0, 800),
+      skillGap: Array.isArray(m?.skillGap)
+        ? m.skillGap.slice(0, 10).map((s) => String(s).slice(0, 80))
+        : undefined,
+    }))
+    .sort((a, b) => {
+      const tierOrder = { A: 0, B: 1, C: 2 } as const;
+      const td = tierOrder[a.tier] - tierOrder[b.tier];
+      if (td !== 0) return td;
+      return b.score - a.score;
+    });
+
+  const stats: TelegramJobScanStats = {
+    channelsScanned: Number(parsed?.stats?.channelsScanned) || fallbackChannelsScanned,
+    channelsFailed: Number(parsed?.stats?.channelsFailed) || 0,
+    messagesRead: Number(parsed?.stats?.messagesRead) || 0,
+    matchesFound: cleanMatches.length,
+    notes: parsed?.stats?.notes ? String(parsed.stats.notes).slice(0, 500) : undefined,
+  };
+
+  return {
+    matches: cleanMatches,
+    stats,
+    rawOutput: parsed == null && outputText ? outputText.slice(0, 4000) : undefined,
+  };
+}
+
+/**
+ * Kick off the Telegram-jobs managed agent in background mode.
+ * Returns an interaction handle in ~1-2s; the agent then runs on Google's infra.
+ * Poll with `pollTelegramJobScan(handle.interactionId)` until phase is
+ * `"completed"` or a terminal failure.
+ */
+export const startTelegramJobScan = createServerFn({ method: "POST" })
+  .inputValidator(
+    z.object({
+      apiKey: apiKeyInputSchema,
+      profile: profileInputSchema,
+      channels: z.array(telegramChannelSchema).min(1).max(5),
+      messagesPerChannel: z.number().int().min(20).max(100).default(60),
+      maxMatches: z.number().int().min(3).max(20).default(10),
+      language: languageSchema.default("en"),
+      targetRole: z.string().max(300).optional(),
+      previousInteractionId: z.string().max(200).optional(),
+      environmentId: z.string().max(200).optional(),
+    }),
+  )
+  .handler(async ({ data }): Promise<TelegramJobScanHandle> => {
+    const apiKey = await guardAiRequest("findTelegramJobs", data.apiKey, {
+      max: 6,
+      windowMs: 60 * 60 * 1000,
+    });
+
+    const channels = data.channels.map((handle) => handle.replace(/^@/, ""));
+    const { systemInstruction, userInput } = buildTelegramAgentPrompts({
+      profile: data.profile,
+      channels,
+      messagesPerChannel: data.messagesPerChannel,
+      maxMatches: data.maxMatches,
+      language: data.language,
+      targetRole: data.targetRole,
+    });
+
+    const result = await callManagedAgent({
+      apiKey,
+      input: userInput,
+      systemInstruction,
+      environment: data.environmentId ?? "remote",
+      previousInteractionId: data.previousInteractionId,
+      background: true,
+      timeoutMs: 25_000,
+    });
+
+    return {
+      interactionId: result.interactionId,
+      environmentId: result.environmentId,
+      phase: mapAgentStatusToPhase(result.status),
+    };
+  });
+
+/**
+ * Poll a running Telegram-jobs scan started by `startTelegramJobScan`.
+ * Returns the current phase; when phase is "completed", `matches` and `stats`
+ * are populated. Each call finishes in ~1s so it fits inside any free-tier
+ * serverless timeout.
+ */
+export const pollTelegramJobScan = createServerFn({ method: "POST" })
+  .inputValidator(
+    z.object({
+      apiKey: apiKeyInputSchema,
+      interactionId: z.string().min(1).max(200),
+      maxMatches: z.number().int().min(3).max(20).default(10),
+      fallbackChannelsScanned: z.number().int().min(0).max(20).default(0),
+    }),
+  )
+  .handler(async ({ data }): Promise<TelegramJobScanResult> => {
+    // Lightweight rate limit — polling can happen many times per scan.
+    const apiKey = await guardAiRequest("pollTelegramJobScan", data.apiKey, {
+      max: 240,
+      windowMs: 60 * 60 * 1000,
+    });
+
+    const status = await getManagedAgentInteraction({
+      apiKey,
+      interactionId: data.interactionId,
+    });
+
+    const phase = mapAgentStatusToPhase(status.status);
+
+    if (phase !== "completed") {
+      return {
+        matches: [],
+        stats: {
+          channelsScanned: data.fallbackChannelsScanned,
+          channelsFailed: 0,
+          messagesRead: 0,
+          matchesFound: 0,
+        },
+        interactionId: status.interactionId,
+        environmentId: status.environmentId,
+        phase,
+      };
+    }
+
+    const parsed = parseTelegramAgentOutput(
+      status.outputText,
+      data.maxMatches,
+      data.fallbackChannelsScanned,
+    );
+
+    return {
+      matches: parsed.matches,
+      stats: parsed.stats,
+      interactionId: status.interactionId,
+      environmentId: status.environmentId,
+      phase,
+      rawOutput: parsed.rawOutput,
+    };
+  });
+
+/** Cancel a running Telegram-jobs scan. Best-effort; safe to call any time. */
+export const cancelTelegramJobScan = createServerFn({ method: "POST" })
+  .inputValidator(
+    z.object({
+      apiKey: apiKeyInputSchema,
+      interactionId: z.string().min(1).max(200),
+    }),
+  )
+  .handler(async ({ data }): Promise<{ ok: true }> => {
+    const apiKey = resolveGeminiApiKey(data.apiKey);
+    await cancelManagedAgentInteraction({ apiKey, interactionId: data.interactionId });
+    return { ok: true };
   });

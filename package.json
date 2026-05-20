@@ -22,6 +22,7 @@
   "dependencies": {
     "@clerk/tanstack-react-start": "^1.2.7",
     "@cloudflare/vite-plugin": "^1.25.5",
+    "@google/genai": "^2.5.0",
     "@heroui/react": "^3.0.4",
     "@heroui/styles": "^3.0.4",
     "@hookform/resolvers": "^5.2.2",

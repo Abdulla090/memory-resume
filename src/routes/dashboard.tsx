@@ -15,6 +15,7 @@ import {
   X,
   Heart,
   Sparkles,
+  Bot,
 } from "lucide-react";
 import { useState } from "react";
 import { useAppStore } from "@/lib/store";
@@ -42,6 +43,7 @@ function DashboardLayout() {
     { name: isKu ? "قاڵبەکان" : "Templates", icon: LayoutTemplate, path: "/templates", group: "create" },
     { name: isKu ? "نووسەری AI" : "AI Writer", icon: PenTool, path: "/dashboard/ai-writer", group: "ai" },
     { name: isKu ? "باشترکردنی AI" : "AI Optimize", icon: Wand2, path: "/dashboard/ai-optimize", group: "ai" },
+    { name: isKu ? "ئاژانسی کار" : "Job Agent", icon: Bot, path: "/dashboard/job-agent", group: "ai" },
     { name: isKu ? "شیکاری" : "Analytics", icon: BarChart2, path: "/dashboard/analytics", group: "track" },
     { name: isKu ? "نامەی ڕووپۆش" : "Cover Letters", icon: FileText, path: "/dashboard/cover-letters", group: "create" },
     { name: isKu ? "کارتی سوپاس" : "Thank-you cards", icon: Heart, path: "/dashboard/thanks", group: "create" },
