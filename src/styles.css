@@ -705,3 +705,11 @@ html.perf-mobile .blur-3xl {
 .cl-footerPages {
   display: none !important;
 }
+
+.auth-clerk-shell .cl-card {
+  gap: 0.75rem;
+}
+
+.auth-clerk-shell .cl-socialButtons {
+  width: 100%;
+}

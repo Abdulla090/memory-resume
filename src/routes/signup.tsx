@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { SignUp } from "@clerk/tanstack-react-start";
 import { AuthFormLayout } from "@/components/auth/AuthFormLayout";
-import { CustomSignUpForm } from "@/components/auth/CustomSignUpForm";
+import { memoryCvClerkAppearance } from "@/components/auth/clerk-appearance";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { useAppStore } from "@/lib/store";
 
@@ -29,19 +30,26 @@ function SignUpPage() {
 
   return (
     <AuthFormLayout
+      isKu={isKu}
       title={isKu ? "تۆمارکردن" : "Create account"}
       subtitle={
         isKu
-          ? "ناو، ئیمەیڵ و وشەی نهێنی — داتاکان لە هەور پاشەکەوت دەبن"
-          : "Name, email, and password — your resumes sync to the cloud"
+          ? "بە گووگڵ یان ئیمەیڵ — سیڤییەکانت لە هەور پاشەکەوت دەبن"
+          : "Continue with Google or email — your resumes sync to the cloud"
       }
       footer={
-        <Link to="/login" className="text-primary underline">
+        <Link to="/login" className="font-semibold text-primary underline-offset-2 hover:underline">
           {isKu ? "هەژمارت هەیە؟ چوونەژوورەوە" : "Already have an account? Sign in"}
         </Link>
       }
     >
-      <CustomSignUpForm isKu={isKu} />
+      <SignUp
+        routing="path"
+        path="/signup"
+        signInUrl="/login"
+        forceRedirectUrl="/dashboard/settings"
+        appearance={memoryCvClerkAppearance}
+      />
     </AuthFormLayout>
   );
 }

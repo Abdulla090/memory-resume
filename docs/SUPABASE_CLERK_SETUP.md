@@ -17,7 +17,8 @@ You only need to paste **Clerk API keys** into `.env.local` (see below).
 1. Create an application at [clerk.com](https://clerk.com).
 2. Copy **Publishable key** → `VITE_CLERK_PUBLISHABLE_KEY` and **Secret key** → `CLERK_SECRET_KEY`.
 3. Enable **Email** sign-in and email verification in Clerk → User & authentication.
-4. Optional: **Appearance** to match MemoryCV branding.
+4. **Google sign-in:** Clerk Dashboard → **User & authentication → Social connections** → enable **Google** → turn on **Enable for sign-up and sign-in**. Without this, the “Continue with Google” button will not appear on `/signup` or `/login`.
+5. Optional: require **First / last name** in Clerk if you want them on the sign-up form.
 
 ## 2. Supabase + Clerk integration
 

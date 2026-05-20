@@ -21,6 +21,8 @@ import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DashboardIndexRouteImport } from './routes/dashboard.index'
+import { Route as SignupSplatRouteImport } from './routes/signup.$'
+import { Route as LoginSplatRouteImport } from './routes/login.$'
 import { Route as EditorIdRouteImport } from './routes/editor.$id'
 import { Route as DashboardThanksRouteImport } from './routes/dashboard.thanks'
 import { Route as DashboardSettingsRouteImport } from './routes/dashboard.settings'
@@ -91,6 +93,16 @@ const DashboardIndexRoute = DashboardIndexRouteImport.update({
   path: '/',
   getParentRoute: () => DashboardRoute,
 } as any)
+const SignupSplatRoute = SignupSplatRouteImport.update({
+  id: '/$',
+  path: '/$',
+  getParentRoute: () => SignupRoute,
+} as any)
+const LoginSplatRoute = LoginSplatRouteImport.update({
+  id: '/$',
+  path: '/$',
+  getParentRoute: () => LoginRoute,
+} as any)
 const EditorIdRoute = EditorIdRouteImport.update({
   id: '/editor/$id',
   path: '/editor/$id',
@@ -142,10 +154,10 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof DashboardRouteWithChildren
   '/forgot-password': typeof ForgotPasswordRoute
   '/interview': typeof InterviewRoute
-  '/login': typeof LoginRoute
+  '/login': typeof LoginRouteWithChildren
   '/onboarding': typeof OnboardingRoute
   '/privacy': typeof PrivacyRoute
-  '/signup': typeof SignupRoute
+  '/signup': typeof SignupRouteWithChildren
   '/templates': typeof TemplatesRoute
   '/terms': typeof TermsRoute
   '/verify-email': typeof VerifyEmailRoute
@@ -158,16 +170,18 @@ export interface FileRoutesByFullPath {
   '/dashboard/settings': typeof DashboardSettingsRoute
   '/dashboard/thanks': typeof DashboardThanksRoute
   '/editor/$id': typeof EditorIdRoute
+  '/login/$': typeof LoginSplatRoute
+  '/signup/$': typeof SignupSplatRoute
   '/dashboard/': typeof DashboardIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/interview': typeof InterviewRoute
-  '/login': typeof LoginRoute
+  '/login': typeof LoginRouteWithChildren
   '/onboarding': typeof OnboardingRoute
   '/privacy': typeof PrivacyRoute
-  '/signup': typeof SignupRoute
+  '/signup': typeof SignupRouteWithChildren
   '/templates': typeof TemplatesRoute
   '/terms': typeof TermsRoute
   '/verify-email': typeof VerifyEmailRoute
@@ -180,6 +194,8 @@ export interface FileRoutesByTo {
   '/dashboard/settings': typeof DashboardSettingsRoute
   '/dashboard/thanks': typeof DashboardThanksRoute
   '/editor/$id': typeof EditorIdRoute
+  '/login/$': typeof LoginSplatRoute
+  '/signup/$': typeof SignupSplatRoute
   '/dashboard': typeof DashboardIndexRoute
 }
 export interface FileRoutesById {
@@ -188,10 +204,10 @@ export interface FileRoutesById {
   '/dashboard': typeof DashboardRouteWithChildren
   '/forgot-password': typeof ForgotPasswordRoute
   '/interview': typeof InterviewRoute
-  '/login': typeof LoginRoute
+  '/login': typeof LoginRouteWithChildren
   '/onboarding': typeof OnboardingRoute
   '/privacy': typeof PrivacyRoute
-  '/signup': typeof SignupRoute
+  '/signup': typeof SignupRouteWithChildren
   '/templates': typeof TemplatesRoute
   '/terms': typeof TermsRoute
   '/verify-email': typeof VerifyEmailRoute
@@ -204,6 +220,8 @@ export interface FileRoutesById {
   '/dashboard/settings': typeof DashboardSettingsRoute
   '/dashboard/thanks': typeof DashboardThanksRoute
   '/editor/$id': typeof EditorIdRoute
+  '/login/$': typeof LoginSplatRoute
+  '/signup/$': typeof SignupSplatRoute
   '/dashboard/': typeof DashboardIndexRoute
 }
 export interface FileRouteTypes {
@@ -229,6 +247,8 @@ export interface FileRouteTypes {
     | '/dashboard/settings'
     | '/dashboard/thanks'
     | '/editor/$id'
+    | '/login/$'
+    | '/signup/$'
     | '/dashboard/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -251,6 +271,8 @@ export interface FileRouteTypes {
     | '/dashboard/settings'
     | '/dashboard/thanks'
     | '/editor/$id'
+    | '/login/$'
+    | '/signup/$'
     | '/dashboard'
   id:
     | '__root__'
@@ -274,6 +296,8 @@ export interface FileRouteTypes {
     | '/dashboard/settings'
     | '/dashboard/thanks'
     | '/editor/$id'
+    | '/login/$'
+    | '/signup/$'
     | '/dashboard/'
   fileRoutesById: FileRoutesById
 }
@@ -282,10 +306,10 @@ export interface RootRouteChildren {
   DashboardRoute: typeof DashboardRouteWithChildren
   ForgotPasswordRoute: typeof ForgotPasswordRoute
   InterviewRoute: typeof InterviewRoute
-  LoginRoute: typeof LoginRoute
+  LoginRoute: typeof LoginRouteWithChildren
   OnboardingRoute: typeof OnboardingRoute
   PrivacyRoute: typeof PrivacyRoute
-  SignupRoute: typeof SignupRoute
+  SignupRoute: typeof SignupRouteWithChildren
   TemplatesRoute: typeof TemplatesRoute
   TermsRoute: typeof TermsRoute
   VerifyEmailRoute: typeof VerifyEmailRoute
@@ -377,6 +401,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/dashboard/'
       preLoaderRoute: typeof DashboardIndexRouteImport
       parentRoute: typeof DashboardRoute
+    }
+    '/signup/$': {
+      id: '/signup/$'
+      path: '/$'
+      fullPath: '/signup/$'
+      preLoaderRoute: typeof SignupSplatRouteImport
+      parentRoute: typeof SignupRoute
+    }
+    '/login/$': {
+      id: '/login/$'
+      path: '/$'
+      fullPath: '/login/$'
+      preLoaderRoute: typeof LoginSplatRouteImport
+      parentRoute: typeof LoginRoute
     }
     '/editor/$id': {
       id: '/editor/$id'
@@ -472,15 +510,36 @@ const DashboardRouteWithChildren = DashboardRoute._addFileChildren(
   DashboardRouteChildren,
 )
 
+interface LoginRouteChildren {
+  LoginSplatRoute: typeof LoginSplatRoute
+}
+
+const LoginRouteChildren: LoginRouteChildren = {
+  LoginSplatRoute: LoginSplatRoute,
+}
+
+const LoginRouteWithChildren = LoginRoute._addFileChildren(LoginRouteChildren)
+
+interface SignupRouteChildren {
+  SignupSplatRoute: typeof SignupSplatRoute
+}
+
+const SignupRouteChildren: SignupRouteChildren = {
+  SignupSplatRoute: SignupSplatRoute,
+}
+
+const SignupRouteWithChildren =
+  SignupRoute._addFileChildren(SignupRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   DashboardRoute: DashboardRouteWithChildren,
   ForgotPasswordRoute: ForgotPasswordRoute,
   InterviewRoute: InterviewRoute,
-  LoginRoute: LoginRoute,
+  LoginRoute: LoginRouteWithChildren,
   OnboardingRoute: OnboardingRoute,
   PrivacyRoute: PrivacyRoute,
-  SignupRoute: SignupRoute,
+  SignupRoute: SignupRouteWithChildren,
   TemplatesRoute: TemplatesRoute,
   TermsRoute: TermsRoute,
   VerifyEmailRoute: VerifyEmailRoute,
@@ -491,10 +550,11 @@ export const routeTree = rootRouteImport
   ._addFileTypes<FileRouteTypes>()
 
 import type { getRouter } from './router.tsx'
-import type { createStart } from '@tanstack/react-start'
+import type { startInstance } from './start.ts'
 declare module '@tanstack/react-start' {
   interface Register {
     ssr: true
     router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
   }
 }

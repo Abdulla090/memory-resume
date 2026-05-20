@@ -32,12 +32,15 @@ function LoginPage() {
 
   return (
     <AuthFormLayout
+      isKu={isKu}
       title={isKu ? "چوونەژوورەوە" : "Sign in"}
       subtitle={
-        isKu ? "بە هەژمارەکەت بچۆرە ژوورەوە" : "Access your cloud-backed resumes and profile"
+        isKu
+          ? "بە گووگڵ یان ئیمەیڵ — دەستگەیشتن بە سیڤی و پڕۆفایلەکەت"
+          : "Continue with Google or email — access your resumes and profile"
       }
       footer={
-        <Link to="/signup" className="text-primary underline">
+        <Link to="/signup" className="font-semibold text-primary underline-offset-2 hover:underline">
           {isKu ? "هەژمارت نییە؟ تۆمار بکە" : "Need an account? Sign up"}
         </Link>
       }
