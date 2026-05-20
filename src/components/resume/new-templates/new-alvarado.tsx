@@ -197,20 +197,30 @@ export function NewAlvaradoTemplate({ data }: { data: ResumeData }) {
             </div>
           </section>
 
-          {/* References */}
-          <section className="mt-[35px]">
-            <SectionTitle title={rtl ? "سەرچاوەکان" : "References"} className="mb-5" />
-            <div className="grid grid-cols-2 gap-x-8 gap-y-6">
-              {references.map((item, index) => (
-                <div key={`${item.name}-${index}`}>
-                  <h3 className="text-[12px] font-bold text-[#2b2b2f]">{item.name}</h3>
-                  <p className="mt-0.5 text-[10px] font-medium text-[#4a4a4e]">{item.role}</p>
-                  <p className="mt-2 text-[8.5px] font-bold text-[#2b2b2f]">Phone: <span className="font-medium text-[#4a4a4e]">+123-456-7890</span></p>
-                  <p className="mt-0.5 text-[8.5px] font-bold text-[#2b2b2f]">Email: <span className="font-medium text-[#4a4a4e]">hello@reallygreatsite.com</span></p>
-                </div>
-              ))}
-            </div>
-          </section>
+          {references.length > 0 && (
+            <section className="mt-[35px]">
+              <SectionTitle title={l.projects} className="mb-5" />
+              <div className="grid grid-cols-2 gap-x-8 gap-y-6">
+                {references.map((item, index) => {
+                  const isProject = c.projects.length > 0 && index < c.projects.length;
+                  const namePath = isProject ? `projects.${index}.name` : `education.${index}.institution`;
+                  const rolePath = isProject ? `projects.${index}.tech.0` : `education.${index}.degree`;
+                  const metaPath = isProject
+                    ? c.projects[index]?.impact
+                      ? `projects.${index}.impact`
+                      : `projects.${index}.description`
+                    : `education.${index}.year`;
+                  return (
+                    <div key={`${item.name}-${index}`}>
+                      <Editable path={namePath} value={item.name} as="h3" className="text-[12px] font-bold text-[#2b2b2f]" />
+                      <Editable path={rolePath} value={item.role} as="p" className="mt-0.5 text-[10px] font-medium text-[#4a4a4e]" />
+                      <Editable path={metaPath} value={item.meta} as="p" className="mt-2 text-[10px] font-medium text-[#4a4a4e]" />
+                    </div>
+                  );
+                })}
+              </div>
+            </section>
+          )}
         </main>
       </div>
     </div>

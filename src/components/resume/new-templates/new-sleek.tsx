@@ -167,15 +167,24 @@ export function NewSleekTemplate({ data }: { data: ResumeData }) {
               <div className="space-y-4">
                 {c.education.map((item, index) => (
                   <div key={`${item.institution}-${index}`}>
-                    <div className="text-[12px] font-extrabold leading-5 text-[var(--color-heading)]">
-                      {item.degree}
-                    </div>
-                    <div className="mt-1 text-[11px] font-semibold text-[var(--color-text)] opacity-80">
-                      {item.institution}
-                    </div>
-                    <div className="mt-1 text-[10px] font-black text-[var(--color-text)] opacity-60">
-                      {item.year}
-                    </div>
+                    <Editable
+                      path={`education.${index}.degree`}
+                      value={item.degree}
+                      as="div"
+                      className="text-[12px] font-extrabold leading-5 text-[var(--color-heading)]"
+                    />
+                    <Editable
+                      path={`education.${index}.institution`}
+                      value={item.institution}
+                      as="div"
+                      className="mt-1 text-[11px] font-semibold text-[var(--color-text)] opacity-80"
+                    />
+                    <Editable
+                      path={`education.${index}.year`}
+                      value={item.year}
+                      as="div"
+                      className="mt-1 text-[10px] font-black text-[var(--color-text)] opacity-60"
+                    />
                   </div>
                 ))}
               </div>
@@ -184,8 +193,8 @@ export function NewSleekTemplate({ data }: { data: ResumeData }) {
           {c.certifications.length > 0 && (
             <Section title={l.certifications}>
               <div className="space-y-2 text-[11px] font-semibold leading-5 text-[var(--color-text)]">
-                {c.certifications.map((item) => (
-                  <div key={item}>{item}</div>
+                {c.certifications.map((item, index) => (
+                  <Editable key={item} path={`certifications.${index}`} value={item} as="div" />
                 ))}
               </div>
             </Section>

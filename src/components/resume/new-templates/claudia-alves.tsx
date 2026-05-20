@@ -1,4 +1,4 @@
-import { Globe, Home, Mail, Phone } from "lucide-react";
+import { Home, Mail, Phone } from "lucide-react";
 import type { ReactNode } from "react";
 import { Editable } from "../Editable";
 import { useLayoutRtl } from "../template-helpers";
@@ -6,8 +6,6 @@ import type { ResumeData } from "@/lib/types";
 import { optimizeResumeForOnePage } from "@/lib/resume-utils";
 
 const BAR = "#686361";
-const TEXT = "#6a6664";
-const HEADING = "#666260";
 
 function SectionBar({ title, className = "" }: { title: ReactNode; className?: string }) {
   return (
@@ -161,7 +159,6 @@ export function ClaudiaAlvesTemplate({ data }: { data: ResumeData }) {
             <div className="mt-[32px] space-y-[10px]">
               {c.phone && <ContactRow icon={<Phone className="h-[8px] w-[8px]" strokeWidth={3} />} path="phone" value={c.phone} />}
               {c.email && <ContactRow icon={<Mail className="h-[8px] w-[8px]" strokeWidth={3} />} path="email" value={c.email} />}
-              <ContactRow icon={<Globe className="h-[8px] w-[8px]" strokeWidth={3} />} value="www.reallygreatsite.com" />
               {c.location && <ContactRow icon={<Home className="h-[8px] w-[8px] fill-white" strokeWidth={3} />} path="location" value={c.location} />}
             </div>
           </div>
@@ -214,19 +211,26 @@ export function ClaudiaAlvesTemplate({ data }: { data: ResumeData }) {
           <section>
             <SectionBar title={<Editable path="sectionTitles.references" value={c.sectionTitles?.references || "Work References"} as="span" />} />
             <div className="mt-[26px]">
-              {references.length > 0 ? references.map((reference, index) => (
-                <div key={`${reference.name}-${index}`}>
-                  <h3 className="text-[13px] font-black uppercase leading-[1.2]" style={{ color: HEADING }}>
-                    {reference.name}
-                  </h3>
-                  <p className="mt-[21px] text-[12px] leading-[1.45]" style={{ color: TEXT }}>{reference.role}</p>
-                  <p className="text-[12px] leading-[1.45]" style={{ color: TEXT }}>{reference.company}</p>
-                  {c.email && <Editable path="email" value={c.email} as="p" className="text-[12px] leading-[1.45] text-[#6a6664]" />}
-                </div>
-              )) : (
+              {references.length > 0 ? references.map((reference, index) => {
+                const isProject = c.projects.length > 0 && index < c.projects.length;
+                const namePath = isProject ? `projects.${index}.name` : `experience.${index}.company`;
+                const rolePath = isProject ? `projects.${index}.tech.0` : `experience.${index}.title`;
+                const companyPath = isProject
+                  ? c.projects[index]?.impact
+                    ? `projects.${index}.impact`
+                    : `projects.${index}.description`
+                  : `experience.${index}.description`;
+                return (
+                  <div key={`${reference.name}-${index}`}>
+                    <Editable path={namePath} value={reference.name} as="h3" className="text-[13px] font-black uppercase leading-[1.2]" />
+                    <Editable path={rolePath} value={reference.role} as="p" className="mt-[21px] text-[12px] leading-[1.45]" />
+                    <Editable path={companyPath} value={reference.company} as="p" className="text-[12px] leading-[1.45]" />
+                  </div>
+                );
+              }) : (
                 <div>
                   <Editable path="name" value={c.name} as="h3" className="text-[13px] font-black uppercase leading-[1.2] text-[#666260]" />
-                  <p className="mt-[21px] text-[12px] leading-[1.45] text-[#6a6664]">{c.title}</p>
+                  <Editable path="title" value={c.title} as="p" className="mt-[21px] text-[12px] leading-[1.45] text-[#6a6664]" />
                   {c.email && <Editable path="email" value={c.email} as="p" className="text-[12px] leading-[1.45] text-[#6a6664]" />}
                 </div>
               )}

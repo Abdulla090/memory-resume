@@ -88,99 +88,18 @@ export function getValueAtPath(data: ResumeData, path: string) {
 }
 
 /**
- * FieldPathAnnotator — Zero-render component that tags preview DOM elements
- * with `data-field-path` attributes so field-override CSS can target them.
- * Runs after every render where fieldOverrides change.
+ * Build the full list of known {path, value} pairs from the resume data.
+ * Used by both the runtime annotator (to tag DOM elements) and the click
+ * handler (to resolve clicked text to a data path).
  */
-function FieldPathAnnotator({
-  previewRef,
-  data,
-  fieldOverrides,
-}: {
-  previewRef: RefObject<HTMLDivElement | null>;
-  data: ResumeData;
-  fieldOverrides?: Record<string, unknown>;
-}) {
-  useEffect(() => {
-    const root = previewRef.current;
-    if (!root || !fieldOverrides) return;
-
-    const paths = Object.keys(fieldOverrides);
-    if (paths.length === 0) return;
-
-    // Clear old annotations
-    root.querySelectorAll("[data-field-path]").forEach((el) => {
-      el.removeAttribute("data-field-path");
-    });
-
-    // Build lookup: value → path
-    const valueToPaths: Map<string, string> = new Map();
-    for (const path of paths) {
-      const val = getValueAtPath(data, path);
-      if (typeof val === "string" && val.trim().length > 0) {
-        valueToPaths.set(val.trim(), path);
-      }
-    }
-
-    if (valueToPaths.size === 0) return;
-
-    // Walk all leaf text-carrying elements
-    const walker = document.createTreeWalker(root, NodeFilter.SHOW_ELEMENT, {
-      acceptNode: (node) => {
-        const el = node as HTMLElement;
-        // Skip style, script, and already-tagged elements
-        if (["STYLE", "SCRIPT", "SVG"].includes(el.tagName)) return NodeFilter.FILTER_REJECT;
-        // Only consider elements that directly contain text children
-        const hasTextChild = Array.from(el.childNodes).some(
-          (n) => n.nodeType === Node.TEXT_NODE && n.textContent?.trim(),
-        );
-        return hasTextChild ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_SKIP;
-      },
-    });
-
-    const tagged = new Set<string>();
-    let current = walker.nextNode();
-    while (current) {
-      const el = current as HTMLElement;
-      const text = el.textContent?.trim() || "";
-      if (text.length > 0) {
-        // Try exact match first
-        for (const [val, path] of valueToPaths) {
-          if (!tagged.has(path) && (text === val || text.includes(val) || val.includes(text))) {
-            // Only tag the most specific (innermost) element
-            const existingTagged = el.querySelector(`[data-field-path="${path}"]`);
-            if (!existingTagged) {
-              el.setAttribute("data-field-path", path);
-              tagged.add(path);
-            }
-            break;
-          }
-        }
-      }
-      current = walker.nextNode();
-    }
-  }, [previewRef, data, fieldOverrides]);
-
-  return null; // Zero-render component
-}
-
-export function findFieldMatch(
-  data: ResumeData,
-  text: string,
-): { path: string; value: string } | null {
-  const target = normalizeText(text);
-  if (!target) return null;
-
-  const segments = target.split(/\s+/).filter((segment) => segment.length >= 3);
-
-  const candidates: Array<{ path: string; value: string }> = [
+function buildAllFieldPaths(data: ResumeData): Array<{ path: string; value: string }> {
+  const out: Array<{ path: string; value: string }> = [
     { path: "name", value: data.name },
     { path: "title", value: data.title },
     { path: "summary", value: data.summary },
     ...(data.location ? [{ path: "location", value: data.location }] : []),
     ...(data.email ? [{ path: "email", value: data.email }] : []),
     ...(data.phone ? [{ path: "phone", value: data.phone }] : []),
-    ...(data.photoUrl ? [{ path: "photoUrl", value: data.photoUrl }] : []),
     ...data.skills.map((value, index) => ({ path: `skills.${index}`, value })),
     ...data.certifications.map((value, index) => ({ path: `certifications.${index}`, value })),
     ...(data.languages || []).map((value, index) => ({ path: `languages.${index}`, value })),
@@ -209,6 +128,99 @@ export function findFieldMatch(
       path: `skillItems.${index}.name`,
       value: item.name,
     })),
+    ...Object.entries(data.sectionTitles || {}).map(([key, value]) => ({
+      path: `sectionTitles.${key}`,
+      value,
+    })),
+  ];
+  return out.filter((entry) => typeof entry.value === "string" && entry.value.trim().length > 0);
+}
+
+/**
+ * FieldPathAnnotator — Zero-render component that tags preview DOM elements
+ * with `data-field-path` attributes so field-override CSS can target them and
+ * clicks in design mode can resolve text to a stable path. Tags ALL data
+ * fields (not only ones with existing overrides) so old templates that don't
+ * use `<Editable>` still support color / size changes uniformly.
+ */
+function FieldPathAnnotator({
+  previewRef,
+  data,
+}: {
+  previewRef: RefObject<HTMLDivElement | null>;
+  data: ResumeData;
+}) {
+  useEffect(() => {
+    const root = previewRef.current;
+    if (!root) return;
+
+    // Clear old annotations (skip elements already tagged via <Editable>'s data-path)
+    root.querySelectorAll("[data-field-path]").forEach((el) => {
+      el.removeAttribute("data-field-path");
+    });
+
+    const entries = buildAllFieldPaths(data);
+    if (entries.length === 0) return;
+
+    // Sort by value length descending so longer/more-specific strings tag first
+    // (prevents short prefixes from claiming the same element as longer text).
+    entries.sort((a, b) => b.value.length - a.value.length);
+
+    const walker = document.createTreeWalker(root, NodeFilter.SHOW_ELEMENT, {
+      acceptNode: (node) => {
+        const el = node as HTMLElement;
+        if (["STYLE", "SCRIPT", "SVG"].includes(el.tagName)) return NodeFilter.FILTER_REJECT;
+        // Skip elements already explicitly tagged via <Editable>
+        if (el.getAttribute("data-editable") === "true") return NodeFilter.FILTER_SKIP;
+        const hasTextChild = Array.from(el.childNodes).some(
+          (n) => n.nodeType === Node.TEXT_NODE && n.textContent?.trim(),
+        );
+        return hasTextChild ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_SKIP;
+      },
+    });
+
+    const tagged = new Set<string>();
+    let current = walker.nextNode();
+    while (current) {
+      const el = current as HTMLElement;
+      // Skip elements that already have <Editable>'s data-path
+      if (el.hasAttribute("data-path")) {
+        current = walker.nextNode();
+        continue;
+      }
+      const text = el.textContent?.trim() || "";
+      if (text.length > 0) {
+        for (const { value, path } of entries) {
+          if (tagged.has(path)) continue;
+          // Only consider a match if the value is a non-trivial chunk of the element text.
+          if (text === value || (value.length >= 3 && (text.includes(value) || value.includes(text)))) {
+            if (!el.querySelector(`[data-field-path="${path}"]`)) {
+              el.setAttribute("data-field-path", path);
+              tagged.add(path);
+            }
+            break;
+          }
+        }
+      }
+      current = walker.nextNode();
+    }
+  }, [previewRef, data]);
+
+  return null; // Zero-render component
+}
+
+export function findFieldMatch(
+  data: ResumeData,
+  text: string,
+): { path: string; value: string } | null {
+  const target = normalizeText(text);
+  if (!target) return null;
+
+  const segments = target.split(/\s+/).filter((segment) => segment.length >= 3);
+
+  const candidates: Array<{ path: string; value: string }> = [
+    ...buildAllFieldPaths(data),
+    ...(data.photoUrl ? [{ path: "photoUrl", value: data.photoUrl }] : []),
   ];
 
   const exact = candidates.find((candidate) => normalizeText(candidate.value) === target);
@@ -844,7 +856,7 @@ ${(() => {
               }}
             />
           )}
-          <FieldPathAnnotator previewRef={previewRef} data={data} fieldOverrides={d?.fieldOverrides} />
+          <FieldPathAnnotator previewRef={previewRef} data={data} />
           <DesignModeContext.Provider value={!!isDesignMode}>
           <UpdateDataContext.Provider value={updateData}>
             <ResumePreview

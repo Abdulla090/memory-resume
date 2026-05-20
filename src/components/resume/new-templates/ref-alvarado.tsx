@@ -10,6 +10,7 @@ import { optimizeResumeForOnePage } from "@/lib/resume-utils";
 export function RefAlvaradoTemplate({ data }: { data: ResumeData }) {
   const c = optimizeResumeForOnePage(data);
   const rtl = useLayoutRtl(c);
+  const l = labels(c, rtl);
   const design = useContext(DesignContext);
   const colLayout = design?.columnLayout || "sidebar-left";
   const showSkillBars = design?.showSkillBars !== false;
@@ -39,21 +40,21 @@ export function RefAlvaradoTemplate({ data }: { data: ResumeData }) {
         </div>
 
         <div className="absolute left-[186px] top-[28px] h-[102px] rounded-none bg-[#27272e] px-[34px] pt-[23px] text-white" style={{ width: "566px" }}>
-          <h1 className="text-[31px] font-black leading-none tracking-[0.04em] uppercase rtl:tracking-normal">{c.name}</h1>
-          <p className="mt-2 text-[13px] font-semibold tracking-[0.35em] uppercase text-white/85 rtl:tracking-normal">{c.title}</p>
+          <Editable path="name" value={c.name} as="h1" className="text-[31px] font-black leading-none tracking-[0.04em] uppercase rtl:tracking-normal" />
+          <Editable path="title" value={c.title} as="p" className="mt-2 text-[13px] font-semibold tracking-[0.35em] uppercase text-white/85 rtl:tracking-normal" />
         </div>
       </header>
 
       <main className="absolute left-0 top-[160px] h-[962px] w-full">
         <aside className={`absolute top-0 h-full w-[145px] px-0 pb-[18px] pt-[44px] text-[#262626] ${colLayout === "sidebar-right" ? "right-[16px] left-auto" : "left-[16px]"}`}>
           <section>
-            <h2 className="mb-4 text-[12px] font-black uppercase tracking-[0.34em] text-[#262626]">About me</h2>
+            <h2 className="mb-4 text-[12px] font-black uppercase tracking-[0.34em] text-[#262626]">{l.profile}</h2>
             <Editable path="summary" value={c.summary} as="p" className="text-[8.6px] leading-[1.62] text-[#4d4d4d]" />
           </section>
 
           {c.education.length > 0 && (
             <section className="mt-[36px]">
-              <h2 className="mb-4 text-[12px] font-black uppercase tracking-[0.34em] text-[#262626]">Education</h2>
+              <h2 className="mb-4 text-[12px] font-black uppercase tracking-[0.34em] text-[#262626]">{l.education}</h2>
               <div className="space-y-4 text-[8.4px] leading-[1.45] text-[#4d4d4d]">
                 {c.education.slice(0, 2).map((item, index) => (
                   <div key={`${item.institution}-${index}`}>
@@ -68,7 +69,7 @@ export function RefAlvaradoTemplate({ data }: { data: ResumeData }) {
 
           {showSkillBars && (c.skillItems?.length ? c.skillItems.length > 0 : c.skills.length > 0) && (
             <section className="mt-[34px]">
-              <h2 className="mb-4 text-[12px] font-black uppercase tracking-[0.34em] text-[#262626]">Skills</h2>
+              <h2 className="mb-4 text-[12px] font-black uppercase tracking-[0.34em] text-[#262626]">{l.skills}</h2>
               <div className="space-y-2.5">
                 {c.skillItems && c.skillItems.length > 0 ? (
                   c.skillItems.slice(0, 6).map((skill, index) => (
@@ -87,7 +88,7 @@ export function RefAlvaradoTemplate({ data }: { data: ResumeData }) {
           )}
 
           <section className="mt-[34px]">
-            <h2 className="mb-4 text-[12px] font-black uppercase tracking-[0.34em] text-[#262626]">Language</h2>
+            <h2 className="mb-4 text-[12px] font-black uppercase tracking-[0.34em] text-[#262626]">{rtl ? "زمانەکان" : "Languages"}</h2>
             <div className="space-y-2 text-[8.4px] font-medium leading-[1.35] text-[#4d4d4d]">
               {languages.map((item, index) => <Editable key={item} path={`languages.${index}`} value={item} as="p" className="m-0" />)}
             </div>
@@ -96,7 +97,7 @@ export function RefAlvaradoTemplate({ data }: { data: ResumeData }) {
 
         <section className={`absolute top-0 w-[586px] px-[16px] pt-[30px] ${colLayout === "sidebar-right" ? "left-[16px]" : "left-[176px]"}`}>
           <section>
-            <h2 className="border-b border-[#9da09d] pb-2 text-[17px] font-black uppercase tracking-[0.28em] text-[#27272e]">Experience</h2>
+            <h2 className="border-b border-[#9da09d] pb-2 text-[17px] font-black uppercase tracking-[0.28em] text-[#27272e]">{l.experience}</h2>
             <div className="mt-4 space-y-[18px]">
               {c.experience.slice(0, 4).map((item, index) => (
                 <article key={`${item.company}-${index}`} className="text-[#222222]">
@@ -107,27 +108,41 @@ export function RefAlvaradoTemplate({ data }: { data: ResumeData }) {
                     </div>
                     <Editable path={`experience.${index}.duration`} value={item.duration} as="p" className="shrink-0 text-[8.4px] font-semibold italic text-[#666666]" />
                   </div>
-                  <Editable path={`experience.${index}.description`} value={item.description || item.achievements[0] || ""} as="p" className="mt-2 text-[8.6px] leading-[1.45] text-[#4d4d4d]" />
+                  {item.description && (
+                    <Editable path={`experience.${index}.description`} value={item.description} as="p" className="mt-2 text-[8.6px] leading-[1.45] text-[#4d4d4d]" />
+                  )}
                   {item.achievements.length > 0 && (
-                    <p className="mt-2 text-[8.5px] leading-[1.45] text-[#4d4d4d]">{item.achievements.slice(0, 2).join(" ")}</p>
+                    <ul className="mt-2 list-disc list-inside space-y-0.5 text-[8.5px] leading-[1.45] text-[#4d4d4d]">
+                      {item.achievements.slice(0, 2).map((ach, aIdx) => (
+                        <Editable key={aIdx} path={`experience.${index}.achievements.${aIdx}`} value={ach} as="li" />
+                      ))}
+                    </ul>
                   )}
                 </article>
               ))}
             </div>
           </section>
 
-          <section className="mt-[24px]">
-            <h2 className="border-b border-[#9da09d] pb-2 text-[17px] font-black uppercase tracking-[0.28em] text-[#27272e]">References</h2>
-            <div className="mt-4 grid grid-cols-2 gap-x-10 gap-y-6 text-[#222222]">
-              {references.map((item, index) => (
-                <div key={`${item.name}-${index}`}>
-                  <Editable path={`education.${index}.institution`} value={item.name} as="p" className="text-[10px] font-semibold" />
-                  <Editable path={`education.${index}.degree`} value={item.role} as="p" className="mt-2 text-[8.4px] font-medium text-[#4d4d4d]" />
-                  <p className="mt-2 text-[8.4px] font-medium text-[#4d4d4d]">{c.phone || "+123-456-7890"}</p>
-                </div>
-              ))}
-            </div>
-          </section>
+          {references.length > 0 && (
+            <section className="mt-[24px]">
+              <h2 className="border-b border-[#9da09d] pb-2 text-[17px] font-black uppercase tracking-[0.28em] text-[#27272e]">{l.projects}</h2>
+              <div className="mt-4 grid grid-cols-2 gap-x-10 gap-y-6 text-[#222222]">
+                {references.map((item, index) => {
+                  const isProject = c.projects.length > 0 && index < c.projects.length;
+                  const namePath = isProject ? `projects.${index}.name` : `education.${index}.institution`;
+                  const rolePath = isProject ? `projects.${index}.tech.0` : `education.${index}.degree`;
+                  const metaPath = isProject ? `projects.${index}.impact` : `education.${index}.year`;
+                  return (
+                    <div key={`${item.name}-${index}`}>
+                      <Editable path={namePath} value={item.name} as="p" className="text-[10px] font-semibold" />
+                      <Editable path={rolePath} value={item.role} as="p" className="mt-2 text-[8.4px] font-medium text-[#4d4d4d]" />
+                      <Editable path={metaPath} value={item.meta} as="p" className="mt-2 text-[8.4px] font-medium text-[#4d4d4d]" />
+                    </div>
+                  );
+                })}
+              </div>
+            </section>
+          )}
         </section>
       </main>
     </div>

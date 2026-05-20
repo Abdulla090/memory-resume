@@ -22,8 +22,8 @@ export function RefSilvaTemplate({ data }: { data: ResumeData }) {
       <header className="flex h-[190px] items-center gap-11 bg-[#342820] px-12 text-white rtl:flex-row-reverse">
         <PhotoBlock data={c} shape={photoBlockShape} />
         <div className="border-l-[7px] border-white pl-8 rtl:border-l-0 rtl:border-r-[7px] rtl:pl-0 rtl:pr-8">
-          <h1 className="text-[45px] font-black leading-none tracking-tight rtl:tracking-normal text-white">{c.name}</h1>
-          <p className="mt-2 text-[23px] font-bold">{c.title}</p>
+          <Editable path="name" value={c.name} as="h1" className="text-[45px] font-black leading-none tracking-tight rtl:tracking-normal text-white" />
+          <Editable path="title" value={c.title} as="p" className="mt-2 text-[23px] font-bold" />
         </div>
       </header>
 
@@ -31,7 +31,9 @@ export function RefSilvaTemplate({ data }: { data: ResumeData }) {
         <aside className="min-h-[932px] bg-[#fff0e3] px-8 py-9 ">
           <Section title={l.contact} accent="border-transparent text-[#1f1b18]">
             <div className="space-y-4 text-[12px] leading-5">
-              {[c.phone, c.email, c.location].filter(Boolean).map((item) => <p key={item}>{item}</p>)}
+              {c.phone && <Editable path="phone" value={c.phone} as="p" />}
+              {c.email && <Editable path="email" value={c.email} as="p" />}
+              {c.location && <Editable path="location" value={c.location} as="p" />}
             </div>
           </Section>
           {c.education.length > 0 && (
@@ -40,9 +42,9 @@ export function RefSilvaTemplate({ data }: { data: ResumeData }) {
               <div className="space-y-7">
                 {c.education.map((item, index) => (
                   <div key={`${item.institution}-${index}`} className="text-[13px] leading-5">
-                    <div className="font-medium uppercase">{item.degree}</div>
-                    <div className="italic">{item.institution}</div>
-                    <div>{item.year}</div>
+                    <Editable path={`education.${index}.degree`} value={item.degree} as="div" className="font-medium uppercase" />
+                    <Editable path={`education.${index}.institution`} value={item.institution} as="div" className="italic" />
+                    <Editable path={`education.${index}.year`} value={item.year} as="div" />
                   </div>
                 ))}
               </div>
@@ -53,16 +55,18 @@ export function RefSilvaTemplate({ data }: { data: ResumeData }) {
               <h2 className="mb-5 text-[22px] font-normal">{l.skills}</h2>
               {c.skillItems && c.skillItems.length > 0 ? (
                 <div className="flex flex-col gap-3">
-                  {c.skillItems.map((s) => (
+                  {c.skillItems.map((s, idx) => (
                     <div key={s.name} className="flex flex-col">
-                      <span className="text-[13px] font-medium">{s.name}</span>
+                      <Editable path={`skillItems.${idx}.name`} value={s.name} as="span" className="text-[13px] font-medium" />
                       <BarRating level={s.level} />
                     </div>
                   ))}
                 </div>
               ) : (
                 <div className="space-y-5 text-[13px]">
-                  {c.skills.slice(0, 8).map((skill) => <p key={skill}>{skill}</p>)}
+                  {c.skills.slice(0, 8).map((skill, idx) => (
+                    <Editable key={skill} path={`skills.${idx}`} value={skill} as="p" />
+                  ))}
                 </div>
               )}
             </section>
@@ -71,21 +75,33 @@ export function RefSilvaTemplate({ data }: { data: ResumeData }) {
 
         <main className="px-8 py-9 ">
           <section>
-            <h2 className="mb-5 text-[23px] font-normal">{rtl ? "پوختە" : "Summary"}</h2>
-            <ul className="list-disc space-y-1.5 pl-5 text-[12px] leading-5 rtl:pl-0 rtl:pr-5">
-              {(c.summary.match(/[^.!?]+[.!?]*/g) ?? [c.summary]).slice(0, 4).map((line, index) => <li key={`sum-${index}`}>{line.trim()}</li>)}
-            </ul>
+            <h2 className="mb-5 text-[23px] font-normal">{l.profile}</h2>
+            <Editable
+              path="summary"
+              value={c.summary}
+              as="p"
+              className="text-[12px] leading-5"
+            />
           </section>
           {c.experience.length > 0 && (
             <section className="mt-9">
-              <h2 className="mb-5 text-[23px] font-normal">{rtl ? "ئەزموونەکان" : "Experiences"}</h2>
+              <h2 className="mb-5 text-[23px] font-normal">{l.experience}</h2>
               <div className="space-y-8">
                 {c.experience.slice(0, 3).map((item, index) => (
                   <article key={`${item.company}-${index}`}>
-                    <h3 className="text-[14px] font-medium uppercase">{item.title}</h3>
-                    <p className="text-[12px]">{item.company} / {item.duration}</p>
+                    <Editable path={`experience.${index}.title`} value={item.title} as="h3" className="text-[14px] font-medium uppercase" />
+                    <p className="text-[12px] flex gap-1">
+                      <Editable path={`experience.${index}.company`} value={item.company} as="span" />
+                      <span>/</span>
+                      <Editable path={`experience.${index}.duration`} value={item.duration} as="span" />
+                    </p>
                     <ul className="mt-2 list-disc space-y-1 pl-5 text-[12px] leading-5 rtl:pl-0 rtl:pr-5">
-                      {(item.achievements.length ? item.achievements : [item.description]).slice(0, 3).map((achievement, achievementIndex) => <li key={`ach-${index}-${achievementIndex}`}>{achievement}</li>)}
+                      {(item.achievements.length ? item.achievements : [item.description]).slice(0, 3).map((achievement, achievementIndex) => {
+                        const path = item.achievements.length
+                          ? `experience.${index}.achievements.${achievementIndex}`
+                          : `experience.${index}.description`;
+                        return <Editable key={`ach-${index}-${achievementIndex}`} path={path} value={achievement} as="li" />;
+                      })}
                     </ul>
                   </article>
                 ))}
@@ -94,12 +110,19 @@ export function RefSilvaTemplate({ data }: { data: ResumeData }) {
           )}
           {c.projects.length > 0 && (
             <section className="mt-9">
-              <h2 className="mb-5 text-[23px] font-normal">{rtl ? "خەڵات و پرۆژەکان" : "Awards"}</h2>
+              <h2 className="mb-5 text-[23px] font-normal">{l.projects}</h2>
               <div className="space-y-5 text-[13px]">
-                {c.projects.map((project) => (
+                {c.projects.map((project, idx) => (
                   <div key={project.name}>
-                    <h3 className="font-medium uppercase">{project.name}</h3>
-                    <p className="mt-1">{project.impact || project.description}</p>
+                    <Editable path={`projects.${idx}.name`} value={project.name} as="h3" className="font-medium uppercase" />
+                    {(project.impact || project.description) && (
+                      <Editable
+                        path={project.impact ? `projects.${idx}.impact` : `projects.${idx}.description`}
+                        value={project.impact || project.description}
+                        as="p"
+                        className="mt-1"
+                      />
+                    )}
                   </div>
                 ))}
               </div>

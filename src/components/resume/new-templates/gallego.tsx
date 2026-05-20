@@ -30,6 +30,7 @@ function SidebarTitle({ children }: { children: ReactNode }) {
 export function GallegoTemplate({ data }: { data: ResumeData }) {
   const c = optimizeResumeForOnePage(data);
   const rtl = useLayoutRtl(c);
+  const l = labels(c, rtl);
   const design = use(DesignContext);
   const showSkillBars = design?.showSkillBars !== false;
   const photoShape = design?.photoShape || "circle";
@@ -67,7 +68,7 @@ export function GallegoTemplate({ data }: { data: ResumeData }) {
         </div>
 
         <section className="mt-[44px]">
-          <SidebarTitle>{rtl ? "┘╛█ò█î┘ê█ò┘å╪»█î" : "Contact"}</SidebarTitle>
+          <SidebarTitle>{l.contact}</SidebarTitle>
           <div className="space-y-[13px] text-[13px] font-bold leading-none text-white">
             {contact.map((item, index) => {
               const icons = [
@@ -75,61 +76,77 @@ export function GallegoTemplate({ data }: { data: ResumeData }) {
                 <Mail key="mail" size={18} fill="currentColor" strokeWidth={3} />,
                 <MapPin key="pin" size={18} fill="currentColor" strokeWidth={3} />,
               ];
+              const path = item === c.phone ? "phone" : item === c.email ? "email" : "location";
               return (
-                <div key={item} className="flex min-w-0 items-center gap-3 rtl:flex-row-reverse">
+                <div key={path} className="flex min-w-0 items-center gap-3 rtl:flex-row-reverse">
                   <span className="grid h-5 w-5 shrink-0 place-items-center rounded-full bg-white text-[#073f57]">{icons[index] ?? icons[0]}</span>
-                  <span className="truncate">{item}</span>
+                  <Editable path={path} value={item as string} as="span" className="truncate" />
                 </div>
               );
             })}
           </div>
         </section>
 
-        <section className="mt-[52px]">
-          <SidebarTitle>{rtl ? "╪│█ò╪▒┌å╪º┘ê█ò┌⌐╪º┘å" : "References"}</SidebarTitle>
-          <div className="space-y-3">
-            {referenceItems.slice(0, 2).map((item, index) => (
-              <div key={`${item.name}-${index}`} className="text-[13px] leading-[1.18]">
-                <div className="font-black text-white">{item.name}</div>
-                <div className="font-semibold text-white/85">{item.meta}</div>
-              </div>
-            ))}
-          </div>
-        </section>
+        {referenceItems.length > 0 && (
+          <section className="mt-[52px]">
+            <SidebarTitle>{rtl ? "ڕاوێژکارەکان" : "References"}</SidebarTitle>
+            <div className="space-y-3">
+              {referenceItems.slice(0, 2).map((item, index) => {
+                const isProject = c.projects.length > 0 && index < c.projects.length;
+                const namePath = isProject ? `projects.${index}.name` : `education.${index}.degree`;
+                const metaPath = isProject
+                  ? c.projects[index]?.impact
+                    ? `projects.${index}.impact`
+                    : `projects.${index}.description`
+                  : `education.${index}.institution`;
+                return (
+                  <div key={`${item.name}-${index}`} className="text-[13px] leading-[1.18]">
+                    <Editable path={namePath} value={item.name} as="div" className="font-black text-white" />
+                    <Editable path={metaPath} value={item.meta} as="div" className="font-semibold text-white/85" />
+                  </div>
+                );
+              })}
+            </div>
+          </section>
+        )}
 
-        {showSkillBars && <section className="mt-[52px]">
-          <SidebarTitle>{rtl ? "╪▓┘à╪º┘å█ò┌⌐╪º┘å" : "Languages"}</SidebarTitle>
-          <ul className="list-disc space-y-1 pl-5 text-[13px] font-bold leading-[1.2] rtl:pl-0 rtl:pr-5">
-            {languageItems.map((item) => (
-              <li key={item}>{item}</li>
-            ))}
-          </ul>
-        </section>}
+        {showSkillBars && (
+          <section className="mt-[52px]">
+            <SidebarTitle>{rtl ? "زمانەکان" : "Languages"}</SidebarTitle>
+            <ul className="list-disc space-y-1 pl-5 text-[13px] font-bold leading-[1.2] rtl:pl-0 rtl:pr-5">
+              {languageItems.map((item) => {
+                const certIdx = c.certifications.indexOf(item);
+                const path = certIdx >= 0 ? `certifications.${certIdx}` : `skills.${c.skills.indexOf(item)}`;
+                return <Editable key={item} path={path} value={item} as="li" />;
+              })}
+            </ul>
+          </section>
+        )}
       </aside>
 
       <main className="relative z-20 ml-[325px] min-h-[1122px] pb-10 pl-0 pr-[30px] pt-[64px] rtl:ml-0 rtl:mr-[325px] rtl:pl-[30px] rtl:pr-0">
         <header className="ml-[-28px] h-[204px] bg-[#075a7c] px-[42px] pt-[38px] text-white shadow-[0_8px_0_rgba(0,0,0,0.14)] rtl:ml-0 rtl:mr-[-28px]">
-          <h1 className="max-w-[430px] text-[37px] font-black leading-[1.03] tracking-tight rtl:tracking-normal text-white">{c.name}</h1>
-          <p className="mt-4 max-w-[360px] text-[18px] font-bold leading-[1.18] text-white/90">{c.title}</p>
+          <Editable path="name" value={c.name} as="h1" className="max-w-[430px] text-[37px] font-black leading-[1.03] tracking-tight rtl:tracking-normal text-white" />
+          <Editable path="title" value={c.title} as="p" className="mt-4 max-w-[360px] text-[18px] font-bold leading-[1.18] text-white/90" />
         </header>
 
         <div className="space-y-[28px] pt-[28px]">
           <section>
-            <SectionRibbon title={rtl ? "┘╛┌ò█å┘ü╪º█î┘ä" : "Profile"} icon={<UserRound size={24} fill="currentColor" strokeWidth={3} />} />
+            <SectionRibbon title={l.profile} icon={<UserRound size={24} fill="currentColor" strokeWidth={3} />} />
             <div className="px-[36px] pt-[22px]">
-              <p className="max-w-[300px] text-[14px] font-bold leading-[1.35] text-[#4d6b77]">{c.summary}</p>
+              <Editable path="summary" value={c.summary} as="p" className="max-w-[300px] text-[14px] font-bold leading-[1.35] text-[#4d6b77]" />
             </div>
           </section>
 
           {c.education.length > 0 && (
             <section>
-              <SectionRibbon title={rtl ? "╪«┘ê█Ä┘å╪»┘å" : "Education"} icon={<GraduationCap size={27} fill="currentColor" strokeWidth={3} />} />
+              <SectionRibbon title={l.education} icon={<GraduationCap size={27} fill="currentColor" strokeWidth={3} />} />
               <div className="space-y-3 px-[36px] pt-[22px]">
                 {c.education.slice(0, 2).map((item, index) => (
                   <div key={`${item.institution}-${index}`} className="text-[13px] leading-[1.13]">
-                    <div className="font-black text-[#15495f]">{item.degree}</div>
-                    <div className="font-semibold text-[#4f6c78]">{item.institution}</div>
-                    <div className="font-bold text-[#15495f]">ΓÇó {item.year}</div>
+                    <Editable path={`education.${index}.degree`} value={item.degree} as="div" className="font-black text-[#15495f]" />
+                    <Editable path={`education.${index}.institution`} value={item.institution} as="div" className="font-semibold text-[#4f6c78]" />
+                    <Editable path={`education.${index}.year`} value={item.year} as="div" className="font-bold text-[#15495f]" />
                   </div>
                 ))}
               </div>
@@ -138,16 +155,19 @@ export function GallegoTemplate({ data }: { data: ResumeData }) {
 
           {c.experience.length > 0 && (
             <section>
-              <SectionRibbon title={rtl ? "╪ª█ò╪▓┘à┘ê┘ê┘å" : "Experience"} icon={<BriefcaseBusiness size={25} fill="currentColor" strokeWidth={3} />} />
+              <SectionRibbon title={l.experience} icon={<BriefcaseBusiness size={25} fill="currentColor" strokeWidth={3} />} />
               <div className="space-y-4 px-[36px] pt-[22px]">
                 {c.experience.slice(0, 2).map((item, index) => (
                   <article key={`${item.company}-${index}`} className="max-w-[320px] text-[13px] leading-[1.22]">
-                    <h3 className="font-black text-[#15495f]">{item.company}</h3>
-                    <p className="font-semibold text-[#4f6c78]">{item.title}</p>
+                    <Editable path={`experience.${index}.company`} value={item.company} as="h3" className="font-black text-[#15495f]" />
+                    <Editable path={`experience.${index}.title`} value={item.title} as="p" className="font-semibold text-[#4f6c78]" />
                     <ul className="mt-2 list-disc space-y-1 pl-5 text-[12px] font-semibold leading-[1.25] text-[#4f6c78] rtl:pl-0 rtl:pr-5">
-                      {(item.achievements.length ? item.achievements : [item.description]).slice(0, 3).map((achievement, achievementIndex) => (
-                        <li key={`ach-${index}-${achievementIndex}`}>{achievement}</li>
-                      ))}
+                      {(item.achievements.length ? item.achievements : [item.description]).slice(0, 3).map((achievement, achievementIndex) => {
+                        const path = item.achievements.length
+                          ? `experience.${index}.achievements.${achievementIndex}`
+                          : `experience.${index}.description`;
+                        return <Editable key={`ach-${index}-${achievementIndex}`} path={path} value={achievement} as="li" />;
+                      })}
                     </ul>
                   </article>
                 ))}

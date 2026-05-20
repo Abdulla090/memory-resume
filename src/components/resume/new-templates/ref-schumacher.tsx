@@ -19,20 +19,24 @@ export function RefSchumacherTemplate({ data }: { data: ResumeData }) {
   return (
     <div dir={rtl ? "rtl" : "ltr"} className="border-[4px] border-[#7c3cff] bg-white px-[80px] py-[84px] font-sans text-[#161616]" style={{ minHeight: "1122px", width: "100%" }}>
       <header className="grid grid-cols-[230px_1fr_1fr] gap-14 ">
-        <h1 className="text-[42px] font-black leading-[0.86] tracking-tight rtl:tracking-normal">{c.name.split(/\s+/).slice(0, 1).join(" ")}<br />{c.name.split(/\s+/).slice(1).join(" ") || c.name}</h1>
-        {contact.slice(0, 2).map((item) => (
-          <div key={item} className="pt-7 text-[13px] font-bold leading-4">
-            <div className="mb-3 h-[2px] w-8 bg-neutral-400" />
-            {item}
-          </div>
-        ))}
+        <Editable path="name" value={c.name} as="h1" className="text-[42px] font-black leading-[0.86] tracking-tight rtl:tracking-normal" />
+        {contact.slice(0, 2).map((item) => {
+          const path =
+            item === c.location ? "location" : item === c.email ? "email" : "phone";
+          return (
+            <div key={path} className="pt-7 text-[13px] font-bold leading-4">
+              <div className="mb-3 h-[2px] w-8 bg-neutral-400" />
+              <Editable path={path} value={item as string} as="span" />
+            </div>
+          );
+        })}
       </header>
 
       <div className="mt-12 grid grid-cols-[230px_1fr] gap-14 ">
         <aside className="space-y-9 ">
           <section>
             <h2 className="mb-4 text-[22px] font-black leading-none">{l.profile}</h2>
-            <p className="text-[12px] font-semibold leading-[1.15]">{c.summary}</p>
+            <Editable path="summary" value={c.summary} as="p" className="text-[12px] font-semibold leading-[1.15]" />
           </section>
           {c.education.length > 0 && (
             <section>
@@ -40,9 +44,9 @@ export function RefSchumacherTemplate({ data }: { data: ResumeData }) {
               <div className="space-y-4">
                 {c.education.map((item, index) => (
                   <div key={`${item.institution}-${index}`} className="text-[12px] font-semibold leading-[1.15]">
-                    <div>{item.degree}</div>
-                    <div>{item.institution}</div>
-                    <div>{item.year}</div>
+                    <Editable path={`education.${index}.degree`} value={item.degree} as="div" />
+                    <Editable path={`education.${index}.institution`} value={item.institution} as="div" />
+                    <Editable path={`education.${index}.year`} value={item.year} as="div" />
                   </div>
                 ))}
               </div>
@@ -52,7 +56,9 @@ export function RefSchumacherTemplate({ data }: { data: ResumeData }) {
             <section>
               <h2 className="mb-5 text-[22px] font-black leading-none">{l.certifications}</h2>
               <div className="space-y-4 text-[12px] font-semibold leading-[1.15]">
-                {c.certifications.map((item) => <p key={item}>{item}</p>)}
+                {c.certifications.map((item, idx) => (
+                  <Editable key={item} path={`certifications.${idx}`} value={item} as="p" />
+                ))}
               </div>
             </section>
           )}
@@ -61,12 +67,12 @@ export function RefSchumacherTemplate({ data }: { data: ResumeData }) {
         <main className="">
           {showSkillBars && (c.skillItems?.length ? c.skillItems.length > 0 : c.skills.length > 0) && (
             <section>
-              <h2 className="mb-5 text-[22px] font-black leading-none">{rtl ? "┘ä█Ä┘ç╪º╪¬┘ê┘ê█î█î█ò ╪│█ò╪▒█ò┌⌐█î█î█ò┌⌐╪º┘å" : "Core Skills"}</h2>
+              <h2 className="mb-5 text-[22px] font-black leading-none">{l.skills}</h2>
               <div className="grid grid-cols-2 gap-x-10 gap-y-5">
                 {c.skillItems && c.skillItems.length > 0 ? (
                   c.skillItems.slice(0, 8).map((s, index) => (
                     <div key={s.name}>
-                      <p className="mb-1 text-[13px] font-semibold leading-4">{s.name}</p>
+                      <Editable path={`skillItems.${index}.name`} value={s.name} as="p" className="mb-1 text-[13px] font-semibold leading-4" />
                       <div className="h-[18px] bg-neutral-300">
                         <div className="h-full bg-[#ff8a22] rtl:mr-auto" style={{ width: `${s.level * 20}%` }} />
                       </div>
@@ -75,7 +81,7 @@ export function RefSchumacherTemplate({ data }: { data: ResumeData }) {
                 ) : (
                   c.skills.slice(0, 8).map((skill, index) => (
                     <div key={skill}>
-                      <p className="mb-1 text-[13px] font-semibold leading-4">{skill}</p>
+                      <Editable path={`skills.${index}`} value={skill} as="p" className="mb-1 text-[13px] font-semibold leading-4" />
                       <div className="h-[18px] bg-neutral-300">
                         <div className="h-full bg-[#ff8a22] rtl:mr-auto" style={{ width: skillLevel(c, skill, index) }} />
                       </div>
@@ -92,11 +98,16 @@ export function RefSchumacherTemplate({ data }: { data: ResumeData }) {
                 {c.experience.slice(0, 3).map((item, index) => (
                   <article key={`${item.company}-${index}`} className="relative pl-6 rtl:pl-0 rtl:pr-6">
                     <span className="absolute left-0 top-1.5 h-4 w-4 rounded-full bg-[#f58213] rtl:left-auto rtl:right-0" />
-                    <h3 className="text-[13px] font-black leading-4">{item.title}</h3>
-                    <p className="text-[12px] font-black leading-4">{item.company}</p>
-                    <p className="text-[12px] font-black leading-4">{item.duration}</p>
+                    <Editable path={`experience.${index}.title`} value={item.title} as="h3" className="text-[13px] font-black leading-4" />
+                    <Editable path={`experience.${index}.company`} value={item.company} as="p" className="text-[12px] font-black leading-4" />
+                    <Editable path={`experience.${index}.duration`} value={item.duration} as="p" className="text-[12px] font-black leading-4" />
                     <ul className="mt-3 list-disc space-y-1 pl-5 text-[11px] font-semibold leading-[1.15] rtl:pl-0 rtl:pr-5">
-                      {(item.achievements.length ? item.achievements : [item.description]).slice(0, 4).map((achievement, achievementIndex) => <li key={achievementIndex}>{achievement}</li>)}
+                      {(item.achievements.length ? item.achievements : [item.description]).slice(0, 4).map((achievement, achievementIndex) => {
+                        const path = item.achievements.length
+                          ? `experience.${index}.achievements.${achievementIndex}`
+                          : `experience.${index}.description`;
+                        return <Editable key={achievementIndex} path={path} value={achievement} as="li" />;
+                      })}
                     </ul>
                   </article>
                 ))}

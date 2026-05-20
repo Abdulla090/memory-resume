@@ -48,14 +48,16 @@ export function RefTorresTemplate({ data }: { data: ResumeData }) {
                 <div className="flex flex-col gap-3">
                   {c.skillItems.map((s, i) => (
                     <div key={i} className="flex flex-col">
-                      <span className="text-[13px] font-medium text-neutral-800">{s.name}</span>
+                      <Editable path={`skillItems.${i}.name`} value={s.name} as="span" className="text-[13px] font-medium text-neutral-800" />
                       <BarRating level={s.level} />
                     </div>
                   ))}
                 </div>
               ) : (
                 <ul className="list-disc space-y-3 pl-5 text-[13px] font-medium text-neutral-800 rtl:pl-0 rtl:pr-5">
-                  {c.skills.slice(0, 7).map((skill) => <li key={skill}>{skill}</li>)}
+                  {c.skills.slice(0, 7).map((skill, idx) => (
+                    <Editable key={skill} path={`skills.${idx}`} value={skill} as="li" />
+                  ))}
                 </ul>
               )}
             </section>
@@ -65,7 +67,9 @@ export function RefTorresTemplate({ data }: { data: ResumeData }) {
             <section className="mt-10">
               <h2 className="mb-5 text-[18px] font-black uppercase tracking-[0.2em] rtl:tracking-normal text-[#1d3f59]">{l.certifications}</h2>
               <ul className="list-disc space-y-3 pl-5 text-[13px] font-medium text-neutral-800 rtl:pl-0 rtl:pr-5">
-                {c.certifications.map((item) => <li key={item}>{item}</li>)}
+                {c.certifications.map((item, idx) => (
+                  <Editable key={item} path={`certifications.${idx}`} value={item} as="li" />
+                ))}
               </ul>
             </section>
           )}
@@ -111,10 +115,10 @@ export function RefTorresTemplate({ data }: { data: ResumeData }) {
             <section className="mt-7">
               <h2 className="mb-4 border-b border-[#b8c5ce] pb-2 text-[18px] font-black uppercase tracking-[0.18em] rtl:tracking-normal text-[#1d3f59]">{l.projects}</h2>
               <div className="grid grid-cols-2 gap-6">
-                {c.projects.map((project) => (
+                {c.projects.map((project, idx) => (
                   <div key={project.name}>
-                    <h3 className="text-[13px] font-black">{project.name}</h3>
-                    <p className="mt-1 text-[11px] leading-5">{project.description}</p>
+                    <Editable path={`projects.${idx}.name`} value={project.name} as="h3" className="text-[13px] font-black" />
+                    <Editable path={`projects.${idx}.description`} value={project.description} as="p" className="mt-1 text-[11px] leading-5" />
                   </div>
                 ))}
               </div>
