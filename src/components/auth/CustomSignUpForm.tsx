@@ -1,6 +1,6 @@
 import { useClerk } from "@clerk/tanstack-react-start";
 import { useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 type CustomSignUpFormProps = {
   isKu: boolean;
@@ -17,6 +17,16 @@ export function CustomSignUpForm({ isKu }: CustomSignUpFormProps) {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+  const [loadTimedOut, setLoadTimedOut] = useState(false);
+
+  useEffect(() => {
+    if (loaded) {
+      setLoadTimedOut(false);
+      return;
+    }
+    const t = window.setTimeout(() => setLoadTimedOut(true), 12_000);
+    return () => window.clearTimeout(t);
+  }, [loaded]);
 
   const inputClass =
     "w-full rounded-xl border border-input bg-background px-4 py-2.5 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring";
@@ -57,7 +67,18 @@ export function CustomSignUpForm({ isKu }: CustomSignUpFormProps) {
   };
 
   if (!loaded) {
-    return <p className="text-sm text-muted-foreground">{isKu ? "بارکردن..." : "Loading..."}</p>;
+    return (
+      <div className="space-y-2 text-sm text-muted-foreground">
+        <p>{isKu ? "بارکردن..." : "Loading..."}</p>
+        {loadTimedOut && (
+          <p className="text-destructive">
+            {isKu
+              ? "کلێرک بار نەکرا. پەڕەکە نوێ بکەرەوە یان لە Vercel دۆمەینەکەت زیاد بکە لە Clerk Dashboard → Domains."
+              : "Clerk did not load. Refresh the page, or add your site URL under Clerk Dashboard → Domains (e.g. memory-resume.vercel.app)."}
+          </p>
+        )}
+      </div>
+    );
   }
 
   return (

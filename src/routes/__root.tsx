@@ -81,15 +81,21 @@ export const Route = createRootRoute({
 });
 
 function RootShell({ children }: { children: React.ReactNode }) {
+  const clerkPublishableKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY as string | undefined;
+
   return (
     <html lang="en">
       <head>
         <HeadContent />
       </head>
       <body style={{ overflowX: "hidden", minHeight: "100dvh" }}>
-        <ClerkProvider>
+        {clerkPublishableKey ? (
+          <ClerkProvider publishableKey={clerkPublishableKey}>
+            <div style={{ overflowX: "hidden", position: "relative" }}>{children}</div>
+          </ClerkProvider>
+        ) : (
           <div style={{ overflowX: "hidden", position: "relative" }}>{children}</div>
-        </ClerkProvider>
+        )}
         <Scripts />
       </body>
     </html>
