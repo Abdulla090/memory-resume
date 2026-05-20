@@ -1,229 +1,259 @@
-import { createFileRoute, Outlet, Link, useLocation } from '@tanstack/react-router';
+import { createFileRoute, Outlet, Link, useLocation } from "@tanstack/react-router";
 import {
-  Home, Files, LayoutTemplate, PenTool, Wand2, BarChart2,
-  FileText, Briefcase, Settings, BrainCircuit, ChevronRight,
-  Menu, X, Heart, Zap,
-} from 'lucide-react';
-import { useState } from 'react';
-import { useAppStore } from '@/lib/store';
+  Home,
+  Files,
+  LayoutTemplate,
+  PenTool,
+  Wand2,
+  BarChart2,
+  FileText,
+  Briefcase,
+  Settings,
+  BrainCircuit,
+  ChevronRight,
+  Menu,
+  X,
+  Heart,
+  Sparkles,
+} from "lucide-react";
+import { useState } from "react";
+import { useAppStore } from "@/lib/store";
 
-export const Route = createFileRoute('/dashboard')({
+export const Route = createFileRoute("/dashboard")({
   component: DashboardLayout,
 });
+
+type NavItem = {
+  name: string;
+  icon: typeof Home;
+  path: string;
+  group: "create" | "ai" | "track" | "account";
+};
 
 function DashboardLayout() {
   const location = useLocation();
   const [isOpen, setIsOpen] = useState(false);
   const language = useAppStore((state) => state.language);
-  const isKu = language === 'ku';
+  const isKu = language === "ku";
 
-  const navItems = [
-    { name: isKu ? 'سەرەتا'        : 'Home',           icon: Home,           path: '/dashboard'                },
-    { name: isKu ? 'سیڤییەکانم'    : 'My CVs',          icon: Files,          path: '/dashboard/my-cvs'         },
-    { name: isKu ? 'تیمپڵەیتەکان' : 'Templates',       icon: LayoutTemplate, path: '/templates'                },
-    { name: isKu ? 'نووسەری AI'    : 'AI Writer',       icon: PenTool,        path: '/dashboard/ai-writer'      },
-    { name: isKu ? 'باشترکردنی AI' : 'AI Optimize',     icon: Wand2,          path: '/dashboard/ai-optimize'    },
-    { name: isKu ? 'شیکاری'        : 'Analytics',       icon: BarChart2,      path: '/dashboard/analytics'      },
-    { name: isKu ? 'نامەی ڕووپۆش'  : 'Cover Letters',   icon: FileText,       path: '/dashboard/cover-letters'  },
-    { name: isKu ? 'کارتی سوپاس'   : 'Thank-You Cards', icon: Heart,          path: '/dashboard/thanks'         },
-    { name: isKu ? 'چاودێری کار'   : 'Job Tracker',     icon: Briefcase,      path: '/dashboard/job-tracker'    },
-    { name: isKu ? 'ڕێکخستنەکان'  : 'Settings',        icon: Settings,       path: '/dashboard/settings'       },
+  const navItems: NavItem[] = [
+    { name: isKu ? "سەرەتا" : "Home", icon: Home, path: "/dashboard", group: "create" },
+    { name: isKu ? "سیڤییەکانم" : "My CVs", icon: Files, path: "/dashboard/my-cvs", group: "create" },
+    { name: isKu ? "قاڵبەکان" : "Templates", icon: LayoutTemplate, path: "/templates", group: "create" },
+    { name: isKu ? "نووسەری AI" : "AI Writer", icon: PenTool, path: "/dashboard/ai-writer", group: "ai" },
+    { name: isKu ? "باشترکردنی AI" : "AI Optimize", icon: Wand2, path: "/dashboard/ai-optimize", group: "ai" },
+    { name: isKu ? "شیکاری" : "Analytics", icon: BarChart2, path: "/dashboard/analytics", group: "track" },
+    { name: isKu ? "نامەی ڕووپۆش" : "Cover Letters", icon: FileText, path: "/dashboard/cover-letters", group: "create" },
+    { name: isKu ? "کارتی سوپاس" : "Thank-you cards", icon: Heart, path: "/dashboard/thanks", group: "create" },
+    { name: isKu ? "چاودێری کار" : "Job Tracker", icon: Briefcase, path: "/dashboard/job-tracker", group: "track" },
+    { name: isKu ? "ڕێکخستن" : "Settings", icon: Settings, path: "/dashboard/settings", group: "account" },
   ];
+
+  const groupLabels: Record<NavItem["group"], string> = isKu
+    ? { create: "دروستکردن", ai: "زیرەکی دەستکرد", track: "بەدواداچوون", account: "هەژمار" }
+    : { create: "Create", ai: "AI tools", track: "Track", account: "Account" };
+
+  const groupedNav = (["create", "ai", "track", "account"] as const).map((group) => ({
+    group,
+    items: navItems.filter((item) => item.group === group),
+  }));
 
   return (
     <div
-      className="flex h-screen overflow-hidden font-sans"
-      style={{ background: 'var(--background, #f8fafc)' }}
-      dir={isKu ? 'rtl' : 'ltr'}
+      className="flex h-screen overflow-hidden font-sans bg-slate-50/60"
+      dir={isKu ? "rtl" : "ltr"}
     >
-      {/* ── Mobile dim overlay ─────────────────────────────────────────── */}
+      {/* Mobile dim overlay */}
       <div
         onClick={() => setIsOpen(false)}
-        className={`fixed inset-0 z-40 bg-black/70 lg:hidden transition-opacity duration-200 ${
-          isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+        className={`fixed inset-0 z-40 bg-slate-900/30 backdrop-blur-sm lg:hidden transition-opacity duration-200 ${
+          isOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
         }`}
       />
 
-      {/* ── Sidebar ────────────────────────────────────────────────────── */}
+      {/* Sidebar */}
       <aside
-        style={{
-          background: '#0a0a0a',
-          borderRight: isKu ? 'none' : '1px solid rgba(255,255,255,0.06)',
-          borderLeft:  isKu ? '1px solid rgba(255,255,255,0.06)' : 'none',
-          transition: 'width 280ms cubic-bezier(0.4,0,0.2,1), transform 280ms cubic-bezier(0.4,0,0.2,1)',
-        }}
         className={`
           fixed lg:relative z-50 lg:z-auto inset-y-0
-          ${isKu ? 'right-0' : 'left-0'}
-          flex flex-col justify-between py-5 h-full overflow-hidden shrink-0
+          ${isKu ? "right-0 lg:border-l" : "left-0 lg:border-r"}
+          flex flex-col h-full overflow-hidden shrink-0
+          border-slate-200/80 bg-white
+          transition-[width,transform] duration-300 ease-out
           ${isOpen
-            ? 'w-[268px] shadow-[4px_0_40px_rgba(0,0,0,0.6)]'
-            : `${isKu ? 'translate-x-full lg:translate-x-0' : '-translate-x-full lg:translate-x-0'} lg:w-[72px] w-[268px]`
+            ? "w-[268px] shadow-[12px_0_40px_-20px_rgba(15,23,42,0.18)]"
+            : `${isKu ? "translate-x-full lg:translate-x-0" : "-translate-x-full lg:translate-x-0"} lg:w-[76px] w-[268px]`
           }
         `}
       >
-        {/* Top section */}
-        <div className="flex flex-col gap-1 min-h-0">
+        {/* Logo / toggle row */}
+        <div className={`flex items-center px-4 pt-5 pb-4 ${isOpen ? "gap-3" : "lg:justify-center"}`}>
+          <button
+            onClick={() => setIsOpen(!isOpen)}
+            title={isKu ? "گۆڕینی لیست" : "Toggle sidebar"}
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 text-white shadow-[0_8px_20px_-8px_rgba(37,99,235,0.6)] transition-transform duration-200 hover:scale-105 active:scale-95"
+          >
+            {isOpen ? <X className="h-[18px] w-[18px]" /> : <Menu className="h-[18px] w-[18px]" />}
+          </button>
 
-          {/* Logo / toggle row */}
-          <div className={`flex items-center mb-6 px-4 ${isOpen ? 'gap-3' : 'lg:justify-center'}`}>
-            <button
-              onClick={() => setIsOpen(!isOpen)}
-              title={isKu ? 'تۆمارکردنی لیست' : 'Toggle sidebar'}
-              className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 cursor-pointer text-white transition-all duration-200"
-              style={{
-                background: 'linear-gradient(135deg,#2563eb,#1d4ed8)',
-                boxShadow: '0 0 16px rgba(37,99,235,0.45)',
-              }}
+          <div
+            className={`overflow-hidden transition-all duration-300 ${
+              isOpen ? "max-w-[160px] opacity-100" : "max-w-0 opacity-0"
+            }`}
+            style={{ whiteSpace: "nowrap" }}
+          >
+            <Link
+              to="/"
+              className="flex items-center gap-1.5 text-[15px] font-extrabold tracking-tight leading-tight text-slate-900 hover:text-blue-600 transition-colors"
             >
-              {isOpen ? <X className="w-[18px] h-[18px]" /> : <Menu className="w-[18px] h-[18px]" />}
-            </button>
-
-            <div
-              className={`overflow-hidden transition-all duration-300 ${isOpen ? 'max-w-[160px] opacity-100' : 'max-w-0 opacity-0'}`}
-              style={{ whiteSpace: 'nowrap' }}
-            >
-              <span className="text-white font-extrabold text-[15px] tracking-tight leading-tight flex items-center gap-1.5">
-                <Zap className="w-3.5 h-3.5 text-blue-400 shrink-0" />
-                {isKu ? 'دروستکەری سیڤی' : 'AI CV Builder'}
-              </span>
-            </div>
+              <Sparkles className="h-3.5 w-3.5 shrink-0 text-blue-500" />
+              {isKu ? "میمۆری سیڤی" : "MemoryCV"}
+            </Link>
           </div>
-
-          {/* Nav items */}
-          <nav className="space-y-0.5 px-2.5 overflow-y-auto overflow-x-hidden">
-            {navItems.map((item) => {
-              const isActive =
-                location.pathname === item.path ||
-                (item.path !== '/dashboard' && location.pathname.startsWith(item.path));
-
-              return (
-                <Link
-                  key={item.path}
-                  to={item.path}
-                  title={item.name}
-                  onClick={() => setIsOpen(false)}
-                  className={`
-                    group flex items-center gap-3 py-2.5 rounded-xl font-medium cursor-pointer
-                    transition-all duration-150
-                    ${isOpen ? 'px-3.5' : 'lg:justify-center lg:px-0 px-3.5'}
-                    ${isActive
-                      ? 'text-white'
-                      : 'text-white/40 hover:text-white/80'
-                    }
-                  `}
-                  style={isActive ? {
-                    background: 'rgba(37,99,235,0.18)',
-                    boxShadow: 'inset 0 0 0 1px rgba(59,130,246,0.35), 0 0 12px rgba(37,99,235,0.15)',
-                  } : {}}
-                >
-                  {/* Icon */}
-                  <span
-                    className={`shrink-0 w-8 h-8 flex items-center justify-center rounded-lg transition-all duration-150
-                      ${isActive
-                        ? 'text-blue-400'
-                        : 'text-white/30 group-hover:text-white/70'
-                      }`}
-                  >
-                    <item.icon className="w-[18px] h-[18px]" />
-                  </span>
-
-                  {/* Label — visible when sidebar is expanded */}
-                  <span
-                    className={`text-[13px] truncate whitespace-nowrap transition-all duration-200 overflow-hidden ${
-                      isOpen ? 'opacity-100 max-w-[160px]' : 'max-w-0 opacity-0'
-                    }`}
-                  >
-                    {item.name}
-                  </span>
-
-                  {/* Active dot */}
-                  {isActive && (
-                    <span
-                      className="ms-auto w-1.5 h-1.5 rounded-full bg-blue-400 shrink-0"
-                      style={{
-                        display: isOpen ? 'block' : 'none',
-                        boxShadow: '0 0 6px rgba(96,165,250,0.9)',
-                      }}
-                    />
-                  )}
-                </Link>
-              );
-            })}
-          </nav>
         </div>
 
-        {/* Bottom AI Memory card — only when expanded */}
+        {/* Nav */}
+        <nav className="flex-1 overflow-y-auto overflow-x-hidden px-2.5 pb-4 [scrollbar-width:thin]">
+          {groupedNav.map(({ group, items }) => (
+            <div key={group} className="mb-3 last:mb-0">
+              <div
+                className={`px-3 pt-3 pb-1.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-400 transition-opacity duration-200 ${
+                  isOpen ? "opacity-100" : "opacity-0 lg:hidden"
+                }`}
+              >
+                {groupLabels[group]}
+              </div>
+
+              <div className="space-y-0.5">
+                {items.map((item) => {
+                  const isActive =
+                    location.pathname === item.path ||
+                    (item.path !== "/dashboard" && location.pathname.startsWith(item.path));
+
+                  return (
+                    <Link
+                      key={item.path}
+                      to={item.path}
+                      title={item.name}
+                      onClick={() => setIsOpen(false)}
+                      className={`
+                        group relative flex items-center gap-3 rounded-xl py-2.5 font-medium
+                        transition-all duration-150
+                        ${isOpen ? "px-3" : "lg:justify-center lg:px-0 px-3"}
+                        ${isActive
+                          ? "bg-blue-50 text-blue-700 shadow-[inset_0_0_0_1px_rgba(37,99,235,0.18)]"
+                          : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                        }
+                      `}
+                    >
+                      {/* Active accent bar (LTR/RTL aware) */}
+                      {isActive && (
+                        <span
+                          className={`absolute top-1.5 bottom-1.5 w-[3px] rounded-full bg-blue-600 ${
+                            isKu ? "right-0" : "left-0"
+                          }`}
+                          style={{ boxShadow: "0 0 8px rgba(37,99,235,0.5)" }}
+                        />
+                      )}
+
+                      <span
+                        className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-colors duration-150 ${
+                          isActive
+                            ? "bg-blue-600 text-white shadow-[0_6px_16px_-8px_rgba(37,99,235,0.6)]"
+                            : "bg-slate-100 text-slate-500 group-hover:bg-slate-200 group-hover:text-slate-700"
+                        }`}
+                      >
+                        <item.icon className="h-[16px] w-[16px]" />
+                      </span>
+
+                      <span
+                        className={`truncate whitespace-nowrap text-[13.5px] transition-all duration-200 overflow-hidden ${
+                          isOpen ? "max-w-[160px] opacity-100" : "max-w-0 opacity-0"
+                        }`}
+                      >
+                        {item.name}
+                      </span>
+
+                      {isActive && isOpen && (
+                        <ChevronRight
+                          className={`ms-auto h-3.5 w-3.5 shrink-0 text-blue-500 ${
+                            isKu ? "rotate-180" : ""
+                          }`}
+                        />
+                      )}
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
+        </nav>
+
+        {/* AI Memory card */}
         <div
-          className="px-3 mt-4"
+          className="px-3 pb-4"
           style={{
-            transition: 'opacity 200ms ease, visibility 200ms ease',
+            transition: "opacity 200ms ease, visibility 200ms ease, max-height 200ms ease",
             opacity: isOpen ? 1 : 0,
-            visibility: isOpen ? 'visible' : 'hidden',
+            visibility: isOpen ? "visible" : "hidden",
+            maxHeight: isOpen ? "200px" : "0",
           }}
         >
-          <div
-            className="rounded-2xl p-4"
-            style={{
-              background: 'rgba(255,255,255,0.04)',
-              border: '1px solid rgba(255,255,255,0.08)',
-            }}
-          >
-            <div className="flex items-center gap-2.5 mb-3">
-              <div
-                className="w-8 h-8 rounded-lg flex items-center justify-center"
-                style={{ background: 'rgba(37,99,235,0.25)', border: '1px solid rgba(59,130,246,0.3)' }}
-              >
-                <BrainCircuit className="w-4 h-4 text-blue-400" />
+          <div className="rounded-2xl border border-blue-100 bg-gradient-to-br from-blue-50 via-white to-indigo-50 p-4 shadow-[0_8px_24px_-16px_rgba(37,99,235,0.35)]">
+            <div className="mb-3 flex items-center gap-2.5">
+              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 text-white shadow-[0_8px_20px_-8px_rgba(37,99,235,0.7)]">
+                <BrainCircuit className="h-4 w-4" />
               </div>
               <div>
-                <div className="text-[12px] font-semibold text-white leading-tight">
-                  {isKu ? 'یادگەی AI' : 'AI Memory'}
+                <div className="text-[12.5px] font-bold leading-tight text-slate-900">
+                  {isKu ? "یادگەی AI" : "AI memory"}
                 </div>
-                <div className="flex items-center gap-1.5 mt-0.5">
+                <div className="mt-0.5 flex items-center gap-1.5">
                   <span
-                    className="w-1.5 h-1.5 rounded-full bg-emerald-400"
-                    style={{ boxShadow: '0 0 6px rgba(52,211,153,0.8)' }}
+                    className="h-1.5 w-1.5 rounded-full bg-emerald-500"
+                    style={{ boxShadow: "0 0 6px rgba(16,185,129,0.7)" }}
                   />
-                  <span className="text-[10px] font-medium text-emerald-400">
-                    {isKu ? 'کراوەتەوە' : 'Active'}
+                  <span className="text-[10px] font-semibold text-emerald-600">
+                    {isKu ? "چالاکە" : "Active"}
                   </span>
                 </div>
               </div>
             </div>
 
-            <div className="flex justify-between text-[10px] font-medium text-white/40 mb-1.5">
-              <span>{isKu ? 'بەکارهێنانی یادگە' : 'Memory Usage'}</span>
-              <span className="text-white/70">68%</span>
+            <div className="mb-1.5 flex justify-between text-[10px] font-semibold text-slate-500">
+              <span>{isKu ? "بەکارهێنان" : "Usage"}</span>
+              <span className="text-slate-700">68%</span>
             </div>
-            <div className="h-1 w-full rounded-full mb-3 overflow-hidden" style={{ background: 'rgba(255,255,255,0.08)' }}>
+            <div className="mb-3 h-1.5 w-full overflow-hidden rounded-full bg-slate-200/70">
               <div
-                className="h-full rounded-full"
+                className="h-full rounded-full bg-gradient-to-r from-blue-600 to-indigo-500"
                 style={{
-                  width: '68%',
-                  background: 'linear-gradient(90deg,#2563eb,#60a5fa)',
-                  boxShadow: '0 0 8px rgba(37,99,235,0.6)',
-                  marginLeft: isKu ? 'auto' : undefined,
+                  width: "68%",
+                  boxShadow: "0 0 8px rgba(37,99,235,0.4)",
+                  marginLeft: isKu ? "auto" : undefined,
                 }}
               />
             </div>
 
-            <button className="flex items-center gap-1 text-[10px] font-bold text-blue-400 hover:text-blue-300 transition-colors cursor-pointer">
-              {isKu ? 'زیاتر بزانە' : 'Learn more'}
-              <ChevronRight className={`w-3 h-3 ${isKu ? 'rotate-180' : ''}`} />
-            </button>
+            <Link
+              to="/dashboard/settings"
+              className="inline-flex items-center gap-1 text-[10.5px] font-bold text-blue-700 transition-colors hover:text-blue-800"
+            >
+              {isKu ? "زیاتر بزانە" : "Learn more"}
+              <ChevronRight className={`h-3 w-3 ${isKu ? "rotate-180" : ""}`} />
+            </Link>
           </div>
         </div>
       </aside>
 
-      {/* ── Main content ───────────────────────────────────────────────── */}
-      <main className="perf-scroll flex-1 h-full overflow-y-auto p-4 sm:p-6 lg:p-10 relative min-w-0 text-foreground bg-background">
+      {/* Main content */}
+      <main className="perf-scroll relative min-w-0 flex-1 h-full overflow-y-auto bg-background p-4 text-foreground sm:p-6 lg:p-10">
         {/* Mobile hamburger */}
         <button
-          className="lg:hidden mb-6 w-10 h-10 rounded-xl bg-card border border-border flex items-center justify-center shadow-sm text-foreground cursor-pointer hover:bg-muted transition-colors"
+          className="mb-6 flex h-10 w-10 items-center justify-center rounded-xl border border-border bg-card text-foreground shadow-sm transition-colors hover:bg-muted lg:hidden"
           onClick={() => setIsOpen(true)}
+          aria-label={isKu ? "کردنەوەی لیست" : "Open menu"}
         >
-          <Menu className="w-5 h-5" />
+          <Menu className="h-5 w-5" />
         </button>
         <Outlet />
       </main>

@@ -49,7 +49,8 @@ function LoginPage() {
         routing="path"
         path="/login"
         signUpUrl="/signup"
-        forceRedirectUrl="/dashboard/settings"
+        fallbackRedirectUrl="/dashboard"
+        signUpFallbackRedirectUrl="/dashboard"
         appearance={memoryCvClerkAppearance}
       />
     </AuthFormLayout>

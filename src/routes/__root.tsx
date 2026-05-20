@@ -90,7 +90,13 @@ function RootShell({ children }: { children: React.ReactNode }) {
       </head>
       <body style={{ overflowX: "hidden", minHeight: "100dvh" }}>
         {clerkPublishableKey ? (
-          <ClerkProvider publishableKey={clerkPublishableKey}>
+          <ClerkProvider
+            publishableKey={clerkPublishableKey}
+            signInUrl="/login"
+            signUpUrl="/signup"
+            signInFallbackRedirectUrl="/dashboard"
+            signUpFallbackRedirectUrl="/dashboard"
+          >
             <div style={{ overflowX: "hidden", position: "relative" }}>{children}</div>
           </ClerkProvider>
         ) : (
