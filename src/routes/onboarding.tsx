@@ -262,19 +262,17 @@ export function ChatOnboarding({
   useEffect(() => {
     if (autoRanRef.current) return;
     if (!incomingPrompt || stage !== "intake") return;
+    const memory = incomingPrompt.trim();
+    if (memory.length < 20) return;
+
     autoRanRef.current = true;
-    setInputText(incomingPrompt);
+    setInputText(memory);
     // Defer so state flushes before the handler reads it
     const t = setTimeout(() => {
       // We pass the memory directly via the input state, then kick off the extract.
       // handleExtract reads from `inputText`, so we wrap the call after state update.
       void (async () => {
         // Re-read the latest value by using the memory directly
-        const memory = incomingPrompt.trim();
-        if (memory.length < 20) {
-          void handleAiStart();
-          return;
-        }
         setRawMemory(memory);
         setInputText("");
         setIsThinking(true);

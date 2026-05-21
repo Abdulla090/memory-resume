@@ -62,7 +62,7 @@ function DashboardLayout() {
 
   return (
     <div
-      className="flex h-screen overflow-hidden font-sans bg-slate-50/60"
+      className="flex min-h-[100dvh] w-full overflow-hidden font-sans bg-slate-50/60"
       dir={isKu ? "rtl" : "ltr"}
     >
       {/* Mobile dim overlay */}
@@ -248,7 +248,7 @@ function DashboardLayout() {
       </aside>
 
       {/* Main content */}
-      <main className="perf-scroll relative min-w-0 flex-1 h-full overflow-y-auto bg-background p-4 text-foreground sm:p-6 lg:p-10">
+      <main className="perf-scroll relative min-w-0 flex-1 overflow-y-auto bg-background p-3 text-foreground sm:p-6 lg:p-10">
         {/* Mobile hamburger */}
         <button
           className="mb-6 flex h-10 w-10 items-center justify-center rounded-xl border border-border bg-card text-foreground shadow-sm transition-colors hover:bg-muted lg:hidden"
