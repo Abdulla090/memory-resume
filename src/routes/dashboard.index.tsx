@@ -74,16 +74,23 @@ function DashboardIndex() {
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="flex justify-center w-full pt-4 relative z-20"
+        className="relative z-20 flex w-full justify-center pt-4"
       >
-        <div className="inline-flex items-center rounded-full border border-neutral-200 bg-white p-1.5 shadow-sm">
-          <button className="flex items-center gap-2 rounded-full px-6 py-2.5 text-sm font-bold transition-all duration-200 bg-black text-white shadow-sm scale-105">
+        <div className="inline-flex w-full max-w-md flex-wrap items-center justify-center gap-1.5 rounded-3xl border border-neutral-200 bg-white p-1.5 shadow-sm sm:max-w-none sm:flex-nowrap sm:rounded-full sm:gap-0">
+          <button
+            onClick={() => {
+              setSeedPrompt(undefined);
+              setSeedTarget(undefined);
+              setMode("chat");
+            }}
+            className="flex min-w-0 flex-1 items-center justify-center gap-2 rounded-full px-4 py-2.5 text-sm font-bold transition-all duration-200 bg-black text-white shadow-sm sm:flex-none sm:px-6 scale-105"
+          >
             <BriefcaseIcon className="h-4 w-4" />
             {isKu ? "دروستکەری سیڤی" : "CV Builder"}
           </button>
           <button
             onClick={() => navigate({ to: "/interview" })}
-            className="flex items-center gap-2 rounded-full px-6 py-2.5 text-sm font-bold transition-all duration-200 text-neutral-500 hover:text-black"
+            className="flex min-w-0 flex-1 items-center justify-center gap-2 rounded-full px-4 py-2.5 text-sm font-bold transition-all duration-200 text-neutral-500 hover:text-black sm:flex-none sm:px-6"
           >
             <MessageSquare className="h-4 w-4" />
             {isKu ? "چاوپێکەوتن" : "Interview Mode"}
