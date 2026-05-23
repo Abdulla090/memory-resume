@@ -443,11 +443,11 @@ function ResumeEditor() {
 
         {/* ── Top Bar ── */}
         <header
-          className="relative z-50 shrink-0 flex items-center justify-between px-4 py-3 border-b border-white/60"
+          className="relative z-50 shrink-0 flex flex-wrap items-center justify-between gap-2 border-b border-white/60 px-3 py-3 sm:px-4"
           style={{ background: "rgba(255,255,255,0.82)", backdropFilter: "blur(20px)" }}
         >
           {/* Left */}
-          <div className="flex items-center gap-3">
+          <div className="flex min-w-0 items-center gap-2 sm:gap-3">
             <Link to="/" className="flex items-center gap-2 group cursor-pointer">
               <div className="size-8 rounded-xl bg-white shadow-[0_2px_8px_rgba(0,0,0,0.12),0_1px_0_rgba(255,255,255,0.8)_inset] flex items-center justify-center">
                 <img
@@ -461,10 +461,10 @@ function ResumeEditor() {
               <button
                 type="button"
                 onClick={() => setShowResumeMenu((v) => !v)}
-                className="flex items-center gap-1.5 rounded-full px-3 py-1 bg-white shadow-[0_2px_8px_rgba(0,0,0,0.08),0_1px_0_rgba(255,255,255,0.9)_inset] border border-white/60 hover:bg-slate-50 transition-colors"
+                className="flex min-w-0 items-center gap-1.5 rounded-full border border-white/60 bg-white px-2.5 py-1 shadow-[0_2px_8px_rgba(0,0,0,0.08),0_1px_0_rgba(255,255,255,0.9)_inset] transition-colors hover:bg-slate-50 sm:px-3"
               >
                 <FileUser className="size-3.5 text-slate-500" />
-                <span className="text-[13px] font-semibold text-slate-700 max-w-[160px] truncate">
+                <span className="max-w-[120px] truncate text-[13px] font-semibold text-slate-700 sm:max-w-[160px]">
                   {data.name || "My Resume"}
                 </span>
                 <ChevronDown
@@ -514,7 +514,7 @@ function ResumeEditor() {
           <div className="hidden md:flex flex-1" />
 
           {/* Right: View resume toggle */}
-          <div className="flex items-center gap-2">
+          <div className="ml-auto flex items-center gap-2">
             <button
               onClick={() => setShowResume((v) => !v)}
               className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-[13px] font-bold transition-all duration-200 ${
@@ -524,14 +524,15 @@ function ResumeEditor() {
               } active:scale-[0.97]`}
             >
               {showResume ? <EyeOff className="size-4" /> : <Play className="size-4" />}
-              <span>{isKu ? "سیڤی" : showResume ? "Hide Resume" : "View Resume"}</span>
+              <span className="hidden sm:inline">{isKu ? "سیڤی" : showResume ? "Hide Resume" : "View Resume"}</span>
+              <span className="sm:hidden">{isKu ? "سیڤی" : showResume ? "Hide" : "View"}</span>
             </button>
           </div>
         </header>
 
         {/* ── Editor workspace ── */}
         <main className="relative z-10 flex-1 min-h-0 overflow-hidden">
-          <div className="flex h-full min-h-0 flex-col gap-4 p-3 md:p-4 lg:grid lg:grid-cols-[360px_minmax(0,1.35fr)] lg:gap-4">
+          <div className="flex h-full min-h-0 flex-col gap-3 p-2.5 sm:gap-4 sm:p-3 md:p-4 lg:grid lg:grid-cols-[360px_minmax(0,1.35fr)] lg:gap-4">
             <aside className="relative flex min-h-0 flex-1 flex-col lg:max-w-none max-lg:min-h-0 max-lg:overflow-hidden">
               {/* ── Chat / Design tab switcher ── */}
               <div
