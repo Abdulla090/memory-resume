@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import { useDarkMode } from "@/hooks/use-dark-mode";
 import React, { useEffect, useRef, useState } from "react";
+import { LandingScrollMotion } from "@/components/landing/LandingScrollMotion";
 import { HeroV2 } from "@/components/HeroV2";
 import { useAppStore } from "@/lib/store";
 import { useMobileOptimized } from "@/lib/performance";
@@ -2284,9 +2285,13 @@ export function BentoGridSection({ language }: { language: Language }) {
 
         <WorkflowStrip language={language} />
 
-        <FAQSection language={language} />
+        <div data-gsap-reveal>
+          <FAQSection language={language} />
+        </div>
 
-        <ClosingCta language={language} />
+        <div data-gsap-reveal>
+          <ClosingCta language={language} />
+        </div>
       </div>
     </section>
   );
@@ -2533,22 +2538,33 @@ function Landing() {
   const language = useAppStore((s) => s.language);
   const setLanguage = useAppStore((s) => s.setLanguage);
   const t = copy[language];
-  const isRTL = language !== "en";
 
   return (
-    <div className="landing-page page-shell font-doran bg-background text-foreground" dir={t.dir} lang={t.lang}>
-      <Header
-        language={language}
-        onSelectLanguage={(lang) => setLanguage(lang)}
-      />
-      <main>
-        <HeroV2 language={language} />
-        <TrustedMarquee language={language} />
-        <StatsSection language={language} />
-        <BentoGridSection language={language} />
-      </main>
-      <SiteFooter language={language} />
-    </div>
+    <LandingScrollMotion>
+      <div className="landing-page page-shell font-doran bg-background text-foreground" dir={t.dir} lang={t.lang}>
+        <Header
+          language={language}
+          onSelectLanguage={(lang) => setLanguage(lang)}
+        />
+        <main>
+          <HeroV2 language={language} />
+          <div data-gsap-reveal>
+            <TrustedMarquee language={language} />
+          </div>
+          <div data-gsap-depth>
+            <div data-gsap-reveal>
+              <StatsSection language={language} />
+            </div>
+          </div>
+          <div data-gsap-reveal>
+            <BentoGridSection language={language} />
+          </div>
+        </main>
+        <div data-gsap-reveal>
+          <SiteFooter language={language} />
+        </div>
+      </div>
+    </LandingScrollMotion>
   );
 }
 
