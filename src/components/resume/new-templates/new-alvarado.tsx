@@ -10,7 +10,7 @@ import { Phone, Mail, MapPin, Globe } from "lucide-react";
 function SectionTitle({ title, className = "" }: { title: ReactNode; className?: string }) {
   return (
     <div className={`mb-4 flex items-center gap-4 ${className}`}>
-      <h2 className="shrink-0 text-[14px] font-black uppercase tracking-[0.2em] rtl:tracking-normal text-[#2b2b2f]">
+      <h2 className="shrink-0 text-[14px] font-black rtl:font-normal uppercase tracking-[0.2em] rtl:tracking-normal text-[#2b2b2f]">
         {title}
       </h2>
       <div className="h-[1px] w-full bg-[#2b2b2f] opacity-30" />
@@ -50,8 +50,8 @@ export function NewAlvaradoTemplate({ data }: { data: ResumeData }) {
         
         {/* Top Right Dark Box */}
         <div className="mt-[60px] h-[100px] flex-1 bg-[#2b2b2f] pl-[40px] pt-[20px] rtl:pl-0 rtl:pr-[40px] text-white flex flex-col justify-center">
-          <Editable path="name" value={c.name} as="h1" className="text-[32px] font-black uppercase tracking-[0.1em] rtl:tracking-normal" />
-          <Editable path="title" value={c.title} as="p" className="mt-1 text-[16px] font-bold tracking-[0.15em] uppercase text-white/90 rtl:tracking-normal" />
+          <Editable path="name" value={c.name} as="h1" className="text-[32px] font-black rtl:font-normal uppercase tracking-[0.1em] rtl:tracking-normal" />
+          <Editable path="title" value={c.title} as="p" className="mt-1 text-[16px] font-bold rtl:font-normal tracking-[0.15em] uppercase text-white/90 rtl:tracking-normal" />
         </div>
         
         {/* Photo Overlay */}
@@ -59,7 +59,7 @@ export function NewAlvaradoTemplate({ data }: { data: ResumeData }) {
           {c.photoUrl ? (
             <img src={c.photoUrl} alt={c.name} className="h-full w-full object-cover" />
           ) : (
-            <div className="flex h-full w-full items-center justify-center bg-[#e3e3e3] text-4xl font-black text-[#2b2b2f]">
+            <div className="flex h-full w-full items-center justify-center bg-[#e3e3e3] text-4xl font-black rtl:font-normal text-[#2b2b2f]">
               {c.name.charAt(0)}
             </div>
           )}
@@ -81,7 +81,7 @@ export function NewAlvaradoTemplate({ data }: { data: ResumeData }) {
               <div className="space-y-4 text-[10.5px] leading-[1.4] text-[#4a4a4e]">
                 {c.education.slice(0, 2).map((item, index) => (
                   <div key={`${item.institution}-${index}`}>
-                    <Editable path={`education.${index}.degree`} value={item.degree} as="div" className="font-bold text-[#2b2b2f]" />
+                    <Editable path={`education.${index}.degree`} value={item.degree} as="div" className="font-bold rtl:font-normal text-[#2b2b2f]" />
                     <Editable path={`education.${index}.institution`} value={item.institution} as="div" className="mt-0.5" />
                     <Editable path={`education.${index}.year`} value={item.year} as="div" className="mt-0.5" />
                   </div>
@@ -178,8 +178,8 @@ export function NewAlvaradoTemplate({ data }: { data: ResumeData }) {
                   <div className="absolute left-[-29px] top-[3px] h-[9px] w-[9px] rounded-full border-[2px] border-[#2b2b2f] bg-white rtl:left-auto rtl:right-[-29px]" />
                   
                   <div className="flex items-baseline justify-between gap-4">
-                    <Editable path={`experience.${index}.title`} value={item.title} as="h3" className="text-[12.5px] font-bold leading-tight text-[#2b2b2f]" />
-                    <Editable path={`experience.${index}.duration`} value={item.duration} as="span" className="shrink-0 text-[9px] font-bold italic text-[#4a4a4e]" />
+                    <Editable path={`experience.${index}.title`} value={item.title} as="h3" className="text-[12.5px] font-bold rtl:font-normal leading-tight text-[#2b2b2f]" />
+                    <Editable path={`experience.${index}.duration`} value={item.duration} as="span" className="shrink-0 text-[9px] font-bold rtl:font-normal italic text-[#4a4a4e]" />
                   </div>
                   <Editable path={`experience.${index}.company`} value={item.company} as="p" className="mt-1 text-[10px] font-medium text-[#4a4a4e]" />
                   <div className="mt-2 text-[10px] leading-[1.5] text-[#4a4a4e]">
@@ -212,7 +212,7 @@ export function NewAlvaradoTemplate({ data }: { data: ResumeData }) {
                     : `education.${index}.year`;
                   return (
                     <div key={`${item.name}-${index}`}>
-                      <Editable path={namePath} value={item.name} as="h3" className="text-[12px] font-bold text-[#2b2b2f]" />
+                      <Editable path={namePath} value={item.name} as="h3" className="text-[12px] font-bold rtl:font-normal text-[#2b2b2f]" />
                       <Editable path={rolePath} value={item.role} as="p" className="mt-0.5 text-[10px] font-medium text-[#4a4a4e]" />
                       <Editable path={metaPath} value={item.meta} as="p" className="mt-2 text-[10px] font-medium text-[#4a4a4e]" />
                     </div>

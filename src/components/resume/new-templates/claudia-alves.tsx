@@ -1,7 +1,8 @@
 import { Home, Mail, Phone } from "lucide-react";
-import type { ReactNode } from "react";
+import { type ReactNode, useContext } from "react";
+import { DesignContext } from "../DesignContext";
 import { Editable } from "../Editable";
-import { useLayoutRtl } from "../template-helpers";
+import { useLayoutRtl, labels, skillRating } from "../template-helpers";
 import type { ResumeData } from "@/lib/types";
 import { optimizeResumeForOnePage } from "@/lib/resume-utils";
 
@@ -10,7 +11,7 @@ const BAR = "#686361";
 function SectionBar({ title, className = "" }: { title: ReactNode; className?: string }) {
   return (
     <div className={`flex h-[30px] items-center px-[16px] ${className}`} style={{ backgroundColor: BAR }}>
-      <h2 className="text-[15px] font-black uppercase leading-none tracking-[0.26em] text-white rtl:tracking-normal">
+      <h2 className="text-[15px] font-black rtl:font-normal uppercase leading-none tracking-[0.26em] text-white rtl:tracking-normal">
         {title}
       </h2>
     </div>
@@ -51,7 +52,7 @@ function EducationBlock({ data, index }: { data: ResumeData; index: number }) {
           path={`education.${index}.institution`}
           value={item.institution}
           as="h3"
-          className="text-[14px] font-black uppercase leading-[1.15] text-[#666260]"
+          className="text-[14px] font-black rtl:font-normal uppercase leading-[1.15] text-[#666260]"
         />
         <Editable path={`education.${index}.year`} value={item.year} as="span" className="text-right text-[13px] leading-[1.2] text-[#6a6664]" />
       </div>
@@ -85,7 +86,7 @@ function ExperienceBlock({ data, index }: { data: ResumeData; index: number }) {
           path={`experience.${index}.title`}
           value={item.title}
           as="h3"
-          className="text-[13px] font-black uppercase leading-[1.15] text-[#666260]"
+          className="text-[13px] font-black rtl:font-normal uppercase leading-[1.15] text-[#666260]"
         />
         <Editable path={`experience.${index}.duration`} value={item.duration} as="span" className="text-right text-[12px] leading-[1.2] text-[#6a6664]" />
       </div>
@@ -112,6 +113,9 @@ function ExperienceBlock({ data, index }: { data: ResumeData; index: number }) {
 export function ClaudiaAlvesTemplate({ data }: { data: ResumeData }) {
   const c = optimizeResumeForOnePage(data);
   const rtl = useLayoutRtl(c);
+  const l = labels(c, rtl);
+  const design = useContext(DesignContext);
+  const showSkillBars = design?.showSkillBars !== false;
   const skills = c.skills.slice(0, 5);
   const references = c.projects.length > 0
     ? c.projects.slice(0, 1).map((project) => ({
@@ -137,7 +141,7 @@ export function ClaudiaAlvesTemplate({ data }: { data: ResumeData }) {
             {c.photoUrl ? (
               <img src={c.photoUrl} alt={c.name} className="h-full w-full object-cover" />
             ) : (
-              <div className="flex h-full w-full items-center justify-center bg-[#d8d8d6] text-[54px] font-black text-[#77716f]">
+              <div className="flex h-full w-full items-center justify-center bg-[#d8d8d6] text-[54px] font-black rtl:font-normal text-[#77716f]">
                 {c.name.slice(0, 1).toUpperCase()}
               </div>
             )}
@@ -148,7 +152,7 @@ export function ClaudiaAlvesTemplate({ data }: { data: ResumeData }) {
               path="name"
               value={c.name}
               as="h1"
-              className="max-w-[390px] text-[42px] font-black uppercase leading-[0.96] tracking-[0.08em] text-[#666260] rtl:tracking-normal"
+              className="max-w-[390px] text-[42px] font-black rtl:font-normal uppercase leading-[0.96] tracking-[0.08em] text-[#666260] rtl:tracking-normal"
             />
             <Editable
               path="title"
@@ -165,7 +169,7 @@ export function ClaudiaAlvesTemplate({ data }: { data: ResumeData }) {
         </header>
 
         <section className="mt-[30px]">
-          <SectionBar title={<Editable path="sectionTitles.summary" value={c.sectionTitles?.summary || "Professional Summary"} as="span" />} />
+          <SectionBar title={l.profile} />
           <Editable
             path="summary"
             value={c.summary}
@@ -176,7 +180,7 @@ export function ClaudiaAlvesTemplate({ data }: { data: ResumeData }) {
 
         {c.education.length > 0 && (
           <section className="mt-[39px]">
-            <SectionBar title={<Editable path="sectionTitles.education" value={c.sectionTitles?.education || "Academic Background"} as="span" />} />
+            <SectionBar title={l.education} />
             <div className="mt-[26px] grid grid-cols-2 gap-[60px]">
               <EducationBlock data={c} index={0} />
               <EducationBlock data={c} index={1} />
@@ -186,7 +190,7 @@ export function ClaudiaAlvesTemplate({ data }: { data: ResumeData }) {
 
         {c.experience.length > 0 && (
           <section className="mt-[38px]">
-            <SectionBar title={<Editable path="sectionTitles.experience" value={c.sectionTitles?.experience || "Career History"} as="span" />} />
+            <SectionBar title={l.experience} />
             <div className="mt-[25px] grid grid-cols-2 gap-[60px]">
               <ExperienceBlock data={c} index={0} />
               <ExperienceBlock data={c} index={1} />
@@ -195,16 +199,37 @@ export function ClaudiaAlvesTemplate({ data }: { data: ResumeData }) {
         )}
 
         <div className="mt-[41px] grid grid-cols-2 gap-[60px]">
-          {skills.length > 0 && (
+          {showSkillBars && (c.skillItems?.length ? c.skillItems.length > 0 : skills.length > 0) && (
             <section>
-              <SectionBar title={<Editable path="sectionTitles.skills" value={c.sectionTitles?.skills || "Core Skills"} as="span" />} />
-              <ul className="mt-[25px] list-disc space-y-[3px] pl-[23px] text-[13px] leading-[1.3] marker:text-[#6a6664] rtl:pl-0 rtl:pr-[23px]">
-                {skills.map((skill, index) => (
-                  <li key={`${skill}-${index}`}>
-                    <Editable path={`skills.${index}`} value={skill} as="span" />
-                  </li>
-                ))}
-              </ul>
+              <SectionBar title={l.skills} />
+              <div className="mt-[25px] space-y-[6px]">
+                {c.skillItems && c.skillItems.length > 0 ? (
+                  c.skillItems.slice(0, 5).map((s, index) => (
+                    <div key={s.name} className="flex justify-between items-center gap-2">
+                      <Editable path={`skillItems.${index}.name`} value={s.name} as="span" className="text-[13px] font-semibold rtl:font-normal" />
+                      <div className="flex shrink-0 gap-1.5 rtl:flex-row-reverse">
+                        {Array.from({ length: 5 }).map((_, dot) => (
+                          <span key={dot} className={`h-2 w-2 rounded-full ${dot < s.level ? "bg-[#686361]" : "bg-[#686361] opacity-30"}`} />
+                        ))}
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  skills.map((skill, index) => {
+                    const rating = skillRating(c, skill, index);
+                    return (
+                      <div key={`${skill}-${index}`} className="flex justify-between items-center gap-2">
+                        <Editable path={`skills.${index}`} value={skill} as="span" className="text-[13px] font-semibold rtl:font-normal" />
+                        <div className="flex shrink-0 gap-1.5 rtl:flex-row-reverse">
+                          {Array.from({ length: 5 }).map((_, dot) => (
+                            <span key={dot} className={`h-2 w-2 rounded-full ${dot < rating ? "bg-[#686361]" : "bg-[#686361] opacity-30"}`} />
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  })
+                )}
+              </div>
             </section>
           )}
 
@@ -222,14 +247,14 @@ export function ClaudiaAlvesTemplate({ data }: { data: ResumeData }) {
                   : `experience.${index}.description`;
                 return (
                   <div key={`${reference.name}-${index}`}>
-                    <Editable path={namePath} value={reference.name} as="h3" className="text-[13px] font-black uppercase leading-[1.2]" />
+                    <Editable path={namePath} value={reference.name} as="h3" className="text-[13px] font-black rtl:font-normal uppercase leading-[1.2]" />
                     <Editable path={rolePath} value={reference.role} as="p" className="mt-[21px] text-[12px] leading-[1.45]" />
                     <Editable path={companyPath} value={reference.company} as="p" className="text-[12px] leading-[1.45]" />
                   </div>
                 );
               }) : (
                 <div>
-                  <Editable path="name" value={c.name} as="h3" className="text-[13px] font-black uppercase leading-[1.2] text-[#666260]" />
+                  <Editable path="name" value={c.name} as="h3" className="text-[13px] font-black rtl:font-normal uppercase leading-[1.2] text-[#666260]" />
                   <Editable path="title" value={c.title} as="p" className="mt-[21px] text-[12px] leading-[1.45] text-[#6a6664]" />
                   {c.email && <Editable path="email" value={c.email} as="p" className="text-[12px] leading-[1.45] text-[#6a6664]" />}
                 </div>

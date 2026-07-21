@@ -18,7 +18,7 @@ export function MercerTemplate({ data }: { data: ResumeData }) {
   const photoBlockShape = photoShape === "square" ? "rounded" : photoShape;
 
   const SectionHeader = ({ title }: { title: ReactNode }) => (
-    <div className="bg-[#305178] text-white px-6 py-2 rounded-full inline-block mb-4 text-lg font-black min-w-[200px]">
+    <div className="bg-[#305178] text-white px-6 py-2 rounded-full inline-block mb-4 text-lg font-black rtl:font-normal min-w-[200px]">
       {title}
     </div>
   );
@@ -31,12 +31,12 @@ export function MercerTemplate({ data }: { data: ResumeData }) {
           {/* Education */}
           {c.education.length > 0 && (
             <section>
-              <h2 className="text-xl font-bold border-b border-white pb-2 mb-6 tracking-wide">{l.education}</h2>
+              <h2 className="text-xl font-bold rtl:font-normal border-b border-white pb-2 mb-6 tracking-wide rtl:tracking-normal">{l.education}</h2>
               <div className="space-y-6">
                 {c.education.map((edu, i) => (
                   <div key={i}>
-                    <Editable path={`education.${i}.institution`} value={edu.institution} as="div" className="font-bold text-[14px] leading-tight" />
-                    <Editable path={`education.${i}.year`} value={edu.year} as="div" className="text-[12px] font-bold mt-1" />
+                    <Editable path={`education.${i}.institution`} value={edu.institution} as="div" className="font-bold rtl:font-normal text-[14px] leading-tight" />
+                    <Editable path={`education.${i}.year`} value={edu.year} as="div" className="text-[12px] font-bold rtl:font-normal mt-1" />
                     <Editable path={`education.${i}.degree`} value={edu.degree} as="div" className="text-[12px] mt-1 leading-relaxed opacity-90" />
                   </div>
                 ))}
@@ -47,32 +47,33 @@ export function MercerTemplate({ data }: { data: ResumeData }) {
           {/* Skills */}
           {showSkillBars && (c.skillItems?.length ? c.skillItems.length > 0 : c.skills.length > 0) && (
             <section>
-              <h2 className="text-xl font-bold border-b border-white pb-2 mb-6 tracking-wide">{l.skills}</h2>
+              <h2 className="text-xl font-bold rtl:font-normal border-b border-white pb-2 mb-6 tracking-wide rtl:tracking-normal">{l.skills}</h2>
               <div className="space-y-4">
                 {c.skillItems && c.skillItems.length > 0 ? (
-                  c.skillItems.slice(0, 8).map((s, i) => (
-                    <div key={i} className="flex justify-between items-center gap-4">
-                      <Editable path={`skillItems.${i}.name`} value={s.name} as="div" className="text-[10px] font-black uppercase w-24 truncate" />
-                      <div className="flex-1 h-3 bg-white/20">
-                        <div
-                          className="h-full bg-slate-200"
-                          style={{ width: `${s.level * 20}%` }}
-                        />
+                  c.skillItems.slice(0, 8).map((s, index) => (
+                    <div key={s.name} className="flex justify-between items-center gap-3">
+                      <Editable path={`skillItems.${index}.name`} value={s.name} as="div" className="text-[11px] font-bold rtl:font-normal uppercase truncate" />
+                      <div className="flex shrink-0 gap-1.5 rtl:flex-row-reverse">
+                        {Array.from({ length: 5 }).map((_, dot) => (
+                          <span key={dot} className={`h-2 w-2 rounded-full bg-slate-200 ${dot < s.level ? "" : "opacity-30"}`} />
+                        ))}
                       </div>
                     </div>
                   ))
                 ) : (
-                  c.skills.slice(0, 8).map((skill, i) => (
-                    <div key={i} className="flex justify-between items-center gap-4">
-                      <Editable path={`skills.${i}`} value={skill} as="div" className="text-[10px] font-black uppercase w-24 truncate" />
-                      <div className="flex-1 h-3 bg-white/20">
-                        <div
-                          className="h-full bg-slate-200"
-                          style={{ width: skillLevel(c, skill, i) }}
-                        />
+                  c.skills.slice(0, 8).map((skill, index) => {
+                    const rating = skillRating(c, skill, index);
+                    return (
+                      <div key={skill} className="flex justify-between items-center gap-3">
+                        <Editable path={`skills.${index}`} value={skill} as="div" className="text-[11px] font-bold rtl:font-normal uppercase truncate" />
+                        <div className="flex shrink-0 gap-1.5 rtl:flex-row-reverse">
+                          {Array.from({ length: 5 }).map((_, dot) => (
+                            <span key={dot} className={`h-2 w-2 rounded-full bg-slate-200 ${dot < rating ? "" : "opacity-30"}`} />
+                          ))}
+                        </div>
                       </div>
-                    </div>
-                  ))
+                    );
+                  })
                 )}
               </div>
             </section>
@@ -80,8 +81,8 @@ export function MercerTemplate({ data }: { data: ResumeData }) {
 
           {/* Contact */}
           <section>
-            <h2 className="text-xl font-bold border-b border-white pb-2 mb-6 tracking-wide">{l.contact}</h2>
-            <div className="space-y-4 text-[12px] font-bold">
+            <h2 className="text-xl font-bold rtl:font-normal border-b border-white pb-2 mb-6 tracking-wide rtl:tracking-normal">{l.contact}</h2>
+            <div className="space-y-4 text-[12px] font-bold rtl:font-normal">
               {c.phone && (
                 <div className="flex items-center gap-4">
                   <div className="w-5 h-5 rounded-full bg-white text-[#305178] flex items-center justify-center shrink-0">
@@ -119,8 +120,8 @@ export function MercerTemplate({ data }: { data: ResumeData }) {
 
            {/* Header Area */}
            <div className="ml-20 pt-4 rtl:ml-0 rtl:mr-20">
-              <Editable path="name" value={c.name} as="h1" className="text-6xl font-black text-[#305178] leading-[0.85] tracking-tighter rtl:tracking-normal uppercase w-fit" />
-              <Editable path="title" value={c.title} as="p" className="text-[20px] font-black text-[var(--color-heading)] mt-4 tracking-widest uppercase" />
+              <Editable path="name" value={c.name} as="h1" className="text-6xl font-black rtl:font-normal text-[#305178] leading-[0.85] tracking-tighter rtl:tracking-normal uppercase w-fit" />
+              <Editable path="title" value={c.title} as="p" className="text-[20px] font-black rtl:font-normal text-[var(--color-heading)] mt-4 tracking-widest rtl:tracking-normal uppercase" />
            </div>
 
            <div className="mt-4">
@@ -141,7 +142,7 @@ export function MercerTemplate({ data }: { data: ResumeData }) {
                             <div className="w-4 h-4 rounded-full bg-[#305178]" />
                             <Editable path={`experience.${i}.title`} value={exp.title} as="h3" className="font-light tracking-wide uppercase text-[16px] text-slate-700" />
                          </div>
-                         <div className="font-black text-[13px] text-[var(--color-heading)] ml-7 uppercase tracking-wider mb-2 flex gap-1">
+                         <div className="font-black rtl:font-normal text-[13px] text-[var(--color-heading)] ml-7 rtl:ml-0 rtl:mr-7 uppercase tracking-wider rtl:tracking-normal mb-2 flex gap-1">
                            <Editable path={`experience.${i}.duration`} value={exp.duration} as="span" />
                            <span>-</span>
                            <Editable path={`experience.${i}.company`} value={exp.company} as="span" />
@@ -151,11 +152,11 @@ export function MercerTemplate({ data }: { data: ResumeData }) {
                              path={`experience.${i}.description`}
                              value={exp.description}
                              as="p"
-                             className="text-[12px] text-slate-700 ml-7 leading-relaxed font-medium"
+                             className="text-[12px] text-slate-700 ml-7 rtl:ml-0 rtl:mr-7 leading-relaxed font-medium"
                            />
                          )}
                          {exp.achievements.length > 0 && (
-                           <ul className="ml-7 mt-1 list-disc list-inside space-y-1">
+                           <ul className="ml-7 rtl:ml-0 rtl:mr-7 mt-1 list-disc list-inside space-y-1">
                              {exp.achievements.map((ach, aIdx) => (
                                <Editable
                                  key={aIdx}

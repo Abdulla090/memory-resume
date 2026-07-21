@@ -383,6 +383,18 @@ const resumeSchema = {
       },
     },
     certifications: { type: "array", items: { type: "string" } },
+    sectionTitles: {
+      type: "object",
+      description: "Localized section titles. Must translate Profile, Experience, Education, Skills, Languages, Certifications if the resume is non-English.",
+      properties: {
+        profile: { type: "string" },
+        experience: { type: "string" },
+        education: { type: "string" },
+        skills: { type: "string" },
+        languages: { type: "string" },
+        certifications: { type: "string" },
+      },
+    },
   },
   required: [
     "name",
@@ -424,6 +436,7 @@ You are the "Professional Memory Architect" for MemoryCV. Your goal is to transf
 
 ### RULES OF ENGAGEMENT
 - **Sorani Context:** If the input is in Kurdish (Sorani), maintain professional linguistic standards.
+- **Localization:** If the input is in Kurdish, ensure you translate all sectionTitles (Profile, Experience, Education, Skills, Languages, Certifications) into Kurdish in the \`sectionTitles\` object.
 - **Conciseness:** No fluff. Every word must justify its existence on the page.
 - **Skills Mapping:** Group skills logically based on the "Memory."
 - **ATS Focus:** Use keywords specific to the job title the user is targeting.

@@ -11,7 +11,7 @@ import { optimizeResumeForOnePage } from "@/lib/resume-utils";
 function SectionRibbon({ title, icon, className = "" }: { title: ReactNode; icon: ReactNode; className?: string }) {
   return (
     <div className={`relative -ml-6 h-[48px] w-[392px] bg-[#075a7c] text-white shadow-[0_4px_0_rgba(0,0,0,0.16)] rtl:-ml-0 rtl:-mr-6 ${className}`}>
-      <div className="flex h-full items-center gap-3 px-8 text-[22px] font-black leading-none tracking-tight rtl:flex-row-reverse rtl:tracking-normal">
+      <div className="flex h-full items-center gap-3 px-8 text-[22px] font-black rtl:font-normal leading-none tracking-tight rtl:flex-row-reverse rtl:tracking-normal">
         <span className="grid h-7 w-7 place-items-center text-white">{icon}</span>
         <span>{title}</span>
       </div>
@@ -21,7 +21,7 @@ function SectionRibbon({ title, icon, className = "" }: { title: ReactNode; icon
 
 function SidebarTitle({ children }: { children: ReactNode }) {
   return (
-    <div className="mb-4 h-[43px] rounded-full border-[3px] border-white/55 text-center text-[21px] font-black leading-[38px] tracking-tight text-white">
+    <div className="mb-4 h-[43px] rounded-full border-[3px] border-white/55 text-center text-[21px] font-black rtl:font-normal leading-[38px] tracking-tight text-white">
       {children}
     </div>
   );
@@ -69,7 +69,7 @@ export function GallegoTemplate({ data }: { data: ResumeData }) {
 
         <section className="mt-[44px]">
           <SidebarTitle>{l.contact}</SidebarTitle>
-          <div className="space-y-[13px] text-[13px] font-bold leading-none text-white">
+          <div className="space-y-[13px] text-[13px] font-bold rtl:font-normal leading-none text-white">
             {contact.map((item, index) => {
               const icons = [
                 <Phone key="phone" size={18} fill="currentColor" strokeWidth={3} />,
@@ -101,8 +101,8 @@ export function GallegoTemplate({ data }: { data: ResumeData }) {
                   : `education.${index}.institution`;
                 return (
                   <div key={`${item.name}-${index}`} className="text-[13px] leading-[1.18]">
-                    <Editable path={namePath} value={item.name} as="div" className="font-black text-white" />
-                    <Editable path={metaPath} value={item.meta} as="div" className="font-semibold text-white/85" />
+                    <Editable path={namePath} value={item.name} as="div" className="font-black rtl:font-normal text-white" />
+                    <Editable path={metaPath} value={item.meta} as="div" className="font-semibold rtl:font-normal text-white/85" />
                   </div>
                 );
               })}
@@ -113,7 +113,7 @@ export function GallegoTemplate({ data }: { data: ResumeData }) {
         {showSkillBars && (
           <section className="mt-[52px]">
             <SidebarTitle>{rtl ? "زمانەکان" : "Languages"}</SidebarTitle>
-            <ul className="list-disc space-y-1 pl-5 text-[13px] font-bold leading-[1.2] rtl:pl-0 rtl:pr-5">
+            <ul className="list-disc space-y-1 pl-5 text-[13px] font-bold rtl:font-normal leading-[1.2] rtl:pl-0 rtl:pr-5">
               {languageItems.map((item) => {
                 const certIdx = c.certifications.indexOf(item);
                 const path = certIdx >= 0 ? `certifications.${certIdx}` : `skills.${c.skills.indexOf(item)}`;
@@ -122,19 +122,53 @@ export function GallegoTemplate({ data }: { data: ResumeData }) {
             </ul>
           </section>
         )}
+
+        {showSkillBars && (c.skillItems?.length ? c.skillItems.length > 0 : c.skills.length > 0) && (
+          <section className="mt-[52px]">
+            <SidebarTitle>{l.skills}</SidebarTitle>
+            <div className="space-y-[10px]">
+              {c.skillItems && c.skillItems.length > 0 ? (
+                c.skillItems.slice(0, 5).map((s, index) => (
+                  <div key={s.name} className="flex items-center justify-between gap-2">
+                    <Editable path={`skillItems.${index}.name`} value={s.name} as="span" className="text-[13px] font-bold rtl:font-normal leading-none text-white" />
+                    <div className="flex shrink-0 gap-1.5 rtl:flex-row-reverse">
+                      {Array.from({ length: 5 }).map((_, dot) => (
+                        <span key={dot} className={`h-2 w-2 rounded-full bg-white ${dot < s.level ? "" : "opacity-30"}`} />
+                      ))}
+                    </div>
+                  </div>
+                ))
+              ) : (
+                c.skills.slice(0, 5).map((skill, index) => {
+                  const rating = skillRating(c, skill, index);
+                  return (
+                    <div key={skill} className="flex items-center justify-between gap-2">
+                      <Editable path={`skills.${index}`} value={skill} as="span" className="text-[13px] font-bold rtl:font-normal leading-none text-white" />
+                      <div className="flex shrink-0 gap-1.5 rtl:flex-row-reverse">
+                        {Array.from({ length: 5 }).map((_, dot) => (
+                          <span key={dot} className={`h-2 w-2 rounded-full bg-white ${dot < rating ? "" : "opacity-30"}`} />
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+          </section>
+        )}
       </aside>
 
       <main className="relative z-20 ml-[325px] min-h-[1122px] pb-10 pl-0 pr-[30px] pt-[64px] rtl:ml-0 rtl:mr-[325px] rtl:pl-[30px] rtl:pr-0">
         <header className="ml-[-28px] h-[204px] bg-[#075a7c] px-[42px] pt-[38px] text-white shadow-[0_8px_0_rgba(0,0,0,0.14)] rtl:ml-0 rtl:mr-[-28px]">
-          <Editable path="name" value={c.name} as="h1" className="max-w-[430px] text-[37px] font-black leading-[1.03] tracking-tight rtl:tracking-normal text-white" />
-          <Editable path="title" value={c.title} as="p" className="mt-4 max-w-[360px] text-[18px] font-bold leading-[1.18] text-white/90" />
+          <Editable path="name" value={c.name} as="h1" className="max-w-[430px] text-[37px] font-black rtl:font-normal leading-[1.03] tracking-tight rtl:tracking-normal text-white" />
+          <Editable path="title" value={c.title} as="p" className="mt-4 max-w-[360px] text-[18px] font-bold rtl:font-normal leading-[1.18] text-white/90" />
         </header>
 
         <div className="space-y-[28px] pt-[28px]">
           <section>
             <SectionRibbon title={l.profile} icon={<UserRound size={24} fill="currentColor" strokeWidth={3} />} />
             <div className="px-[36px] pt-[22px]">
-              <Editable path="summary" value={c.summary} as="p" className="max-w-[300px] text-[14px] font-bold leading-[1.35] text-[#4d6b77]" />
+              <Editable path="summary" value={c.summary} as="p" className="max-w-[300px] text-[14px] font-bold rtl:font-normal leading-[1.35] text-[#4d6b77]" />
             </div>
           </section>
 
@@ -144,9 +178,9 @@ export function GallegoTemplate({ data }: { data: ResumeData }) {
               <div className="space-y-3 px-[36px] pt-[22px]">
                 {c.education.slice(0, 2).map((item, index) => (
                   <div key={`${item.institution}-${index}`} className="text-[13px] leading-[1.13]">
-                    <Editable path={`education.${index}.degree`} value={item.degree} as="div" className="font-black text-[#15495f]" />
-                    <Editable path={`education.${index}.institution`} value={item.institution} as="div" className="font-semibold text-[#4f6c78]" />
-                    <Editable path={`education.${index}.year`} value={item.year} as="div" className="font-bold text-[#15495f]" />
+                    <Editable path={`education.${index}.degree`} value={item.degree} as="div" className="font-black rtl:font-normal text-[#15495f]" />
+                    <Editable path={`education.${index}.institution`} value={item.institution} as="div" className="font-semibold rtl:font-normal text-[#4f6c78]" />
+                    <Editable path={`education.${index}.year`} value={item.year} as="div" className="font-bold rtl:font-normal text-[#15495f]" />
                   </div>
                 ))}
               </div>
@@ -159,9 +193,9 @@ export function GallegoTemplate({ data }: { data: ResumeData }) {
               <div className="space-y-4 px-[36px] pt-[22px]">
                 {c.experience.slice(0, 2).map((item, index) => (
                   <article key={`${item.company}-${index}`} className="max-w-[320px] text-[13px] leading-[1.22]">
-                    <Editable path={`experience.${index}.company`} value={item.company} as="h3" className="font-black text-[#15495f]" />
-                    <Editable path={`experience.${index}.title`} value={item.title} as="p" className="font-semibold text-[#4f6c78]" />
-                    <ul className="mt-2 list-disc space-y-1 pl-5 text-[12px] font-semibold leading-[1.25] text-[#4f6c78] rtl:pl-0 rtl:pr-5">
+                    <Editable path={`experience.${index}.company`} value={item.company} as="h3" className="font-black rtl:font-normal text-[#15495f]" />
+                    <Editable path={`experience.${index}.title`} value={item.title} as="p" className="font-semibold rtl:font-normal text-[#4f6c78]" />
+                    <ul className="mt-2 list-disc space-y-1 pl-5 text-[12px] font-semibold rtl:font-normal leading-[1.25] text-[#4f6c78] rtl:pl-0 rtl:pr-5">
                       {(item.achievements.length ? item.achievements : [item.description]).slice(0, 3).map((achievement, achievementIndex) => {
                         const path = item.achievements.length
                           ? `experience.${index}.achievements.${achievementIndex}`

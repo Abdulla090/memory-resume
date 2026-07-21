@@ -1,4 +1,4 @@
-import { use } from "react";
+import { useContext } from "react";
 import type { ReactNode } from "react";
 import { DesignContext } from "../DesignContext";
 import { Editable } from "../Editable";
@@ -12,7 +12,7 @@ export function RefSilvaTemplate({ data }: { data: ResumeData }) {
   const c = optimizeResumeForOnePage(data);
   const rtl = useLayoutRtl(c);
   const l = labels(c, rtl);
-  const design = use(DesignContext);
+  const design = useContext(DesignContext);
   const showSkillBars = design?.showSkillBars !== false;
   const photoShape = design?.photoShape || "circle";
   const photoBlockShape = photoShape === "square" ? "rounded" : photoShape;
@@ -22,8 +22,8 @@ export function RefSilvaTemplate({ data }: { data: ResumeData }) {
       <header className="flex h-[190px] items-center gap-11 bg-[#342820] px-12 text-white rtl:flex-row-reverse">
         <PhotoBlock data={c} shape={photoBlockShape} />
         <div className="border-l-[7px] border-white pl-8 rtl:border-l-0 rtl:border-r-[7px] rtl:pl-0 rtl:pr-8">
-          <Editable path="name" value={c.name} as="h1" className="text-[45px] font-black leading-none tracking-tight rtl:tracking-normal text-white" />
-          <Editable path="title" value={c.title} as="p" className="mt-2 text-[23px] font-bold" />
+          <Editable path="name" value={c.name} as="h1" className="text-[45px] font-black rtl:font-normal leading-none tracking-tight rtl:tracking-normal text-white" />
+          <Editable path="title" value={c.title} as="p" className="mt-2 text-[23px] font-bold rtl:font-normal" />
         </div>
       </header>
 
@@ -53,22 +53,34 @@ export function RefSilvaTemplate({ data }: { data: ResumeData }) {
           {showSkillBars && (c.skillItems?.length ? c.skillItems.length > 0 : c.skills.length > 0) && (
             <section className="mt-10">
               <h2 className="mb-5 text-[22px] font-normal">{l.skills}</h2>
-              {c.skillItems && c.skillItems.length > 0 ? (
-                <div className="flex flex-col gap-3">
-                  {c.skillItems.map((s, idx) => (
-                    <div key={s.name} className="flex flex-col">
-                      <Editable path={`skillItems.${idx}.name`} value={s.name} as="span" className="text-[13px] font-medium" />
-                      <BarRating level={s.level} />
+              <div className="space-y-3">
+                {c.skillItems && c.skillItems.length > 0 ? (
+                  c.skillItems.slice(0, 8).map((s, index) => (
+                    <div key={s.name} className="flex justify-between items-center gap-2">
+                      <Editable path={`skillItems.${index}.name`} value={s.name} as="span" className="text-[13px] font-medium" />
+                      <div className="flex shrink-0 gap-1.5 rtl:flex-row-reverse">
+                        {Array.from({ length: 5 }).map((_, dot) => (
+                          <span key={dot} className={`h-2 w-2 rounded-full bg-[#342820] ${dot < s.level ? "" : "opacity-30"}`} />
+                        ))}
+                      </div>
                     </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="space-y-5 text-[13px]">
-                  {c.skills.slice(0, 8).map((skill, idx) => (
-                    <Editable key={skill} path={`skills.${idx}`} value={skill} as="p" />
-                  ))}
-                </div>
-              )}
+                  ))
+                ) : (
+                  c.skills.slice(0, 8).map((skill, index) => {
+                    const rating = skillRating(c, skill, index);
+                    return (
+                      <div key={skill} className="flex justify-between items-center gap-2">
+                        <Editable path={`skills.${index}`} value={skill} as="span" className="text-[13px] font-medium" />
+                        <div className="flex shrink-0 gap-1.5 rtl:flex-row-reverse">
+                          {Array.from({ length: 5 }).map((_, dot) => (
+                            <span key={dot} className={`h-2 w-2 rounded-full bg-[#342820] ${dot < rating ? "" : "opacity-30"}`} />
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  })
+                )}
+              </div>
             </section>
           )}
         </aside>

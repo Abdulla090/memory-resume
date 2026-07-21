@@ -31,7 +31,7 @@ export function RefSanchezTemplate({ data }: { data: ResumeData }) {
       <span className="absolute left-0 top-0 grid h-9 w-9 place-items-center rounded-full bg-[#303b4e] text-white rtl:left-auto rtl:right-0">
         {icon}
       </span>
-      <h2 className="mb-3 border-b border-[#7d8792] pb-2 text-[19px] font-black uppercase tracking-[0.17em] rtl:tracking-normal text-[#303b4e]">{title}</h2>
+      <h2 className="mb-3 border-b border-[#7d8792] pb-2 text-[19px] font-black rtl:font-normal uppercase tracking-[0.17em] rtl:tracking-normal text-[#303b4e]">{title}</h2>
       {children}
     </section>
   );
@@ -39,19 +39,19 @@ export function RefSanchezTemplate({ data }: { data: ResumeData }) {
   return (
     <div dir={rtl ? "rtl" : "ltr"} className="bg-white font-sans text-[#263241]" style={{ minHeight: "1122px", width: "100%" }}>
       <header className="relative h-[185px] bg-[#303b4e] text-white">
-        <div className="absolute left-[28px] top-[78px] z-10 rtl:left-auto rtl:right-[28px]">
+        <div className="absolute left-[28px] top-[78px] z-10 rtl:left-auto rtl:right-[56px]" style={{ "--ds-photo-size": "140px" } as React.CSSProperties}>
           <PhotoBlock data={c} shape={photoBlockShape} />
         </div>
         <div className="pl-[315px] pt-[62px] rtl:pl-0 rtl:pr-[315px]">
-          <Editable path="name" value={c.name} as="h1" className="text-[38px] font-black uppercase leading-none text-white" />
-          <Editable path="title" value={c.title} as="p" className="mt-4 text-[18px] font-bold uppercase text-white" />
+          <Editable path="name" value={c.name} as="h1" className="text-[38px] font-black rtl:font-normal uppercase leading-none text-white" />
+          <Editable path="title" value={c.title} as="p" className="mt-4 text-[18px] font-bold rtl:font-normal uppercase text-white" />
         </div>
       </header>
 
       <div className="grid grid-cols-[245px_1fr] ">
         <aside className="min-h-[937px] bg-[#e6e6e6] px-6 pb-9 pt-[120px] ">
           <section>
-            <h2 className="mb-4 border-b-2 border-[#8c939a] pb-2 text-[18px] font-black uppercase tracking-[0.15em] rtl:tracking-normal">{l.contact}</h2>
+            <h2 className="mb-4 border-b-2 border-[#8c939a] pb-2 text-[18px] font-black rtl:font-normal uppercase tracking-[0.15em] rtl:tracking-normal">{l.contact}</h2>
             <div className="space-y-3 text-[12px] leading-5">
               {c.phone && <Editable path="phone" value={c.phone} as="p" />}
               {c.email && <Editable path="email" value={c.email} as="p" />}
@@ -60,15 +60,15 @@ export function RefSanchezTemplate({ data }: { data: ResumeData }) {
           </section>
           {showSkillBars && (c.skillItems?.length ? c.skillItems.length > 0 : c.skills.length > 0) && (
             <section className="mt-9">
-              <h2 className="mb-4 border-b-2 border-[#8c939a] pb-2 text-[18px] font-black uppercase tracking-[0.15em] rtl:tracking-normal">{l.skills}</h2>
+              <h2 className="mb-4 border-b-2 border-[#8c939a] pb-2 text-[18px] font-black rtl:font-normal uppercase tracking-[0.15em] rtl:tracking-normal">{l.skills}</h2>
               <div className="space-y-3">
                 {c.skillItems && c.skillItems.length > 0 ? (
                   c.skillItems.slice(0, 7).map((s, index) => (
-                    <div key={s.name}>
-                      <Editable path={`skillItems.${index}.name`} value={s.name} as="p" className="text-[12px] font-semibold" />
-                      <div className="mt-1 flex gap-1.5 rtl:flex-row-reverse">
+                    <div key={s.name} className="flex justify-between items-center gap-2">
+                      <Editable path={`skillItems.${index}.name`} value={s.name} as="p" className="text-[12px] font-semibold rtl:font-normal" />
+                      <div className="flex shrink-0 gap-1.5 rtl:flex-row-reverse">
                         {Array.from({ length: 5 }).map((_, dot) => (
-                          <span key={dot} className={`h-2 w-2 rounded-full ${dot < s.level ? "bg-[#303b4e]" : "bg-[#b8bdc3]"}`} />
+                          <span key={dot} className={`h-2 w-2 rounded-full bg-current ${dot < s.level ? "" : "opacity-30"}`} />
                         ))}
                       </div>
                     </div>
@@ -77,11 +77,11 @@ export function RefSanchezTemplate({ data }: { data: ResumeData }) {
                   c.skills.slice(0, 7).map((skill, index) => {
                     const rating = skillRating(c, skill, index);
                     return (
-                      <div key={skill}>
-                        <Editable path={`skills.${index}`} value={skill} as="p" className="text-[12px] font-semibold" />
-                        <div className="mt-1 flex gap-1.5 rtl:flex-row-reverse">
+                      <div key={skill} className="flex justify-between items-center gap-2">
+                        <Editable path={`skills.${index}`} value={skill} as="p" className="text-[12px] font-semibold rtl:font-normal" />
+                        <div className="flex shrink-0 gap-1.5 rtl:flex-row-reverse">
                           {Array.from({ length: 5 }).map((_, dot) => (
-                            <span key={dot} className={`h-2 w-2 rounded-full ${dot < rating ? "bg-[#303b4e]" : "bg-[#b8bdc3]"}`} />
+                            <span key={dot} className={`h-2 w-2 rounded-full bg-current ${dot < rating ? "" : "opacity-30"}`} />
                           ))}
                         </div>
                       </div>
@@ -91,16 +91,18 @@ export function RefSanchezTemplate({ data }: { data: ResumeData }) {
               </div>
             </section>
           )}
-          <section className="mt-9">
-            <h2 className="mb-4 border-b-2 border-[#8c939a] pb-2 text-[18px] font-black uppercase tracking-[0.15em] rtl:tracking-normal">{rtl ? "زمانەکان" : "Languages"}</h2>
-            <ul className="list-disc space-y-1 pl-4 text-[12px] rtl:pl-0 rtl:pr-4">
-              {(rtl ? ["کوردی", "ئینگلیزی"] : ["English", "Kurdish"]).map((item) => <li key={item}>{item}</li>)}
-            </ul>
-          </section>
+          {c.languages && c.languages.length > 0 && (
+            <section className="mt-9">
+              <h2 className="mb-4 border-b-2 border-[#8c939a] pb-2 text-[18px] font-black rtl:font-normal uppercase tracking-[0.15em] rtl:tracking-normal">{rtl ? "زمانەکان" : "Languages"}</h2>
+              <ul className="list-disc space-y-1 pl-4 text-[12px] rtl:pl-0 rtl:pr-4">
+                {c.languages.map((item, index) => <Editable key={index} path={`languages.${index}`} value={item} as="li" />)}
+              </ul>
+            </section>
+          )}
           {c.projects.length > 0 && (
             <section className="mt-9">
-              <h2 className="mb-4 border-b-2 border-[#8c939a] pb-2 text-[18px] font-black uppercase tracking-[0.15em] rtl:tracking-normal">{l.projects}</h2>
-              <Editable path="projects.0.name" value={c.projects[0].name} as="p" className="text-[12px] font-bold" />
+              <h2 className="mb-4 border-b-2 border-[#8c939a] pb-2 text-[18px] font-black rtl:font-normal uppercase tracking-[0.15em] rtl:tracking-normal">{l.projects}</h2>
+              <Editable path="projects.0.name" value={c.projects[0].name} as="p" className="text-[12px] font-bold rtl:font-normal" />
               {c.projects[0].description && (
                 <Editable path="projects.0.description" value={c.projects[0].description} as="p" className="mt-2 text-[11px] leading-5" />
               )}
@@ -119,10 +121,10 @@ export function RefSanchezTemplate({ data }: { data: ResumeData }) {
                   <article key={`${item.company}-${index}`}>
                     <div className="flex justify-between gap-4">
                       <div>
-                        <Editable path={`experience.${index}.company`} value={item.company} as="h3" className="text-[13px] font-black uppercase" />
-                        <Editable path={`experience.${index}.title`} value={item.title} as="p" className="text-[12px] font-semibold" />
+                        <Editable path={`experience.${index}.company`} value={item.company} as="h3" className="text-[13px] font-black rtl:font-normal uppercase" />
+                        <Editable path={`experience.${index}.title`} value={item.title} as="p" className="text-[12px] font-semibold rtl:font-normal" />
                       </div>
-                      <Editable path={`experience.${index}.duration`} value={item.duration} as="span" className="shrink-0 text-[11px] font-bold uppercase" />
+                      <Editable path={`experience.${index}.duration`} value={item.duration} as="span" className="shrink-0 text-[11px] font-bold rtl:font-normal uppercase" />
                     </div>
                     <ul className="mt-3 list-disc space-y-1 pl-5 text-[11px] leading-5 rtl:pl-0 rtl:pr-5">
                       {(item.achievements.length ? item.achievements : [item.description]).slice(0, 3).map((achievement, achievementIndex) => {
@@ -143,8 +145,8 @@ export function RefSanchezTemplate({ data }: { data: ResumeData }) {
                 {c.education.slice(0, 2).map((item, index) => (
                   <div key={`${item.institution}-${index}`} className="text-[12px] leading-5">
                     <div className="flex justify-between gap-4">
-                      <Editable path={`education.${index}.degree`} value={item.degree} as="p" className="font-black" />
-                      <Editable path={`education.${index}.year`} value={item.year} as="p" className="shrink-0 font-semibold" />
+                      <Editable path={`education.${index}.degree`} value={item.degree} as="p" className="font-black rtl:font-normal" />
+                      <Editable path={`education.${index}.year`} value={item.year} as="p" className="shrink-0 font-semibold rtl:font-normal" />
                     </div>
                     <Editable path={`education.${index}.institution`} value={item.institution} as="p" />
                   </div>

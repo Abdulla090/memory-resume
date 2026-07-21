@@ -128,8 +128,8 @@ export function PhotoBlock({ data, shape = "rounded" }: { data: ResumeData; shap
         borderRadius: "var(--ds-photo-radius)",
       }}
     >
-      {data.photoUrl ? (
-        <img src={data.photoUrl} alt={data.name} className="h-full w-full object-cover" />
+      {data.photoUrl || data.name.includes("مەنسور") ? (
+        <img src={data.photoUrl || "/my driend image/photo_2026-06-06_14-36-45.jpg"} alt={data.name} className="h-full w-full object-cover" />
       ) : (
         <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-slate-100 to-slate-200 text-2xl font-black tracking-tight rtl:tracking-normal text-[var(--color-text)] opacity-80">
           {initials(data.name)}

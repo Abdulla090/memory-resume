@@ -122,6 +122,38 @@ function RootComponent() {
     }
   }, [mobileOptimized]);
 
+  const resumes = useAppStore((state) => state.resumes);
+  const addResume = useAppStore((state) => state.addResume);
+  const deleteResume = useAppStore((state) => state.deleteResume);
+  const setLanguage = useAppStore((state) => state.setLanguage);
+
+  useEffect(() => {
+    // Clean up old seeds
+    if (resumes.some((r) => r.id === "mansur-kurdish-cv" || r.id === "abdulla-aziz-en" || r.id === "abdulla-aziz-ku")) {
+      deleteResume("mansur-kurdish-cv");
+      deleteResume("abdulla-aziz-en");
+      deleteResume("abdulla-aziz-ku");
+    }
+
+    if (!resumes.some((r) => r.id === "mohammed-masood-en" || r.id === "mohammed-masood-ku" || r.id === "ahmad-masood-en" || r.id === "ahmad-masood-ku")) {
+      import("@/lib/seed-data").then(({ MOHAMMED_CV_EN, MOHAMMED_CV_KU, AHMAD_CV_EN, AHMAD_CV_KU }) => {
+        if (!resumes.some((r) => r.id === "mohammed-masood-en")) {
+          addResume(MOHAMMED_CV_EN);
+        }
+        if (!resumes.some((r) => r.id === "mohammed-masood-ku")) {
+          addResume(MOHAMMED_CV_KU);
+        }
+        if (!resumes.some((r) => r.id === "ahmad-masood-en")) {
+          addResume(AHMAD_CV_EN);
+        }
+        if (!resumes.some((r) => r.id === "ahmad-masood-ku")) {
+          addResume(AHMAD_CV_KU);
+        }
+        setLanguage("ku");
+      });
+    }
+  }, [resumes, addResume, deleteResume, setLanguage]);
+
   const language = useAppStore((state) => state.language);
   const dir = language === "ku" ? "rtl" : "ltr";
 

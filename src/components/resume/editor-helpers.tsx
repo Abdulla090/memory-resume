@@ -443,6 +443,7 @@ export function ClientPDFPreview({
       const link = document.createElement("link");
       link.id = id;
       link.rel = "stylesheet";
+      link.crossOrigin = "anonymous";
       link.href = `https://fonts.googleapis.com/css2?family=${encodeURIComponent(font)}:wght@400;500;600;700;800&display=swap`;
       document.head.appendChild(link);
     });
