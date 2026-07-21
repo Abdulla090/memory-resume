@@ -1,4 +1,4 @@
-/** MemoryCV-branded Clerk auth UI — Linear/Figma-grade, no Clerk chrome. */
+/** MemoryCV-branded Clerk auth UI. */
 export const memoryCvClerkAppearance = {
   layout: {
     logoPlacement: "none" as const,
@@ -7,19 +7,19 @@ export const memoryCvClerkAppearance = {
     showOptionalFields: true,
   },
   variables: {
-    colorPrimary: "#0A0B10",
+    colorPrimary: "#2563eb",
     colorText: "#0f172a",
     colorTextSecondary: "#64748b",
     colorBackground: "transparent",
     colorInputBackground: "#ffffff",
     colorDanger: "#e11d48",
-    borderRadius: "0.625rem",
+    borderRadius: "0.75rem",
     fontFamily: '"DM Sans", system-ui, sans-serif',
     fontSize: "14px",
   },
   elements: {
     rootBox: "w-full",
-    card: "shadow-none border-0 p-0 bg-transparent w-full gap-4",
+    card: "shadow-none border-0 p-0 bg-transparent w-full gap-5",
     headerTitle: "hidden",
     headerSubtitle: "hidden",
     logoBox: "hidden",
@@ -27,23 +27,23 @@ export const memoryCvClerkAppearance = {
     footer: "hidden",
     footerPages: "hidden",
     footerAction: "hidden",
-    main: "gap-4",
+    main: "gap-5",
     socialButtonsRoot: "w-full gap-2",
     socialButtonsBlockButton:
-      "w-full rounded-lg border border-slate-200 bg-white py-2.5 text-[13.5px] font-medium text-slate-900 shadow-[0_1px_2px_rgba(15,23,42,0.04)] transition-all hover:border-slate-300 hover:bg-slate-50",
-    socialButtonsBlockButtonText: "font-medium",
+      "w-full rounded-xl border border-slate-200 bg-white py-3 text-[13.5px] font-semibold text-slate-800 shadow-none transition-all hover:border-slate-300 hover:bg-slate-50 active:scale-[0.99]",
+    socialButtonsBlockButtonText: "font-semibold",
     socialButtonsProviderIcon: "h-[18px] w-[18px]",
-    dividerRow: "my-1",
+    dividerRow: "my-0.5",
     dividerLine: "bg-slate-200",
     dividerText: "text-[10.5px] font-medium text-slate-400 uppercase tracking-[0.14em] px-3",
-    form: "gap-3.5",
-    formFieldRow: "gap-1.5",
-    formFieldLabel: "text-[12px] font-medium text-slate-700",
+    form: "gap-4",
+    formFieldRow: "gap-2",
+    formFieldLabel: "text-[12px] font-semibold text-slate-700",
     formFieldInput:
-      "rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 text-[14px] text-slate-900 shadow-[0_1px_2px_rgba(15,23,42,0.03)] focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10 focus:outline-none transition",
+      "rounded-xl border border-slate-200 bg-slate-50/70 px-3.5 py-3 text-[14px] text-slate-950 shadow-none transition focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 focus:outline-none",
     formFieldInputShowPasswordButton: "text-slate-400 hover:text-slate-700",
     formButtonPrimary:
-      "rounded-lg bg-slate-900 py-2.5 text-[13.5px] font-semibold text-white shadow-[0_1px_2px_rgba(15,23,42,0.2),inset_0_1px_0_rgba(255,255,255,0.08)] transition hover:bg-slate-800 focus:ring-2 focus:ring-slate-900/20 focus:outline-none",
+      "rounded-xl bg-[#2563EB] py-3 text-[13.5px] font-semibold text-white shadow-[0_8px_20px_-10px_rgba(37,99,235,0.8),inset_0_1px_0_rgba(255,255,255,0.2)] transition hover:bg-blue-700 active:scale-[0.99] focus:ring-4 focus:ring-blue-500/15 focus:outline-none",
     formFieldAction: "text-[12px] font-medium text-slate-900 hover:underline",
     identityPreview: "rounded-lg border border-slate-200 bg-white",
     identityPreviewEditButton: "text-slate-900",

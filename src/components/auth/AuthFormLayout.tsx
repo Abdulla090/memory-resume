@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Check } from "lucide-react";
+import { ArrowLeft, Check, FileText, LockKeyhole } from "lucide-react";
 import type { ReactNode } from "react";
 
 type AuthFormLayoutProps = {
@@ -10,166 +10,119 @@ type AuthFormLayoutProps = {
   isKu?: boolean;
 };
 
-/**
- * Ultra-SaaS split auth layout — Linear / Figma / Expo grade.
- * Left: editorial dark panel with product narrative + testimonial.
- * Right: bone-white form panel with tight typography.
- */
 export function AuthFormLayout({ title, subtitle, children, footer, isKu }: AuthFormLayoutProps) {
   const dir = isKu ? "rtl" : "ltr";
-  const bullets = isKu
-    ? [
-        "پاشەکەوتکردنی ئۆتۆماتیکی هەور",
-        "سیڤیی زیرەک بۆ هەر پۆستێک",
-        "ناردنی PDF بە یەک کلیک",
-      ]
-    : [
-        "Automatic cloud sync across devices",
-        "AI-tailored resumes for any role",
-        "Export vector PDF in one click",
-      ];
-
-  const quote = isKu
-    ? "لە کاتژمێرێکدا سیڤییەکی پیشەیی و تایبەتم بۆ پۆستەکەم دروستکرد."
-    : "I shipped a role-specific, recruiter-ready resume in under an hour.";
-  const quoteAuthor = isKu ? "لانا م. — بەرپرسی بەرهەم" : "Lana M. — Product Lead";
+  const workflow = isKu
+    ? ["زانیارییەکانت کۆبکەرەوە", "سیڤییەکەت بۆ ڕۆڵەکە بگونجێنە", "بە PDF هەناردەی بکە"]
+    : ["Capture your career history", "Tailor it to the role", "Export a polished PDF"];
 
   return (
-    <div dir={dir} className="min-h-screen w-full bg-white text-slate-900 antialiased">
-      <div className="grid min-h-screen w-full lg:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)]">
-        {/* LEFT — editorial dark panel */}
-        <aside className="relative hidden overflow-hidden bg-[#0A0B10] text-white lg:flex lg:flex-col lg:justify-between">
-          {/* Precision grid */}
+    <div dir={dir} className="min-h-[100dvh] bg-[#F3F5F7] text-slate-950 antialiased">
+      <div className="mx-auto grid min-h-[100dvh] max-w-[1480px] lg:grid-cols-[minmax(360px,0.82fr)_minmax(520px,1.18fr)]">
+        <aside className="relative m-4 hidden overflow-hidden rounded-[28px] bg-[#111827] text-white lg:flex lg:flex-col lg:justify-between xl:m-6">
           <div
             aria-hidden
-            className="pointer-events-none absolute inset-0 opacity-[0.08]"
+            className="pointer-events-none absolute inset-0 opacity-[0.06]"
             style={{
               backgroundImage:
-                "linear-gradient(to right, #ffffff 1px, transparent 1px), linear-gradient(to bottom, #ffffff 1px, transparent 1px)",
-              backgroundSize: "48px 48px",
-              maskImage:
-                "radial-gradient(ellipse at 30% 20%, #000 40%, transparent 75%)",
-            }}
-          />
-          {/* Aurora */}
-          <div
-            aria-hidden
-            className="pointer-events-none absolute -left-32 top-1/4 h-[520px] w-[520px] rounded-full opacity-40 blur-3xl"
-            style={{
-              background:
-                "radial-gradient(circle, oklch(0.55 0.18 258) 0%, transparent 60%)",
-            }}
-          />
-          <div
-            aria-hidden
-            className="pointer-events-none absolute -bottom-40 right-0 h-[420px] w-[420px] rounded-full opacity-30 blur-3xl"
-            style={{
-              background:
-                "radial-gradient(circle, oklch(0.7 0.15 220) 0%, transparent 60%)",
+                "linear-gradient(#fff 1px, transparent 1px), linear-gradient(90deg, #fff 1px, transparent 1px)",
+              backgroundSize: "56px 56px",
             }}
           />
 
-          <div className="relative z-10 flex items-center gap-2.5 px-12 pt-10">
-            <Link to="/" className="group inline-flex items-center gap-2.5">
-              <span className="grid h-8 w-8 place-items-center rounded-lg bg-white/10 ring-1 ring-white/15 backdrop-blur">
-                <span className="h-2 w-2 rounded-[2px] bg-white" />
+          <div className="relative px-10 pt-10 xl:px-14 xl:pt-12">
+            <Link to="/" className="inline-flex items-center gap-3 text-white">
+              <span className="grid h-10 w-10 place-items-center rounded-xl bg-[#2563EB] shadow-[inset_0_1px_0_rgba(255,255,255,0.2)]">
+                <FileText className="h-5 w-5" strokeWidth={1.8} />
               </span>
-              <span className="text-[15px] font-semibold tracking-tight">MemoryCV</span>
+              <span className="text-[17px] font-semibold tracking-[-0.02em]">MemoryCV</span>
             </Link>
           </div>
 
-          <div className="relative z-10 flex flex-col gap-10 px-12 pb-16">
-            <div className="max-w-md">
-              <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1 text-[11px] font-medium uppercase tracking-[0.14em] text-white/70 backdrop-blur">
-                <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-                {isKu ? "بەردەست بۆ سەرجەم بەکارهێنەران" : "Trusted by 12,000+ builders"}
+          <div className="relative px-10 xl:px-14" dir={dir}>
+            <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.24em] text-blue-300">
+              {isKu ? "شوێنی کاری پیشەیی" : "Career workspace"}
+            </p>
+            <h2 className={`mt-5 max-w-[15ch] text-[clamp(2rem,3.2vw,3.35rem)] font-semibold tracking-[-0.045em] ${isKu ? "leading-[1.35]" : "leading-[1.02]"}`}>
+              {isKu ? "هەموو ئەو شتانەی بۆ هەنگاوی داهاتووت پێویستن." : "Everything you need for the next career move."}
+            </h2>
+            <p className="mt-5 max-w-[42ch] text-[14px] leading-7 text-slate-300">
+              {isKu
+                ? "زانیارییە پیشەییەکانت لە شوێنێکی پارێزراودا ڕێکبخە و بۆ هەر دەرفەتێک سیڤییەکی گونجاو دروست بکە."
+                : "Organize your experience in one private workspace, then shape a focused resume for every opportunity."}
+            </p>
+
+            <div className="mt-10 overflow-hidden rounded-2xl border border-white/10 bg-white/[0.045] shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]">
+              <div className="flex items-center justify-between border-b border-white/10 px-5 py-4" dir="ltr">
+                <div className="flex items-center gap-2.5">
+                  <span className="h-2 w-2 rounded-full bg-emerald-400" />
+                  <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-300">Workspace ready</span>
+                </div>
+                <LockKeyhole className="h-4 w-4 text-slate-400" strokeWidth={1.8} />
               </div>
-              <h2 className="text-[2rem] font-semibold leading-[1.1] tracking-tight text-white sm:text-[2.35rem]">
-                {isKu ? (
-                  <>
-                    بیرەوەریی AI ـەکەت،
-                    <br />
-                    سیڤییەکی بێکۆتا.
-                  </>
-                ) : (
-                  <>
-                    Your AI memory.
-                    <br />
-                    <span className="text-white/50">Infinite resumes.</span>
-                  </>
-                )}
-              </h2>
-              <p className="mt-4 text-[15px] leading-relaxed text-white/60">
-                {isKu
-                  ? "کارە کۆنەکان و بەڵگەکانت بگۆڕە بۆ سیڤییەکی تایبەتی و ئامادە بۆ هەر ڕۆڵێک."
-                  : "Turn your ChatGPT, Claude, or Gemini memory into recruiter-ready resumes — tailored per role in seconds."}
-              </p>
+              <ol className="divide-y divide-white/10">
+                {workflow.map((item, index) => (
+                  <li key={item} className="flex items-center gap-4 px-5 py-4">
+                    <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full border border-white/15 font-mono text-[10px] text-slate-400">
+                      0{index + 1}
+                    </span>
+                    <span className="text-[13px] font-medium text-slate-200">{item}</span>
+                    <Check className="ms-auto h-4 w-4 shrink-0 text-blue-300" strokeWidth={2} />
+                  </li>
+                ))}
+              </ol>
             </div>
-
-            <ul className="space-y-3">
-              {bullets.map((b) => (
-                <li key={b} className="flex items-start gap-3 text-[14px] text-white/80">
-                  <span className="mt-0.5 grid h-4 w-4 shrink-0 place-items-center rounded-full bg-white/10 ring-1 ring-white/15">
-                    <Check className="h-2.5 w-2.5" strokeWidth={3} />
-                  </span>
-                  {b}
-                </li>
-              ))}
-            </ul>
-
-            <figure className="relative rounded-2xl border border-white/10 bg-white/[0.03] p-5 backdrop-blur">
-              <div className="absolute -top-2 left-5 h-4 w-4 rotate-45 border-l border-t border-white/10 bg-white/[0.03]" />
-              <blockquote className="text-[14px] leading-relaxed text-white/85">
-                “{quote}”
-              </blockquote>
-              <figcaption className="mt-3 flex items-center gap-2.5 text-[12px] text-white/55">
-                <span className="h-6 w-6 rounded-full bg-gradient-to-br from-fuchsia-400 to-sky-400" />
-                {quoteAuthor}
-              </figcaption>
-            </figure>
           </div>
 
-          <div className="relative z-10 flex items-center justify-between border-t border-white/5 px-12 py-5 text-[11px] uppercase tracking-[0.18em] text-white/40">
-            <span>SOC 2 · GDPR</span>
-            <span>© MemoryCV</span>
+          <div className="relative flex items-center justify-between border-t border-white/10 px-10 py-6 text-[11px] text-slate-400 xl:px-14" dir="ltr">
+            <span>Private by default</span>
+            <span className="font-mono uppercase tracking-[0.16em]">MemoryCV</span>
           </div>
         </aside>
 
-        {/* RIGHT — form panel */}
-        <main className="relative flex min-h-screen flex-col bg-[#FAFAF7]">
-          {/* Mobile top bar */}
-          <div className="flex items-center justify-between px-6 pt-6 lg:hidden">
-            <Link to="/" className="inline-flex items-center gap-2 text-sm font-semibold text-slate-900">
-              <span className="grid h-7 w-7 place-items-center rounded-md bg-slate-900">
-                <span className="h-1.5 w-1.5 rounded-[2px] bg-white" />
-              </span>
-              MemoryCV
+        <main className="flex min-h-[100dvh] flex-col">
+          <header className="flex items-center justify-between px-5 py-5 sm:px-8 lg:px-12 lg:py-8 xl:px-20">
+            <Link to="/" className="inline-flex items-center gap-2 text-[13px] font-semibold text-slate-500 transition-colors hover:text-slate-950">
+              <ArrowLeft className={`h-4 w-4 ${isKu ? "rotate-180" : ""}`} strokeWidth={1.8} />
+              {isKu ? "گەڕانەوە بۆ سەرەتا" : "Back to home"}
             </Link>
-            <Link to="/" className="text-xs font-medium text-slate-500 hover:text-slate-900">
-              {isKu ? "گەڕانەوە" : "← Home"}
-            </Link>
-          </div>
+            <div className="inline-flex items-center gap-2 text-[11px] font-medium text-slate-500">
+              <LockKeyhole className="h-3.5 w-3.5" strokeWidth={1.8} />
+              {isKu ? "پەیوەندیی پارێزراو" : "Secure access"}
+            </div>
+          </header>
 
-          <div className="flex flex-1 items-center justify-center px-6 py-10 sm:px-10 lg:py-16">
-            <div className="w-full max-w-[400px]">
-              <div className="mb-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400">
-                {isKu ? "هەژماری خۆڕایی" : "Free account"}
+          <div className="flex flex-1 items-center justify-center px-5 pb-12 pt-4 sm:px-8 lg:px-12 lg:pb-20 xl:px-20">
+            <div className="w-full max-w-[460px]">
+              <div className="mb-8 lg:hidden">
+                <Link to="/" className="inline-flex items-center gap-2.5">
+                  <span className="grid h-9 w-9 place-items-center rounded-xl bg-[#2563EB] text-white">
+                    <FileText className="h-4.5 w-4.5" strokeWidth={1.8} />
+                  </span>
+                  <span className="font-semibold tracking-tight">MemoryCV</span>
+                </Link>
               </div>
-              <h1 className="text-[1.75rem] font-semibold leading-tight tracking-tight text-slate-900 sm:text-[2rem]">
-                {title}
-              </h1>
-              <p className="mt-2 text-[14px] leading-relaxed text-slate-500">{subtitle}</p>
 
-              <div className="auth-clerk-shell mt-8">{children}</div>
+              <div className="border-b border-slate-200 pb-7" dir={dir}>
+                <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.2em] text-[#2563EB]">
+                  {isKu ? "هەژماری پارێزراو" : "Your account"}
+                </p>
+                <h1 className={`mt-3 text-[clamp(2rem,5vw,2.75rem)] font-semibold tracking-[-0.045em] text-slate-950 ${isKu ? "leading-[1.3]" : "leading-[1.05]"}`}>
+                  {title}
+                </h1>
+                <p className="mt-3 max-w-[46ch] text-[14px] leading-6 text-slate-500">{subtitle}</p>
+              </div>
 
-              {footer && (
-                <div className="mt-8 text-center text-[13px] text-slate-500">{footer}</div>
-              )}
+              <div className="auth-clerk-shell mt-7 rounded-[20px] border border-slate-200 bg-white p-5 shadow-[0_18px_50px_-30px_rgba(15,23,42,0.28)] sm:p-7">
+                {children}
+              </div>
 
-              <p className="mt-10 text-center text-[11px] leading-relaxed text-slate-400">
+              {footer && <div className="mt-6 text-center text-[13px] text-slate-500">{footer}</div>}
+
+              <p className="mx-auto mt-8 max-w-[42ch] text-center text-[11px] leading-5 text-slate-400">
                 {isKu
-                  ? "بە بەردەوامبوون، ڕەزامەندی دەدەیت لەگەڵ مەرجەکان و سیاسەتی تایبەتی."
-                  : "By continuing you agree to our Terms and Privacy Policy."}
+                  ? "بە بەردەوامبوون، ڕەزامەندی لەسەر مەرجەکان و سیاسەتی تایبەتی دەدەیت."
+                  : "By continuing, you agree to the Terms and Privacy Policy."}
               </p>
             </div>
           </div>

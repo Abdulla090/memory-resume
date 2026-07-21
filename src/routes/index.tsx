@@ -2085,11 +2085,9 @@ export function FAQSection({ language }: { language: Language }) {
   const [openIndex, setOpenIndex] = useState<number | null>(0);
 
   return (
-    <div id="faq" className="mx-auto mt-20 w-full max-w-6xl sm:mt-28" dir="ltr">
-      <div className="grid gap-10 md:grid-cols-[minmax(0,0.9fr)_minmax(0,1.4fr)] md:gap-16">
-        {/* Left column: editorial framing */}
-        <div className="md:sticky md:top-24 md:self-start" dir={t.dir}>
-          <div className={editorialEyebrow} dir="ltr">
+    <div id="faq" className="mx-auto mt-20 w-full max-w-4xl sm:mt-28" dir="ltr">
+      <div className="mx-auto max-w-3xl text-center" dir={t.dir}>
+          <div className={`${editorialEyebrow} justify-center`} dir="ltr">
             <span className="h-px w-6 bg-slate-300" />
             <span>§ 03</span>
             <span className="text-slate-300">·</span>
@@ -2102,33 +2100,32 @@ export function FAQSection({ language }: { language: Language }) {
           >
             {t.faqTitle}
           </h2>
-          <p className="mt-5 max-w-[36ch] text-[14px] font-normal leading-[1.7] text-slate-500">
+          <p className="mx-auto mt-5 max-w-[48ch] text-[14px] font-normal leading-[1.7] text-slate-500">
             {isRtl
               ? "پێش دەستپێکردن، ئەمە باوترین پرسیارەکانن دەربارەی مێمۆری سیڤی."
               : "Before you start — the questions candidates ask us most."}
           </p>
-        </div>
+      </div>
 
-        {/* Right column: hairline-separated accordion */}
-        <div className="border-t border-[#E7E5DE]" dir={t.dir}>
+        <div className="mx-auto mt-12 max-w-3xl border-t border-[#E7E5DE]" dir={t.dir}>
           {t.faqItems.map((item, i) => {
             const open = openIndex === i;
             return (
               <div key={i} className="border-b border-[#E7E5DE]">
                 <button
                   onClick={() => setOpenIndex(open ? null : i)}
-                  className="group flex w-full items-start justify-between gap-6 py-6 text-left focus:outline-none"
+                  className="group grid w-full grid-cols-[2.25rem_minmax(0,1fr)_2.25rem] items-center gap-3 py-6 text-center focus:outline-none"
                 >
-                  <div className="flex items-baseline gap-4">
-                    <span className="font-mono text-[10px] font-semibold tabular-nums tracking-[0.22em] text-slate-400">
+                  <div className="contents">
+                    <span className="font-mono text-[10px] font-semibold tabular-nums tracking-[0.18em] text-slate-400">
                       {`0${i + 1}`}
                     </span>
-                    <span className="text-[15px] sm:text-[17px] font-semibold tracking-tight text-slate-900 group-hover:text-[#2A5BFF] transition-colors">
+                    <span className="text-center text-[15px] font-semibold tracking-tight text-slate-900 transition-colors group-hover:text-[#2A5BFF] sm:text-[17px]">
                       {item.q}
                     </span>
                   </div>
                   <span
-                    className={`mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border transition-all ${
+                    className={`mx-auto flex h-6 w-6 shrink-0 items-center justify-center rounded-full border transition-all ${
                       open ? "border-[#2A5BFF] bg-[#2A5BFF] text-white" : "border-slate-300 text-slate-500"
                     }`}
                   >
@@ -2143,7 +2140,7 @@ export function FAQSection({ language }: { language: Language }) {
                       exit={{ height: 0, opacity: 0 }}
                       transition={{ duration: 0.3, ease: "easeInOut" }}
                     >
-                      <div className="pb-6 pl-10 pr-2 text-[14px] font-normal leading-[1.75] text-slate-600">
+                      <div className="mx-auto max-w-[62ch] px-8 pb-6 text-center text-[14px] font-normal leading-[1.75] text-slate-600">
                         {item.a}
                       </div>
                     </motion.div>
@@ -2153,7 +2150,6 @@ export function FAQSection({ language }: { language: Language }) {
             );
           })}
         </div>
-      </div>
     </div>
   );
 }
