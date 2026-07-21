@@ -126,7 +126,8 @@ export function EditorPreviewPanel({
       </div>
 
       <div className="flex-1 min-h-0 overflow-hidden p-2 sm:p-6 relative">
-        <div className="relative h-full w-full rounded-xl sm:rounded-2xl overflow-hidden shadow-[0_8px_40px_rgba(15,23,42,0.14),0_0_0_1px_rgba(15,23,42,0.06)] bg-white">
+        <div data-cv-canvas className="cv-canvas relative h-full w-full rounded-xl sm:rounded-2xl overflow-hidden shadow-[0_8px_40px_rgba(15,23,42,0.14),0_0_0_1px_rgba(15,23,42,0.06)] bg-white">
+
           {isReady ? (
             <ClientPDFPreview
               data={previewData}

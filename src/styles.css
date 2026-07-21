@@ -1152,3 +1152,261 @@ html.perf-mobile .blur-3xl {
 .auth-form-shell .cl-socialButtons {
   width: 100%;
 }
+
+/* ─────────────────────────────────────────────────────────────
+   Landing page — dark mode overrides
+   Scoped to .landing-page so it doesn't affect app surfaces
+───────────────────────────────────────────────────────────── */
+html.dark .landing-page {
+  --landing-canvas: #0a0f1c;
+  --landing-surface: #111827;
+  --landing-surface-2: #0f172a;
+  --landing-ink: #f1f5f9;
+  --landing-ink-soft: #cbd5e1;
+  --landing-ink-mute: #94a3b8;
+  --landing-ink-faint: #64748b;
+  --landing-rule: #1f2937;
+  --landing-rule-strong: #334155;
+  --landing-accent: #3b82f6;
+
+  background: var(--landing-canvas);
+  color: var(--landing-ink);
+}
+
+/* Base surfaces */
+html.dark .landing-page .bg-white,
+html.dark .landing-page .bg-white\/98,
+html.dark .landing-page .bg-white\/95,
+html.dark .landing-page .bg-white\/90,
+html.dark .landing-page .bg-white\/80 {
+  background-color: var(--landing-surface) !important;
+}
+html.dark .landing-page .bg-\[\#FAFAF7\] {
+  background-color: var(--landing-canvas) !important;
+}
+html.dark .landing-page .bg-\[\#E7E5DE\] {
+  background-color: var(--landing-rule-strong) !important;
+}
+html.dark .landing-page .bg-slate-50 { background-color: #1e293b !important; }
+html.dark .landing-page .bg-slate-100 { background-color: #1e293b !important; }
+html.dark .landing-page .bg-slate-300 { background-color: #475569 !important; }
+
+/* Text */
+html.dark .landing-page .text-slate-900 { color: var(--landing-ink) !important; }
+html.dark .landing-page .text-slate-800 { color: var(--landing-ink) !important; }
+html.dark .landing-page .text-slate-700 { color: var(--landing-ink-soft) !important; }
+html.dark .landing-page .text-slate-600 { color: var(--landing-ink-soft) !important; }
+html.dark .landing-page .text-slate-500 { color: var(--landing-ink-mute) !important; }
+html.dark .landing-page .text-slate-400 { color: var(--landing-ink-mute) !important; }
+html.dark .landing-page .text-slate-300 { color: var(--landing-ink-faint) !important; }
+
+/* Borders */
+html.dark .landing-page .border-\[\#E7E5DE\],
+html.dark .landing-page .border-slate-100,
+html.dark .landing-page .border-slate-200,
+html.dark .landing-page .border-slate-300 {
+  border-color: var(--landing-rule) !important;
+}
+html.dark .landing-page .border-white { border-color: var(--landing-rule-strong) !important; }
+
+/* Header (uses inline style backgrounds) */
+html.dark .landing-page header > div[style] {
+  background: rgba(17, 24, 39, 0.92) !important;
+  border-color: rgba(51, 65, 85, 0.6) !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), 0 1px 3px rgba(0, 0, 0, 0.3) !important;
+}
+html.dark .landing-page header.md\:hidden {
+  background-color: rgba(15, 23, 42, 0.98) !important;
+  border-bottom-color: rgba(51, 65, 85, 0.6) !important;
+}
+
+/* Mobile menu overlay */
+html.dark .landing-page .fixed.inset-0.bg-white\/98 {
+  background-color: rgba(10, 15, 28, 0.98) !important;
+}
+
+/* Marquee chips — hardcoded blue tint */
+html.dark .landing-page .bg-blue-50\/50,
+html.dark .landing-page .bg-blue-50 {
+  background-color: rgba(37, 99, 235, 0.08) !important;
+}
+html.dark .landing-page .border-blue-100 {
+  border-color: rgba(59, 130, 246, 0.25) !important;
+}
+html.dark .landing-page .text-blue-900\/70 { color: #cbd5e1 !important; }
+html.dark .landing-page .text-blue-600\/80 { color: #93c5fd !important; }
+
+/* Editorial section canvas divs & workflow strips */
+html.dark .landing-page section {
+  background-color: transparent;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   App shell — global dark mode (dashboard + editor)
+   Scoped to .app-shell; CV paper is exempt via [data-cv-canvas].
+───────────────────────────────────────────────────────────── */
+html.dark .app-shell {
+  --app-canvas: #0b1120;
+  --app-surface: #111827;
+  --app-surface-2: #0f172a;
+  --app-ink: #f1f5f9;
+  --app-ink-soft: #cbd5e1;
+  --app-ink-mute: #94a3b8;
+  --app-rule: #1f2937;
+  --app-rule-strong: #334155;
+  background: var(--app-canvas) !important;
+  color: var(--app-ink);
+}
+
+/* Base surfaces (exclude anything inside the CV paper) */
+html.dark .app-shell .bg-white:not([data-cv-canvas]):not([data-cv-canvas] *),
+html.dark .app-shell .bg-white\/95:not([data-cv-canvas] *),
+html.dark .app-shell .bg-white\/90:not([data-cv-canvas] *),
+html.dark .app-shell .bg-white\/82:not([data-cv-canvas] *),
+html.dark .app-shell .bg-card:not([data-cv-canvas] *) {
+  background-color: var(--app-surface) !important;
+}
+html.dark .app-shell .bg-slate-50:not([data-cv-canvas] *),
+html.dark .app-shell .bg-slate-50\/60:not([data-cv-canvas] *),
+html.dark .app-shell .bg-slate-50\/50:not([data-cv-canvas] *),
+html.dark .app-shell .bg-\[\#f0f2f7\]:not([data-cv-canvas] *) {
+  background-color: var(--app-canvas) !important;
+}
+html.dark .app-shell .bg-slate-100:not([data-cv-canvas] *),
+html.dark .app-shell .bg-slate-200:not([data-cv-canvas] *) {
+  background-color: var(--app-surface-2) !important;
+}
+html.dark .app-shell .bg-slate-200\/70:not([data-cv-canvas] *) {
+  background-color: rgba(51, 65, 85, 0.6) !important;
+}
+html.dark .app-shell .bg-blue-50:not([data-cv-canvas] *),
+html.dark .app-shell .bg-blue-50\/50:not([data-cv-canvas] *) {
+  background-color: rgba(37, 99, 235, 0.15) !important;
+}
+html.dark .app-shell .bg-background:not([data-cv-canvas] *) {
+  background-color: var(--app-canvas) !important;
+}
+
+/* Text */
+html.dark .app-shell .text-slate-900:not([data-cv-canvas] *),
+html.dark .app-shell .text-slate-800:not([data-cv-canvas] *),
+html.dark .app-shell .text-foreground:not([data-cv-canvas] *) {
+  color: var(--app-ink) !important;
+}
+html.dark .app-shell .text-slate-700:not([data-cv-canvas] *),
+html.dark .app-shell .text-slate-600:not([data-cv-canvas] *) {
+  color: var(--app-ink-soft) !important;
+}
+html.dark .app-shell .text-slate-500:not([data-cv-canvas] *),
+html.dark .app-shell .text-slate-400:not([data-cv-canvas] *) {
+  color: var(--app-ink-mute) !important;
+}
+html.dark .app-shell .text-blue-700:not([data-cv-canvas] *) { color: #93c5fd !important; }
+html.dark .app-shell .text-blue-600:not([data-cv-canvas] *) { color: #60a5fa !important; }
+html.dark .app-shell .text-black:not([data-cv-canvas] *),
+html.dark .app-shell .hover\:text-black:not([data-cv-canvas] *):hover {
+  color: var(--app-ink) !important;
+}
+html.dark .app-shell .text-neutral-700:not([data-cv-canvas] *),
+html.dark .app-shell .text-neutral-600:not([data-cv-canvas] *) {
+  color: var(--app-ink-soft) !important;
+}
+html.dark .app-shell .text-neutral-500:not([data-cv-canvas] *),
+html.dark .app-shell .text-neutral-400:not([data-cv-canvas] *) {
+  color: var(--app-ink-mute) !important;
+}
+html.dark .app-shell .text-muted-foreground:not([data-cv-canvas] *) {
+  color: var(--app-ink-mute) !important;
+}
+/* Selected-pill bg-black inverts on dark: keep it readable */
+html.dark .app-shell .bg-black:not([data-cv-canvas] *) {
+  background-color: #f8fafc !important;
+  color: #0b1120 !important;
+}
+html.dark .app-shell .bg-black:not([data-cv-canvas] *) * {
+  color: #0b1120 !important;
+}
+/* shadcn tokens */
+html.dark .app-shell .bg-muted:not([data-cv-canvas] *),
+html.dark .app-shell .bg-muted\/50:not([data-cv-canvas] *),
+html.dark .app-shell .bg-popover:not([data-cv-canvas] *),
+html.dark .app-shell .bg-secondary:not([data-cv-canvas] *) {
+  background-color: var(--app-surface-2) !important;
+}
+
+/* Borders */
+html.dark .app-shell .border-slate-100:not([data-cv-canvas] *),
+html.dark .app-shell .border-slate-200:not([data-cv-canvas] *),
+html.dark .app-shell .border-slate-200\/60:not([data-cv-canvas] *),
+html.dark .app-shell .border-slate-200\/80:not([data-cv-canvas] *),
+html.dark .app-shell .border-white\/60:not([data-cv-canvas] *),
+html.dark .app-shell .border-border:not([data-cv-canvas] *) {
+  border-color: var(--app-rule) !important;
+}
+html.dark .app-shell .border-blue-100:not([data-cv-canvas] *) {
+  border-color: rgba(59, 130, 246, 0.25) !important;
+}
+
+/* Editor top bar (inline style rgba white) */
+html.dark .app-shell header[style*="rgba(255,255,255"] {
+  background: rgba(17, 24, 39, 0.85) !important;
+  border-color: rgba(51, 65, 85, 0.6) !important;
+}
+
+/* Editor ambient gradient */
+html.dark .app-shell .bg-gradient-to-br.from-slate-100 {
+  background: linear-gradient(135deg, #0b1120, #0f172a 50%, #0b1120) !important;
+}
+
+/* Dashboard AI-memory card gradient */
+html.dark .app-shell .bg-gradient-to-br.from-blue-50 {
+  background: linear-gradient(135deg, rgba(37,99,235,0.18), rgba(15,23,42,0.6), rgba(79,70,229,0.18)) !important;
+}
+
+/* Cards / shadows */
+html.dark .app-shell .shadow-sm,
+html.dark .app-shell .shadow-md,
+html.dark .app-shell .shadow-lg {
+  box-shadow: 0 1px 2px rgba(0,0,0,0.4), 0 8px 24px -12px rgba(0,0,0,0.5) !important;
+}
+
+/* Inputs */
+html.dark .app-shell input:not([data-cv-canvas] *),
+html.dark .app-shell textarea:not([data-cv-canvas] *),
+html.dark .app-shell select:not([data-cv-canvas] *) {
+  background-color: var(--app-surface-2) !important;
+  color: var(--app-ink) !important;
+  border-color: var(--app-rule-strong) !important;
+}
+html.dark .app-shell input::placeholder,
+html.dark .app-shell textarea::placeholder {
+  color: var(--app-ink-mute) !important;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Resume templates — overflow protection for long strings.
+   Guards against emails/URLs/skills pushing the CV page wider
+   than A4 and text spilling out of columns.
+───────────────────────────────────────────────────────────── */
+[data-cv-canvas],
+[data-cv-canvas] * {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+[data-cv-canvas] h1,
+[data-cv-canvas] h2,
+[data-cv-canvas] h3 {
+  text-wrap: balance;
+}
+[data-cv-canvas] p,
+[data-cv-canvas] li {
+  text-wrap: pretty;
+}
+[data-cv-canvas] a {
+  word-break: break-all;
+}
+/* Never let images push templates wider than their column */
+[data-cv-canvas] img {
+  max-width: 100%;
+  height: auto;
+}

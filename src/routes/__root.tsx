@@ -155,7 +155,7 @@ function RootComponent() {
   }, [resumes, addResume, deleteResume, setLanguage]);
 
   const language = useAppStore((state) => state.language);
-  const dir = language === "ku" ? "rtl" : "ltr";
+  const dir = language === "ku" || language === "ar" ? "rtl" : "ltr";
 
   useEffect(() => {
     // Only set lang — never set dir on <html> as it shifts the scrollbar

@@ -6,7 +6,7 @@ interface AppState {
   profile: Profile | null;
   resumes: SavedResume[];
   preferences: { defaultTemplate: TemplateId };
-  language: "en" | "ku";
+  language: "en" | "ku" | "ar";
   apiKey?: string;
   /** True once the user has completed the onboarding flow at least once */
   onboardingDone: boolean;
@@ -15,7 +15,7 @@ interface AppState {
   updateResume: (id: string, patch: Partial<SavedResume>) => void;
   deleteResume: (id: string) => void;
   setDefaultTemplate: (t: TemplateId) => void;
-  setLanguage: (lang: "en" | "ku") => void;
+  setLanguage: (lang: "en" | "ku" | "ar") => void;
   setApiKey: (key: string) => void;
   setOnboardingDone: () => void;
   reset: () => void;

@@ -11,13 +11,16 @@ import {
   Globe,
   LockKeyhole,
   Menu,
+  Moon,
   Sparkles,
   Star,
+  Sun,
   TrendingUp,
   Users,
   ArrowUpRight,
   X,
 } from "lucide-react";
+import { useDarkMode } from "@/hooks/use-dark-mode";
 import React, { useEffect, useRef, useState } from "react";
 import { HeroV2 } from "@/components/HeroV2";
 import { useAppStore } from "@/lib/store";
@@ -38,7 +41,7 @@ export const Route = createFileRoute("/")({
   component: Landing,
 });
 
-export type Language = "en" | "ku";
+export type Language = "en" | "ku" | "ar";
 type NavItem = { label: string; to: "/" | "/templates"; hash?: string };
 
 export const copy = {
@@ -215,6 +218,90 @@ export const copy = {
     characterAlt: "وێنەی کەسایەتی بۆ کار",
     shieldAlt: "نیشانی پاراستنی داتا",
   },
+  ar: {
+    dir: "rtl",
+    lang: "ar",
+    toggle: "English",
+    menu: "فتح القائمة",
+    nav: [
+      { label: "المميزات", to: "/", hash: "features" },
+      { label: "القوالب", to: "/templates" },
+      { label: "الأسئلة الشائعة", to: "/", hash: "faq" },
+    ],
+    navCta: "ابدأ الآن",
+    navSignIn: "تسجيل الدخول",
+    badge: "من الذاكرة إلى سيرة ذاتية بالذكاء الاصطناعي",
+    badgeMobile: "ذكاء اصطناعي · مجاناً",
+    heroTitle: "حوّل ذاكرتك المهنية إلى",
+    heroTitleAccent: "سيرة ذاتية جاهزة للعمل.",
+    heroBody:
+      "يجمع MemoryCV خبراتك ومهاراتك وإنجازاتك، ويستخرج ملفاً مهنياً منسّقاً، ويكيّف سيرتك الذاتية لكل وظيفة، ثم يتيح لك تنزيل مستند احترافي.",
+    heroCta: "ابدأ الآن",
+    statsTitleA: "أنشئ سيرة ذاتية",
+    statsTitleB: "تصنع الفرق فعلاً",
+    statsCta: "ابدأ مجاناً",
+    stats: [
+      { icon: Users, value: 150, suffix: "K+", label: "سيرة ذاتية منشأة", id: "stat-resumes" },
+      {
+        icon: TrendingUp,
+        value: 85,
+        suffix: "%",
+        label: "نسبة أعلى لطلبات المقابلة",
+        id: "stat-interviews",
+      },
+      { icon: Star, value: 49, suffix: "/5.0", label: "متوسط تقييم المستخدمين", id: "stat-rating" },
+    ],
+    bentoBadge: "توجيه بالذكاء الاصطناعي",
+    bentoTitleA: "سيرة ذاتية تضع اسمك",
+    bentoTitleB: "في مقدمة قائمة المرشحين.",
+    bentoBody:
+      "في دقائق، ينظّم MemoryCV معلوماتك، ويُبرز أقوى إنجازاتك، ويُكيّف الصياغة للوظيفة التي تستهدفها.",
+    bentoCta: "ابدأ الآن",
+    standTitleA: "تميّز",
+    standTitleB: "وسط قوائم المتقدمين المزدحمة.",
+    standBody:
+      "هيكل واضح، ونتائج أقوى، وصياغة مركّزة تساعد المسؤولين عن التوظيف على فهم قيمتك بسرعة.",
+    standNote: "موثوق من قِبل أكثر من 100 ألف باحث عن عمل يعدّون طلبات أقوى.",
+    securityTitleA: "بياناتك محمية",
+    securityTitleB: "في كل خطوة.",
+    securityBody:
+      "تُستخدم معلوماتك المهنية الخاصة فقط لبناء سيرتك الذاتية، ويمكنك تعديلها متى شئت.",
+    securityBadge: "الخصوصية أولاً",
+    downloadTitlePrefix: "أنشئ، راجع، ",
+    downloadTitleHighlight: "نزّل.",
+    downloadBody:
+      "بعد تنظيم ملفك، يمكنك معاينة سيرة ذاتية بتصميم أنيق جاهزة للإرسال.",
+    downloadAlt: "معاينة تنزيل السيرة الذاتية",
+    ctaTitle: "أرسل سيرتك الذاتية بإشارة واضحة وواثقة.",
+    ctaBody:
+      "استورد الذاكرة، وأكّد ملفك، وأنشئ سيرة لوظيفة محددة، ثم اضبط التفاصيل الأهم.",
+    ctaPrimary: "ابدأ الآن",
+    ctaSecondary: "عرض القوالب",
+    trust: ["لا حاجة لبطاقة ائتمان", "بداية مجانية", "عدّل في أي وقت"],
+    trustedLabel: "رواد الصناعة",
+    trustedTitle: "موثوق من قِبل الأفضل عالمياً",
+    faqTitle: "الأسئلة الشائعة",
+    faqItems: [
+      {
+        q: "كيف يعمل مُنشئ السير الذاتية بالذكاء الاصطناعي؟",
+        a: "يطرح MemoryCV أسئلة موجّهة حول مسيرتك المهنية، ثم يستخدم ذكاءً اصطناعياً متقدماً لتنظيم وكتابة سيرة ذاتية احترافية مصمّمة لوظيفتك المستهدفة.",
+      },
+      {
+        q: "هل ستكون سيرتي متوافقة مع أنظمة ATS؟",
+        a: "نعم. جميع قوالبنا مصمّمة ليقرأها نظام تتبع المتقدمين (ATS) بسهولة، مما يضمن تجاوز الفحوصات الآلية.",
+      },
+      {
+        q: "هل يمكنني تصدير سيرتي إلى PDF؟",
+        a: "بالتأكيد. عند رضاك عن السيرة، يمكنك تنزيلها بجودة عالية بصيغة PDF جاهزة للإرفاق بطلبات التوظيف.",
+      },
+      {
+        q: "هل توفّرون إنشاء رسائل تعريفية؟",
+        a: "تركيزنا حالياً على إنشاء سير ذاتية عالمية المستوى، لكن إنشاء رسالة التعريف بناءً على ملفك مُدرج ضمن الميزات القادمة.",
+      },
+    ],
+    characterAlt: "رسم توضيحي لشخصية مهنية",
+    shieldAlt: "درع حماية البيانات",
+  },
 } as const;
 
 function Counter({ to, suffix = "" }: { to: number; suffix?: string }) {
@@ -283,12 +370,106 @@ function CtaButton({
   );
 }
 
-export function Header({
+const LANGUAGE_OPTIONS: { code: Language; label: string; native: string }[] = [
+  { code: "en", label: "English", native: "English" },
+  { code: "ar", label: "Arabic", native: "العربية" },
+  { code: "ku", label: "Kurdish", native: "کوردی" },
+];
+
+function LanguageDropdown({
   language,
-  onToggleLanguage,
+  onSelect,
+  align = "end",
 }: {
   language: Language;
-  onToggleLanguage: () => void;
+  onSelect: (lang: Language) => void;
+  align?: "start" | "end";
+}) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  const current = LANGUAGE_OPTIONS.find((l) => l.code === language) ?? LANGUAGE_OPTIONS[0];
+
+  useEffect(() => {
+    if (!open) return;
+    const onDoc = (e: MouseEvent) => {
+      if (!ref.current?.contains(e.target as Node)) setOpen(false);
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false);
+    };
+    document.addEventListener("mousedown", onDoc);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onDoc);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [open]);
+
+  return (
+    <div ref={ref} className="relative" dir="ltr">
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-semibold text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900"
+        aria-label="Change language"
+        aria-haspopup="listbox"
+        aria-expanded={open}
+      >
+        <Globe className="h-4 w-4 shrink-0" />
+        <span className="hidden sm:inline whitespace-nowrap">{current.native}</span>
+        <ChevronDown
+          className={`h-3.5 w-3.5 shrink-0 transition-transform ${open ? "rotate-180" : ""}`}
+        />
+      </button>
+      <AnimatePresence>
+        {open && (
+          <motion.ul
+            initial={{ opacity: 0, y: -6 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -6 }}
+            transition={{ duration: 0.15 }}
+            role="listbox"
+            className={`absolute top-full z-50 mt-2 min-w-[180px] overflow-hidden rounded-xl border border-slate-200 bg-white shadow-lg ${
+              align === "end" ? "right-0" : "left-0"
+            }`}
+          >
+            {LANGUAGE_OPTIONS.map((opt) => {
+              const active = opt.code === language;
+              return (
+                <li key={opt.code}>
+                  <button
+                    type="button"
+                    role="option"
+                    aria-selected={active}
+                    onClick={() => {
+                      onSelect(opt.code);
+                      setOpen(false);
+                    }}
+                    className={`flex w-full items-center justify-between gap-3 px-4 py-2.5 text-sm transition-colors ${
+                      active
+                        ? "bg-blue-50 text-blue-700 font-semibold"
+                        : "text-slate-700 hover:bg-slate-50"
+                    }`}
+                  >
+                    <span className="whitespace-nowrap">{opt.native}</span>
+                    <span className="text-xs text-slate-400">{opt.label}</span>
+                  </button>
+                </li>
+              );
+            })}
+          </motion.ul>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
+export function Header({
+  language,
+  onSelectLanguage,
+}: {
+  language: Language;
+  onSelectLanguage: (lang: Language) => void;
 }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -296,6 +477,7 @@ export function Header({
   const navigate = useNavigate();
   const onboardingDone = useAppStore((s) => s.onboardingDone);
   const { clerkEnabled, isSignedIn } = useAuth();
+  const { isDark, toggle: toggleDark } = useDarkMode();
   const handleStart = () =>
     navigate({
       to: landingCtaPath({
@@ -384,23 +566,18 @@ export function Header({
 
           {/* Right actions */}
           <div className="flex shrink-0 items-center gap-2">
+            <div className="hidden md:flex">
+              <LanguageDropdown language={language} onSelect={onSelectLanguage} />
+            </div>
+
+
             <button
-              onClick={onToggleLanguage}
-              className="hidden items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-semibold text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900 md:flex"
-              aria-label="Change language"
+              onClick={toggleDark}
+              className="hidden h-9 w-9 items-center justify-center rounded-lg text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900 md:flex"
+              aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
               dir="ltr"
             >
-              <Globe className="h-4 w-4 shrink-0" />
-              <span
-                className="overflow-hidden whitespace-nowrap"
-                style={{
-                  maxWidth: scrolled ? "0px" : "80px",
-                  opacity: scrolled ? 0 : 1,
-                  transition: "max-width 0.55s cubic-bezier(0.25,0.46,0.45,0.94), opacity 0.4s ease",
-                }}
-              >
-                {t.toggle}
-              </span>
+              {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
             </button>
 
             {!isSignedIn && clerkEnabled && (
@@ -417,7 +594,7 @@ export function Header({
               id="nav-free-trial"
               className="hidden md:block rounded-full bg-blue-600 px-5 py-2 text-sm font-bold text-white shadow-sm transition-all hover:bg-blue-700 hover:shadow-md"
             >
-              {isSignedIn ? (language === "ku" ? "داشبۆرد" : "Dashboard") : t.navCta}
+              {isSignedIn ? (language === "ku" ? "داشبۆرد" : language === "ar" ? "لوحة التحكم" : "Dashboard") : t.navCta}
             </button>
 
             <button
@@ -554,17 +731,47 @@ export function Header({
                 transition={{ delay: 0.08 + t.nav.length * 0.06, duration: 0.24, ease: "easeOut" }}
                 className="w-full max-w-xs"
               >
+                <div className="grid grid-cols-3 gap-2 rounded-2xl border border-slate-100 bg-white/80 p-2 shadow-sm" dir="ltr">
+                  {LANGUAGE_OPTIONS.map((opt) => {
+                    const active = opt.code === language;
+                    return (
+                      <button
+                        key={opt.code}
+                        type="button"
+                        onClick={() => {
+                          onSelectLanguage(opt.code);
+                          setMobileOpen(false);
+                        }}
+                        className={`rounded-xl px-3 py-3 text-sm font-semibold transition-colors ${
+                          active
+                            ? "bg-blue-600 text-white shadow-sm"
+                            : "text-slate-700 hover:bg-slate-100"
+                        }`}
+                      >
+                        {opt.native}
+                      </button>
+                    );
+                  })}
+                </div>
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, y: 18 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.08 + (t.nav.length + 1) * 0.06, duration: 0.24, ease: "easeOut" }}
+                className="w-full max-w-xs"
+              >
                 <button
-                  onClick={() => {
-                    onToggleLanguage();
-                    setMobileOpen(false);
-                  }}
+                  onClick={toggleDark}
                   className="flex w-full items-center justify-center gap-2 rounded-2xl border border-slate-100 bg-white/80 px-6 py-4 text-base font-semibold text-slate-700 shadow-sm transition-all active:scale-95 hover:border-blue-200 hover:text-blue-600"
                 >
-                  <Globe className="h-4 w-4" />
-                  {t.toggle}
+                  {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+                  {isDark
+                    ? language === "ku" ? "دۆخی ڕووناک" : language === "ar" ? "الوضع الفاتح" : "Light mode"
+                    : language === "ku" ? "دۆخی تاریک" : language === "ar" ? "الوضع الداكن" : "Dark mode"}
                 </button>
               </motion.div>
+
 
               {!isSignedIn && clerkEnabled && (
                 <motion.div
@@ -604,7 +811,7 @@ export function Header({
                   onClick={() => { setMobileOpen(false); void handleStart(); }}
                   className="flex w-full items-center justify-center gap-2 rounded-2xl bg-blue-600 px-6 py-4 text-base font-bold text-white shadow-[0_8px_24px_rgba(37,99,235,0.28)] transition-all active:scale-95 hover:bg-blue-700"
                 >
-                  {isSignedIn ? (language === "ku" ? "داشبۆرد" : "Dashboard") : t.navCta}
+                  {isSignedIn ? (language === "ku" ? "داشبۆرد" : language === "ar" ? "لوحة التحكم" : "Dashboard") : t.navCta}
                 </button>
               </motion.div>
             </div>
@@ -1268,7 +1475,7 @@ function HeroCards() {
 }
 
 function DirectionArrow({ language, className }: { language: Language; className: string }) {
-  return language === "ku" ? (
+  return language !== "en" ? (
     <ArrowLeft className={className} />
   ) : (
     <ArrowRight className={className} />
@@ -1342,147 +1549,211 @@ function Hero({ language }: { language: Language }) {
   );
 }
 
+/* ─────────────────────────────────────────────────────────────
+   Editorial / Ultra-SaaS system
+   Canvas: #FAFAF7   Card: #FFF   Rule: #E7E5DE   Ink: slate-900
+   Accent: #2A5BFF   Mono numerics · tabular-nums · hairlines
+───────────────────────────────────────────────────────────── */
+
+const editorialRule = "border-t border-[#E7E5DE]";
+const editorialCard =
+  "relative overflow-hidden rounded-[22px] border border-[#E7E5DE] bg-white shadow-[0_1px_0_rgba(15,23,42,0.02)]";
+const editorialEyebrow =
+  "inline-flex items-center gap-3 font-mono text-[10px] font-semibold uppercase tracking-[0.28em] text-slate-500";
+
+function EditorialSectionHeader({
+  index,
+  kicker,
+  titleTop,
+  titleBottom,
+  dir,
+}: {
+  index: string;
+  kicker: string;
+  titleTop: React.ReactNode;
+  titleBottom: React.ReactNode;
+  dir: "ltr" | "rtl";
+}) {
+  return (
+    <div className="mx-auto max-w-6xl">
+      <div className="flex items-center gap-4" dir="ltr">
+        <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.32em] text-slate-400">
+          {index}
+        </span>
+        <span className="h-px flex-1 bg-[#E7E5DE]" />
+        <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.32em] text-slate-500">
+          {kicker}
+        </span>
+      </div>
+      <h2
+        className="mt-8 max-w-[22ch] text-[clamp(2rem,4.6vw,3.75rem)] font-semibold tracking-[-0.028em] text-slate-900"
+        style={{ lineHeight: 1.02 }}
+        dir={dir}
+      >
+        {titleTop}
+        <br />
+        <span className="text-slate-400">{titleBottom}</span>
+      </h2>
+    </div>
+  );
+}
+
+/* ── Section: Proof strip (replaces StatsSection) ── */
 export function StatsSection({ language }: { language: Language }) {
   const t = copy[language];
-  const onboardingDone = useAppStore((s) => s.onboardingDone);
-  const textAlign = language === "ku" ? "text-right" : "text-left";
+  const isRtl = language !== "en";
 
   return (
     <section
-      className="perf-defer-section app-frame relative px-5 pb-12 sm:px-8 sm:pb-24"
-      style={{ paddingTop: "clamp(60px,10vw,140px)" }}
+      id="proof"
+      className="perf-defer-section relative bg-[#FAFAF7] px-5 pt-24 pb-20 sm:px-8 sm:pt-32 sm:pb-28"
     >
-      <div className="absolute right-10 top-20 -z-10 h-96 w-96 rounded-full bg-[radial-gradient(circle_at_center,rgba(219,234,254,0.4)_0%,transparent_70%)]" />
-      <div className="absolute bottom-10 left-10 -z-10 h-80 w-80 rounded-full bg-[radial-gradient(circle_at_center,rgba(224,242,254,0.4)_0%,transparent_70%)]" />
-
-      <div
-        className="mb-10 flex flex-col items-start justify-between gap-6 sm:mb-16 md:flex-row md:items-center"
+      <EditorialSectionHeader
+        index="§ 01"
+        kicker={isRtl ? "ژمارە / بەڵگە" : "Numbers / Proof"}
+        titleTop={t.statsTitleA}
+        titleBottom={t.statsTitleB}
         dir={t.dir}
-      >
-        <motion.h2
-          initial={{ opacity: 0, x: 20 }}
-          whileInView={{ opacity: 1, x: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.55 }}
-          className={`text-[clamp(1.75rem,6vw,3.75rem)] font-extrabold ${language === "ku" ? "leading-[1.4] pr-4 sm:pr-6" : "leading-[1.18]"} tracking-tight text-slate-900 ${textAlign}`}
-          dir={t.dir}
-        >
-          {t.statsTitleA}
-          <br />
-          <span className="text-blue-600">{t.statsTitleB}</span>
-        </motion.h2>
-        <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          whileInView={{ opacity: 1, x: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.55 }}
-          className="hidden shrink-0 sm:flex"
-        >
-          <Link
-            to="/dashboard"
-            id="stats-free-trial"
-            className="inline-flex items-center justify-center rounded-full bg-blue-600 px-8 py-4 text-base font-bold text-white shadow-[0_10px_20px_rgba(37,99,235,0.2)] transition-all duration-300 hover:-translate-y-1 hover:bg-blue-700 hover:shadow-[0_15px_30px_rgba(37,99,235,0.3)]"
-            dir={t.dir}
-          >
-            {t.statsCta}
-          </Link>
-        </motion.div>
-      </div>
+      />
 
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
-        {t.stats.map((s, i) => (
-          <motion.div
-            key={s.id}
-            id={s.id}
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: i * 0.15, duration: 0.6, ease: "easeOut" }}
-            whileHover={{ y: -6, boxShadow: "0 25px 50px -12px rgba(37,99,235,0.15)" }}
-            className={`group relative flex cursor-pointer flex-col items-center overflow-hidden rounded-[1.5rem] border border-slate-100 bg-white/80 p-6 text-center shadow-lg backdrop-blur-xl sm:items-start sm:rounded-[2rem] sm:p-10 sm:${textAlign}`}
-            dir={t.dir}
-          >
-            <div className="absolute inset-0 bg-gradient-to-bl from-blue-50/0 to-blue-50/50 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-            <div className="relative z-10 mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-700 to-blue-500 shadow-lg shadow-blue-500/30 transition-transform duration-300 group-hover:scale-110">
-              <s.icon className="h-6 w-6 text-white" />
-            </div>
-            <div className="relative z-10">
-              <div className="flex items-baseline justify-center text-4xl font-black tracking-tight text-slate-900 sm:justify-start">
-                <Counter to={s.value} suffix={s.suffix} />
+      {/* Metric ledger — hairline-separated hero numbers */}
+      <div className="mx-auto mt-16 max-w-6xl border-y border-[#E7E5DE]" dir="ltr">
+        <div className="grid grid-cols-1 divide-y divide-[#E7E5DE] md:grid-cols-3 md:divide-y-0 md:divide-x">
+          {t.stats.map((s, i) => (
+            <motion.div
+              key={s.id}
+              id={s.id}
+              initial={{ opacity: 0, y: 14 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-40px" }}
+              transition={{ duration: 0.55, delay: i * 0.08, ease: [0.22, 1, 0.36, 1] }}
+              className="group relative px-6 py-10 sm:px-10 sm:py-14"
+            >
+              <div className="flex items-center gap-2 font-mono text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-400">
+                <span className="tabular-nums">{`0${i + 1}`}</span>
+                <span className="h-px w-6 bg-slate-300" />
+                <s.icon className="h-3.5 w-3.5 text-slate-500" strokeWidth={1.6} />
               </div>
-              <div className="mt-2 text-sm font-semibold text-slate-500">{s.label}</div>
-            </div>
-          </motion.div>
-        ))}
+
+              <div className="mt-6 flex items-baseline gap-1.5 font-semibold tabular-nums tracking-[-0.03em] text-slate-900">
+                <span className="text-[clamp(3rem,6.5vw,5.25rem)] leading-[0.9]">
+                  <Counter to={s.value} />
+                </span>
+                <span className="text-[clamp(1.25rem,2vw,1.75rem)] leading-none text-[#2A5BFF]">
+                  {s.suffix}
+                </span>
+              </div>
+
+              <div
+                className="mt-5 text-[13px] font-medium leading-[1.55] text-slate-500"
+                dir={t.dir}
+              >
+                {s.label}
+              </div>
+
+              <span className="pointer-events-none absolute inset-x-0 bottom-0 h-px origin-left scale-x-0 bg-[#2A5BFF] transition-transform duration-500 group-hover:scale-x-100" />
+            </motion.div>
+          ))}
+        </div>
       </div>
     </section>
   );
 }
 
+/* ─────────────────────────────────────────────────────────────
+   Product spotlight — real CV cards on paper grid
+───────────────────────────────────────────────────────────── */
+function BentoIndex({ n }: { n: string }) {
+  return (
+    <span className="pointer-events-none absolute right-6 top-6 font-mono text-[10px] font-medium tabular-nums text-slate-400/70">
+      {n}
+    </span>
+  );
+}
+
 const BentoHeroCard = ({ language }: { language: Language }) => {
   const t = copy[language];
-  const textAlign = language === "ku" ? "text-right" : "text-left";
+  const isRtl = language !== "en";
+  const textAlign = isRtl ? "text-right" : "text-left";
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 16 }}
       whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      className="relative w-full overflow-hidden rounded-[2rem] border border-slate-100 bg-white shadow-xl"
+      viewport={{ once: true, margin: "-60px" }}
+      transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+      className={`${editorialCard} w-full`}
     >
-      <div className="pointer-events-none absolute inset-0">
-        <div className="absolute bottom-[-10%] right-[10%] h-[200px] w-[400px] rounded-full bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.6)_0%,transparent_70%)]" />
-        <div className="absolute bottom-[-20%] left-[-10%] h-[300px] w-[600px] rounded-full bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.8)_0%,transparent_70%)]" />
-      </div>
+      <BentoIndex n="01 / SPOTLIGHT" />
+      <div className="grid gap-10 p-6 sm:p-10 md:grid-cols-[1.05fr_1fr] md:gap-10 md:p-16">
+        <div className={`flex flex-col justify-between ${textAlign}`} dir={t.dir}>
+          <div>
+            <div className={editorialEyebrow}>
+              <span className="h-px w-6 bg-slate-300" />
+              <span>{isRtl ? "پلاتفۆرم" : "Platform"}</span>
+              <span className="text-slate-300">·</span>
+              <span className="text-slate-400">{t.bentoBadge}</span>
+            </div>
 
-      <div className="relative z-10 grid gap-6 p-5 sm:p-10 md:grid-cols-[0.95fr_1.05fr] md:p-14">
-        <div
-          className={`relative z-20 flex flex-col items-start ${textAlign} md:items-start`}
-          dir={t.dir}
-        >
-          <div className="mb-8 flex items-center gap-2 rounded-full border border-white bg-white/90 px-4 py-1.5 shadow-sm backdrop-blur-sm">
-            <Sparkles className="h-4 w-4 text-blue-500" />
-            <span className="text-sm font-semibold text-blue-700">{t.bentoBadge}</span>
+            <h3
+              className={`mt-6 text-[clamp(1.75rem,3vw,2.75rem)] font-semibold tracking-[-0.02em] text-slate-900 ${
+                isRtl ? "leading-[1.45]" : "leading-[1.08]"
+              }`}
+            >
+              {t.bentoTitleA}
+              <br />
+              <span className="text-[#2A5BFF]">{t.bentoTitleB}</span>
+            </h3>
+
+            <p className="mt-5 max-w-[46ch] text-[15px] font-normal leading-[1.7] text-slate-500">
+              {t.bentoBody}
+            </p>
           </div>
 
-          <h2
-            className={`mb-5 text-[clamp(1.6rem,5vw,3rem)] font-extrabold ${language === "ku" ? "leading-[1.45]" : "leading-[1.15]"} tracking-tight text-slate-900`}
-          >
-            {t.bentoTitleA}
-            <br />
-            <span className="text-blue-600">{t.bentoTitleB}</span>
-          </h2>
+          <div className={`mt-10 ${editorialRule} pt-6`}>
+            <ul className="grid grid-cols-1 gap-x-8 gap-y-3 text-[13px] text-slate-600 sm:grid-cols-2">
+              {[
+                { k: "01", v: isRtl ? "بنکەی داتای تایبەتی" : "Career-memory capture" },
+                { k: "02", v: isRtl ? "هەڵسەنگاندنی ATS" : "ATS-grade formatting" },
+                { k: "03", v: isRtl ? "گونجاندن بۆ ڕۆڵ" : "Role-tailored wording" },
+                { k: "04", v: isRtl ? "هەناردەی PDF" : "Recruiter-ready PDF" },
+              ].map((it) => (
+                <li key={it.k} className="flex items-baseline gap-3">
+                  <span className="font-mono text-[10px] tabular-nums text-slate-400">{it.k}</span>
+                  <span className="font-medium tracking-tight">{it.v}</span>
+                </li>
+              ))}
+            </ul>
 
-          <p className="mb-10 max-w-[32ch] text-base font-medium leading-8 text-slate-600 md:text-lg">
-            {t.bentoBody}
-          </p>
-
-          <Link
-            to="/dashboard"
-            className="flex items-center gap-2 rounded-2xl bg-blue-600 px-8 py-4 text-lg font-bold text-white shadow-[0_8px_20px_-6px_rgba(37,99,235,0.5)] transition-all duration-300 hover:-translate-y-1 hover:bg-blue-700 hover:shadow-[0_12px_25px_-6px_rgba(37,99,235,0.6)]"
-          >
-            {t.bentoCta}
-            <DirectionArrow language={language} className="h-5 w-5" />
-          </Link>
+            <div className="mt-8 flex flex-wrap items-center gap-4">
+              <Link
+                to="/dashboard"
+                className="group inline-flex items-center gap-2 rounded-full bg-slate-900 px-5 py-2.5 text-[13px] font-semibold text-white transition-colors hover:bg-slate-800"
+              >
+                {t.bentoCta}
+                <DirectionArrow language={language} className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
+              </Link>
+              <Link
+                to="/templates"
+                className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-slate-700 underline decoration-slate-300 decoration-[1.5px] underline-offset-[6px] transition-colors hover:text-slate-900 hover:decoration-slate-500"
+              >
+                {isRtl ? "قاڵبەکان" : "Browse templates"}
+                <ArrowUpRight className="h-3.5 w-3.5" />
+              </Link>
+            </div>
+          </div>
         </div>
 
-        <div
-          className="pointer-events-none relative hidden h-[330px] items-center justify-center sm:flex sm:h-[420px] md:h-[460px]"
-          dir="ltr"
-        >
-          <div className="absolute left-1/2 top-1/2 h-[400px] w-[400px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle_at_center,rgba(219,234,254,0.3)_0%,transparent_70%)]" />
-          <div className="relative flex h-[320px] w-[280px] select-none items-center justify-center sm:h-[400px] sm:w-[360px]">
-            <div
-              className="absolute right-[7%] top-[6%] w-[145px] origin-center rounded-2xl shadow-[0_20px_40px_rgba(0,0,0,0.15)] sm:w-[190px]"
-              style={{ transform: "rotate(-8deg)" }}
-            >
-              <LeftCardSVG />
-            </div>
-            <div
-              className="absolute bottom-[4%] left-[8%] z-10 w-[170px] origin-center rounded-lg shadow-[0_25px_35px_rgba(37,99,235,0.15)] sm:w-[225px]"
-              style={{ transform: "rotate(6deg)" }}
-            >
+        <div className="relative hidden min-h-[420px] items-center justify-center md:flex" dir="ltr">
+          <div className="relative flex h-[420px] w-full items-center justify-center">
+            <div className="relative z-10 w-[70%] rounded-lg shadow-[0_30px_50px_-24px_rgba(15,23,42,0.28)] ring-1 ring-slate-200/70">
               <CenterCardSVG />
+            </div>
+
+
+            <div className="absolute bottom-3 right-3 flex items-center gap-2 rounded-full bg-white/90 px-3 py-1 text-[10px] font-medium tracking-wide text-slate-500 ring-1 ring-slate-200/60 backdrop-blur">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+              {isRtl ? "ئامادە بۆ ناردن" : "Recruiter-ready"}
             </div>
           </div>
         </div>
@@ -1493,50 +1764,65 @@ const BentoHeroCard = ({ language }: { language: Language }) => {
 
 const BentoStandOutCard = ({ language }: { language: Language }) => {
   const t = copy[language];
-  const isRtl = language === "ku";
+  const isRtl = language !== "en";
   const textAlign = isRtl ? "text-right" : "text-left";
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 16 }}
       whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      className={`relative flex min-h-[300px] w-full flex-col justify-between overflow-hidden rounded-[1.5rem] border border-slate-100 bg-white p-6 ${textAlign} shadow-xl sm:min-h-[380px] sm:rounded-[2rem] sm:p-10`}
+      viewport={{ once: true, margin: "-60px" }}
+      transition={{ duration: 0.6, delay: 0.08, ease: [0.22, 1, 0.36, 1] }}
+      className={`${editorialCard} flex min-h-[380px] flex-col justify-between p-6 sm:min-h-[460px] sm:p-10 ${textAlign}`}
     >
-      {/* Subtle gradient wash on the text side */}
-      <div
-        className={`pointer-events-none absolute top-0 z-0 h-full w-1/2 ${isRtl ? "right-0 bg-gradient-to-l" : "left-0 bg-gradient-to-r"} from-[#f0f7ff] to-transparent`}
-      />
+      <BentoIndex n="02 / SIGNAL" />
 
-      <div className="relative z-10 max-w-[230px]" dir={t.dir}>
-        <h3
-          className={`mb-2 text-[clamp(1.5rem,4vw,1.875rem)] font-extrabold ${language === "ku" ? "leading-[1.45]" : "leading-[1.18]"} tracking-tight text-slate-900`}
-        >
-          <span className="whitespace-nowrap">{t.standTitleA}</span>
+      <div dir={t.dir} className="relative z-10 max-w-[30ch]">
+        <div className={editorialEyebrow}>
+          <span className="h-px w-6 bg-slate-300" />
+          {isRtl ? "دەربکەوە" : "Signal"}
+        </div>
+        <h3 className={`mt-5 text-[clamp(1.4rem,2.1vw,1.75rem)] font-semibold tracking-[-0.015em] text-slate-900 ${isRtl ? "leading-[1.45]" : "leading-[1.15]"}`}>
+          {t.standTitleA}
           <br />
-          <span className="text-blue-500">{t.standTitleB}</span>
+          <span className="text-slate-500">{t.standTitleB}</span>
         </h3>
-        <p className="mt-4 text-sm font-medium leading-7 text-slate-500">{t.standBody}</p>
-      </div>
-      <div
-        className="relative z-10 mt-auto max-w-[160px] pt-8 text-xs font-semibold leading-6 text-slate-400"
-        dir={t.dir}
-      >
-        {t.standNote}
+        <p className="mt-4 text-[14px] font-normal leading-[1.7] text-slate-500">
+          {t.standBody}
+        </p>
       </div>
 
-      {/* Image: right for EN, left for KU */}
+      <div className={`relative z-10 mt-8 ${editorialRule} pt-6`} dir="ltr">
+        <div className="flex items-end justify-between">
+          <div>
+            <div className="font-mono text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-400">
+              {isRtl ? "ڕێژەی چاوپێکەوتن" : "Interview rate"}
+            </div>
+            <div className="mt-2 flex items-baseline gap-1.5 font-semibold tabular-nums tracking-tight text-slate-900">
+              <span className="text-[42px] leading-none">+42</span>
+              <span className="text-lg text-[#2A5BFF]">%</span>
+            </div>
+          </div>
+          <svg viewBox="0 0 120 40" className="h-11 w-32" fill="none">
+            <path d="M2,32 L18,28 L34,30 L52,20 L70,24 L86,14 L104,16 L118,6" stroke="#2A5BFF" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" />
+            <circle cx="118" cy="6" r="2.5" fill="#2A5BFF" />
+          </svg>
+        </div>
+      </div>
+
       <div
-        className="pointer-events-none absolute bottom-0 z-10 flex h-[200px] w-[180px] items-end justify-center sm:h-[285px] sm:w-[235px]"
-        style={{ [isRtl ? "left" : "right"]: "-10px" }}
+        className="pointer-events-none absolute bottom-0 z-0 flex h-[180px] w-[160px] items-end justify-center opacity-90 sm:h-[230px] sm:w-[200px]"
+        style={{ [isRtl ? "left" : "right"]: "-12px" }}
         dir="ltr"
       >
         <motion.img
           src="/images/bento/3d guy transparent.png"
           alt={t.characterAlt}
-          className="h-full w-full select-none object-contain object-bottom drop-shadow-2xl"
+          className="h-full w-full select-none object-contain object-bottom"
           draggable={false}
-          style={{ transform: isRtl ? "scaleX(-1)" : "none" }}
+          style={{ transform: isRtl ? "scaleX(-1)" : "none", filter: "drop-shadow(0 20px 24px rgba(15,23,42,0.10))" }}
+          animate={{ y: [0, -4, 0] }}
+          transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
         />
       </div>
     </motion.div>
@@ -1545,51 +1831,53 @@ const BentoStandOutCard = ({ language }: { language: Language }) => {
 
 const BentoSecurityCard = ({ language }: { language: Language }) => {
   const t = copy[language];
-  const isRtl = language === "ku";
+  const isRtl = language !== "en";
   const textAlign = isRtl ? "text-right" : "text-left";
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 16 }}
       whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      transition={{ delay: 0.1 }}
-      className={`relative flex min-h-[300px] w-full flex-col justify-between overflow-hidden rounded-[1.5rem] border border-slate-100 bg-white p-6 ${textAlign} shadow-xl sm:min-h-[380px] sm:rounded-[2rem] sm:p-10`}
+      viewport={{ once: true, margin: "-60px" }}
+      transition={{ duration: 0.6, delay: 0.14, ease: [0.22, 1, 0.36, 1] }}
+      className={`${editorialCard} flex min-h-[380px] flex-col justify-between p-6 sm:min-h-[460px] sm:p-10 ${textAlign}`}
     >
-      {/* Gradient on text side */}
-      <div
-        className={`pointer-events-none absolute top-0 z-0 h-full w-2/3 ${isRtl ? "right-0 bg-gradient-to-l" : "left-0 bg-gradient-to-r"} from-[#f0f7ff] to-transparent`}
-      />
+      <BentoIndex n="03 / TRUST" />
 
-      <div className="relative z-10 max-w-[240px]" dir={t.dir}>
-        <h3
-          className={`mb-2 text-[clamp(1.5rem,4vw,1.875rem)] font-extrabold ${language === "ku" ? "leading-[1.45]" : "leading-[1.18]"} tracking-tight text-slate-900`}
-        >
+      <div dir={t.dir} className="relative z-10 max-w-[30ch]">
+        <div className={editorialEyebrow}>
+          <span className="h-px w-6 bg-slate-300" />
+          {isRtl ? "متمانە" : "Trust"}
+        </div>
+        <h3 className={`mt-5 text-[clamp(1.4rem,2.1vw,1.75rem)] font-semibold tracking-[-0.015em] text-slate-900 ${isRtl ? "leading-[1.45]" : "leading-[1.15]"}`}>
           {t.securityTitleA}
           <br />
-          <span className="text-blue-500">{t.securityTitleB}</span>
+          <span className="text-slate-500">{t.securityTitleB}</span>
         </h3>
-        <p className="mt-4 text-sm font-medium leading-7 text-slate-500">{t.securityBody}</p>
+        <p className="mt-4 text-[14px] font-normal leading-[1.7] text-slate-500">
+          {t.securityBody}
+        </p>
       </div>
-      <div className="relative z-10 mt-auto pt-8" dir={t.dir}>
-        <div className="inline-flex items-center gap-2 rounded-xl border border-slate-100 bg-white px-4 py-2 text-xs font-bold text-blue-600 shadow-sm">
-          <LockKeyhole className="h-4 w-4 text-blue-500" />
+
+      <div className={`relative z-10 mt-8 ${editorialRule} pt-6`} dir={t.dir}>
+        <div className="inline-flex items-center gap-2 text-[12px] font-medium text-slate-600">
+          <LockKeyhole className="h-3.5 w-3.5 text-[#2A5BFF]" />
           {t.securityBadge}
         </div>
       </div>
 
-      {/* Image: right for EN, left for KU */}
       <div
-        className="pointer-events-none absolute bottom-[12px] z-10 flex h-[150px] w-[150px] items-center justify-center sm:h-[190px] sm:w-[190px]"
-        style={{ [isRtl ? "left" : "right"]: "-4px" }}
+        className="pointer-events-none absolute bottom-4 z-0 flex h-[150px] w-[150px] items-center justify-center opacity-95 sm:h-[190px] sm:w-[190px]"
+        style={{ [isRtl ? "left" : "right"]: "-8px" }}
         dir="ltr"
       >
         <motion.img
           src="/images/bento/sheild transparent.png"
           alt={t.shieldAlt}
-          className="h-full w-full select-none object-contain drop-shadow-2xl"
+          className="h-full w-full select-none object-contain"
           draggable={false}
-          animate={{ y: [0, -8, 0] }}
+          style={{ filter: "drop-shadow(0 20px 30px rgba(42,91,255,0.16))" }}
+          animate={{ y: [0, -6, 0] }}
           transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
         />
       </div>
@@ -1599,154 +1887,586 @@ const BentoSecurityCard = ({ language }: { language: Language }) => {
 
 const BentoCreateWinCard = ({ language }: { language: Language }) => {
   const t = copy[language];
+  const isRtl = language !== "en";
+  const textAlign = isRtl ? "text-right" : "text-left";
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 16 }}
       whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      transition={{ delay: 0.2 }}
-      className="relative min-h-[280px] overflow-hidden rounded-[1.5rem] border border-blue-100 bg-white shadow-xl sm:min-h-[360px] sm:rounded-[2rem]"
+      viewport={{ once: true, margin: "-60px" }}
+      transition={{ duration: 0.6, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
+      className={`${editorialCard} w-full`}
     >
-      <div
-        className="absolute inset-0 flex items-center justify-center overflow-hidden bg-white"
-        dir="ltr"
-      >
-        <img
-          src="/images/bento/download cv bento.webp"
-          alt={t.downloadAlt}
-          className="h-full w-full select-none object-cover"
-          draggable={false}
-        />
+      <BentoIndex n="04 / EXPORT" />
+      <div className="p-6 sm:p-10 md:p-14">
+        <div className={`mx-auto flex max-w-3xl flex-col ${textAlign}`} dir={t.dir}>
+          <div className={editorialEyebrow}>
+            <span className="h-px w-6 bg-slate-300" />
+            {isRtl ? "هەناردە" : "Export"}
+          </div>
+          <h3 className={`mt-5 text-[clamp(1.5rem,2.6vw,2.25rem)] font-semibold tracking-[-0.015em] text-slate-900 ${isRtl ? "leading-[1.4]" : "leading-[1.12]"}`}>
+            {t.downloadTitlePrefix}
+            <span className="text-[#2A5BFF]">{t.downloadTitleHighlight}</span>
+          </h3>
+          <p className="mt-4 max-w-[52ch] text-[14px] font-normal leading-[1.7] text-slate-500 sm:text-[15px]">
+            {t.downloadBody}
+          </p>
+
+          <div
+            className={`mt-8 ${editorialRule} grid grid-cols-1 gap-3 pt-5 sm:grid-cols-3`}
+            dir="ltr"
+          >
+            {[
+              { k: "PDF", s: ".pdf", d: "Recruiter-ready" },
+              { k: "DOCX", s: ".docx", d: "Fully editable" },
+              { k: "TXT", s: ".txt", d: "ATS plain-text" },
+            ].map((f) => (
+              <div
+                key={f.k}
+                className="flex items-center gap-3 rounded-xl border border-[#E7E5DE] bg-white px-4 py-3"
+              >
+                <div className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-slate-900 text-white">
+                  <FileText className="h-4 w-4" />
+                </div>
+                <div className="min-w-0">
+                  <div className="flex items-baseline gap-1.5 font-mono text-[11px] tabular-nums">
+                    <span className="font-semibold text-slate-900">{f.k}</span>
+                    <span className="text-slate-400">{f.s}</span>
+                  </div>
+                  <div className="truncate text-[11.5px] text-slate-500">{f.d}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div
+            className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-2 font-mono text-[11px] tabular-nums text-slate-500"
+            dir="ltr"
+          >
+            <div className="flex items-center gap-1.5">
+              <CheckCircle className="h-3.5 w-3.5 text-emerald-500" strokeWidth={2} />
+              300 DPI
+            </div>
+            <div className="flex items-center gap-1.5">
+              <CheckCircle className="h-3.5 w-3.5 text-emerald-500" strokeWidth={2} />
+              A4 / Letter
+            </div>
+            <div className="flex items-center gap-1.5">
+              <CheckCircle className="h-3.5 w-3.5 text-emerald-500" strokeWidth={2} />
+              Selectable text
+            </div>
+          </div>
+        </div>
       </div>
+
     </motion.div>
   );
 };
 
-export function FAQSection({ language }: { language: Language }) {
-  const t = copy[language];
-  const [openIndex, setOpenIndex] = useState<number | null>(null);
+/* ── Workflow ticker: 4-step process strip ── */
+function WorkflowStrip({ language }: { language: Language }) {
+  const isRtl = language !== "en";
+  const steps = isRtl
+    ? [
+        { k: "01", t: "بیرەوەری", d: "زانیاری کاریت هاوردە بکە" },
+        { k: "02", t: "پڕۆفایل", d: "دەرهێنانی ئوتۆماتیکی" },
+        { k: "03", t: "گونجاندن", d: "بۆ ڕۆڵی مەبەست" },
+        { k: "04", t: "هەناردە", d: "PDF ئامادە" },
+      ]
+    : [
+        { k: "01", t: "Memory", d: "Import your career history" },
+        { k: "02", t: "Profile", d: "Auto-structured extraction" },
+        { k: "03", t: "Tailor", d: "Optimize per role" },
+        { k: "04", t: "Export", d: "Recruiter-ready PDF" },
+      ];
 
   return (
-    <div id="faq" className="mt-16 mb-10 w-full max-w-4xl mx-auto px-5 sm:px-4" dir={t.dir}>
-      <h2 className="mb-8 text-[clamp(1.5rem,4vw,2.25rem)] font-extrabold tracking-tight text-slate-900 text-center">
-        {t.faqTitle}
-      </h2>
-      <div className="space-y-4">
-        {t.faqItems.map((item, i) => (
-          <div
-            key={i}
-            className="rounded-2xl border border-slate-200/60 bg-white/60 backdrop-blur-sm shadow-sm overflow-hidden transition-all duration-300 hover:shadow-md hover:border-blue-200/50 hover:bg-white/90"
+    <div className={`${editorialCard} p-0`} dir="ltr">
+      <div className="grid grid-cols-2 divide-x divide-y divide-[#E7E5DE] md:grid-cols-4 md:divide-y-0">
+        {steps.map((s, i) => (
+          <motion.div
+            key={s.k}
+            initial={{ opacity: 0, y: 10 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: i * 0.06 }}
+            className="group relative flex flex-col justify-between p-6 sm:p-8 min-h-[160px]"
           >
-            <button
-              onClick={() => setOpenIndex(openIndex === i ? null : i)}
-              className="flex w-full items-center justify-between px-6 py-5 text-left font-bold text-slate-800 focus:outline-none"
-            >
-              <span className="text-base sm:text-lg">{item.q}</span>
-              <div
-                className={`ml-4 flex h-8 w-8 shrink-0 items-center justify-center rounded-full transition-colors duration-200 ${openIndex === i ? "bg-blue-100 text-blue-600" : "bg-slate-100 text-slate-400"}`}
-              >
-                <ChevronDown
-                  className={`h-5 w-5 transition-transform duration-300 ${
-                    openIndex === i ? "rotate-180" : ""
-                  }`}
-                />
-              </div>
-            </button>
-            <AnimatePresence initial={false}>
-              {openIndex === i && (
-                <motion.div
-                  initial={{ height: 0, opacity: 0 }}
-                  animate={{ height: "auto", opacity: 1 }}
-                  exit={{ height: 0, opacity: 0 }}
-                  transition={{ duration: 0.3, ease: "easeInOut" }}
-                >
-                  <div className="px-6 pb-6 text-slate-600 font-medium leading-relaxed border-t border-slate-100 pt-4">
-                    {item.a}
-                  </div>
-                </motion.div>
+            <div className="flex items-center justify-between">
+              <span className="font-mono text-[10px] font-semibold tabular-nums tracking-[0.22em] text-slate-400">
+                {s.k}
+              </span>
+              {i < steps.length - 1 && (
+                <span className="hidden md:inline-block h-px w-6 bg-slate-300 opacity-60 group-hover:bg-[#2A5BFF] transition-colors" />
               )}
-            </AnimatePresence>
-          </div>
+            </div>
+            <div dir={isRtl ? "rtl" : "ltr"} className={isRtl ? "text-right" : "text-left"}>
+              <div className="text-[15px] font-semibold tracking-tight text-slate-900">
+                {s.t}
+              </div>
+              <div className="mt-1 text-[12px] font-medium leading-[1.55] text-slate-500">
+                {s.d}
+              </div>
+            </div>
+          </motion.div>
         ))}
       </div>
     </div>
   );
 }
 
-export function BentoGridSection({ language }: { language: Language }) {
+export function FAQSection({ language }: { language: Language }) {
   const t = copy[language];
+  const isRtl = language !== "en";
+  const [openIndex, setOpenIndex] = useState<number | null>(0);
+
+  return (
+    <div id="faq" className="mx-auto mt-20 w-full max-w-6xl sm:mt-28" dir="ltr">
+      <div className="grid gap-10 md:grid-cols-[minmax(0,0.9fr)_minmax(0,1.4fr)] md:gap-16">
+        {/* Left column: editorial framing */}
+        <div className="md:sticky md:top-24 md:self-start" dir={t.dir}>
+          <div className={editorialEyebrow} dir="ltr">
+            <span className="h-px w-6 bg-slate-300" />
+            <span>§ 03</span>
+            <span className="text-slate-300">·</span>
+            <span>{isRtl ? "پرسیارەکان" : "Questions"}</span>
+          </div>
+          <h2
+            className={`mt-6 text-[clamp(1.75rem,3.4vw,2.75rem)] font-semibold tracking-[-0.025em] text-slate-900 ${
+              isRtl ? "leading-[1.35]" : "leading-[1.06]"
+            }`}
+          >
+            {t.faqTitle}
+          </h2>
+          <p className="mt-5 max-w-[36ch] text-[14px] font-normal leading-[1.7] text-slate-500">
+            {isRtl
+              ? "پێش دەستپێکردن، ئەمە باوترین پرسیارەکانن دەربارەی مێمۆری سیڤی."
+              : "Before you start — the questions candidates ask us most."}
+          </p>
+        </div>
+
+        {/* Right column: hairline-separated accordion */}
+        <div className="border-t border-[#E7E5DE]" dir={t.dir}>
+          {t.faqItems.map((item, i) => {
+            const open = openIndex === i;
+            return (
+              <div key={i} className="border-b border-[#E7E5DE]">
+                <button
+                  onClick={() => setOpenIndex(open ? null : i)}
+                  className="group flex w-full items-start justify-between gap-6 py-6 text-left focus:outline-none"
+                >
+                  <div className="flex items-baseline gap-4">
+                    <span className="font-mono text-[10px] font-semibold tabular-nums tracking-[0.22em] text-slate-400">
+                      {`0${i + 1}`}
+                    </span>
+                    <span className="text-[15px] sm:text-[17px] font-semibold tracking-tight text-slate-900 group-hover:text-[#2A5BFF] transition-colors">
+                      {item.q}
+                    </span>
+                  </div>
+                  <span
+                    className={`mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border transition-all ${
+                      open ? "border-[#2A5BFF] bg-[#2A5BFF] text-white" : "border-slate-300 text-slate-500"
+                    }`}
+                  >
+                    <ChevronDown className={`h-3.5 w-3.5 transition-transform duration-300 ${open ? "rotate-180" : ""}`} />
+                  </span>
+                </button>
+                <AnimatePresence initial={false}>
+                  {open && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.3, ease: "easeInOut" }}
+                    >
+                      <div className="pb-6 pl-10 pr-2 text-[14px] font-normal leading-[1.75] text-slate-600">
+                        {item.a}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ── Closing CTA: bold ink panel, editorial framing ── */
+function ClosingCta({ language }: { language: Language }) {
+  const t = copy[language];
+  const isRtl = language !== "en";
   const onboardingDone = useAppStore((s) => s.onboardingDone);
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
+      className="relative mt-20 overflow-hidden rounded-[28px] bg-slate-950 sm:mt-28"
+      id="closing-cta"
+    >
+      {/* Precision grid backdrop */}
+      <div
+        aria-hidden
+        className="absolute inset-0 opacity-[0.06]"
+        style={{
+          backgroundImage:
+            "linear-gradient(#fff 1px, transparent 1px), linear-gradient(90deg, #fff 1px, transparent 1px)",
+          backgroundSize: "44px 44px",
+          maskImage: "radial-gradient(80% 80% at 50% 20%, black 20%, transparent 80%)",
+          WebkitMaskImage: "radial-gradient(80% 80% at 50% 20%, black 20%, transparent 80%)",
+        }}
+      />
+      {/* Subtle accent wash */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -top-40 left-1/2 h-[380px] w-[720px] -translate-x-1/2 rounded-full"
+        style={{
+          background:
+            "radial-gradient(closest-side, rgba(42,91,255,0.35), rgba(42,91,255,0.08) 60%, transparent 80%)",
+        }}
+      />
+
+      <div className="relative px-6 py-16 sm:px-14 sm:py-24" dir="ltr">
+        {/* Top rail */}
+        <div className="flex items-center gap-3 font-mono text-[10px] font-semibold uppercase tracking-[0.32em] text-white/50">
+          <span className="tabular-nums">§ 04</span>
+          <span className="h-px w-6 bg-white/25" />
+          <span>{isRtl ? "دەست پێبکە" : "Begin"}</span>
+        </div>
+
+        <h2
+          className={`mt-8 max-w-[22ch] text-[clamp(2rem,5.2vw,4rem)] font-semibold tracking-[-0.03em] text-white ${
+            isRtl ? "text-right leading-[1.25]" : "leading-[1.02]"
+          }`}
+          dir={t.dir}
+        >
+          {t.ctaTitle}
+        </h2>
+
+        <p
+          className={`mt-6 max-w-[52ch] text-[15px] font-normal leading-[1.75] text-white/60 ${
+            isRtl ? "text-right" : ""
+          }`}
+          dir={t.dir}
+        >
+          {t.ctaBody}
+        </p>
+
+        <div className="mt-10 flex flex-wrap items-center gap-4">
+          <CtaButton
+            id="closing-cta-btn"
+            onboardingDone={onboardingDone}
+            className="group inline-flex items-center gap-2 rounded-full bg-white px-6 py-3.5 text-[14px] font-semibold text-slate-900 transition-all hover:bg-slate-100"
+          >
+            {t.ctaPrimary}
+            <DirectionArrow language={language} className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+          </CtaButton>
+          <Link
+            to="/templates"
+            id="closing-templates-btn"
+            className="inline-flex items-center gap-1.5 rounded-full border border-white/20 px-6 py-3.5 text-[14px] font-semibold text-white/90 transition-colors hover:border-white/40 hover:text-white"
+          >
+            {t.ctaSecondary}
+            <ArrowUpRight className="h-4 w-4" />
+          </Link>
+        </div>
+
+        {/* Trust rail */}
+        <div className="mt-14 flex flex-wrap items-center gap-x-8 gap-y-3 border-t border-white/10 pt-8">
+          {t.trust.map((item, i) => (
+            <div key={item} className="flex items-center gap-2.5">
+              <span className="font-mono text-[10px] font-semibold tabular-nums tracking-[0.22em] text-white/40">
+                {`0${i + 1}`}
+              </span>
+              <span className="text-[12.5px] font-medium text-white/80">{item}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
+export function BentoGridSection({ language }: { language: Language }) {
+  const isRtl = language !== "en";
 
   return (
     <section
       id="features"
-      className="relative overflow-hidden bg-[#f4f9ff] px-5 pb-12 pt-12 sm:px-8 sm:pb-24 sm:pt-28 md:pt-40"
+      className="relative overflow-hidden bg-[#FAFAF7] px-5 pb-24 pt-8 sm:px-8 sm:pb-32"
     >
-      <div className="pointer-events-none absolute right-1/4 top-0 h-[600px] w-[800px] -translate-y-1/2 rounded-full bg-[radial-gradient(circle_at_center,rgba(219,234,254,0.3)_0%,transparent_70%)]" />
-      <div className="pointer-events-none absolute left-0 top-1/4 h-[500px] w-[600px] rounded-full bg-[radial-gradient(circle_at_center,rgba(224,242,254,0.3)_0%,transparent_70%)]" />
+      <EditorialSectionHeader
+        index="§ 02"
+        kicker={isRtl ? "پلاتفۆرم / تایبەتمەندی" : "Platform / Features"}
+        titleTop={
+          isRtl ? "پلاتفۆرمێک بۆ ئەوانەی" : "A platform engineered for the"
+        }
+        titleBottom={
+          isRtl ? "دەیانەوێت جیاواز دەربکەون." : "details recruiters actually read."
+        }
+        dir={isRtl ? "rtl" : "ltr"}
+      />
 
-      <div className="mx-auto max-w-6xl space-y-6">
+      <div className="mx-auto mt-14 max-w-6xl space-y-5 sm:mt-20">
         <BentoHeroCard language={language} />
 
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
           <BentoStandOutCard language={language} />
           <BentoSecurityCard language={language} />
         </div>
 
         <BentoCreateWinCard language={language} />
 
+        <WorkflowStrip language={language} />
+
         <FAQSection language={language} />
 
-        <motion.div
-          initial={{ opacity: 0, y: 24 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-          className="relative mt-10 overflow-hidden rounded-[1.5rem] px-5 py-10 text-center shadow-2xl sm:mt-20 sm:rounded-[2rem] sm:px-8 sm:py-16"
-          style={{ background: "linear-gradient(145deg,#1e40af 0%,#2563eb 55%,#3b82f6 100%)" }}
-          id="closing-cta"
-          dir="ltr"
-        >
-          <div className="pointer-events-none absolute right-10 top-4 h-14 w-20 rotate-6 rounded-xl border border-white/20 bg-white/10 opacity-15" />
-          <div className="pointer-events-none absolute bottom-4 left-10 h-10 w-16 -rotate-3 rounded-xl border border-white/15 bg-white/10 opacity-10" />
-          <h2
-            className="mb-3 text-[clamp(1.4rem,4vw,2.25rem)] font-extrabold tracking-tight text-white sm:mb-4"
-            dir={t.dir}
-          >
-            {t.ctaTitle}
-          </h2>
-          <p
-            className="mx-auto mb-8 max-w-[54ch] text-sm font-medium leading-7 text-blue-100/90 sm:mb-10 sm:text-base md:text-lg"
-            dir={t.dir}
-          >
-            {t.ctaBody}
-          </p>
-          <div className="flex flex-wrap justify-center gap-4">
-            <CtaButton id="closing-cta-btn" onboardingDone={onboardingDone} className="inline-flex items-center gap-2 rounded-xl bg-white px-6 py-3 text-base font-bold text-blue-700 shadow-lg transition-all hover:-translate-y-1 hover:shadow-xl sm:rounded-2xl sm:px-8 sm:py-4 sm:text-lg">
-              {t.ctaPrimary}
-              <DirectionArrow language={language} className="h-5 w-5" />
-            </CtaButton>
-            <Link
-              to="/templates"
-              id="closing-templates-btn"
-              className="hero-outline-button rounded-xl border-2 border-blue-300 px-6 py-3 text-base font-bold text-white transition-all hover:border-blue-200 hover:bg-blue-600 sm:rounded-2xl sm:px-8 sm:py-4 sm:text-lg"
-            >
-              {t.ctaSecondary}
-            </Link>
-          </div>
-        </motion.div>
-
-        <div className="mt-8 flex flex-wrap items-center justify-center gap-5 text-xs font-semibold text-slate-500 sm:mt-12 sm:gap-8 sm:text-sm">
-          {t.trust.map((item) => (
-            <div key={item} className="flex items-center gap-2">
-              <CheckCircle className="h-5 w-5 text-blue-500" />
-              <span>{item}</span>
-            </div>
-          ))}
-        </div>
+        <ClosingCta language={language} />
       </div>
     </section>
+  );
+}
+
+/* ── Editorial footer: academic, professional, ultra-SaaS ── */
+function SiteFooter({ language }: { language: Language }) {
+  const isRtl = language !== "en";
+  const dir = isRtl ? "rtl" : "ltr";
+  const year = new Date().getFullYear();
+
+  const t =
+    language === "ku"
+      ? {
+          tagline:
+            "پلاتفۆرمێکی زانستی بۆ نووسینی سیڤی، دیزاینکراو بۆ ڕاوێژکاران و تاقیکاری ATS.",
+          product: "بەرهەم",
+          resources: "سەرچاوەکان",
+          company: "کۆمپانیا",
+          legal: "یاسایی",
+          productLinks: [
+            { l: "تایبەتمەندی", h: "features" },
+            { l: "قاڵبەکان", to: "/templates" as const },
+            { l: "پرسیارە دووبارەکان", h: "faq" },
+            { l: "دەست پێبکە", h: "closing-cta" },
+          ],
+          resourceLinks: [
+            { l: "ڕێبەری سیڤی", to: "/" as const },
+            { l: "ATS", to: "/" as const },
+            { l: "چاوپێکەوتن", to: "/interview" as const },
+            { l: "بەڵگەنامەکان", to: "/" as const },
+          ],
+          companyLinks: [
+            { l: "دەربارە", to: "/" as const },
+            { l: "پەیوەندی", to: "/" as const },
+            { l: "بلاگ", to: "/" as const },
+          ],
+          legalLinks: [
+            { l: "نهێنی", to: "/privacy" as const },
+            { l: "مەرجەکان", to: "/terms" as const },
+          ],
+          rights: "هەموو مافەکان پارێزراون",
+          made: "بە وردی دیزاینکراو",
+          status: "هەموو سیستەمەکان کار دەکەن",
+        }
+      : language === "ar"
+        ? {
+            tagline:
+              "منصّة أكاديمية لبناء السيرة الذاتية، مصمّمة للمُوظّفين ومُهيَّأة لأنظمة ATS.",
+            product: "المنتج",
+            resources: "المصادر",
+            company: "الشركة",
+            legal: "قانوني",
+            productLinks: [
+              { l: "المميّزات", h: "features" },
+              { l: "القوالب", to: "/templates" as const },
+              { l: "الأسئلة الشائعة", h: "faq" },
+              { l: "ابدأ الآن", h: "closing-cta" },
+            ],
+            resourceLinks: [
+              { l: "دليل السيرة الذاتية", to: "/" as const },
+              { l: "ATS", to: "/" as const },
+              { l: "المقابلات", to: "/interview" as const },
+              { l: "التوثيق", to: "/" as const },
+            ],
+            companyLinks: [
+              { l: "من نحن", to: "/" as const },
+              { l: "اتصل بنا", to: "/" as const },
+              { l: "المدوّنة", to: "/" as const },
+            ],
+            legalLinks: [
+              { l: "الخصوصية", to: "/privacy" as const },
+              { l: "الشروط", to: "/terms" as const },
+            ],
+            rights: "جميع الحقوق محفوظة",
+            made: "مصمّمة بعناية",
+            status: "جميع الأنظمة تعمل",
+          }
+        : {
+            tagline:
+              "An academic-grade platform for résumé craft — engineered for recruiters, tuned for ATS.",
+            product: "Product",
+            resources: "Resources",
+            company: "Company",
+            legal: "Legal",
+            productLinks: [
+              { l: "Features", h: "features" },
+              { l: "Templates", to: "/templates" as const },
+              { l: "FAQ", h: "faq" },
+              { l: "Get started", h: "closing-cta" },
+            ],
+            resourceLinks: [
+              { l: "Resume guide", to: "/" as const },
+              { l: "ATS handbook", to: "/" as const },
+              { l: "Interview mode", to: "/interview" as const },
+              { l: "Documentation", to: "/" as const },
+            ],
+            companyLinks: [
+              { l: "About", to: "/" as const },
+              { l: "Contact", to: "/" as const },
+              { l: "Blog", to: "/" as const },
+            ],
+            legalLinks: [
+              { l: "Privacy", to: "/privacy" as const },
+              { l: "Terms", to: "/terms" as const },
+            ],
+            rights: "All rights reserved",
+            made: "Crafted with precision",
+            status: "All systems operational",
+          };
+
+  const columns = [
+    { title: t.product, links: t.productLinks },
+    { title: t.resources, links: t.resourceLinks },
+    { title: t.company, links: t.companyLinks },
+    { title: t.legal, links: t.legalLinks },
+  ];
+
+  return (
+    <footer
+      className="relative mt-24 border-t border-[#E7E5DE] bg-[#FAFAF7] sm:mt-32"
+      dir={dir}
+    >
+      {/* Hairline accent */}
+      <div
+        aria-hidden
+        className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-slate-300/70 to-transparent"
+      />
+
+      <div className="mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-20">
+        {/* Top meta rail */}
+        <div
+          className="flex flex-col gap-3 border-b border-[#E7E5DE] pb-8 sm:flex-row sm:items-center sm:justify-between"
+          dir="ltr"
+        >
+          <div className="flex items-center gap-3 font-mono text-[10px] font-semibold uppercase tracking-[0.32em] text-slate-500">
+            <span className="tabular-nums">§ 05</span>
+            <span className="h-px w-6 bg-slate-300" />
+            <span>Colophon</span>
+          </div>
+          <div className="flex items-center gap-2 font-mono text-[10.5px] tracking-[0.14em] text-slate-500">
+            <span className="relative flex h-1.5 w-1.5">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400/60" />
+              <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-500" />
+            </span>
+            <span className="uppercase tracking-[0.22em]">{t.status}</span>
+          </div>
+        </div>
+
+        {/* Brand + columns */}
+        <div className="mt-12 grid gap-12 md:grid-cols-[minmax(0,1.2fr)_minmax(0,2fr)] md:gap-16">
+          {/* Brand block */}
+          <div className={isRtl ? "text-right" : "text-left"}>
+            <Link to="/" className="inline-flex items-center gap-2.5">
+              <img
+                src="/logo/MemoryCV Logo Icon Only.png"
+                alt="MemoryCV"
+                className="h-8 w-8"
+              />
+              <span className="text-[17px] font-semibold tracking-[-0.01em] text-slate-900">
+                MemoryCV
+              </span>
+            </Link>
+            <p className="mt-5 max-w-[38ch] text-[13.5px] leading-[1.75] text-slate-500">
+              {t.tagline}
+            </p>
+
+            {/* Editorial signature line */}
+            <div
+              className="mt-8 flex items-center gap-3 border-t border-[#E7E5DE] pt-5 font-mono text-[10.5px] uppercase tracking-[0.22em] text-slate-400"
+              dir="ltr"
+            >
+              <span>MMXXVI</span>
+              <span className="h-px w-6 bg-slate-300" />
+              <span>{t.made}</span>
+            </div>
+          </div>
+
+          {/* Link columns */}
+          <div className="grid grid-cols-2 gap-8 sm:grid-cols-4 sm:gap-6">
+            {columns.map((col) => (
+              <div key={col.title} className={isRtl ? "text-right" : "text-left"}>
+                <h4 className="font-mono text-[10.5px] font-semibold uppercase tracking-[0.24em] text-slate-900">
+                  {col.title}
+                </h4>
+                <ul className="mt-5 space-y-3">
+                  {col.links.map((link) => {
+                    const label = link.l;
+                    if ("h" in link && link.h) {
+                      return (
+                        <li key={label}>
+                          <a
+                            href={`#${link.h}`}
+                            className="text-[13px] text-slate-500 transition-colors hover:text-slate-900"
+                          >
+                            {label}
+                          </a>
+                        </li>
+                      );
+                    }
+                    if ("to" in link && link.to) return (
+                      <li key={label}>
+                        <Link
+                          to={link.to}
+                          className="text-[13px] text-slate-500 transition-colors hover:text-slate-900"
+                        >
+                          {label}
+                        </Link>
+                      </li>
+                    );
+                    return null;
+                  })}
+                </ul>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Bottom bar */}
+        <div
+          className="mt-16 flex flex-col-reverse items-start gap-4 border-t border-[#E7E5DE] pt-6 sm:flex-row sm:items-center sm:justify-between"
+        >
+          <p className="font-mono text-[11px] tracking-[0.06em] text-slate-500" dir="ltr">
+            © {year} MemoryCV · {t.rights}
+          </p>
+          <div className="flex flex-wrap items-center gap-x-5 gap-y-2" dir="ltr">
+            {t.legalLinks.map((l) => (
+              <Link
+                key={l.l}
+                to={l.to}
+                className="font-mono text-[11px] uppercase tracking-[0.18em] text-slate-500 transition-colors hover:text-slate-900"
+              >
+                {l.l}
+              </Link>
+            ))}
+          </div>
+        </div>
+      </div>
+    </footer>
   );
 }
 
@@ -1754,13 +2474,13 @@ function Landing() {
   const language = useAppStore((s) => s.language);
   const setLanguage = useAppStore((s) => s.setLanguage);
   const t = copy[language];
-  const isRTL = language === "ku";
+  const isRTL = language !== "en";
 
   return (
-    <div className="page-shell font-doran bg-background text-foreground" dir={t.dir} lang={t.lang}>
+    <div className="landing-page page-shell font-doran bg-background text-foreground" dir={t.dir} lang={t.lang}>
       <Header
         language={language}
-        onToggleLanguage={() => setLanguage(language === "en" ? "ku" : "en")}
+        onSelectLanguage={(lang) => setLanguage(lang)}
       />
       <main>
         <HeroV2 language={language} />
@@ -1768,6 +2488,8 @@ function Landing() {
         <StatsSection language={language} />
         <BentoGridSection language={language} />
       </main>
+      <SiteFooter language={language} />
     </div>
   );
 }
+

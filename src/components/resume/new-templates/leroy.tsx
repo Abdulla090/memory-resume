@@ -33,7 +33,7 @@ export function LeroyTemplate({ data }: { data: ResumeData }) {
     <div dir={rtl ? "rtl" : "ltr"} className="relative overflow-hidden bg-white font-sans text-[#050b14]" style={{ height: "1122px", minHeight: "1122px", width: "794px", maxWidth: "100%" }}>
       <div className="absolute left-0 top-[76px] h-[112px] w-full bg-[#6f7e84]" />
 
-      <div className="absolute left-[46px] top-0 z-20 h-[609px] w-[292px] bg-[#202a3a]" style={{ clipPath: "polygon(0 0, 100% 0, 100% 90%, 50% 100%, 0 90%)" }}>
+      <div className="absolute left-[46px] top-0 z-20 h-[609px] w-[292px] bg-[#202a3a]">
         <Editable
           path="name"
           value={c.name}

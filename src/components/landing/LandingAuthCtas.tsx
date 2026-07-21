@@ -5,7 +5,7 @@ import { landingCtaPath } from "@/lib/landing-cta";
 import { useAppStore } from "@/lib/store";
 
 type LandingAuthCtasProps = {
-  language: "en" | "ku";
+  language: "en" | "ku" | "ar";
   /** Primary button styles (Get started) */
   primaryClassName: string;
   /** Secondary link/button styles (Sign in) */
@@ -29,18 +29,23 @@ export function LandingAuthCtas({
   const onboardingDone = useAppStore((s) => s.onboardingDone);
   const { clerkEnabled, isSignedIn } = useAuth();
   const isKu = language === "ku";
+  const isAr = language === "ar";
 
   const primary =
     primaryLabel ??
     (isSignedIn
       ? isKu
         ? "داشبۆرد"
-        : "Dashboard"
+        : isAr
+          ? "لوحة التحكم"
+          : "Dashboard"
       : isKu
         ? "دەستپێکردن"
-        : "Get started");
+        : isAr
+          ? "ابدأ الآن"
+          : "Get started");
   const secondary =
-    secondaryLabel ?? (isKu ? "چوونەژوورەوە" : "Sign in");
+    secondaryLabel ?? (isKu ? "چوونەژوورەوە" : isAr ? "تسجيل الدخول" : "Sign in");
 
   const primaryTo = landingCtaPath({
     clerkEnabled,

@@ -403,7 +403,7 @@ function JobAgentPage() {
           channels: cleanChannels,
           messagesPerChannel: settings.messagesPerChannel,
           maxMatches: settings.maxMatches,
-          language,
+          language: language === "ar" ? "en" : language,
           targetRole: settings.targetRole.trim() || undefined,
         },
       });

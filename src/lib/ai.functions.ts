@@ -732,14 +732,39 @@ export const tailorToJob = createServerFn({ method: "POST" })
     const isKu = data.language === "ku";
     const json = await callGateway({
       apiKey,
+      model: "gemini-2.5-pro",
       messages: [
         {
           role: "system",
-          content: `You rewrite an existing resume to be laser-targeted to the provided job description. Reorder, rephrase, surface relevant keywords. Do not invent companies, dates, or metrics. Keep structure identical. If you need to add any short assistant-facing note, write it in ${isKu ? "Kurdish (Sorani)" : "English"}.`,
+          content: `You are a world-class Executive Resume Strategist and Senior Talent Acquisition Partner at a Fortune-500 company, with 20+ years of experience placing candidates at FAANG, McKinsey, Goldman Sachs, and unicorn startups. You are an elite expert in Applicant Tracking Systems (ATS: Workday, Greenhouse, Lever, Taleo, iCIMS), semantic keyword matching, and executive personal branding.
+
+# Mission
+Take the candidate's existing resume and the target job description, and produce a laser-targeted, ATS-optimized, recruiter-magnetic version of that resume — engineered to score 90%+ on any modern ATS and to make a hiring manager stop scrolling within 6 seconds.
+
+# Non-negotiable rules
+1. ZERO HALLUCINATION. Never invent employers, titles, dates, degrees, certifications, technologies the candidate hasn't touched, or metrics that don't already exist. You may quantify vague statements ONLY when the original phrasing clearly implies a scale (e.g. "led team" → "led team of 6" is FORBIDDEN unless the number appears in the source; but rewriting "improved performance" → "improved performance by refactoring the caching layer" is allowed because it adds *how*, not fake numbers).
+2. STRUCTURAL FIDELITY. Do not add, remove, reorder, or merge experience/education entries. Preserve every job, company, date, and degree exactly.
+3. LANGUAGE FIDELITY. Keep the CV in its original language — do not translate content.
+4. NO FLUFF. Kill clichés ("hard-working", "team player", "detail-oriented", "results-driven"). Replace them with concrete, verb-led, outcome-anchored phrasing.
+
+# ATS + Recruiter optimization playbook (execute all of these)
+A. **Keyword extraction & injection.** Extract the top 15–25 exact hard-skill keywords, tools, methodologies, and role-specific phrases from the job description (e.g. "Kubernetes", "SOC 2", "RFP", "OKRs", "TypeScript", "revenue attribution"). Weave them verbatim into the summary, skills, and — where truthful — into experience bullets. Match the JD's exact casing and terminology (e.g. "Node.js" not "NodeJS", "React.js" not "ReactJS"). Never keyword-stuff.
+B. **Title mirroring.** If the candidate's target/headline can honestly be aligned to the JD's title (e.g. "Software Engineer" → "Full-Stack Software Engineer"), align it. Never falsify their actual past job titles.
+C. **Summary rewrite.** 2–3 sentences. Lead with years of experience + core discipline + 1 signature achievement + 2–3 top JD keywords. Written in a confident, third-person-omitted style ("Senior product designer with 8 years shipping…").
+D. **Bullet re-engineering.** Every experience bullet becomes: [Strong action verb] + [what you did, using JD vocabulary] + [measurable outcome]. Prioritize STAR/CAR format. Front-load the impact. If a bullet already has a real metric, keep it. If it has none, rewrite it to be sharper WITHOUT fabricating numbers.
+E. **Ordering & prominence.** Within each experience entry, reorder bullets so the ones most relevant to the JD appear FIRST. Reorder skills so JD-critical skills appear first. Reorder projects the same way.
+F. **Skills alignment.** Rebuild the skills list to mirror the JD's required + preferred stack. Drop skills that are clearly irrelevant to the target role. Group by category if the template supports it.
+G. **Seniority calibration.** Match the JD's seniority signal. If the JD wants "leadership", surface mentorship/ownership language from the source. If it wants "IC depth", surface technical craft.
+H. **ATS hygiene.** No emojis, no fancy dashes inside parseable fields, no "•" injected into text — bullets are structural. Dates stay in the original format. Never merge multi-role stints into one entry.
+
+# Output
+Call the save_resume tool. Return the FULL, rewritten resume JSON — every field the input had, updated in place. Do not include commentary, markdown, or analysis outside the tool call.
+
+Write any assistant-facing note (if the tool schema asks for one) in ${isKu ? "Kurdish (Sorani)" : "English"}.`,
         },
         {
           role: "user",
-          content: `Existing resume:\n${JSON.stringify(data.resume)}\n\nJob description:\n${data.jobDescription}`,
+          content: `TARGET JOB DESCRIPTION:\n"""${data.jobDescription}"""\n\nCANDIDATE'S CURRENT RESUME (JSON):\n${JSON.stringify(data.resume)}\n\nProduce the tailored, ATS-optimized resume now.`,
         },
       ],
       tools: [
@@ -747,7 +772,7 @@ export const tailorToJob = createServerFn({ method: "POST" })
           type: "function",
           function: {
             name: "save_resume",
-            description: "Save the tailored resume.",
+            description: "Save the tailored, ATS-optimized resume.",
             parameters: resumeSchema,
           },
         },
@@ -756,6 +781,7 @@ export const tailorToJob = createServerFn({ method: "POST" })
     });
     return { resume: optimizeResumeForOnePage(extractToolArgs<ResumeData>(json)) };
   });
+
 
 // ───────────────── fixResumeErrors ─────────────────
 
@@ -898,23 +924,46 @@ export const generateInterviewQuestion = createServerFn({ method: "POST" })
   .handler(async ({ data }): Promise<{ nextQuestion: string }> => {
     const apiKey = await guardAiRequest("generateInterviewQuestion", data.apiKey);
     const isKu = data.language === "ku";
+    const idx = data.questionIndex;
+    const total = data.totalQuestions;
+
+    // Interview arc — an elite interviewer paces the session, not fires random questions.
+    // Slot the question in a realistic phase based on progress through the loop.
+    const progress = idx / Math.max(total, 1);
+    const phase =
+      idx === 0
+        ? "OPENING (rapport + calibration): warm greeting, then a role-specific opener that lets you calibrate seniority. Use 'Tell me about yourself' ONLY if the role is generalist; otherwise use a sharper opener tied to the target role."
+        : progress < 0.35
+          ? "BEHAVIORAL (STAR probing): ask a competency-based question (leadership, conflict, ownership, ambiguity, failure). Follow up on the LAST answer if it lacked Situation, Task, Action, Result, or a measurable outcome."
+          : progress < 0.65
+            ? "TECHNICAL / DOMAIN DEPTH: probe hard skills specific to the target role — architecture trade-offs, tooling choices, debugging under constraints, or a scenario the candidate would actually face on the job. If the last answer was vague or textbook, drill one level deeper."
+            : progress < 0.9
+              ? "SITUATIONAL / CASE: pose a realistic case or 'what would you do if…' scenario tied to the target role. Test judgment, prioritization, stakeholder handling, or trade-off reasoning."
+              : "CLOSING (motivation + reverse signal): ask about motivation for THIS role, biggest professional risk they've taken, or an ambitious 12-month goal. NEVER ask 'do you have any questions'.";
+
     const rolePrompt = data.targetRole
-      ? `The user is interviewing for the role of: ${data.targetRole}. You ALREADY KNOW this role, DO NOT ask them what role they are applying for.`
-      : "The user is interviewing for a general professional role.";
+      ? `TARGET ROLE: "${data.targetRole}". You already know the role — never ask the candidate what role they're applying for. Calibrate every question to the seniority and domain implied by that title.`
+      : "TARGET ROLE: unspecified — default to a mid-senior professional interview and stay generalist.";
 
-    const sysPrompt = `You are an expert AI Interviewer conducting a highly professional, hyper-realistic job interview.
+    const sysPrompt = `You are "The Panel" — an elite hiring interviewer trained by ex-Google, Amazon Bar Raiser, McKinsey EM, and Stripe hiring committee standards. You are conducting a hyper-realistic ${total}-question interview loop.
+
 ${rolePrompt}
-You are currently asking question ${data.questionIndex + 1} out of ${data.totalQuestions}.
-Your goal is to assess the candidate's skills, experience, and behavioral traits.
 
-RULES:
-1. Ask ONE clear, professional interview question.
-2. If this is question 1, welcome them briefly and immediately ask the first opening question (e.g., "Tell me about yourself" or a role-specific starter). DO NOT ask what role they are applying for.
-3. Base your question on the context of the conversation so far, or introduce a new relevant topic if needed.
-4. DO NOT break character. You are the interviewer.
-5. Keep the question concise (1-3 sentences maximum).
-6. DO NOT provide answers or hints.
-7. ${isKu ? "YOU MUST SPEAK ONLY IN KURDISH SORANI (کوردی سۆرانی)." : "Speak in English."}`;
+CURRENT SLOT: Question ${idx + 1} of ${total} — ${phase}
+
+INTERVIEWER PLAYBOOK (non-negotiable)
+1. ONE question per turn. Never stack two questions. Never ask compound "and also…" questions.
+2. Adaptive difficulty. Read the candidate's last answer carefully. If they were strong and specific, RAISE the bar with a harder follow-up or a deeper probe. If they were vague, generic, buzzword-heavy, or evasive, ask a sharpening follow-up that forces a concrete example, metric, or trade-off — do NOT let vague answers pass silently.
+3. STAR discipline. On behavioral questions, if the previous answer is missing Situation, Task, Action, Result, or a measurable Outcome, your next question probes exactly the missing piece ("What was your specific role there?" / "What was the measurable outcome?" / "What would you do differently?").
+4. No repeats. Never re-ask a topic already covered. Rotate across: ownership, leadership, conflict, technical depth, system design or domain design, prioritization, failure/learning, stakeholder management, motivation, ambiguity.
+5. Signal over politeness. You are warm but not sycophantic. Never say "great answer", "excellent", "amazing". Acknowledge briefly (max 6 words) only when useful for flow, then ask the next question. Prefer to skip acknowledgment entirely and go straight to the question.
+6. Red flags. If an answer contradicts an earlier one, exaggerates ("I single-handedly built…"), or is evasive, calmly probe the contradiction with one specific follow-up.
+7. Realism. Sound like a human senior interviewer — natural, direct, curious. No emojis. No lists. No markdown. No "As an AI…". Never break character.
+8. Length. 1–3 sentences total, including any brief acknowledgment. Question ends with a "?".
+9. Do NOT answer, hint, coach, or reveal the rubric. You are here to assess, not teach.
+10. Language: ${isKu ? "Kurdish Sorani (کوردی سۆرانی) only — natural professional register, no English words unless they are the standard technical term." : "English only."}
+
+Return ONLY the next question text. No preamble, no numbering, no quotes.`;
 
     const messages: GatewayMessage[] = [{ role: "system", content: sysPrompt }];
 
@@ -922,8 +971,8 @@ RULES:
       messages.push({
         role: "user",
         content: isKu
-          ? "من ئامادەم. تکایە یەکەم پرسیاری چاوپێکەوتنەکە بکە."
-          : "I am ready. Please ask the first interview question.",
+          ? "من ئامادەم. تکایە بە پرسیاری یەکەم دەست پێ بکە."
+          : "I'm ready. Please begin with the first question.",
       });
     } else {
       messages.push(
@@ -939,12 +988,150 @@ RULES:
 
     const json = await callGateway({
       apiKey,
-      model: "gemini-2.5-flash",
+      model: "gemini-2.5-pro",
       messages,
     });
 
-    return { nextQuestion: extractText(json).trim() };
+    let out = extractText(json).trim();
+    // Strip common contamination: leading "Q1:", "Question 3 -", wrapping quotes, markdown bullets.
+    out = out.replace(/^(?:Q\d+[:.)\-\s]+|Question\s*\d+[:.)\-\s]+)/i, "").trim();
+    out = out.replace(/^[-*•]\s+/, "").trim();
+    if ((out.startsWith('"') && out.endsWith('"')) || (out.startsWith("'") && out.endsWith("'"))) {
+      out = out.slice(1, -1).trim();
+    }
+    return { nextQuestion: out };
   });
+
+// ───────────────── scoreInterview ─────────────────
+// Real rubric-based scoring. Replaces the client-side Math.random score.
+// Returns overall 0–100, per-competency subscores, strengths, gaps, and actionable next steps.
+
+export const scoreInterview = createServerFn({ method: "POST" })
+  .inputValidator(
+    z.object({
+      apiKey: apiKeyInputSchema,
+      history: z.array(interviewHistoryItemSchema).max(200),
+      targetRole: z.string().max(300).optional(),
+      language: languageSchema.default("en"),
+    }),
+  )
+  .handler(
+    async ({
+      data,
+    }): Promise<{
+      score: number;
+      verdict: "strong_hire" | "hire" | "lean_hire" | "no_hire" | "strong_no_hire";
+      summary: string;
+      strengths: string[];
+      gaps: string[];
+      nextSteps: string[];
+      subscores: {
+        communication: number;
+        starStructure: number;
+        technicalDepth: number;
+        ownershipImpact: number;
+        roleFit: number;
+      };
+    }> => {
+      const apiKey = await guardAiRequest("scoreInterview", data.apiKey);
+      const isKu = data.language === "ku";
+
+      // Serialize the transcript compactly and only include candidate answers + interviewer prompts.
+      const transcript = data.history
+        .map((m, i) => `${m.role === "ai" ? "Interviewer" : "Candidate"} #${i + 1}: ${m.content}`)
+        .join("\n\n");
+
+      const answerCount = data.history.filter((m) => m.role === "user").length;
+
+      const sysPrompt = `You are a hiring committee calibrator (ex-Google Bar Raiser + Stripe hiring committee). Score this interview transcript with the discipline of a real debrief — evidence-based, calibrated, no grade inflation.
+
+TARGET ROLE: ${data.targetRole || "Unspecified — score against a mid-senior professional bar."}
+Candidate provided ${answerCount} answer(s).
+
+RUBRIC (score each 0–100, calibrated)
+- communication: clarity, structure, conciseness, active listening evidence.
+- starStructure: presence of Situation, Task, Action, Result with a measurable outcome on behavioral answers.
+- technicalDepth: correctness, trade-off awareness, first-principles reasoning specific to the target role.
+- ownershipImpact: evidence the candidate DROVE the result (used "I" appropriately), scope, quantified impact.
+- roleFit: alignment of experience, motivation, and seniority to the target role.
+
+CALIBRATION ANCHORS (be strict — most real candidates land 55–75)
+90–100 strong_hire: multiple crisp STAR answers, quantified impact, senior judgment, zero red flags.
+80–89 hire: solid, structured, minor gaps.
+70–79 lean_hire: competent but generic or missing metrics; would need a second loop.
+55–69 no_hire: vague, buzzword-heavy, weak STAR, shallow technical depth.
+0–54 strong_no_hire: contradictions, evasion, incorrect fundamentals, or off-topic.
+
+OVERALL SCORE = weighted mean rounded to an integer: communication 15%, starStructure 20%, technicalDepth 25%, ownershipImpact 20%, roleFit 20%. If the candidate answered fewer than 3 questions, cap the overall score at 60 and set verdict to at most "lean_hire".
+
+OUTPUT
+Return ONLY valid minified JSON (no markdown, no code fence, no commentary) with this exact shape:
+{"score":<int 0-100>,"verdict":"strong_hire"|"hire"|"lean_hire"|"no_hire"|"strong_no_hire","summary":"<2-3 sentences, senior debrief tone>","strengths":["<max 4, each 6-14 words, evidence-based>"],"gaps":["<max 4, each 6-14 words, specific and coachable>"],"nextSteps":["<max 4, each 6-14 words, concrete practice actions>"],"subscores":{"communication":<int>,"starStructure":<int>,"technicalDepth":<int>,"ownershipImpact":<int>,"roleFit":<int>}}
+
+Language for summary/strengths/gaps/nextSteps: ${isKu ? "Kurdish Sorani (کوردی سۆرانی)" : "English"}. Verdict enum values stay in English.`;
+
+      const json = await callGateway({
+        apiKey,
+        model: "gemini-2.5-pro",
+        messages: [
+          { role: "system", content: sysPrompt },
+          { role: "user", content: `TRANSCRIPT:\n\n${transcript || "(empty)"}` },
+        ],
+      });
+
+      let raw = extractText(json).trim();
+      raw = raw.replace(/^```json\s*|```$/gi, "").trim();
+      raw = raw.replace(/^```\s*|```$/g, "").trim();
+
+      // Defensive parse — fall back to a conservative shape if the model misbehaves.
+      const fallback = {
+        score: 60,
+        verdict: "lean_hire" as const,
+        summary: isKu
+          ? "چاوپێکەوتنەکە تەواو بوو، بەڵام هەڵسەنگاندنی وردتر پێویستە."
+          : "Interview completed; a more detailed evaluation is unavailable right now.",
+        strengths: [],
+        gaps: [],
+        nextSteps: [],
+        subscores: { communication: 60, starStructure: 60, technicalDepth: 60, ownershipImpact: 60, roleFit: 60 },
+      };
+
+      let parsed: unknown;
+      try {
+        parsed = JSON.parse(raw);
+      } catch {
+        return fallback;
+      }
+      const p = parsed as Record<string, unknown>;
+      const clampInt = (v: unknown, min = 0, max = 100) => {
+        const n = typeof v === "number" ? v : Number(v);
+        if (!Number.isFinite(n)) return min;
+        return Math.max(min, Math.min(max, Math.round(n)));
+      };
+      const asStrArr = (v: unknown) =>
+        Array.isArray(v) ? v.filter((x): x is string => typeof x === "string").slice(0, 4) : [];
+      const validVerdicts = ["strong_hire", "hire", "lean_hire", "no_hire", "strong_no_hire"] as const;
+      const verdict = validVerdicts.includes(p.verdict as (typeof validVerdicts)[number])
+        ? (p.verdict as (typeof validVerdicts)[number])
+        : fallback.verdict;
+      const sub = (p.subscores ?? {}) as Record<string, unknown>;
+      return {
+        score: clampInt(p.score),
+        verdict,
+        summary: typeof p.summary === "string" ? p.summary : fallback.summary,
+        strengths: asStrArr(p.strengths),
+        gaps: asStrArr(p.gaps),
+        nextSteps: asStrArr(p.nextSteps),
+        subscores: {
+          communication: clampInt(sub.communication),
+          starStructure: clampInt(sub.starStructure),
+          technicalDepth: clampInt(sub.technicalDepth),
+          ownershipImpact: clampInt(sub.ownershipImpact),
+          roleFit: clampInt(sub.roleFit),
+        },
+      };
+    },
+  );
 
 // ───────────────── generateFieldContent ─────────────────
 
@@ -962,24 +1149,83 @@ export const generateFieldContent = createServerFn({ method: "POST" })
   .handler(async ({ data }): Promise<{ content: string }> => {
     const apiKey = await guardAiRequest("generateFieldContent", data.apiKey);
     const isKu = data.language === "ku";
+    const field = String(data.field).trim();
+
+    // Field-specific playbook — makes the model behave like a senior resume strategist
+    // instead of a generic "write something" LLM. Each entry defines shape, length,
+    // tone, ATS rules, and anti-patterns for that exact field.
+    const FIELD_PLAYBOOK: Record<string, string> = {
+      fullName: "Return ONLY a plausible full name inferred from existing context. If unknown, return empty. No titles, no honorifics.",
+      email: "Return ONLY a single professional email address. No labels, no explanation.",
+      phone: "Return ONLY a phone number in international format if country is known, otherwise national format. No labels.",
+      location: "Return 'City, Country' or 'City, State, Country'. No neighborhoods, no ZIP codes, no emojis.",
+      title: "Return ONE crisp, market-recognized job title (2–5 words). Match seniority to the experience context. No buzzwords like 'Ninja', 'Rockstar', 'Guru'. Prefer titles ATS parsers recognize (e.g. 'Senior Product Designer', 'Full-Stack Engineer').",
+      headline: "Return ONE line (max 120 chars): [Role] + [domain/edge] + [signal metric or specialty]. Zero fluff. No 'passionate', 'results-driven', 'dynamic'.",
+      summary: "3–4 sentences, ~55–75 words. Structure: (1) Positioning line (who you are + years + domain). (2) Signature strengths with a concrete proof point. (3) Target outcome / what you're optimizing for next. Third-person implied (no 'I'). ATS-friendly plain text. No clichés. Weave 3–5 role-relevant keywords naturally.",
+      about: "Same rules as summary.",
+      experience: "Output 3–5 bullet points, one per line, each starting with '• '. Each bullet = [Strong past-tense action verb] + [what you did using domain vocabulary] + [measurable or scoped outcome]. STAR/CAR compression. Never invent employers, dates, or metrics — quantify only when the source clearly implies scale. No 'Responsible for', no 'Duties included'. Vary verbs across bullets.",
+      achievements: "3–5 bullets, one per line, '• ' prefix. Each is a discrete WIN with a metric or clear outcome, not a responsibility. Rank by impact.",
+      projects: "For each project: '• Project Name — one-line outcome (tech stack). Optional second clause with a metric.' Max 4 entries.",
+      skills: "Return a single comma-separated list, ordered by relevance to the target role. 8–16 items. Mix hard skills, tools, and 1–2 methodologies. No proficiency labels, no duplicates, no soft-skill filler.",
+      technicalSkills: "Comma-separated, grouped implicitly by category (languages, frameworks, tools, cloud). 10–20 items. ATS-parseable, no icons.",
+      softSkills: "Comma-separated. 5–8 items. Each must be defensible with evidence elsewhere in the resume. Avoid generic filler.",
+      education: "One line per entry: 'Degree, Field — Institution, Year (optional: honors / GPA if ≥3.5).' No high school unless nothing else exists.",
+      certifications: "One line per entry: 'Credential Name — Issuer (Year).' No expired credentials unless recent.",
+      languages: "'Language — CEFR or plain level (Native / Fluent / Professional / Conversational).' Comma or newline separated.",
+      interests: "3–6 interests, comma-separated, specific and interview-worthy, never generic ('reading', 'traveling').",
+      coverLetter: "3 short paragraphs. Hook → fit (2 proof points tied to their context) → close with a specific ask. Under 220 words.",
+    };
+
+    const fieldRule = FIELD_PLAYBOOK[field] ?? `Write high-signal, resume-grade content specifically for the "${field}" field. Infer shape from the field name and the surrounding form data. Never fabricate facts.`;
+
+    // Compact the form context so the model sees signal, not noise.
+    const contextEntries = Object.entries(data.formData ?? {})
+      .filter(([k, v]) => k !== field && (typeof v === "string" ? String(v).trim().length > 0 : v != null))
+      .map(([k, v]) => `${k}: ${typeof v === "string" ? v : JSON.stringify(v)}`)
+      .join("\n");
+
+    const system = `You are the "Executive Resume Strategist" for MemoryCV — a top-1% career writer used by senior candidates at FAANG, McKinsey, and unicorn startups. You are precise, senior, and ATS-aware.
+
+NON-NEGOTIABLE RULES
+1. ZERO HALLUCINATION. Never invent employers, titles, dates, degrees, certifications, metrics, or technologies not implied by the provided context. If context is thin, write conservatively — never manufacture specifics.
+2. OUTPUT ONLY THE FIELD CONTENT. No preambles ("Here is..."), no meta commentary, no field label, no markdown headings, no code fences, no quotation marks wrapping the whole answer.
+3. PLAIN TEXT ONLY. No **bold**, no *italics*, no #headings. Bullets use '• ' at line start when the field format requires bullets. Use '—' (em dash), never '--'.
+4. ATS-SAFE. Real words, no emojis in parseable fields, no tables, no columns, no invisible characters. Numbers as digits when they represent metrics.
+5. VOICE. Confident, specific, senior. Cut clichés: 'passionate', 'results-driven', 'dynamic', 'go-getter', 'team player', 'hard-working', 'synergy', 'leverage', 'utilize'. Prefer 'use' over 'utilize'. Prefer strong past-tense verbs (led, shipped, architected, reduced, scaled, migrated, negotiated, mentored).
+6. LANGUAGE. Write in ${isKu ? "Kurdish Sorani (کوردیی ناوەندی) with natural professional register" : "English"}. Do not mix languages.
+7. LENGTH DISCIPLINE. Follow the field's length rule below exactly. Brevity is a signal of seniority.
+8. CONTEXT COHERENCE. Read the entire form context and stay consistent with declared role, seniority, industry, and location. Do not contradict facts already stated.
+
+FIELD-SPECIFIC RULE for "${field}":
+${fieldRule}
+
+Return only the raw field value. Nothing else.`;
+
+    const user = `TARGET FIELD: ${field}
+
+CURRENT FORM CONTEXT (other fields the user has already filled — treat as source of truth):
+${contextEntries || "(empty — infer conservatively from the field name and role; produce a strong generic-professional answer suitable for a mid-senior candidate.)"}
+
+Write the "${field}" content now, obeying every rule above.`;
+
     const json = await callGateway({
       apiKey,
       messages: [
-        {
-          role: "system",
-          content: `You are an expert resume writer. The user is filling out a form and clicked "Generate with AI" for the field: ${data.field}. 
-Write professional content for this specific field based on the context provided in the rest of the form.
-Do not use markdown formatting. Write pure text suitable for a textarea. 
-For example, if field is "experience", write a few bullet points of standard achievements for their role.
-Write in ${isKu ? "Kurdish (Sorani)" : "English"}.`,
-        },
-        {
-          role: "user",
-          content: `Current form data context:\n${JSON.stringify(data.formData, null, 2)}\n\nPlease generate the content for: ${data.field}`,
-        },
+        { role: "system", content: system },
+        { role: "user", content: user },
       ],
     });
-    return { content: extractText(json).trim() };
+
+    // Post-process: strip common LLM contamination (code fences, leading labels, wrapping quotes).
+    let out = extractText(json).trim();
+    out = out.replace(/^```[a-z]*\n?|\n?```$/gi, "").trim();
+    out = out.replace(new RegExp(`^${field}\\s*[:\\-—]\\s*`, "i"), "").trim();
+    if ((out.startsWith('"') && out.endsWith('"')) || (out.startsWith("'") && out.endsWith("'"))) {
+      out = out.slice(1, -1).trim();
+    }
+    // Normalize bullets: "- ", "* ", "· " → "• "
+    out = out.replace(/^[-*·]\s+/gm, "• ");
+    return { content: out };
   });
 
 // ───────────────── Telegram Jobs Agent (Gemini Managed Agent) ─────────────────

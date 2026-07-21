@@ -17,7 +17,7 @@ export function RefSchumacherTemplate({ data }: { data: ResumeData }) {
   const showSkillBars = design?.showSkillBars !== false;
 
   return (
-    <div dir={rtl ? "rtl" : "ltr"} className="border-[4px] border-[#7c3cff] bg-white px-[80px] py-[84px] font-sans text-[#161616]" style={{ minHeight: "1122px", width: "100%" }}>
+    <div dir={rtl ? "rtl" : "ltr"} className="bg-white px-[80px] py-[84px] font-sans text-[#161616]" style={{ minHeight: "1122px", width: "100%" }}>
       <header className="grid grid-cols-[230px_1fr_1fr] gap-14 ">
         <Editable path="name" value={c.name} as="h1" className="text-[42px] font-black rtl:font-normal leading-[0.86] tracking-tight rtl:tracking-normal" />
         {contact.slice(0, 2).map((item) => {
