@@ -28,6 +28,13 @@ import { getAiErrorMessage } from "@/lib/ai-errors";
 import { useAppStore } from "@/lib/store";
 
 export const Route = createFileRoute("/dashboard/job-agent")({
+  head: () => ({
+    meta: [
+      { title: "Job Agent — MemoryCV" },
+      { name: "description", content: "Let the MemoryCV AI job agent surface roles that match your profile." },
+      { name: "robots", content: "noindex" },
+    ],
+  }),
   component: JobAgentPage,
 });
 

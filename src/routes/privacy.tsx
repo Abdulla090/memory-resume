@@ -1,6 +1,16 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/privacy")({
+  head: () => ({
+    meta: [
+      { title: "Privacy Policy — MemoryCV" },
+      { name: "description", content: "How MemoryCV handles your resume data, AI processing, and account information." },
+      { property: "og:title", content: "Privacy Policy — MemoryCV" },
+      { property: "og:description", content: "How MemoryCV handles your resume data, AI processing, and account information." },
+      { property: "og:url", content: "/privacy" },
+    ],
+    links: [{ rel: "canonical", href: "/privacy" }],
+  }),
   component: PrivacyPage,
 });
 

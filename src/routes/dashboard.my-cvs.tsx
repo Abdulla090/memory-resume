@@ -4,6 +4,13 @@ import { useAppStore } from '@/lib/store';
 import { useState } from 'react';
 
 export const Route = createFileRoute('/dashboard/my-cvs')({
+  head: () => ({
+    meta: [
+      { title: "My CVs — MemoryCV" },
+      { name: "description", content: "All of your saved resumes and tailored versions in one place." },
+      { name: "robots", content: "noindex" },
+    ],
+  }),
   component: MyCvsPage,
 });
 

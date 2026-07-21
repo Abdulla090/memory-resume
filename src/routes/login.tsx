@@ -6,6 +6,17 @@ import { useAuth } from "@/components/auth/AuthProvider";
 import { useAppStore } from "@/lib/store";
 
 export const Route = createFileRoute("/login")({
+  head: () => ({
+    meta: [
+      { title: "Sign in — MemoryCV" },
+      { name: "description", content: "Sign in to MemoryCV to build, tailor and export AI-powered resumes." },
+      { property: "og:title", content: "Sign in — MemoryCV" },
+      { property: "og:description", content: "Sign in to MemoryCV to build, tailor and export AI-powered resumes." },
+      { property: "og:url", content: "/login" },
+      { name: "robots", content: "noindex" },
+    ],
+    links: [{ rel: "canonical", href: "/login" }],
+  }),
   component: LoginPage,
 });
 

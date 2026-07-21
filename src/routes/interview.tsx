@@ -7,6 +7,16 @@ import { generateInterviewQuestion, scoreInterview } from "@/lib/ai.functions";
 import { getAiErrorMessage } from "@/lib/ai-errors";
 
 export const Route = createFileRoute("/interview")({
+  head: () => ({
+    meta: [
+      { title: "AI Interview Practice — MemoryCV" },
+      { name: "description", content: "Practice role-specific interview questions with an adaptive AI simulator that scores communication, technical depth and behavioural signals." },
+      { property: "og:title", content: "AI Interview Practice — MemoryCV" },
+      { property: "og:description", content: "Practice role-specific interview questions with an adaptive AI simulator that scores communication, technical depth and behavioural signals." },
+      { property: "og:url", content: "/interview" },
+    ],
+    links: [{ rel: "canonical", href: "/interview" }],
+  }),
   component: InterviewPage,
 });
 

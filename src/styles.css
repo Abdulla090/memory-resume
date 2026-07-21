@@ -1241,6 +1241,50 @@ html.dark .landing-page section {
   background-color: transparent;
 }
 
+/* Hero — dark editorial gradient (deep ink → indigo → slate) */
+html.dark .landing-page .hero-gradient {
+  background: linear-gradient(180deg,
+    #05070d 0%,
+    #0a0f1f 30%,
+    #111a33 58%,
+    #0b1226 82%,
+    #070912 100%
+  ) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.05),
+    0 30px 80px -40px rgba(0, 0, 0, 0.7);
+}
+
+html.dark .landing-page .hero-gradient::before {
+  background:
+    radial-gradient(ellipse at 25% 20%, rgba(99, 102, 241, 0.22) 0%, transparent 55%),
+    radial-gradient(ellipse at 85% 85%, rgba(56, 189, 248, 0.14) 0%, transparent 50%),
+    radial-gradient(ellipse at 60% 50%, rgba(168, 85, 247, 0.08) 0%, transparent 60%) !important;
+}
+
+/* Faint dot grid overlay for editorial depth in dark mode */
+html.dark .landing-page .hero-gradient::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1px);
+  background-size: 22px 22px;
+  mask-image: radial-gradient(ellipse at 30% 30%, #000 40%, transparent 75%);
+  -webkit-mask-image: radial-gradient(ellipse at 30% 30%, #000 40%, transparent 75%);
+  pointer-events: none;
+  border-radius: inherit;
+}
+
+/* Keep hero text/CTA colors intact — override the generic slate remaps */
+html.dark .landing-page .hero-gradient .text-white,
+html.dark .landing-page .hero-gradient h1,
+html.dark .landing-page .hero-gradient h1 * {
+  color: #ffffff !important;
+}
+html.dark .landing-page .hero-gradient .text-blue-800 {
+  color: #1e3a8a !important;
+}
+
 /* ─────────────────────────────────────────────────────────────
    App shell — global dark mode (dashboard + editor)
    Scoped to .app-shell; CV paper is exempt via [data-cv-canvas].

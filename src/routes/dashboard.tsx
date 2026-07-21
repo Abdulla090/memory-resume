@@ -25,6 +25,13 @@ import { useDarkMode } from "@/hooks/use-dark-mode";
 
 
 export const Route = createFileRoute("/dashboard")({
+  head: () => ({
+    meta: [
+      { title: "Dashboard — MemoryCV" },
+      { name: "description", content: "Your MemoryCV workspace — resumes, cover letters, job tracker, AI tools and analytics." },
+      { name: "robots", content: "noindex" },
+    ],
+  }),
   component: DashboardLayout,
 });
 

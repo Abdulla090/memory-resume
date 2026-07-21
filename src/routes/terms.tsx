@@ -1,6 +1,16 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/terms")({
+  head: () => ({
+    meta: [
+      { title: "Terms of Service — MemoryCV" },
+      { name: "description", content: "Terms governing use of MemoryCV's resume builder, AI tools, and account features." },
+      { property: "og:title", content: "Terms of Service — MemoryCV" },
+      { property: "og:description", content: "Terms governing use of MemoryCV's resume builder, AI tools, and account features." },
+      { property: "og:url", content: "/terms" },
+    ],
+    links: [{ rel: "canonical", href: "/terms" }],
+  }),
   component: TermsPage,
 });
 

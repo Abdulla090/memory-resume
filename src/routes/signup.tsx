@@ -6,6 +6,16 @@ import { useAuth } from "@/components/auth/AuthProvider";
 import { useAppStore } from "@/lib/store";
 
 export const Route = createFileRoute("/signup")({
+  head: () => ({
+    meta: [
+      { title: "Create an account — MemoryCV" },
+      { name: "description", content: "Start building an ATS-ready resume with MemoryCV — free to try, no credit card required." },
+      { property: "og:title", content: "Create an account — MemoryCV" },
+      { property: "og:description", content: "Start building an ATS-ready resume with MemoryCV — free to try, no credit card required." },
+      { property: "og:url", content: "/signup" },
+    ],
+    links: [{ rel: "canonical", href: "/signup" }],
+  }),
   component: SignUpPage,
 });
 

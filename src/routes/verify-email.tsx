@@ -4,6 +4,15 @@ import { VerifyEmailForm } from "@/components/auth/VerifyEmailForm";
 import { useAppStore } from "@/lib/store";
 
 export const Route = createFileRoute("/verify-email")({
+  head: () => ({
+    meta: [
+      { title: "Verify email — MemoryCV" },
+      { name: "description", content: "Verify your email address to activate your MemoryCV account." },
+      { property: "og:url", content: "/verify-email" },
+      { name: "robots", content: "noindex" },
+    ],
+    links: [{ rel: "canonical", href: "/verify-email" }],
+  }),
   validateSearch: (search: Record<string, unknown>) => ({
     email: typeof search.email === "string" ? search.email : "",
   }),

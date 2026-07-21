@@ -111,21 +111,46 @@ export const copy = {
     faqItems: [
       {
         q: "How does the AI resume builder work?",
-        a: "MemoryCV asks you targeted questions about your career, then uses advanced AI to instantly organize and write a clean, professional resume tailored to your target role.",
+        a: "You answer a short, guided intake — personal details, career history, education, skills, projects and languages. MemoryCV then uses Gemini-powered agents to structure, rewrite and grammar-check every section into an ATS-ready resume tailored to your target role.",
       },
       {
-        q: "Will my resume be ATS-friendly?",
-        a: "Yes. All our templates are designed to be easily read by Applicant Tracking Systems (ATS), ensuring your resume passes automated screenings.",
+        q: "Which templates can I choose from?",
+        a: "You get 20+ hand-crafted templates — from Swiss editorial and executive classics to modern two-column, academic and creative layouts. You can switch templates at any time from the editor without losing your content.",
       },
       {
-        q: "Can I export my resume to PDF?",
-        a: "Absolutely. Once you are happy with your resume, you can download it as a high-quality PDF ready to be attached to your job applications.",
+        q: "Will my resume pass ATS screenings?",
+        a: "Yes. Every template uses semantic structure, standard section headings and clean typography so Applicant Tracking Systems parse your resume correctly. The AI also rewrites bullets to include measurable impact and relevant keywords.",
       },
       {
-        q: "Do you offer cover letter generation?",
-        a: "Currently, our primary focus is generating world-class resumes. However, cover letter generation based on your resume profile is a planned feature!",
+        q: "What export formats do you support?",
+        a: "You can export as high-quality vector PDF (the default for job applications), editable DOCX for recruiters who ask for Word, and plain TXT for ATS uploads that reject styled files.",
+      },
+      {
+        q: "Can I tailor one resume for many different jobs?",
+        a: "Yes. Paste a job description into the AI Optimize tool and MemoryCV rewrites your summary, skills and bullet points to match the role — while keeping your master profile intact. Every tailored version is saved to your dashboard.",
+      },
+      {
+        q: "Do you generate cover letters and thank-you notes?",
+        a: "Both are built in. The Cover Letter studio drafts a role-specific letter from your profile in seconds, and the Thank-You card library gives you elegant post-interview templates you can personalize and export.",
+      },
+      {
+        q: "Is there an interview practice mode?",
+        a: "Yes. Interview Mode runs an adaptive 5-phase simulation with role-specific questions, follow-ups and a scoring rubric covering communication, technical depth and behavioural signals — with instant feedback after each answer.",
+      },
+      {
+        q: "Do you support Kurdish and Arabic?",
+        a: "The entire product — landing page, dashboard, intake form, editor and AI writing — works in English, Kurdish (Sorani) and Arabic with full right-to-left layout, localized fonts and native-quality AI output.",
+      },
+      {
+        q: "Is my data private?",
+        a: "Your career profile is only used to build your own resume. Nothing is sold, shared or used to train third-party models, and you can edit or delete your data at any time from the dashboard.",
+      },
+      {
+        q: "Is MemoryCV free to start?",
+        a: "Yes — you can build, preview and export your first resume without a credit card. Advanced AI tailoring, unlimited exports and premium templates are available on paid plans.",
       },
     ],
+
     characterAlt: "Career character illustration",
     shieldAlt: "Data protection shield",
   },
@@ -200,21 +225,46 @@ export const copy = {
     faqItems: [
       {
         q: "دروستکەری سیڤی بە زیرەکی دەستکرد چۆن کار دەکات؟",
-        a: "مێمۆری سیڤی پرسیاری ورد لەسەر ئەزموونەکانت دەکات، پاشان زیرەکی دەستکرد بەکاردێنێت بۆ نووسین و ڕێکخستنی سیڤییەکی پیشەیی کە بۆ ڕۆڵی مەبەستت گونجاو بێت.",
+        a: "پرسیارگەلێکی ڕێنمایی کورت وەڵام دەدەیتەوە — زانیاری کەسی، مێژووی کار، خوێندن، لێهاتووییەکان، پڕۆژە و زمانەکان. پاشان ئاجێنتەکانی MemoryCV بە بنەمای Gemini هەموو بەشەکان ڕێک دەخات، دووبارە دەنووسێتەوە و ڕێنووسی چاک دەکاتەوە بۆ سیڤییەکی ATS-گونجاو کە بۆ ڕۆڵی مەبەستت گونجێنراوە.",
       },
       {
-        q: "ئایا سیڤییەکەم بۆ سیستەمی ATS گونجاوە؟",
-        a: "بەڵێ. سەرجەم قاڵبەکانمان بە شێوەیەکە کە بە ئاسانی لەلایەن سیستەمەکانی بەدواداچوونی داواکاران (ATS) دەخوێندرێنەوە، کە دڵنیایی دەدات لە دەرچوونی سیڤییەکەت لە پشکنینە ئۆتۆماتیکییەکان.",
+        q: "کام قاڵبەکان بەردەستن؟",
+        a: "زیاتر لە ٢٠ قاڵبی دەستکرد — لە ستایلی سویسی و پیشەیی کلاسیک بۆ دوو ستوونی مۆدێرن، ئەکادیمی و داهێنەرانە. لە ئێدیتەردا دەتوانیت هەر کاتێک قاڵب بگۆڕیت بەبێ لەدەستدانی ناوەڕۆکەکەت.",
       },
       {
-        q: "دەتوانم سیڤییەکەم بە فۆرماتی PDF دابگرم؟",
-        a: "بێگومان. کاتێک لە سیڤییەکەت ڕازی بوویت، دەتوانیت بە کوالێتی بەرز وەکو PDF دایبگریت و ئامادەیە بۆ ناردن لەگەڵ داواکارییەکانت.",
+        q: "ئایا سیڤییەکەم لە ATS تێدەپەڕێت؟",
+        a: "بەڵێ. هەموو قاڵبەکان پێکهاتەیەکی مانادار و سەردێڕی ستانداردیان هەیە بۆ ئەوەی سیستەمەکانی ATS بە دروستی بیخوێننەوە. ئاجێنتەکەش خاڵەکان بە کاریگەری پێواوکراو و ووشە کلیلییە پێویستەکانەوە دووبارە دەنووسێتەوە.",
       },
       {
-        q: "ئایا خزمەتگوزاری نووسینی نامەی پێشەکی (Cover Letter)تان هەیە؟",
-        a: "لە ئێستادا تەرکیزمان لەسەر دروستکردنی سیڤییەکی پێشکەوتووە، بەڵام خزمەتگوزاری دروستکردنی نامەی پێشەکی لەسەر بنەمای سیڤییەکەت یەکێکە لەو تایبەتمەندییانەی کە لە پلاندایە.",
+        q: "چ فۆرماتێکی داگرتن بەردەستە؟",
+        a: "دەتوانیت وەکو PDF ی ڤێکتۆر بە کوالێتی بەرز (پەسەندکراو بۆ داواکاری کار)، DOCX ی گۆڕانکاریپەزێر بۆ ئەو کارگێڕانەی داوای Word دەکەن، و TXT ی سادە بۆ ئەو ATSانەی فایلی ڕازێنراو ڕەت دەکەنەوە، دای بگریت.",
+      },
+      {
+        q: "دەتوانم یەک پڕۆفایل بۆ چەندین کار بگونجێنم؟",
+        a: "بەڵێ. وەسفی کار لە بەشی AI Optimize بلکێنە، MemoryCV پوختە، لێهاتووی و خاڵەکانت بۆ ئەو ڕۆڵە دووبارە دەنووسێتەوە — لە کاتێکدا پڕۆفایلە سەرەکییەکەت پارێزراو دەمێنێت. هەموو وەشانە گونجاوەکان لە داشبۆردەکەت هەڵدەگیرێن.",
+      },
+      {
+        q: "نامەی پێشەکی و کارتی سوپاسیش دروست دەکەن؟",
+        a: "هەردووکیان لە ناوەوە هەن. ستۆدیۆی Cover Letter لە چەند چرکەیەکدا نامەیەکی تایبەت بە ڕۆڵ لە پڕۆفایلەکەتەوە دەردەهێنێت، و کتێبخانەی Thank-You چەندین قاڵبی جوانی دوای چاوپێکەوتنت پێدەدات کە دەتوانیت کەسیبکەیت و داگری بکەیت.",
+      },
+      {
+        q: "ئایا مۆدی ڕاهێنانی چاوپێکەوتن هەیە؟",
+        a: "بەڵێ. Interview Mode سیمولاتۆرێکی ٥ قۆناغی گونجێنراو دەبەخشێت لەگەڵ پرسیاری تایبەت بە ڕۆڵ، پرسیاری شوێنکەوتوو و ڕەگاکانی هەڵسەنگاندن بۆ گەیاندن، قوڵی تەکنیکی و هەڵسوکەوت — لەگەڵ فیدباکی خێرا دوای هەر وەڵامێک.",
+      },
+      {
+        q: "کوردی و عەرەبی پشتیوانی دەکرێن؟",
+        a: "هەموو بەرهەمەکە — پەڕەی سەرەکی، داشبۆرد، فۆرمی پڕکردنەوە، ئێدیتەر و نووسینی زیرەک — بە ئینگلیزی، کوردی (سۆرانی) و عەرەبی کار دەکات لەگەڵ لاپەڕەبەندی ڕاست-بۆ-چەپی تەواو، فۆنتی گونجاو و بەرهەمی زیرەک بە کوالێتی زگماکی.",
+      },
+      {
+        q: "ئایا داتاکەم پارێزراوە؟",
+        a: "پڕۆفایلی کاریی تۆ تەنها بۆ دروستکردنی سیڤییەکەی خۆت بەکار دەهێنرێت. هیچ شتێک نافرۆشرێت، بەشدار ناکرێت یان بۆ ڕاهێنانی مۆدێلە دەرەکییەکان بەکار ناهێنرێت، و هەر کاتێک دەتوانیت داتاکەت لە داشبۆردەوە دەستکاری بکەیت یان بیسڕیتەوە.",
+      },
+      {
+        q: "ئایا MemoryCV خۆڕاییە بۆ دەستپێکردن؟",
+        a: "بەڵێ — دەتوانیت یەکەم سیڤیت دروست بکەیت، پێشبینینی بکەیت و داگری بکەیت بەبێ کارتی بانکی. گونجاندنی زیرەکی پێشکەوتوو، داگرتنی بێسنوور و قاڵبە تایبەتەکان لە پلانە پارەداریەکاندا بەردەستن.",
       },
     ],
+
     characterAlt: "وێنەی کەسایەتی بۆ کار",
     shieldAlt: "نیشانی پاراستنی داتا",
   },
@@ -284,19 +334,43 @@ export const copy = {
     faqItems: [
       {
         q: "كيف يعمل مُنشئ السير الذاتية بالذكاء الاصطناعي؟",
-        a: "يطرح MemoryCV أسئلة موجّهة حول مسيرتك المهنية، ثم يستخدم ذكاءً اصطناعياً متقدماً لتنظيم وكتابة سيرة ذاتية احترافية مصمّمة لوظيفتك المستهدفة.",
+        a: "تُجيب على استمارة موجّهة قصيرة — معلومات شخصية، مسيرة مهنية، تعليم، مهارات، مشاريع ولغات. ثم تستخدم وكلاء MemoryCV المدعومون بـ Gemini لهيكلة كل قسم وإعادة صياغته وتدقيقه لغوياً لإنتاج سيرة ذاتية جاهزة لأنظمة ATS ومكيّفة لوظيفتك المستهدفة.",
       },
       {
-        q: "هل ستكون سيرتي متوافقة مع أنظمة ATS؟",
-        a: "نعم. جميع قوالبنا مصمّمة ليقرأها نظام تتبع المتقدمين (ATS) بسهولة، مما يضمن تجاوز الفحوصات الآلية.",
+        q: "ما القوالب المتاحة؟",
+        a: "أكثر من 20 قالباً مصمّماً يدوياً — من الطراز السويسري التحريري والتنفيذي الكلاسيكي إلى تصاميم عمودَين حديثة وأكاديمية وإبداعية. يمكنك تبديل القالب في أي وقت من المحرر دون فقد المحتوى.",
       },
       {
-        q: "هل يمكنني تصدير سيرتي إلى PDF؟",
-        a: "بالتأكيد. عند رضاك عن السيرة، يمكنك تنزيلها بجودة عالية بصيغة PDF جاهزة للإرفاق بطلبات التوظيف.",
+        q: "هل ستجتاز سيرتي أنظمة ATS؟",
+        a: "نعم. كل قالب يستخدم بنية دلالية وعناوين أقسام قياسية وطباعة نظيفة لتقرأه أنظمة تتبع المتقدمين بشكل صحيح. كما يعيد الذكاء الاصطناعي صياغة النقاط لتضمين أثر قابل للقياس وكلمات مفتاحية ذات صلة.",
       },
       {
-        q: "هل توفّرون إنشاء رسائل تعريفية؟",
-        a: "تركيزنا حالياً على إنشاء سير ذاتية عالمية المستوى، لكن إنشاء رسالة التعريف بناءً على ملفك مُدرج ضمن الميزات القادمة.",
+        q: "ما صيغ التصدير المدعومة؟",
+        a: "يمكنك التصدير كـ PDF متجهي عالي الجودة (المعتمد لطلبات التوظيف)، وDOCX قابل للتحرير لمن يطلبونه بصيغة Word، وTXT نصي عادي لأنظمة ATS التي ترفض الملفات المنسّقة.",
+      },
+      {
+        q: "هل يمكنني تكييف ملف واحد لعدة وظائف؟",
+        a: "نعم. الصق وصف الوظيفة في أداة AI Optimize فيعيد MemoryCV صياغة الملخّص والمهارات والنقاط لتناسب الدور — مع الحفاظ على ملفك الرئيسي كما هو. كل نسخة مكيّفة تُحفظ في لوحة التحكم.",
+      },
+      {
+        q: "هل تُنشئون رسائل تعريفية وبطاقات شكر؟",
+        a: "كلاهما مدمج. يصوغ استوديو Cover Letter رسالة خاصة بالوظيفة من ملفك في ثوانٍ، وتوفّر مكتبة Thank-You قوالب أنيقة لما بعد المقابلة يمكنك تخصيصها وتصديرها.",
+      },
+      {
+        q: "هل هناك وضع تدريب على المقابلات؟",
+        a: "نعم. يقدّم Interview Mode محاكاة تكيّفية من 5 مراحل تشمل أسئلة خاصة بالدور، وأسئلة متابعة، ورُبْريك تقييم يغطي التواصل والعمق التقني والإشارات السلوكية — مع ملاحظات فورية بعد كل إجابة.",
+      },
+      {
+        q: "هل تدعمون الكردية والعربية؟",
+        a: "المنتج بأكمله — الصفحة الرئيسية، ولوحة التحكم، والاستمارة، والمحرر، وكتابة الذكاء الاصطناعي — يعمل بالإنجليزية والكردية (سوراني) والعربية بدعم كامل من اليمين إلى اليسار وخطوط محلية ومخرجات AI بجودة لغة أصلية.",
+      },
+      {
+        q: "هل بياناتي خاصة؟",
+        a: "يُستخدم ملفك المهني فقط لبناء سيرتك الذاتية. لا يُباع ولا يُشارك ولا يُستخدم لتدريب نماذج طرف ثالث، ويمكنك تعديل بياناتك أو حذفها في أي وقت من لوحة التحكم.",
+      },
+      {
+        q: "هل MemoryCV مجاني للبدء؟",
+        a: "نعم — يمكنك إنشاء ومعاينة وتصدير أول سيرة ذاتية دون بطاقة ائتمان. التكييف المتقدم بالذكاء الاصطناعي، والتصدير غير المحدود، والقوالب المميّزة متاحة في الخطط المدفوعة.",
       },
     ],
     characterAlt: "رسم توضيحي لشخصية مهنية",
@@ -1684,7 +1758,7 @@ const BentoHeroCard = ({ language }: { language: Language }) => {
       transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
       className={`${editorialCard} w-full`}
     >
-      <BentoIndex n="01 / SPOTLIGHT" />
+      
       <div className="grid gap-10 p-6 sm:p-10 md:grid-cols-[1.05fr_1fr] md:gap-10 md:p-16">
         <div className={`flex flex-col justify-between ${textAlign}`} dir={t.dir}>
           <div>
@@ -1775,7 +1849,7 @@ const BentoStandOutCard = ({ language }: { language: Language }) => {
       transition={{ duration: 0.6, delay: 0.08, ease: [0.22, 1, 0.36, 1] }}
       className={`${editorialCard} flex min-h-[380px] flex-col justify-between p-6 sm:min-h-[460px] sm:p-10 ${textAlign}`}
     >
-      <BentoIndex n="02 / SIGNAL" />
+      
 
       <div dir={t.dir} className="relative z-10 max-w-[30ch]">
         <div className={editorialEyebrow}>
@@ -1792,16 +1866,11 @@ const BentoStandOutCard = ({ language }: { language: Language }) => {
         </p>
       </div>
 
-      <div className={`relative z-10 mt-8 ${editorialRule} pt-6`} dir="ltr">
+      <div className="relative z-10 mt-8" dir="ltr">
         <div className="flex items-end justify-between">
-          <div>
-            <div className="font-mono text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-400">
-              {isRtl ? "ڕێژەی چاوپێکەوتن" : "Interview rate"}
-            </div>
-            <div className="mt-2 flex items-baseline gap-1.5 font-semibold tabular-nums tracking-tight text-slate-900">
-              <span className="text-[42px] leading-none">+42</span>
-              <span className="text-lg text-[#2A5BFF]">%</span>
-            </div>
+          <div className="flex items-baseline gap-1.5 font-semibold tabular-nums tracking-tight text-slate-900">
+            <span className="text-[42px] leading-none">+42</span>
+            <span className="text-lg text-[#2A5BFF]">%</span>
           </div>
           <svg viewBox="0 0 120 40" className="h-11 w-32" fill="none">
             <path d="M2,32 L18,28 L34,30 L52,20 L70,24 L86,14 L104,16 L118,6" stroke="#2A5BFF" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" />
@@ -1842,7 +1911,7 @@ const BentoSecurityCard = ({ language }: { language: Language }) => {
       transition={{ duration: 0.6, delay: 0.14, ease: [0.22, 1, 0.36, 1] }}
       className={`${editorialCard} flex min-h-[380px] flex-col justify-between p-6 sm:min-h-[460px] sm:p-10 ${textAlign}`}
     >
-      <BentoIndex n="03 / TRUST" />
+      
 
       <div dir={t.dir} className="relative z-10 max-w-[30ch]">
         <div className={editorialEyebrow}>
@@ -1859,12 +1928,6 @@ const BentoSecurityCard = ({ language }: { language: Language }) => {
         </p>
       </div>
 
-      <div className={`relative z-10 mt-8 ${editorialRule} pt-6`} dir={t.dir}>
-        <div className="inline-flex items-center gap-2 text-[12px] font-medium text-slate-600">
-          <LockKeyhole className="h-3.5 w-3.5 text-[#2A5BFF]" />
-          {t.securityBadge}
-        </div>
-      </div>
 
       <div
         className="pointer-events-none absolute bottom-4 z-0 flex h-[150px] w-[150px] items-center justify-center opacity-95 sm:h-[190px] sm:w-[190px]"
@@ -1898,7 +1961,7 @@ const BentoCreateWinCard = ({ language }: { language: Language }) => {
       transition={{ duration: 0.6, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
       className={`${editorialCard} w-full`}
     >
-      <BentoIndex n="04 / EXPORT" />
+      
       <div className="p-6 sm:p-10 md:p-14">
         <div className={`mx-auto flex max-w-3xl flex-col ${textAlign}`} dir={t.dir}>
           <div className={editorialEyebrow}>
@@ -1914,7 +1977,7 @@ const BentoCreateWinCard = ({ language }: { language: Language }) => {
           </p>
 
           <div
-            className={`mt-8 ${editorialRule} grid grid-cols-1 gap-3 pt-5 sm:grid-cols-3`}
+            className="mt-8 grid grid-cols-1 gap-3 sm:grid-cols-3"
             dir="ltr"
           >
             {[

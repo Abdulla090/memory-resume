@@ -8,6 +8,13 @@ import { getAiErrorMessage } from "@/lib/ai-errors";
 import { useAppStore } from "@/lib/store";
 
 export const Route = createFileRoute("/dashboard/ai-writer")({
+  head: () => ({
+    meta: [
+      { title: "AI Writer — MemoryCV" },
+      { name: "description", content: "Draft bullets, summaries and section content with the MemoryCV AI writer." },
+      { name: "robots", content: "noindex" },
+    ],
+  }),
   component: AiWriterPage,
 });
 

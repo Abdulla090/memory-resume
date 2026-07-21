@@ -12,6 +12,13 @@ import { useAppStore } from "@/lib/store";
 import { ChatOnboarding } from "@/routes/onboarding";
 
 export const Route = createFileRoute("/dashboard/")({
+  head: () => ({
+    meta: [
+      { title: "Overview — MemoryCV" },
+      { name: "description", content: "Overview of your MemoryCV resumes, applications and AI activity." },
+      { name: "robots", content: "noindex" },
+    ],
+  }),
   component: DashboardIndex,
 });
 

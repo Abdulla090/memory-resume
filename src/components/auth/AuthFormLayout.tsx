@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Sparkles, FileText, BarChart3, CheckCircle2 } from "lucide-react";
+import { Check } from "lucide-react";
 import type { ReactNode } from "react";
 
 type AuthFormLayoutProps = {
@@ -10,178 +10,170 @@ type AuthFormLayoutProps = {
   isKu?: boolean;
 };
 
-/** Floating resume card shown on the dark branding panel */
-function ResumeMockup({ isKu }: { isKu?: boolean }) {
-  return (
-    <div className="auth-resume-mockup">
-      {/* Card surface */}
-      <div className="auth-resume-card">
-        {/* Header row */}
-        <div className="auth-resume-header">
-          <div className="auth-resume-avatar" />
-          <div className="auth-resume-meta">
-            <div className="auth-resume-bar" style={{ width: "72%", height: "10px" }} />
-            <div className="auth-resume-bar" style={{ width: "48%", height: "7px", opacity: 0.5 }} />
-          </div>
-          <div className="auth-resume-badge">
-            <CheckCircle2 size={11} className="text-sky-400" />
-          </div>
-        </div>
-
-        {/* Section label */}
-        <div className="auth-resume-section-label">
-          <BarChart3 size={9} className="auth-resume-icon" />
-          <span>{isKu ? "بەتوانایی" : "Skills"}</span>
-        </div>
-
-        {/* Skill bars */}
-        {[
-          { label: isKu ? "React" : "React", pct: 92, delay: "0ms" },
-          { label: isKu ? "تایپ‌ئێسکریپت" : "TypeScript", pct: 85, delay: "80ms" },
-          { label: isKu ? "UI/UX" : "UI/UX", pct: 78, delay: "160ms" },
-        ].map((skill) => (
-          <div key={skill.label} className="auth-resume-skill-row">
-            <span className="auth-resume-skill-label">{skill.label}</span>
-            <div className="auth-resume-skill-track">
-              <div
-                className="auth-resume-skill-fill"
-                style={{ width: `${skill.pct}%`, animationDelay: skill.delay }}
-              />
-            </div>
-            <span className="auth-resume-skill-pct">{skill.pct}%</span>
-          </div>
-        ))}
-
-        {/* Divider */}
-        <div className="auth-resume-divider" />
-
-        {/* Section label */}
-        <div className="auth-resume-section-label">
-          <FileText size={9} className="auth-resume-icon" />
-          <span>{isKu ? "ئەزموون" : "Experience"}</span>
-        </div>
-
-        {/* Experience rows */}
-        {[
-          { title: isKu ? "مهەندسی باش" : "Senior Engineer", sub: isKu ? "٢٠٢٢ — ئێستا" : "2022 — Present", dot: "bg-sky-400" },
-          { title: isKu ? "دیزاینەری UI" : "UI Designer", sub: isKu ? "٢٠١٩ — ٢٠٢٢" : "2019 — 2022", dot: "bg-blue-400" },
-        ].map((exp) => (
-          <div key={exp.title} className="auth-resume-exp-row">
-            <div className={`auth-resume-dot ${exp.dot}`} />
-            <div>
-              <div className="auth-resume-bar" style={{ width: "60%", height: "8px" }} />
-              <div className="auth-resume-bar" style={{ width: "38%", height: "6px", opacity: 0.45, marginTop: "4px" }} />
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Floating score badge */}
-      <div className="auth-resume-score">
-        <span className="auth-resume-score-num">98</span>
-        <span className="auth-resume-score-label">{isKu ? "نمرە" : "Score"}</span>
-      </div>
-
-      {/* Floating tag */}
-      <div className="auth-resume-tag">
-        <Sparkles size={9} className="text-sky-300" />
-        <span>{isKu ? "باشترین ٥٪" : "Top 5%"}</span>
-      </div>
-    </div>
-  );
-}
-
+/**
+ * Ultra-SaaS split auth layout — Linear / Figma / Expo grade.
+ * Left: editorial dark panel with product narrative + testimonial.
+ * Right: bone-white form panel with tight typography.
+ */
 export function AuthFormLayout({ title, subtitle, children, footer, isKu }: AuthFormLayoutProps) {
-  const featureList = isKu
+  const dir = isKu ? "rtl" : "ltr";
+  const bullets = isKu
     ? [
-        "پاشەکەوتکردنی هەوری ئۆتۆماتیکی",
-        "سیڤیی زیرەک بە AI",
-        "داگرتنی PDF بە یەک کلیک",
+        "پاشەکەوتکردنی ئۆتۆماتیکی هەور",
+        "سیڤیی زیرەک بۆ هەر پۆستێک",
+        "ناردنی PDF بە یەک کلیک",
       ]
     : [
-        "Auto cloud backup",
-        "AI-tailored CVs",
-        "One-click PDF export",
+        "Automatic cloud sync across devices",
+        "AI-tailored resumes for any role",
+        "Export vector PDF in one click",
       ];
 
+  const quote = isKu
+    ? "لە کاتژمێرێکدا سیڤییەکی پیشەیی و تایبەتم بۆ پۆستەکەم دروستکرد."
+    : "I shipped a role-specific, recruiter-ready resume in under an hour.";
+  const quoteAuthor = isKu ? "لانا م. — بەرپرسی بەرهەم" : "Lana M. — Product Lead";
+
   return (
-    <div className="auth-root">
-      {/* ── Left branding panel (hidden on mobile) ─────────────── */}
-      <div className="auth-panel-brand" aria-hidden>
-        {/* Grid background */}
-        <div className="auth-grid-bg" />
-        {/* Glow blobs */}
-        <div className="auth-glow auth-glow-1" />
-        <div className="auth-glow auth-glow-2" />
+    <div dir={dir} className="min-h-screen w-full bg-white text-slate-900 antialiased">
+      <div className="grid min-h-screen w-full lg:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)]">
+        {/* LEFT — editorial dark panel */}
+        <aside className="relative hidden overflow-hidden bg-[#0A0B10] text-white lg:flex lg:flex-col lg:justify-between">
+          {/* Precision grid */}
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-0 opacity-[0.08]"
+            style={{
+              backgroundImage:
+                "linear-gradient(to right, #ffffff 1px, transparent 1px), linear-gradient(to bottom, #ffffff 1px, transparent 1px)",
+              backgroundSize: "48px 48px",
+              maskImage:
+                "radial-gradient(ellipse at 30% 20%, #000 40%, transparent 75%)",
+            }}
+          />
+          {/* Aurora */}
+          <div
+            aria-hidden
+            className="pointer-events-none absolute -left-32 top-1/4 h-[520px] w-[520px] rounded-full opacity-40 blur-3xl"
+            style={{
+              background:
+                "radial-gradient(circle, oklch(0.55 0.18 258) 0%, transparent 60%)",
+            }}
+          />
+          <div
+            aria-hidden
+            className="pointer-events-none absolute -bottom-40 right-0 h-[420px] w-[420px] rounded-full opacity-30 blur-3xl"
+            style={{
+              background:
+                "radial-gradient(circle, oklch(0.7 0.15 220) 0%, transparent 60%)",
+            }}
+          />
 
-        <div className="auth-panel-inner">
-          {/* Logo wordmark */}
-          <Link to="/" className="auth-logo-link" tabIndex={-1}>
-            <div className="auth-logo-icon">
-              <FileText size={14} className="text-white" />
-            </div>
-            <span className="auth-logo-text">MemoryCV</span>
-          </Link>
-
-          {/* Headline */}
-          <div className="auth-brand-headline">
-            <h2 className="auth-brand-title">
-              {isKu ? "قەدەغەیەکی پیشەیی" : "Power your career."}
-            </h2>
-            <p className="auth-brand-sub">
-              {isKu
-                ? "داتابەیسی کەسیی سەرکەوتنەکانت. لە هەر شوێنێک."
-                : "Your personal database of professional achievements. Anywhere."}
-            </p>
+          <div className="relative z-10 flex items-center gap-2.5 px-12 pt-10">
+            <Link to="/" className="group inline-flex items-center gap-2.5">
+              <span className="grid h-8 w-8 place-items-center rounded-lg bg-white/10 ring-1 ring-white/15 backdrop-blur">
+                <span className="h-2 w-2 rounded-[2px] bg-white" />
+              </span>
+              <span className="text-[15px] font-semibold tracking-tight">MemoryCV</span>
+            </Link>
           </div>
 
-          {/* Floating mockup */}
-          <ResumeMockup isKu={isKu} />
+          <div className="relative z-10 flex flex-col gap-10 px-12 pb-16">
+            <div className="max-w-md">
+              <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1 text-[11px] font-medium uppercase tracking-[0.14em] text-white/70 backdrop-blur">
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+                {isKu ? "بەردەست بۆ سەرجەم بەکارهێنەران" : "Trusted by 12,000+ builders"}
+              </div>
+              <h2 className="text-[2rem] font-semibold leading-[1.1] tracking-tight text-white sm:text-[2.35rem]">
+                {isKu ? (
+                  <>
+                    بیرەوەریی AI ـەکەت،
+                    <br />
+                    سیڤییەکی بێکۆتا.
+                  </>
+                ) : (
+                  <>
+                    Your AI memory.
+                    <br />
+                    <span className="text-white/50">Infinite resumes.</span>
+                  </>
+                )}
+              </h2>
+              <p className="mt-4 text-[15px] leading-relaxed text-white/60">
+                {isKu
+                  ? "کارە کۆنەکان و بەڵگەکانت بگۆڕە بۆ سیڤییەکی تایبەتی و ئامادە بۆ هەر ڕۆڵێک."
+                  : "Turn your ChatGPT, Claude, or Gemini memory into recruiter-ready resumes — tailored per role in seconds."}
+              </p>
+            </div>
 
-          {/* Feature bullets */}
-          <ul className="auth-features">
-            {featureList.map((f) => (
-              <li key={f} className="auth-feature-item">
-                <CheckCircle2 size={13} className="auth-feature-icon" />
-                <span>{f}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
-      </div>
+            <ul className="space-y-3">
+              {bullets.map((b) => (
+                <li key={b} className="flex items-start gap-3 text-[14px] text-white/80">
+                  <span className="mt-0.5 grid h-4 w-4 shrink-0 place-items-center rounded-full bg-white/10 ring-1 ring-white/15">
+                    <Check className="h-2.5 w-2.5" strokeWidth={3} />
+                  </span>
+                  {b}
+                </li>
+              ))}
+            </ul>
 
-      {/* ── Right form panel ────────────────────────────────────── */}
-      <div className="auth-panel-form">
-        {/* Subtle background texture */}
-        <div className="auth-form-bg" />
-
-        <div className="auth-form-inner">
-          {/* Back link */}
-          <Link to="/" className="auth-back-link">
-            <span aria-hidden className="auth-back-arrow">←</span>
-            <span>MemoryCV</span>
-          </Link>
-
-          {/* Badge */}
-          <div className="auth-badge">
-            <Sparkles size={10} className="auth-badge-icon" />
-            <span>{isKu ? "هەژماری خۆڕایی" : "Free account"}</span>
+            <figure className="relative rounded-2xl border border-white/10 bg-white/[0.03] p-5 backdrop-blur">
+              <div className="absolute -top-2 left-5 h-4 w-4 rotate-45 border-l border-t border-white/10 bg-white/[0.03]" />
+              <blockquote className="text-[14px] leading-relaxed text-white/85">
+                “{quote}”
+              </blockquote>
+              <figcaption className="mt-3 flex items-center gap-2.5 text-[12px] text-white/55">
+                <span className="h-6 w-6 rounded-full bg-gradient-to-br from-fuchsia-400 to-sky-400" />
+                {quoteAuthor}
+              </figcaption>
+            </figure>
           </div>
 
-          {/* Title */}
-          <h1 className="auth-title">{title}</h1>
-          <p className="auth-subtitle">{subtitle}</p>
+          <div className="relative z-10 flex items-center justify-between border-t border-white/5 px-12 py-5 text-[11px] uppercase tracking-[0.18em] text-white/40">
+            <span>SOC 2 · GDPR</span>
+            <span>© MemoryCV</span>
+          </div>
+        </aside>
 
-          {/* Clerk / custom form */}
-          <div className="auth-form-shell">{children}</div>
+        {/* RIGHT — form panel */}
+        <main className="relative flex min-h-screen flex-col bg-[#FAFAF7]">
+          {/* Mobile top bar */}
+          <div className="flex items-center justify-between px-6 pt-6 lg:hidden">
+            <Link to="/" className="inline-flex items-center gap-2 text-sm font-semibold text-slate-900">
+              <span className="grid h-7 w-7 place-items-center rounded-md bg-slate-900">
+                <span className="h-1.5 w-1.5 rounded-[2px] bg-white" />
+              </span>
+              MemoryCV
+            </Link>
+            <Link to="/" className="text-xs font-medium text-slate-500 hover:text-slate-900">
+              {isKu ? "گەڕانەوە" : "← Home"}
+            </Link>
+          </div>
 
-          {/* Footer link */}
-          {footer && (
-            <div className="auth-footer">
-              {footer}
+          <div className="flex flex-1 items-center justify-center px-6 py-10 sm:px-10 lg:py-16">
+            <div className="w-full max-w-[400px]">
+              <div className="mb-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400">
+                {isKu ? "هەژماری خۆڕایی" : "Free account"}
+              </div>
+              <h1 className="text-[1.75rem] font-semibold leading-tight tracking-tight text-slate-900 sm:text-[2rem]">
+                {title}
+              </h1>
+              <p className="mt-2 text-[14px] leading-relaxed text-slate-500">{subtitle}</p>
+
+              <div className="auth-clerk-shell mt-8">{children}</div>
+
+              {footer && (
+                <div className="mt-8 text-center text-[13px] text-slate-500">{footer}</div>
+              )}
+
+              <p className="mt-10 text-center text-[11px] leading-relaxed text-slate-400">
+                {isKu
+                  ? "بە بەردەوامبوون، ڕەزامەندی دەدەیت لەگەڵ مەرجەکان و سیاسەتی تایبەتی."
+                  : "By continuing you agree to our Terms and Privacy Policy."}
+              </p>
             </div>
-          )}
-        </div>
+          </div>
+        </main>
       </div>
     </div>
   );

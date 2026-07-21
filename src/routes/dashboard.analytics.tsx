@@ -3,6 +3,13 @@ import { BarChart3 } from "lucide-react";
 import { useAppStore } from "@/lib/store";
 
 export const Route = createFileRoute("/dashboard/analytics")({
+  head: () => ({
+    meta: [
+      { title: "Analytics — MemoryCV" },
+      { name: "description", content: "Track resume performance, application outcomes and interview signals." },
+      { name: "robots", content: "noindex" },
+    ],
+  }),
   component: AnalyticsPage,
 });
 

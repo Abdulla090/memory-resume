@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /dashboard
+Disallow: /editor
+Disallow: /onboarding
+Disallow: /verify-email
+Disallow: /forgot-password

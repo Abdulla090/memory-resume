@@ -3,6 +3,13 @@ import { Sparkles } from "lucide-react";
 import { useAppStore } from "@/lib/store";
 
 export const Route = createFileRoute("/dashboard/ai-optimize")({
+  head: () => ({
+    meta: [
+      { title: "AI Optimize — MemoryCV" },
+      { name: "description", content: "Tailor your resume to a specific job description with AI-powered rewrites." },
+      { name: "robots", content: "noindex" },
+    ],
+  }),
   component: AiOptimizePage,
 });
 

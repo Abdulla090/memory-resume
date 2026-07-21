@@ -6,6 +6,16 @@ import { useAppStore } from "@/lib/store";
 
 /** Password reset is handled inside Clerk SignIn (reset flow). */
 export const Route = createFileRoute("/forgot-password")({
+  head: () => ({
+    meta: [
+      { title: "Reset password — MemoryCV" },
+      { name: "description", content: "Reset your MemoryCV account password." },
+      { property: "og:title", content: "Reset password — MemoryCV" },
+      { property: "og:url", content: "/forgot-password" },
+      { name: "robots", content: "noindex" },
+    ],
+    links: [{ rel: "canonical", href: "/forgot-password" }],
+  }),
   component: ForgotPasswordPage,
 });
 

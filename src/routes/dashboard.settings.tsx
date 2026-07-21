@@ -4,6 +4,13 @@ import { useAuth } from "@/components/auth/AuthProvider";
 import { useAppStore } from "@/lib/store";
 
 export const Route = createFileRoute("/dashboard/settings")({
+  head: () => ({
+    meta: [
+      { title: "Settings — MemoryCV" },
+      { name: "description", content: "Manage your MemoryCV account, language, theme and data preferences." },
+      { name: "robots", content: "noindex" },
+    ],
+  }),
   component: SettingsPage,
 });
 

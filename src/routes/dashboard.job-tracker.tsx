@@ -4,6 +4,13 @@ import { Briefcase, Building2, CalendarClock, CircleCheck, Plus, Trash2 } from "
 import { useAppStore } from "@/lib/store";
 
 export const Route = createFileRoute("/dashboard/job-tracker")({
+  head: () => ({
+    meta: [
+      { title: "Job Tracker — MemoryCV" },
+      { name: "description", content: "Track every application, stage and follow-up across your job search." },
+      { name: "robots", content: "noindex" },
+    ],
+  }),
   component: JobTrackerPage,
 });
 

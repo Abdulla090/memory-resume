@@ -3,6 +3,13 @@ import { Mail } from "lucide-react";
 import { useAppStore } from "@/lib/store";
 
 export const Route = createFileRoute("/dashboard/cover-letters")({
+  head: () => ({
+    meta: [
+      { title: "Cover Letters — MemoryCV" },
+      { name: "description", content: "Generate role-specific cover letters from your MemoryCV profile in seconds." },
+      { name: "robots", content: "noindex" },
+    ],
+  }),
   component: CoverLettersPage,
 });
 
