@@ -4,30 +4,30 @@ import { DesignContext, FieldFocusContext } from "./DesignContext";
 import { useLayoutRtl } from "./template-helpers";
 import { ResumeLayoutContext } from "./DesignContext";
 
-function labels(rtl: boolean) {
+function labels(rtl: boolean, data?: ResumeData) {
   return rtl
     ? {
-        summary: "پوختە",
-        profile: "پڕۆفایل",
-        experience: "ئەزموون",
-        projects: "پرۆژەکان",
+        summary: data?.sectionTitles?.profile || "پوختە",
+        profile: data?.sectionTitles?.profile || "پڕۆفایل",
+        experience: data?.sectionTitles?.experience || "ئەزموون",
+        projects: data?.sectionTitles?.projects || "پرۆژەکان",
         selectedProjects: "پرۆژە دیاریکراوەکان",
-        skills: "لێهاتووییەکان",
-        expertise: "پسپۆڕی",
-        education: "خوێندن",
-        certifications: "بڕوانامەکان",
+        skills: data?.sectionTitles?.skills || "لێهاتووییەکان",
+        expertise: data?.sectionTitles?.skills || "پسپۆڕی",
+        education: data?.sectionTitles?.education || "خوێندن",
+        certifications: data?.sectionTitles?.certifications || "بڕوانامەکان",
         impact: "کاریگەری",
       }
     : {
-        summary: "Summary",
-        profile: "Profile",
-        experience: "Experience",
-        projects: "Projects",
+        summary: data?.sectionTitles?.profile || "Summary",
+        profile: data?.sectionTitles?.profile || "Profile",
+        experience: data?.sectionTitles?.experience || "Experience",
+        projects: data?.sectionTitles?.projects || "Projects",
         selectedProjects: "Selected Projects",
-        skills: "Skills",
-        expertise: "Expertise",
-        education: "Education",
-        certifications: "Certifications",
+        skills: data?.sectionTitles?.skills || "Skills",
+        expertise: data?.sectionTitles?.skills || "Expertise",
+        education: data?.sectionTitles?.education || "Education",
+        certifications: data?.sectionTitles?.certifications || "Certifications",
         impact: "Impact",
       };
 }
@@ -55,7 +55,7 @@ export function BarRating({ level, max = 5 }: { level: number, max?: number }) {
 
 export function MinimalTemplate({ data }: { data: ResumeData }) {
   const rtl = useLayoutRtl(data);
-  const l = labels(rtl);
+  const l = labels(rtl, data);
   return (
     <div dir={rtl ? "rtl" : "ltr"} className="bg-white p-12 text-[#111] font-sans" style={{ minHeight: "1122px", width: "100%" }}>
       <header className="border-b border-neutral-300 pb-4">
@@ -159,7 +159,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 
 export function ExecutiveTemplate({ data }: { data: ResumeData }) {
   const rtl = useLayoutRtl(data);
-  const l = labels(rtl);
+  const l = labels(rtl, data);
   return (
     <div
       dir={rtl ? "rtl" : "ltr"}
@@ -210,7 +210,9 @@ export function ExecutiveTemplate({ data }: { data: ResumeData }) {
               {data.education.map((e, i) => (
                 <div key={i} className="mb-2 text-xs">
                   <div className="font-semibold">{e.degree}</div>
-                  <div className="text-neutral-400">{e.institution}, {e.year}</div>
+                  <div className="text-neutral-400">
+                    {[e.institution, e.year].filter(Boolean).join(", ")}
+                  </div>
                 </div>
               ))}
             </div>

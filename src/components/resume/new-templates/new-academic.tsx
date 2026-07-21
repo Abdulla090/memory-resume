@@ -2,8 +2,6 @@ import { useContext } from "react";
 import type { ReactNode } from "react";
 import { DesignContext } from "../DesignContext";
 import { Editable } from "../Editable";
-import { InteractiveSkills } from "../InteractiveSkills";
-import { StarRating, BarRating } from "../templates";
 import {
   ContactLines,
   ExperienceList,
@@ -11,8 +9,8 @@ import {
   Section,
   useLayoutRtl,
   labels,
+  skillRating,
   initials,
-  getContrastTheme,
 } from "../template-helpers";
 import {
   BriefcaseBusiness,
@@ -32,6 +30,7 @@ export function NewAcademicTemplate({ data }: { data: ResumeData }) {
   const l = labels(c, rtl);
   const design = useContext(DesignContext);
 
+  const showSkillBars = design?.showSkillBars !== false;
   const colLayout = design?.columnLayout || "sidebar-right";
   const isLeftSidebar = colLayout === "sidebar-left";
   const layoutClass =
@@ -43,32 +42,42 @@ export function NewAcademicTemplate({ data }: { data: ResumeData }) {
           ? "grid-cols-[235px_1fr]"
           : "grid-cols-[1fr_235px]";
 
-  const skillBar = design?.skillBarStyle || "lines";
   const photoShape = design?.photoShape || "arch";
   const photoBlockShape = photoShape === "square" ? "rounded" : photoShape;
 
-  const skillsColumns = design?.skillsColumns || 1;
   const skillsLocation = design?.skillsLocation || "sidebar";
 
-  const renderSkills = design?.showSkillBars !== false &&
+  const renderSkills = showSkillBars &&
     (c.skillItems?.length ? c.skillItems.length > 0 : c.skills.length > 0) && (
       <Section title={l.skills} accent="border-slate-950 text-[var(--color-heading)]">
-        <InteractiveSkills
-          data={c}
-          skillBar={skillBar}
-          columns={skillsColumns}
-          isSidebar={skillsLocation === "sidebar"}
-          textColor={getContrastTheme(design?.backgroundColor || "#ffffff") === "dark" ? "text-slate-100" : "text-slate-700"}
-          barBgClass={getContrastTheme(design?.backgroundColor || "#ffffff") === "dark" ? "bg-white/20" : "bg-slate-200"}
-          barFillClass={getContrastTheme(design?.backgroundColor || "#ffffff") === "dark" ? "bg-white" : "bg-slate-800"}
-          circleBorderClass={getContrastTheme(design?.backgroundColor || "#ffffff") === "dark" ? "border-white/50" : "border-slate-400"}
-          circleFillClass={getContrastTheme(design?.backgroundColor || "#ffffff") === "dark" ? "bg-white" : "bg-slate-600"}
-          starFillClass={getContrastTheme(design?.backgroundColor || "#ffffff") === "dark" ? "text-white" : "text-slate-800"}
-          starEmptyClass={getContrastTheme(design?.backgroundColor || "#ffffff") === "dark" ? "text-white/20" : "text-slate-200"}
-          textDescClass={getContrastTheme(design?.backgroundColor || "#ffffff") === "dark" ? "text-white/60" : "text-slate-500"}
-          tagFilledClass={getContrastTheme(design?.backgroundColor || "#ffffff") === "dark" ? "px-2 py-1 bg-slate-800 text-white rounded" : "px-2 py-1 bg-slate-100 rounded"}
-          tagBorderClass={getContrastTheme(design?.backgroundColor || "#ffffff") === "dark" ? "border-b border-white/20" : "border-b border-slate-200"}
-        />
+        <div className="space-y-3">
+          {c.skillItems && c.skillItems.length > 0 ? (
+            c.skillItems.slice(0, 7).map((s, index) => (
+              <div key={s.name} className="flex justify-between items-center gap-2">
+                <Editable path={`skillItems.${index}.name`} value={s.name} as="span" className="text-[12px] font-semibold rtl:font-normal text-slate-700" />
+                <div className="flex shrink-0 gap-1.5 rtl:flex-row-reverse">
+                  {Array.from({ length: 5 }).map((_, dot) => (
+                    <span key={dot} className={`h-2 w-2 rounded-full bg-slate-800 ${dot < s.level ? "" : "opacity-30"}`} />
+                  ))}
+                </div>
+              </div>
+            ))
+          ) : (
+            c.skills.slice(0, 7).map((skill, index) => {
+              const rating = skillRating(c, skill, index);
+              return (
+                <div key={skill} className="flex justify-between items-center gap-2">
+                  <Editable path={`skills.${index}`} value={skill} as="span" className="text-[12px] font-semibold rtl:font-normal text-slate-700" />
+                  <div className="flex shrink-0 gap-1.5 rtl:flex-row-reverse">
+                    {Array.from({ length: 5 }).map((_, dot) => (
+                      <span key={dot} className={`h-2 w-2 rounded-full bg-slate-800 ${dot < rating ? "" : "opacity-30"}`} />
+                    ))}
+                  </div>
+                </div>
+              );
+            })
+          )}
+        </div>
       </Section>
     );
 
@@ -83,22 +92,22 @@ export function NewAcademicTemplate({ data }: { data: ResumeData }) {
       >
         <PhotoBlock data={c} shape={photoBlockShape} />
         <div>
-          <p className="text-[11px] font-bold uppercase tracking-[0.3em] rtl:tracking-normal text-[var(--color-text)] opacity-80">
+          <p className="text-[11px] font-bold rtl:font-normal uppercase tracking-[0.3em] rtl:tracking-normal text-[var(--color-text)] opacity-80">
             {l.selected} Curriculum Vitae
           </p>
           <Editable
             path="name"
             value={c.name}
             as="h1"
-            className="mt-4 text-[2.2em] font-bold leading-tight tracking-tight rtl:tracking-normal"
+            className="mt-4 text-[2.2em] font-bold rtl:font-normal leading-tight tracking-tight rtl:tracking-normal"
           />
           <Editable
             path="title"
             value={c.title}
             as="p"
-            className="mt-2 text-[15px] font-semibold text-slate-700"
+            className="mt-2 text-[15px] font-semibold rtl:font-normal text-slate-700"
           />
-          <div className="mt-4 flex flex-wrap gap-x-5 gap-y-1 text-[11px] font-semibold text-[var(--color-text)] opacity-80">
+          <div className="mt-4 flex flex-wrap gap-x-5 gap-y-1 text-[11px] font-semibold rtl:font-normal text-[var(--color-text)] opacity-80">
             <ContactLines data={c} />
           </div>
         </div>
@@ -129,7 +138,7 @@ export function NewAcademicTemplate({ data }: { data: ResumeData }) {
                       path={`projects.${index}.name`}
                       value={project.name}
                       as="h3"
-                      className="text-[13px] font-bold text-[var(--color-heading)]"
+                      className="text-[13px] font-bold rtl:font-normal text-[var(--color-heading)]"
                     />
                     <Editable
                       path={`projects.${index}.description`}
@@ -162,7 +171,7 @@ export function NewAcademicTemplate({ data }: { data: ResumeData }) {
                       path={`education.${index}.degree`}
                       value={item.degree}
                       as="div"
-                      className="text-[12px] font-bold leading-5"
+                      className="text-[12px] font-bold rtl:font-normal leading-5"
                     />
                     <Editable
                       path={`education.${index}.institution`}
@@ -174,7 +183,7 @@ export function NewAcademicTemplate({ data }: { data: ResumeData }) {
                       path={`education.${index}.year`}
                       value={item.year}
                       as="div"
-                      className="mt-1 text-[10px] font-bold text-[var(--color-text)] opacity-60"
+                      className="mt-1 text-[10px] font-bold rtl:font-normal text-[var(--color-text)] opacity-60"
                     />
                   </div>
                 ))}
@@ -197,11 +206,3 @@ export function NewAcademicTemplate({ data }: { data: ResumeData }) {
   );
 }
 
-function skillLevel(data: ResumeData, skill: string, index: number) {
-  return `${Math.max(28, Math.min(100, (skillRating(data, skill, index) / 5) * 100))}%`;
-}
-
-function skillRating(data: ResumeData, skill: string, index: number) {
-  const explicit = data.skillItems?.find((item) => item.name === skill)?.level;
-  return Math.max(1, Math.min(5, explicit ?? (index % 4) + 2));
-}

@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Cloud, Shield, Sparkles } from "lucide-react";
+import { Sparkles, FileText, BarChart3, CheckCircle2 } from "lucide-react";
 import type { ReactNode } from "react";
 
 type AuthFormLayoutProps = {
@@ -10,63 +10,174 @@ type AuthFormLayoutProps = {
   isKu?: boolean;
 };
 
+/** Floating resume card shown on the dark branding panel */
+function ResumeMockup({ isKu }: { isKu?: boolean }) {
+  return (
+    <div className="auth-resume-mockup">
+      {/* Card surface */}
+      <div className="auth-resume-card">
+        {/* Header row */}
+        <div className="auth-resume-header">
+          <div className="auth-resume-avatar" />
+          <div className="auth-resume-meta">
+            <div className="auth-resume-bar" style={{ width: "72%", height: "10px" }} />
+            <div className="auth-resume-bar" style={{ width: "48%", height: "7px", opacity: 0.5 }} />
+          </div>
+          <div className="auth-resume-badge">
+            <CheckCircle2 size={11} className="text-sky-400" />
+          </div>
+        </div>
+
+        {/* Section label */}
+        <div className="auth-resume-section-label">
+          <BarChart3 size={9} className="auth-resume-icon" />
+          <span>{isKu ? "بەتوانایی" : "Skills"}</span>
+        </div>
+
+        {/* Skill bars */}
+        {[
+          { label: isKu ? "React" : "React", pct: 92, delay: "0ms" },
+          { label: isKu ? "تایپ‌ئێسکریپت" : "TypeScript", pct: 85, delay: "80ms" },
+          { label: isKu ? "UI/UX" : "UI/UX", pct: 78, delay: "160ms" },
+        ].map((skill) => (
+          <div key={skill.label} className="auth-resume-skill-row">
+            <span className="auth-resume-skill-label">{skill.label}</span>
+            <div className="auth-resume-skill-track">
+              <div
+                className="auth-resume-skill-fill"
+                style={{ width: `${skill.pct}%`, animationDelay: skill.delay }}
+              />
+            </div>
+            <span className="auth-resume-skill-pct">{skill.pct}%</span>
+          </div>
+        ))}
+
+        {/* Divider */}
+        <div className="auth-resume-divider" />
+
+        {/* Section label */}
+        <div className="auth-resume-section-label">
+          <FileText size={9} className="auth-resume-icon" />
+          <span>{isKu ? "ئەزموون" : "Experience"}</span>
+        </div>
+
+        {/* Experience rows */}
+        {[
+          { title: isKu ? "مهەندسی باش" : "Senior Engineer", sub: isKu ? "٢٠٢٢ — ئێستا" : "2022 — Present", dot: "bg-sky-400" },
+          { title: isKu ? "دیزاینەری UI" : "UI Designer", sub: isKu ? "٢٠١٩ — ٢٠٢٢" : "2019 — 2022", dot: "bg-blue-400" },
+        ].map((exp) => (
+          <div key={exp.title} className="auth-resume-exp-row">
+            <div className={`auth-resume-dot ${exp.dot}`} />
+            <div>
+              <div className="auth-resume-bar" style={{ width: "60%", height: "8px" }} />
+              <div className="auth-resume-bar" style={{ width: "38%", height: "6px", opacity: 0.45, marginTop: "4px" }} />
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Floating score badge */}
+      <div className="auth-resume-score">
+        <span className="auth-resume-score-num">98</span>
+        <span className="auth-resume-score-label">{isKu ? "نمرە" : "Score"}</span>
+      </div>
+
+      {/* Floating tag */}
+      <div className="auth-resume-tag">
+        <Sparkles size={9} className="text-sky-300" />
+        <span>{isKu ? "باشترین ٥٪" : "Top 5%"}</span>
+      </div>
+    </div>
+  );
+}
+
 export function AuthFormLayout({ title, subtitle, children, footer, isKu }: AuthFormLayoutProps) {
-  const perks = isKu
-    ? ["پاشەکەوتکردنی هەور", "سیڤیی زیرەک", "تایبەتمەندی تەواو"]
-    : ["Cloud backup", "AI-tailored CVs", "Private & secure"];
+  const featureList = isKu
+    ? [
+        "پاشەکەوتکردنی هەوری ئۆتۆماتیکی",
+        "سیڤیی زیرەک بە AI",
+        "داگرتنی PDF بە یەک کلیک",
+      ]
+    : [
+        "Auto cloud backup",
+        "AI-tailored CVs",
+        "One-click PDF export",
+      ];
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-[linear-gradient(165deg,oklch(0.97_0.01_250)_0%,oklch(0.99_0.004_95)_42%,oklch(0.96_0.02_240)_100%)]">
-      <div
-        className="pointer-events-none absolute -left-24 top-0 h-72 w-72 rounded-full bg-primary/10 blur-3xl"
-        aria-hidden
-      />
-      <div
-        className="pointer-events-none absolute -right-16 bottom-0 h-80 w-80 rounded-full bg-blue-400/15 blur-3xl"
-        aria-hidden
-      />
+    <div className="auth-root">
+      {/* ── Left branding panel (hidden on mobile) ─────────────── */}
+      <div className="auth-panel-brand" aria-hidden>
+        {/* Grid background */}
+        <div className="auth-grid-bg" />
+        {/* Glow blobs */}
+        <div className="auth-glow auth-glow-1" />
+        <div className="auth-glow auth-glow-2" />
 
-      <div className="relative mx-auto flex min-h-screen max-w-[440px] flex-col justify-center px-4 py-10 sm:py-14">
-        <div className="rounded-2xl border border-border/70 bg-card/95 p-6 shadow-[0_24px_60px_-32px_rgba(15,23,42,0.18)] backdrop-blur-sm sm:p-8">
-          <Link
-            to="/"
-            className="inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
-          >
-            <span aria-hidden>←</span>
-            MemoryCV
+        <div className="auth-panel-inner">
+          {/* Logo wordmark */}
+          <Link to="/" className="auth-logo-link" tabIndex={-1}>
+            <div className="auth-logo-icon">
+              <FileText size={14} className="text-white" />
+            </div>
+            <span className="auth-logo-text">MemoryCV</span>
           </Link>
 
-          <div className="mt-6">
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/20 bg-primary/8 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-primary">
-              <Sparkles className="h-3 w-3" />
-              {isKu ? "هەژماری خۆڕایی" : "Free account"}
-            </span>
-            <h1 className="mt-4 text-2xl font-bold tracking-tight text-foreground sm:text-[1.65rem]">
-              {title}
-            </h1>
-            <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{subtitle}</p>
+          {/* Headline */}
+          <div className="auth-brand-headline">
+            <h2 className="auth-brand-title">
+              {isKu ? "قەدەغەیەکی پیشەیی" : "Power your career."}
+            </h2>
+            <p className="auth-brand-sub">
+              {isKu
+                ? "داتابەیسی کەسیی سەرکەوتنەکانت. لە هەر شوێنێک."
+                : "Your personal database of professional achievements. Anywhere."}
+            </p>
           </div>
 
-          <ul className="mt-5 flex flex-wrap gap-2">
-            {perks.map((label) => (
-              <li
-                key={label}
-                className="inline-flex items-center gap-1 rounded-lg border border-border/80 bg-muted/40 px-2.5 py-1 text-[11px] font-medium text-muted-foreground"
-              >
-                {label.includes("Cloud") || label.includes("هەور") ? (
-                  <Cloud className="h-3 w-3 shrink-0 text-primary" />
-                ) : (
-                  <Shield className="h-3 w-3 shrink-0 text-primary" />
-                )}
-                {label}
+          {/* Floating mockup */}
+          <ResumeMockup isKu={isKu} />
+
+          {/* Feature bullets */}
+          <ul className="auth-features">
+            {featureList.map((f) => (
+              <li key={f} className="auth-feature-item">
+                <CheckCircle2 size={13} className="auth-feature-icon" />
+                <span>{f}</span>
               </li>
             ))}
           </ul>
+        </div>
+      </div>
 
-          <div className="auth-clerk-shell mt-7">{children}</div>
+      {/* ── Right form panel ────────────────────────────────────── */}
+      <div className="auth-panel-form">
+        {/* Subtle background texture */}
+        <div className="auth-form-bg" />
 
+        <div className="auth-form-inner">
+          {/* Back link */}
+          <Link to="/" className="auth-back-link">
+            <span aria-hidden className="auth-back-arrow">←</span>
+            <span>MemoryCV</span>
+          </Link>
+
+          {/* Badge */}
+          <div className="auth-badge">
+            <Sparkles size={10} className="auth-badge-icon" />
+            <span>{isKu ? "هەژماری خۆڕایی" : "Free account"}</span>
+          </div>
+
+          {/* Title */}
+          <h1 className="auth-title">{title}</h1>
+          <p className="auth-subtitle">{subtitle}</p>
+
+          {/* Clerk / custom form */}
+          <div className="auth-form-shell">{children}</div>
+
+          {/* Footer link */}
           {footer && (
-            <div className="mt-8 border-t border-border/60 pt-6 text-center text-sm text-muted-foreground">
+            <div className="auth-footer">
               {footer}
             </div>
           )}

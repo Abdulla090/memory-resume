@@ -32,8 +32,8 @@ export async function exportPreviewAsPDF(
     const canvas = await toCanvas(clone, {
       pixelRatio,
       // skipFonts prevents the CORS SecurityError from Google Fonts.
-      // Fonts are already loaded in the browser so they render fine.
-      skipFonts: true,
+      // We set to false here to allow local fonts (like Rabar) to be parsed and embedded.
+      skipFonts: false,
       backgroundColor: "#ffffff",
       width: RESUME_PAGE_WIDTH_PX,
       height: fullHeight,

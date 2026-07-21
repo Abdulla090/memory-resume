@@ -3,7 +3,7 @@ import { Mic, Type, ArrowUp, ArrowLeft, Briefcase, Settings2, Sparkles } from "l
 import { memo, useState, useMemo, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAppStore } from "@/lib/store";
-import { generateInterviewQuestion } from "@/lib/ai.functions";
+import { generateInterviewQuestion, scoreInterview } from "@/lib/ai.functions";
 import { getAiErrorMessage } from "@/lib/ai-errors";
 
 export const Route = createFileRoute("/interview")({
@@ -236,20 +236,56 @@ function InterviewPage() {
         ]);
         setQuestionIndex(nextIndex);
 
-        // Show scorecard after a brief delay
-        setTimeout(() => {
-          const generatedScore = Math.floor(Math.random() * 20) + 75; // Random score between 75 and 94
-          setInterviewScore(generatedScore);
+        // Real rubric-based scoring — replaces the previous Math.random score.
+        try {
+          const result = await scoreInterview({
+            data: {
+              apiKey,
+              history: newHistory,
+              targetRole,
+              language: isKu ? "ku" : "en",
+            },
+          });
+          setInterviewScore(result.score);
+          const verdictLabelEn: Record<typeof result.verdict, string> = {
+            strong_hire: "Strong Hire",
+            hire: "Hire",
+            lean_hire: "Lean Hire",
+            no_hire: "No Hire",
+            strong_no_hire: "Strong No Hire",
+          };
+          const verdictLabelKu: Record<typeof result.verdict, string> = {
+            strong_hire: "دەستنیشانکردنی بەهێز",
+            hire: "دەستنیشانکردن",
+            lean_hire: "لایەنگری دەستنیشانکردن",
+            no_hire: "دەستنیشان ناکرێت",
+            strong_no_hire: "بە توندی دەستنیشان ناکرێت",
+          };
+          const label = (isKu ? verdictLabelKu : verdictLabelEn)[result.verdict];
+          const strengths = result.strengths.length
+            ? (isKu ? "\n\nخاڵە بەهێزەکان:\n• " : "\n\nStrengths:\n• ") + result.strengths.join("\n• ")
+            : "";
+          const gaps = result.gaps.length
+            ? (isKu ? "\n\nخاڵە لاوازەکان:\n• " : "\n\nGaps:\n• ") + result.gaps.join("\n• ")
+            : "";
+          const steps = result.nextSteps.length
+            ? (isKu ? "\n\nهەنگاوی داهاتوو:\n• " : "\n\nNext steps:\n• ") + result.nextSteps.join("\n• ")
+            : "";
           setInterviewMessages((prev) => [
             ...prev,
             {
               role: "ai",
               content: isKu
-                ? `چاوپێکەوتنەکە کۆتایی هات. ئەنجامی کۆتایی تۆ: ${generatedScore}/100. ئاستێکی زۆر باشە، دەتوانیت لە هەندێک وەڵامدا زیاتر وردبیتەوە.`
-                : `Interview complete. Your final score is ${generatedScore}/100. Excellent performance overall, with some room for refinement in behavioral answers.`,
+                ? `چاوپێکەوتنەکە کۆتایی هات. ئەنجامی کۆتایی: ${result.score}/100 — ${label}.\n\n${result.summary}${strengths}${gaps}${steps}`
+                : `Interview complete. Final score: ${result.score}/100 — ${label}.\n\n${result.summary}${strengths}${gaps}${steps}`,
             },
           ]);
-        }, 2500);
+        } catch (err) {
+          setInterviewMessages((prev) => [
+            ...prev,
+            { role: "ai", content: getAiErrorMessage(err, isKu) },
+          ]);
+        }
       }
     } catch (err) {
       setInterviewMessages((prev) => [

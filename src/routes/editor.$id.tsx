@@ -16,7 +16,10 @@ import {
   EyeOff,
   Bot,
   Sliders,
+  Moon,
+  Sun,
 } from "lucide-react";
+
 import {
   improveBullet,
   tailorToJob,
@@ -32,6 +35,8 @@ import { DesignContext } from "@/components/resume/DesignContext";
 import { DEFAULT_DESIGN, getTemplateDefaults, DesignPanel } from "@/components/DesignPanel";
 import type { SectionId } from "@/components/DesignPanel";
 import { getValueAtPath } from "@/components/resume/editor-helpers";
+import { useDarkMode } from "@/hooks/use-dark-mode";
+
 
 // Sub-components
 import { EditorChatPane } from "@/components/editor/EditorChatPane";
@@ -88,6 +93,8 @@ function ResumeEditor() {
   const apiKey = useAppStore((s) => s.apiKey);
   const isKu = useAppStore((s) => s.language) === "ku";
   const mobileOptimized = useMobileOptimized();
+  const { isDark, toggle: toggleDark } = useDarkMode();
+
 
   const tailorFn = useServerFn(tailorToJob);
   const chatEditFn = useServerFn(chatEditResume);
@@ -437,7 +444,7 @@ function ResumeEditor() {
   // ─── Render ──────────────────────────────────────────────────────────────────
   return (
     <DesignContext.Provider value={design}>
-      <div className="h-[100dvh] w-full bg-[#f0f2f7] text-slate-900 font-sans selection:bg-blue-100 selection:text-blue-900 relative overflow-hidden flex flex-col">
+      <div className="app-shell h-[100dvh] w-full bg-[#f0f2f7] text-slate-900 font-sans selection:bg-blue-100 selection:text-blue-900 relative overflow-hidden flex flex-col">
         {/* Ambient background */}
         <div className="absolute inset-0 bg-gradient-to-br from-slate-100 via-blue-50/30 to-slate-100 pointer-events-none" />
 
@@ -513,8 +520,16 @@ function ResumeEditor() {
           {/* Center: title or empty space */}
           <div className="hidden md:flex flex-1" />
 
-          {/* Right: View resume toggle */}
+          {/* Right: theme toggle + View resume toggle */}
           <div className="flex items-center gap-2">
+            <button
+              onClick={toggleDark}
+              aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
+              title={isDark ? (isKu ? "دۆخی ڕووناک" : "Light mode") : (isKu ? "دۆخی تاریک" : "Dark mode")}
+              className="flex h-9 w-9 items-center justify-center rounded-full bg-white text-slate-600 shadow-[0_2px_8px_rgba(0,0,0,0.1),0_1px_0_rgba(255,255,255,0.9)_inset] border border-white/60 hover:text-slate-900 transition-all active:scale-[0.97]"
+            >
+              {isDark ? <Sun className="size-4" /> : <Moon className="size-4" />}
+            </button>
             <button
               onClick={() => setShowResume((v) => !v)}
               className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-[13px] font-bold transition-all duration-200 ${
@@ -528,6 +543,7 @@ function ResumeEditor() {
             </button>
           </div>
         </header>
+
 
         {/* ── Editor workspace ── */}
         <main className="relative z-10 flex-1 min-h-0 overflow-hidden">

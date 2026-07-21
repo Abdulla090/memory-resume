@@ -12,7 +12,7 @@ import {
 } from "../routes/index";
 import { CVCard1, CVCard2, CVCard3, CVCard4, CVCard5 } from "./CVCards";
 
-type Language = "en" | "ku";
+type Language = "en" | "ku" | "ar";
 
 const copy = {
   en: {
@@ -37,10 +37,21 @@ const copy = {
     heroCta: "دەستپێکردن",
     heroSecondary: "قاڵبەکان ببینە",
   },
+  ar: {
+    dir: "rtl" as const,
+    badge: "بالذكاء الاصطناعي · ابدأ مجاناً",
+    badgeMobile: "ذكاء اصطناعي · مجاناً",
+    heroTitle: "ذاكرتك المهنية،",
+    heroTitleAccentPrefix: "تتحوّل إلى ",
+    heroTitleAccentHighlight: "سيرة ذاتية.",
+    heroBody: "احكِ لنا قصتك، ونحن نُعدّ سيرتك الذاتية.",
+    heroCta: "ابدأ الآن",
+    heroSecondary: "تصفّح القوالب",
+  },
 };
 
 function DirectionArrow({ language, className }: { language: Language; className: string }) {
-  return language === "ku" ? <ArrowLeft className={className} /> : <ArrowRight className={className} />;
+  return language !== "en" ? <ArrowLeft className={className} /> : <ArrowRight className={className} />;
 }
 
 /* Card arrays */
@@ -125,7 +136,7 @@ export function HeroV2({ language }: { language: Language }) {
         {/* Mobile Kurdish: stacked. Desktop: two-col side-by-side */}
         <div
           className={`relative ${
-            language === "ku"
+            language !== "en"
               ? "flex flex-col md:grid md:grid-cols-[1.1fr_0.9fr] md:items-center md:gap-4"
               : "grid grid-cols-[58%_42%] items-center md:grid-cols-[1.1fr_0.9fr] md:gap-4"
           }`}
@@ -135,25 +146,12 @@ export function HeroV2({ language }: { language: Language }) {
           {/* ── Left: text content ── */}
           <div
             className={`relative z-10 flex flex-col overflow-hidden ${
-            language === "ku"
+            language !== "en"
               ? "order-1 py-8 pr-5 pl-5 sm:px-10 sm:py-14 md:order-2 md:py-20 lg:px-16 lg:py-24"
               : "order-1 py-8 pl-5 pr-4 sm:px-10 sm:py-14 md:px-14 md:py-20 lg:px-16 lg:py-24"
             }`}
             dir={t.dir}
           >
-            {/* Badge */}
-            <motion.div
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-              className="mb-3 sm:mb-5"
-            >
-              <span className="inline-flex items-center gap-1 rounded-full border border-blue-400/30 bg-blue-500/20 px-2.5 py-1 text-[9px] font-semibold text-blue-100 shadow-[0_0_15px_rgba(59,130,246,0.2)] backdrop-blur-sm sm:gap-2 sm:px-4 sm:py-1.5 sm:text-xs">
-                <Sparkles className="h-2.5 w-2.5 text-blue-200 sm:h-3.5 sm:w-3.5" />
-                <span className="hidden xs:inline">{t.badge}</span>
-                <span className="xs:hidden">{t.badgeMobile}</span>
-              </span>
-            </motion.div>
 
             {/* Headline */}
             <motion.h1
@@ -161,7 +159,7 @@ export function HeroV2({ language }: { language: Language }) {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.1 }}
               className={`font-extrabold tracking-tight text-white ${
-                language === "ku"
+                language !== "en"
                   ? "text-[clamp(1.55rem,7.5vw,4rem)] leading-[1.5] sm:text-[clamp(1.8rem,5.5vw,4rem)] sm:leading-[1.6]"
                   : "text-[clamp(1.8rem,5.8vw,4rem)] leading-[1.08] sm:text-[clamp(2rem,5.5vw,4rem)]"
               }`}
@@ -215,11 +213,11 @@ export function HeroV2({ language }: { language: Language }) {
                 <span className="pointer-events-none absolute inset-y-[-20%] left-[-50%] w-[34%] rotate-12 bg-gradient-to-r from-transparent via-white/24 to-transparent opacity-0 blur-[2px] transition-[transform,opacity] duration-700 ease-out group-hover:translate-x-[430%] group-hover:opacity-100" />
                 <span className="relative z-10">
                   {starting
-                    ? language === "ku"
+                    ? language !== "en"
                       ? "ئامادەکردن..."
                       : "Preparing..."
                     : isSignedIn
-                      ? language === "ku"
+                      ? language !== "en"
                         ? "داشبۆرد"
                         : "Dashboard"
                       : t.heroCta}
@@ -242,7 +240,7 @@ export function HeroV2({ language }: { language: Language }) {
           {/* ── Right: marquee columns (all screen sizes, smaller on mobile) ── */}
           <div
             className={`relative z-10 overflow-hidden ${
-              language === "ku"
+              language !== "en"
                 ? "order-2 h-[180px] sm:h-[420px] md:order-1 md:h-[520px] lg:h-[620px]"
                 : "order-2 h-[300px] sm:h-[420px] md:h-[520px] lg:h-[620px]"
             }`}

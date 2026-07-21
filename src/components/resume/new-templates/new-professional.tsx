@@ -140,19 +140,19 @@ export function NewProfessionalTemplate({ data }: { data: ResumeData }) {
             path="name"
             value={c.name}
             as="h1"
-            className="mt-7 text-[1.8em] font-black leading-[1] tracking-tight rtl:tracking-normal"
+            className="mt-7 text-[1.8em] font-black rtl:font-normal leading-[1] tracking-tight rtl:tracking-normal"
           />
           <Editable
             path="title"
             value={c.title}
             as="p"
-            className="mt-3 text-[11px] font-black uppercase leading-5 tracking-[0.2em] rtl:tracking-normal opacity-80"
+            className="mt-3 text-[11px] font-black rtl:font-normal uppercase leading-5 tracking-[0.2em] rtl:tracking-normal opacity-80"
           />
           <div className="mt-8">
-            <h2 className="mb-3 text-[10px] font-black uppercase tracking-[0.22em] rtl:tracking-normal opacity-60">
+            <h2 className="mb-3 text-[10px] font-black rtl:font-normal uppercase tracking-[0.22em] rtl:tracking-normal opacity-60">
               {l.contact}
             </h2>
-            <div className="space-y-2 text-[11px] font-semibold leading-5 opacity-70">
+            <div className="space-y-2 text-[11px] font-semibold rtl:font-normal leading-5 opacity-70">
               {c.location && <Editable path="location" value={c.location} as="div" />}
               {c.email && <Editable path="email" value={c.email} as="div" />}
               {c.phone && <Editable path="phone" value={c.phone} as="div" />}
@@ -161,7 +161,7 @@ export function NewProfessionalTemplate({ data }: { data: ResumeData }) {
           {skillsLocation !== "main" && design?.showSkillBars !== false &&
             (c.skillItems?.length ? c.skillItems.length > 0 : c.skills.length > 0) && (
               <div className="mt-8">
-                <h2 className="mb-3 text-[10px] font-black uppercase tracking-[0.22em] rtl:tracking-normal opacity-60">
+                <h2 className="mb-3 text-[10px] font-black rtl:font-normal uppercase tracking-[0.22em] rtl:tracking-normal opacity-60">
                   {l.skills}
                 </h2>
                 {renderSkillContent(true)}
@@ -171,7 +171,7 @@ export function NewProfessionalTemplate({ data }: { data: ResumeData }) {
 
         <main className="space-y-7 p-9">
           <section className="rounded-3xl border border-slate-200 bg-slate-50 p-6">
-            <h2 className="mb-3 text-[10px] font-black uppercase tracking-[0.22em] rtl:tracking-normal text-[var(--color-accent)]">
+            <h2 className="mb-3 text-[10px] font-black rtl:font-normal uppercase tracking-[0.22em] rtl:tracking-normal text-[var(--color-accent)]">
               {l.profile}
             </h2>
             <Editable
@@ -202,7 +202,7 @@ export function NewProfessionalTemplate({ data }: { data: ResumeData }) {
                         path={`projects.${index}.name`}
                         value={project.name}
                         as="h3"
-                        className="text-[0.9em] font-extrabold text-[var(--color-heading)]"
+                        className="text-[0.9em] font-extrabold rtl:font-normal text-[var(--color-heading)]"
                       />
                       <Editable
                         path={`projects.${index}.description`}
@@ -224,7 +224,7 @@ export function NewProfessionalTemplate({ data }: { data: ResumeData }) {
                         path={`education.${index}.degree`}
                         value={item.degree}
                         as="div"
-                        className="text-[0.9em] font-extrabold text-[var(--color-heading)]"
+                        className="text-[0.9em] font-extrabold rtl:font-normal text-[var(--color-heading)]"
                       />
                       <div className="mt-1 text-[0.85em] text-[var(--color-text)] flex gap-1">
                         <Editable

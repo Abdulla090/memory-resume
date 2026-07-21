@@ -32,7 +32,18 @@ import {
   Star,
   Bot,
   ArrowLeft,
+  Plus,
+  Trash2,
+  X,
+  Briefcase,
+  GraduationCap,
+  FolderKanban,
+  Award,
+  Languages as LanguagesIcon,
+  Heart,
+  Wrench,
 } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { SAMPLE_MEMORIES } from "@/lib/sample-memories";
 import { getAiErrorMessage } from "@/lib/ai-errors";
@@ -50,6 +61,13 @@ const TEMPLATE_SAMPLE: ResumeData = {
   skills: [],
   certifications: [],
 };
+
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Progress } from "@/components/ui/progress";
+import { ArrowRight } from "lucide-react";
 
 export const Route = createFileRoute("/onboarding")({
   head: () => ({ meta: [{ title: "MemoryCV — Builder" }] }),
@@ -121,6 +139,7 @@ export function ChatOnboarding({
   const [loaderResumeId, setLoaderResumeId] = useState<string | null>(null);
   const [selectedTemplate, setSelectedTemplate] = useState<TemplateId>("minimal");
   const [intakeMethod, setIntakeMethod] = useState<"choose" | "form" | "raw">("choose");
+  const [pendingPhoto, setPendingPhoto] = useState<string | null>(null);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -180,6 +199,7 @@ export function ChatOnboarding({
 
     try {
       const { profile: parsed } = await parseMemoryFn({ data: { apiKey, memory } });
+      if (pendingPhoto) parsed.photoUrl = pendingPhoto;
       setProfile(parsed);
 
       const { state, message, questions } = await getQuestionsFn({
@@ -428,6 +448,58 @@ export function ChatOnboarding({
     }
   };
 
+  // ── Auto-build from structured form: try AI, fall back to raw form data ─────
+  const handleAutoBuild = async (memory: string, fallback: ResumeData) => {
+    setRawMemory(memory);
+    setInputText("");
+    const target = (fallback.title || "").trim();
+    setJobTarget(target);
+    setStage("generating");
+    setIsThinking(true);
+
+    const saveAndGo = (data: ResumeData) => {
+      const saved: SavedResume = {
+        id: crypto.randomUUID(),
+        title: data.title || target || (isKu ? "سیڤی" : "Resume"),
+        jobTarget: target,
+        template: selectedTemplate,
+        design: getTemplateDefaults(selectedTemplate),
+        data,
+        createdAt: Date.now(),
+      };
+      addResume(saved);
+      setOnboardingDone();
+      setIsThinking(false);
+      setShowLoader(true);
+      setLoaderResumeId(saved.id);
+    };
+
+    try {
+      const { profile: parsed } = await parseMemoryFn({ data: { apiKey, memory } });
+      if (pendingPhoto) parsed.photoUrl = pendingPhoto;
+      setProfile(parsed);
+      const { resume } = await generateFn({
+        data: {
+          apiKey,
+          profile: parsed,
+          jobTarget: target || parsed.careerGoals || (parsed.experience[0]?.title ?? "Professional"),
+        },
+      });
+      saveAndGo(resume);
+    } catch {
+      // AI missing / failed → build directly from the form data the user provided
+      toast.message(
+        isKu ? "سیڤییەکەت بەبێ AI دروستکرا." : "Generated without AI.",
+        {
+          description: isKu
+            ? "کلیلی AI بەردەست نەبوو — زانیارییەکانت وەک خۆیان بەکارهێنراون."
+            : "AI unavailable — used your info as entered. You can polish it in the editor.",
+        },
+      );
+      saveAndGo(fallback);
+    }
+  };
+
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -446,6 +518,8 @@ export function ChatOnboarding({
   // ── Render ───────────────────────────────────────────────────────────────
   return (
     <div
+      dir={isKu ? "rtl" : "ltr"}
+      lang={isKu ? "ckb" : "en"}
       className={
         embedded
           ? "min-h-0 flex flex-col relative overflow-hidden bg-transparent"
@@ -634,9 +708,10 @@ export function ChatOnboarding({
         <div className="perf-scroll relative z-10 flex-1 flex flex-col items-center justify-start px-4 pb-12 pt-10 overflow-y-auto">
           <IntakeForm
             isKu={isKu}
-            onSubmit={(formDataStr) => {
-              setInputText(formDataStr);
-              setIntakeMethod("raw");
+            initialPhoto={pendingPhoto}
+            onPhotoChange={setPendingPhoto}
+            onSubmit={(formDataStr, fallback) => {
+              void handleAutoBuild(formDataStr, fallback);
             }}
             onBack={() => setIntakeMethod("choose")}
           />
@@ -1177,14 +1252,20 @@ function IntakeForm({
   isKu,
   onSubmit,
   onBack,
+  initialPhoto,
+  onPhotoChange,
 }: {
   isKu: boolean;
-  onSubmit: (data: string) => void;
+  onSubmit: (data: string, fallback: ResumeData) => void;
   onBack: () => void;
+  initialPhoto?: string | null;
+  onPhotoChange?: (photo: string | null) => void;
 }) {
   const apiKey = useAppStore((s) => s.apiKey);
   const generateFieldFn = useServerFn(generateFieldContent);
   const [loadingFields, setLoadingFields] = useState<Record<string, boolean>>({});
+  const photoInputRef = useRef<HTMLInputElement>(null);
+  const [photo, setPhoto] = useState<string | null>(initialPhoto ?? null);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -1193,13 +1274,115 @@ function IntakeForm({
     location: "",
     jobTitle: "",
     website: "",
+    linkedin: "",
     summary: "",
     experience: "",
+    projects: "",
     education: "",
     skills: "",
     certifications: "",
     languages: "",
+    interests: "",
   });
+
+  // ---- Structured state (source of truth for career/edu/skills sections) ----
+  type ExpItem = { id: string; company: string; role: string; start: string; end: string; present: boolean; achievements: string };
+  type ProjItem = { id: string; name: string; role: string; tech: string[]; description: string };
+  type EduItem = { id: string; degree: string; field: string; institution: string; start: string; end: string; present: boolean; grade: string };
+  type CertItem = { id: string; name: string; issuer: string; year: string };
+  type LangItem = { id: string; language: string; level: string };
+
+  const uid = () => Math.random().toString(36).slice(2, 9);
+  const [expList, setExpList] = useState<ExpItem[]>([]);
+  const [projList, setProjList] = useState<ProjItem[]>([]);
+  const [eduList, setEduList] = useState<EduItem[]>([]);
+  const [certList, setCertList] = useState<CertItem[]>([]);
+  const [langList, setLangList] = useState<LangItem[]>([]);
+  const [skillChips, setSkillChips] = useState<string[]>([]);
+  const [interestChips, setInterestChips] = useState<string[]>([]);
+
+  // Serialize structured state back into formData strings for the AI parser downstream.
+  useEffect(() => {
+    const serialized = expList
+      .filter((e) => e.company || e.role || e.achievements)
+      .map((e) => {
+        const period = `${e.start || "?"} – ${e.present ? (isKu ? "ئێستا" : "Present") : (e.end || "?")}`;
+        const header = `${e.role || ""}${e.role && e.company ? " @ " : ""}${e.company || ""} (${period})`;
+        return e.achievements ? `${header}\n${e.achievements}` : header;
+      })
+      .join("\n\n");
+    setFormData((prev) => (prev.experience === serialized ? prev : { ...prev, experience: serialized }));
+  }, [expList, isKu]);
+
+  useEffect(() => {
+    const serialized = projList
+      .filter((p) => p.name || p.description)
+      .map((p) => {
+        const head = `${p.name || ""}${p.role ? ` — ${p.role}` : ""}`;
+        const tech = p.tech.length ? `\nTech: ${p.tech.join(", ")}` : "";
+        const desc = p.description ? `\n${p.description}` : "";
+        return `${head}${tech}${desc}`;
+      })
+      .join("\n\n");
+    setFormData((prev) => (prev.projects === serialized ? prev : { ...prev, projects: serialized }));
+  }, [projList]);
+
+  useEffect(() => {
+    const serialized = eduList
+      .filter((e) => e.institution || e.degree || e.field)
+      .map((e) => {
+        const period = `${e.start || "?"}–${e.present ? (isKu ? "ئێستا" : "Present") : (e.end || "?")}`;
+        const grade = e.grade ? ` — ${e.grade}` : "";
+        return `${e.degree || ""}${e.field ? ` in ${e.field}` : ""}, ${e.institution || ""} (${period})${grade}`.trim();
+      })
+      .join("\n");
+    setFormData((prev) => (prev.education === serialized ? prev : { ...prev, education: serialized }));
+  }, [eduList, isKu]);
+
+  useEffect(() => {
+    const serialized = certList
+      .filter((c) => c.name)
+      .map((c) => `${c.name}${c.issuer ? ` — ${c.issuer}` : ""}${c.year ? ` (${c.year})` : ""}`)
+      .join("\n");
+    setFormData((prev) => (prev.certifications === serialized ? prev : { ...prev, certifications: serialized }));
+  }, [certList]);
+
+  useEffect(() => {
+    const serialized = langList
+      .filter((l) => l.language)
+      .map((l) => `${l.language}${l.level ? ` — ${l.level}` : ""}`)
+      .join("\n");
+    setFormData((prev) => (prev.languages === serialized ? prev : { ...prev, languages: serialized }));
+  }, [langList]);
+
+  useEffect(() => {
+    const serialized = skillChips.join(", ");
+    setFormData((prev) => (prev.skills === serialized ? prev : { ...prev, skills: serialized }));
+  }, [skillChips]);
+
+  useEffect(() => {
+    const serialized = interestChips.join(", ");
+    setFormData((prev) => (prev.interests === serialized ? prev : { ...prev, interests: serialized }));
+  }, [interestChips]);
+
+
+
+  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      toast.error(isKu ? "تکایە وێنەیەک هەڵبژێرە." : "Please select an image file.");
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const url = ev.target?.result as string;
+      setPhoto(url);
+      onPhotoChange?.(url);
+    };
+    reader.readAsDataURL(file);
+    e.target.value = "";
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -1209,6 +1392,7 @@ Email: ${formData.email}
 Phone: ${formData.phone}
 Location: ${formData.location}
 Website: ${formData.website}
+LinkedIn: ${formData.linkedin}
 Target Job Title: ${formData.jobTitle}
 
 Summary:
@@ -1216,6 +1400,9 @@ ${formData.summary}
 
 Experience:
 ${formData.experience}
+
+Projects:
+${formData.projects}
 
 Education:
 ${formData.education}
@@ -1228,8 +1415,66 @@ ${formData.certifications}
 
 Languages:
 ${formData.languages}
+
+Interests:
+${formData.interests}
     `.trim();
-    onSubmit(str);
+
+    // Build a ResumeData fallback directly from the structured inputs so we
+    // can still generate a CV when the AI key is missing or the AI errors out.
+    const dashSep = " – ";
+    const presentLabel = isKu ? "ئێستا" : "Present";
+    const fallback: ResumeData = {
+      name: formData.name || (isKu ? "ناوی تۆ" : "Your Name"),
+      title: formData.jobTitle || (isKu ? "پیشەگەر" : "Professional"),
+      email: formData.email || undefined,
+      phone: formData.phone || undefined,
+      photoUrl: photo || undefined,
+      location: formData.location || undefined,
+      languages: langList.map((l) => l.language.trim()).filter(Boolean),
+      summary: formData.summary || "",
+      experience: expList
+        .filter((e) => e.company || e.role || e.achievements)
+        .map((e) => ({
+          title: e.role || "",
+          company: e.company || "",
+          duration: `${e.start || ""}${dashSep}${e.present ? presentLabel : e.end || ""}`.trim(),
+          description: "",
+          achievements: (e.achievements || "")
+            .split(/\r?\n|•|·|- /)
+            .map((a) => a.trim())
+            .filter(Boolean),
+        })),
+      projects: projList
+        .filter((p) => p.name || p.description)
+        .map((p) => ({
+          name: p.name || "",
+          description: p.description || "",
+          tech: p.tech,
+          impact: "",
+        })),
+      education: eduList
+        .filter((e) => e.institution || e.degree || e.field)
+        .map((e) => ({
+          degree: `${e.degree || ""}${e.field ? ` in ${e.field}` : ""}`.trim(),
+          institution: e.institution || "",
+          year: `${e.start || ""}${dashSep}${e.present ? presentLabel : e.end || ""}`.trim(),
+        })),
+      skills: skillChips.length
+        ? skillChips
+        : formData.skills
+            .split(",")
+            .map((s) => s.trim())
+            .filter(Boolean),
+      certifications: certList
+        .filter((c) => c.name)
+        .map(
+          (c) =>
+            `${c.name}${c.issuer ? ` — ${c.issuer}` : ""}${c.year ? ` (${c.year})` : ""}`,
+        ),
+    };
+
+    onSubmit(str, fallback);
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -1263,11 +1508,13 @@ ${formData.languages}
   };
 
   const aiButton = (field: keyof typeof formData) => (
-    <button
+    <Button
       type="button"
+      variant="secondary"
+      size="sm"
       onClick={() => handleGenerateAI(field)}
       disabled={loadingFields[field]}
-      className="flex items-center gap-1 text-xs font-bold text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 px-2 py-1 rounded-md transition-colors disabled:opacity-50"
+      className="h-7 px-2 text-xs font-bold text-blue-600 bg-blue-50 hover:bg-blue-100 hover:text-blue-700 gap-1"
     >
       {loadingFields[field] ? (
         <Loader2 className="w-3 h-3 animate-spin" />
@@ -1275,276 +1522,890 @@ ${formData.languages}
         <Sparkles className="w-3 h-3" />
       )}
       {isKu ? "بە AI دروستی بکە" : "Generate with AI"}
-    </button>
+    </Button>
   );
+
+  const dir = isKu ? "rtl" : "ltr";
+  const inputCls = "rounded-xl bg-slate-50 border-slate-200 focus-visible:bg-white h-11";
+  const textareaCls = "rounded-xl bg-slate-50 border-slate-200 focus-visible:bg-white";
+
+  const steps = [
+    { id: "personal", label: isKu ? "زانیارییە کەسییەکان" : "Personal" },
+    { id: "summary", label: isKu ? "پوختە" : "Summary" },
+    { id: "career", label: isKu ? "ئەزموون و پڕۆژە" : "Career" },
+    { id: "education", label: isKu ? "خوێندن" : "Education" },
+    { id: "extras", label: isKu ? "کارامەیی و زیاتر" : "Skills & More" },
+  ] as const;
+
+  const [step, setStep] = useState(0);
+  const total = steps.length;
+  const isLast = step === total - 1;
+  const canSubmit =
+    !!formData.name || !!formData.jobTitle || !!formData.experience || !!formData.education;
+
+  const goNext = () => {
+    if (isLast) return;
+    setStep((s) => Math.min(total - 1, s + 1));
+  };
+  const goPrev = () => {
+    if (step === 0) {
+      onBack();
+      return;
+    }
+    setStep((s) => Math.max(0, s - 1));
+  };
+
+  const onFormSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!isLast) {
+      goNext();
+      return;
+    }
+    handleSubmit(e);
+  };
+
+  const CloseIcon = isKu ? ArrowRight : ArrowLeft;
+  const PrevIcon = isKu ? ArrowRight : ArrowLeft;
+  const NextIcon = isKu ? ArrowLeft : ArrowRight;
 
   return (
     <motion.div
+      dir={dir}
+      lang={isKu ? "ckb" : "en"}
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -16 }}
       className="w-full max-w-2xl bg-white rounded-[28px] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-200/60 p-6 sm:p-8 relative max-h-[85vh] overflow-y-auto"
-      style={{ scrollbarWidth: "none" }}
+      style={{ scrollbarWidth: "none", textAlign: isKu ? "right" : "left" }}
     >
-      <button
+      <Button
         type="button"
+        variant="ghost"
+        size="icon"
         onClick={onBack}
-        className="absolute top-6 right-6 p-2 rounded-full hover:bg-slate-100 text-slate-500 transition-colors"
+        className={`absolute top-4 ${isKu ? "left-4" : "right-4"} rounded-full text-slate-500`}
       >
-        <ArrowLeft className="w-5 h-5" />
-      </button>
-      
-      <h2 className="text-2xl font-bold text-slate-900 mb-2">
+        <CloseIcon className="w-5 h-5" />
+      </Button>
+
+      <div className="mb-2 flex items-center gap-2 text-[11px] font-mono uppercase tracking-[0.14em] text-slate-500">
+        <span>{String(step + 1).padStart(2, "0")} / {String(total).padStart(2, "0")}</span>
+        <span className="text-slate-300">•</span>
+        <span className="text-slate-700">{steps[step].label}</span>
+      </div>
+      <h2 className="text-2xl font-bold text-slate-900 mb-3">
         {isKu ? "فۆڕمی زانیارییەکان" : "Information Form"}
       </h2>
-      
+
+      {/* Progress bar (shadcn) */}
+      <div className="mb-3">
+        <Progress value={((step + 1) / total) * 100} className="h-1.5" />
+      </div>
+      <div className="flex items-center gap-1.5 mb-5">
+        {steps.map((s, i) => (
+          <button
+            key={s.id}
+            type="button"
+            onClick={() => setStep(i)}
+            className={`h-1 flex-1 rounded-full transition-all ${
+              i <= step ? "bg-blue-600" : "bg-slate-200 hover:bg-slate-300"
+            }`}
+            title={s.label}
+          />
+        ))}
+      </div>
+
       <div className="flex items-start sm:items-center gap-2 bg-blue-50/80 text-blue-700 p-3 rounded-xl mb-6 border border-blue-100/50">
         <Sparkles className="w-5 h-5 shrink-0 mt-0.5 sm:mt-0" />
         <p className="text-xs sm:text-sm font-medium">
-          {isKu 
-            ? "پێویست ناکات بە تەواوی ڕێکیبخەیت، کێشە نییە ئەگەر هەڵەی ڕێنووسیشت هەبێت. زیرەکی دەستکردەکەمان هەمووی ڕێکدەخاتەوە." 
+          {isKu
+            ? "پێویست ناکات بە تەواوی ڕێکیبخەیت، کێشە نییە ئەگەر هەڵەی ڕێنووسیشت هەبێت. زیرەکی دەستکردەکەمان هەمووی ڕێکدەخاتەوە."
             : "No need to be perfect! It's completely ok to be messy or have typos. Our AI will organize everything beautifully."}
         </p>
       </div>
-      
-      <form onSubmit={handleSubmit} className="space-y-5 text-left">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">
-              {isKu ? "ناوی تەواو" : "Full Name"}
-            </label>
-            <input
-              type="text"
-              name="name"
-              value={formData.name}
-              onChange={handleChange}
-              className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 outline-none focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-slate-800"
-              placeholder={isKu ? "ناوی تەواوت" : "e.g. John Doe"}
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">
-              {isKu ? "پۆستی مەبەست" : "Target Job Title"}
-            </label>
-            <input
-              type="text"
-              name="jobTitle"
-              list="job-titles"
-              value={formData.jobTitle}
-              onChange={handleChange}
-              className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 outline-none focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-slate-800"
-              placeholder={isKu ? "بۆ نموونە: ئەندازیاری نەرمەکاڵا" : "e.g. Software Engineer"}
-            />
-            <datalist id="job-titles">
-              <option value="Software Engineer" />
-              <option value="Frontend Developer" />
-              <option value="Backend Developer" />
-              <option value="Product Manager" />
-              <option value="Data Scientist" />
-              <option value="UI/UX Designer" />
-              <option value="Marketing Manager" />
-              <option value="Sales Representative" />
-              <option value="Project Manager" />
-              <option value="Graphic Designer" />
-              <option value="Accountant" />
-              <option value="Teacher" />
-              <option value="Doctor" />
-              <option value="Nurse" />
-              <option value="Civil Engineer" />
-            </datalist>
-          </div>
-        </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">
-              {isKu ? "ئیمەیڵ" : "Email"}
-            </label>
-            <input
-              type="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 outline-none focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-slate-800"
-              placeholder="email@example.com"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">
-              {isKu ? "ژمارەی مۆبایل" : "Phone"}
-            </label>
-            <input
-              type="text"
-              name="phone"
-              value={formData.phone}
-              onChange={handleChange}
-              className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 outline-none focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-slate-800"
-              placeholder="+1 234 567 890"
-            />
-          </div>
-        </div>
+      <form onSubmit={onFormSubmit} className="space-y-5">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={steps[step].id}
+            initial={{ opacity: 0, x: isKu ? -24 : 24 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: isKu ? 24 : -24 }}
+            transition={{ duration: 0.22, ease: "easeOut" }}
+            className="space-y-5"
+          >
+            {step === 0 && (
+              <>
+                {/* Photo upload */}
+                <div className="flex items-center gap-4 p-4 rounded-2xl border border-slate-200 bg-slate-50/60">
+                  <button
+                    type="button"
+                    onClick={() => photoInputRef.current?.click()}
+                    className={`shrink-0 w-16 h-16 rounded-full flex items-center justify-center overflow-hidden transition-all ${photo ? "ring-2 ring-blue-500 ring-offset-2" : "bg-white border-2 border-dashed border-slate-300 hover:border-blue-400 hover:bg-blue-50/40"}`}
+                    title={isKu ? "وێنە بارکە" : "Upload photo"}
+                  >
+                    {photo ? (
+                      <img src={photo} alt="" className="w-full h-full object-cover" />
+                    ) : (
+                      <ImagePlus className="w-6 h-6 text-slate-400" />
+                    )}
+                  </button>
+                  <div className="flex-1">
+                    <p className="text-sm font-semibold text-slate-800">
+                      {isKu ? "وێنەی پرۆفایل (بەڵێن نییە)" : "Profile photo (optional)"}
+                    </p>
+                    <p className="text-xs text-slate-500 mt-0.5">
+                      {isKu ? "PNG یان JPG. لە هەندێک قاڵبدا پیشان دەدرێت." : "PNG or JPG. Shown on templates that support photos."}
+                    </p>
+                  </div>
+                  {photo && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => { setPhoto(null); onPhotoChange?.(null); }}
+                      className="text-xs text-slate-500 hover:text-red-600"
+                    >
+                      {isKu ? "لابردن" : "Remove"}
+                    </Button>
+                  )}
+                  <input
+                    ref={photoInputRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handlePhotoUpload}
+                  />
+                </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">
-              {isKu ? "ناونیشان" : "Location"}
-            </label>
-            <input
-              type="text"
-              name="location"
-              list="locations"
-              value={formData.location}
-              onChange={handleChange}
-              className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 outline-none focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-slate-800"
-              placeholder={isKu ? "شار، وڵات" : "City, Country"}
-            />
-            <datalist id="locations">
-              <option value="Erbil, Iraq" />
-              <option value="Sulaymaniyah, Iraq" />
-              <option value="Duhok, Iraq" />
-              <option value="Baghdad, Iraq" />
-              <option value="London, UK" />
-              <option value="New York, USA" />
-              <option value="San Francisco, USA" />
-              <option value="Berlin, Germany" />
-              <option value="Dubai, UAE" />
-              <option value="Remote" />
-            </datalist>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">
-              {isKu ? "وێبسایت / پۆرتفۆلیۆ" : "Website / Portfolio"}
-            </label>
-            <input
-              type="text"
-              name="website"
-              value={formData.website}
-              onChange={handleChange}
-              className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 outline-none focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-slate-800"
-              placeholder="github.com/johndoe"
-            />
-          </div>
-        </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="name">{isKu ? "ناوی تەواو" : "Full Name"}</Label>
+                    <Input id="name" dir={dir} type="text" name="name" value={formData.name} onChange={handleChange} className={inputCls} placeholder={isKu ? "ناوی تەواوت" : "e.g. John Doe"} />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="jobTitle">{isKu ? "پۆستی مەبەست" : "Target Job Title"}</Label>
+                    <Input id="jobTitle" dir={dir} type="text" name="jobTitle" list="job-titles" value={formData.jobTitle} onChange={handleChange} className={inputCls} placeholder={isKu ? "بۆ نموونە: ئەندازیاری نەرمەکاڵا" : "e.g. Software Engineer"} />
+                    <datalist id="job-titles">
+                      <option value="Software Engineer" />
+                      <option value="Frontend Developer" />
+                      <option value="Backend Developer" />
+                      <option value="Product Manager" />
+                      <option value="Data Scientist" />
+                      <option value="UI/UX Designer" />
+                      <option value="Marketing Manager" />
+                      <option value="Sales Representative" />
+                      <option value="Project Manager" />
+                      <option value="Graphic Designer" />
+                      <option value="Accountant" />
+                      <option value="Teacher" />
+                      <option value="Doctor" />
+                      <option value="Nurse" />
+                      <option value="Civil Engineer" />
+                    </datalist>
+                  </div>
+                </div>
 
-        <div>
-          <div className="flex items-center justify-between mb-1">
-            <label className="block text-sm font-medium text-slate-700">
-              {isKu ? "پوختە" : "Summary"}
-            </label>
-            {aiButton("summary")}
-          </div>
-          <textarea
-            name="summary"
-            value={formData.summary}
-            onChange={handleChange}
-            rows={3}
-            className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 outline-none focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-slate-800 resize-y"
-            placeholder={isKu ? "کورتەیەک دەربارەی خۆت بنووسە..." : "Write a brief summary about yourself..."}
-          />
-        </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="email">{isKu ? "ئیمەیڵ" : "Email"}</Label>
+                    <Input id="email" dir="ltr" type="email" name="email" value={formData.email} onChange={handleChange} className={inputCls} placeholder="email@example.com" />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="phone">{isKu ? "ژمارەی مۆبایل" : "Phone"}</Label>
+                    <Input id="phone" dir="ltr" type="text" name="phone" value={formData.phone} onChange={handleChange} className={inputCls} placeholder="+1 234 567 890" />
+                  </div>
+                </div>
 
-        <div>
-          <div className="flex items-center justify-between mb-1">
-            <label className="block text-sm font-medium text-slate-700">
-              {isKu ? "ئەزموونی کارکردن" : "Experience"}
-            </label>
-            {aiButton("experience")}
-          </div>
-          <textarea
-            name="experience"
-            value={formData.experience}
-            onChange={handleChange}
-            rows={4}
-            className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 outline-none focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-slate-800 resize-y"
-            placeholder={isKu ? "ناوی کۆمپانیا، ڕۆڵەکەت، و کاتەکان..." : "Company names, roles, and dates..."}
-          />
-        </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="location">{isKu ? "ناونیشان" : "Location"}</Label>
+                    <Input id="location" dir={dir} type="text" name="location" list="locations" value={formData.location} onChange={handleChange} className={inputCls} placeholder={isKu ? "شار، وڵات" : "City, Country"} />
+                    <datalist id="locations">
+                      <option value="Erbil, Iraq" />
+                      <option value="Sulaymaniyah, Iraq" />
+                      <option value="Duhok, Iraq" />
+                      <option value="Baghdad, Iraq" />
+                      <option value="London, UK" />
+                      <option value="New York, USA" />
+                      <option value="San Francisco, USA" />
+                      <option value="Berlin, Germany" />
+                      <option value="Dubai, UAE" />
+                      <option value="Remote" />
+                    </datalist>
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="website">{isKu ? "وێبسایت / پۆرتفۆلیۆ" : "Website / Portfolio"}</Label>
+                    <Input id="website" dir="ltr" type="text" name="website" value={formData.website} onChange={handleChange} className={inputCls} placeholder="github.com/johndoe" />
+                  </div>
+                </div>
 
-        <div>
-          <div className="flex items-center justify-between mb-1">
-            <label className="block text-sm font-medium text-slate-700">
-              {isKu ? "خوێندن" : "Education"}
-            </label>
-            {aiButton("education")}
-          </div>
-          <textarea
-            name="education"
-            value={formData.education}
-            onChange={handleChange}
-            rows={3}
-            className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 outline-none focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-slate-800 resize-y"
-            placeholder={isKu ? "بڕوانامە و زانکۆ..." : "Degrees and universities..."}
-          />
-        </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="linkedin">{isKu ? "لینکدین" : "LinkedIn"}</Label>
+                  <Input id="linkedin" dir="ltr" type="text" name="linkedin" value={formData.linkedin} onChange={handleChange} className={inputCls} placeholder="linkedin.com/in/johndoe" />
+                </div>
+              </>
+            )}
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
-          <div>
-            <div className="flex items-center justify-between mb-1">
-              <label className="block text-sm font-medium text-slate-700">
-                {isKu ? "کارامەییەکان" : "Skills"}
-              </label>
-              {aiButton("skills")}
-            </div>
-            <textarea
-              name="skills"
-              value={formData.skills}
-              onChange={handleChange}
-              rows={3}
-              className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 outline-none focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-slate-800 resize-y"
-              placeholder={isKu ? "جیابکەرەوە بە فاریزە" : "Comma separated..."}
-            />
-          </div>
-          <div>
-            <div className="flex items-center justify-between mb-1">
-              <label className="block text-sm font-medium text-slate-700">
-                {isKu ? "بڕوانامەکان" : "Certifications"}
-              </label>
-              {aiButton("certifications")}
-            </div>
-            <textarea
-              name="certifications"
-              value={formData.certifications}
-              onChange={handleChange}
-              rows={3}
-              className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 outline-none focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-slate-800 resize-y"
-              placeholder={isKu ? "بڕوانامە پیشەییەکان..." : "Professional certs..."}
-            />
-          </div>
-          <div>
-            <div className="flex items-center justify-between mb-1">
-              <label className="block text-sm font-medium text-slate-700">
-                {isKu ? "زمانەکان" : "Languages"}
-              </label>
-              {aiButton("languages")}
-            </div>
-            <textarea
-              name="languages"
-              value={formData.languages}
-              onChange={handleChange}
-              rows={3}
-              className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 outline-none focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-slate-800 resize-y"
-              placeholder={isKu ? "ئینگلیزی، کوردی..." : "English, Kurdish..."}
-            />
-          </div>
-        </div>
+            {step === 1 && (
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="summary">{isKu ? "پوختە" : "Summary"}</Label>
+                  {aiButton("summary")}
+                </div>
+                <Textarea id="summary" dir={dir} name="summary" value={formData.summary} onChange={handleChange} rows={8} className={textareaCls} placeholder={isKu ? "کورتەیەک دەربارەی خۆت بنووسە..." : "Write a brief summary about yourself..."} />
+                <p className="text-xs text-slate-500 mt-1">
+                  {isKu ? "٢-٤ ڕستە دەربارەی ئەزموون و ئامانجەکانت." : "2–4 sentences about your experience and goals."}
+                </p>
+              </div>
+            )}
 
-        <div className="pt-4 border-t border-slate-100 flex justify-end gap-3 sticky bottom-0 bg-white py-2">
-          <button
+            {step === 2 && (
+              <div className="space-y-6">
+                {/* Experience repeater */}
+                <div>
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2">
+                      <Briefcase className="w-4 h-4 text-slate-500" />
+                      <Label className="text-sm font-semibold text-slate-800">
+                        {isKu ? "ئەزموونی کارکردن" : "Work Experience"}
+                      </Label>
+                    </div>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      onClick={() => setExpList((l) => [...l, { id: uid(), company: "", role: "", start: "", end: "", present: false, achievements: "" }])}
+                      className="rounded-lg gap-1 h-8 text-xs"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                      {isKu ? "زیادکردن" : "Add"}
+                    </Button>
+                  </div>
+                  {expList.length === 0 ? (
+                    <button
+                      type="button"
+                      onClick={() => setExpList([{ id: uid(), company: "", role: "", start: "", end: "", present: false, achievements: "" }])}
+                      className="w-full py-6 rounded-xl border-2 border-dashed border-slate-200 hover:border-blue-400 hover:bg-blue-50/40 text-sm text-slate-500 hover:text-blue-600 transition-all"
+                    >
+                      + {isKu ? "یەکەم ئەزموونی کار زیاد بکە" : "Add your first work experience"}
+                    </button>
+                  ) : (
+                    <div className="space-y-3">
+                      {expList.map((item, idx) => (
+                        <RepeaterCard key={item.id} index={idx + 1} onRemove={() => setExpList((l) => l.filter((x) => x.id !== item.id))} isKu={isKu}>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div className="space-y-1">
+                              <Label className="text-xs text-slate-600">{isKu ? "ڕۆڵ / پۆست" : "Role / Title"}</Label>
+                              <Input dir={dir} value={item.role} onChange={(e) => setExpList((l) => l.map((x) => x.id === item.id ? { ...x, role: e.target.value } : x))} className={inputCls} placeholder={isKu ? "بۆ نموونە: ئەندازیاری نەرمەکاڵا" : "e.g. Software Engineer"} />
+                            </div>
+                            <div className="space-y-1">
+                              <Label className="text-xs text-slate-600">{isKu ? "کۆمپانیا" : "Company"}</Label>
+                              <Input dir={dir} value={item.company} onChange={(e) => setExpList((l) => l.map((x) => x.id === item.id ? { ...x, company: e.target.value } : x))} className={inputCls} placeholder={isKu ? "ناوی کۆمپانیا" : "Company name"} />
+                            </div>
+                          </div>
+                          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-3 items-end">
+                            <div className="space-y-1">
+                              <Label className="text-xs text-slate-600">{isKu ? "لە" : "Start"}</Label>
+                              <MonthYearSelect value={item.start} onChange={(v) => setExpList((l) => l.map((x) => x.id === item.id ? { ...x, start: v } : x))} isKu={isKu} />
+                            </div>
+                            <div className="space-y-1">
+                              <Label className="text-xs text-slate-600">{isKu ? "بۆ" : "End"}</Label>
+                              <MonthYearSelect value={item.end} onChange={(v) => setExpList((l) => l.map((x) => x.id === item.id ? { ...x, end: v } : x))} disabled={item.present} isKu={isKu} />
+                            </div>
+                            <label className="col-span-2 sm:col-span-2 flex items-center gap-2 h-9 text-sm text-slate-700 cursor-pointer select-none">
+                              <input
+                                type="checkbox"
+                                checked={item.present}
+                                onChange={(e) => setExpList((l) => l.map((x) => x.id === item.id ? { ...x, present: e.target.checked, end: e.target.checked ? "" : x.end } : x))}
+                                className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                              />
+                              {isKu ? "ئێستا لێرەم کار دەکەم" : "I currently work here"}
+                            </label>
+                          </div>
+                          <div className="space-y-1 mt-3">
+                            <Label className="text-xs text-slate-600">{isKu ? "دەسکەوت و ئەرکەکان" : "Key achievements"}</Label>
+                            <Textarea dir={dir} value={item.achievements} onChange={(e) => setExpList((l) => l.map((x) => x.id === item.id ? { ...x, achievements: e.target.value } : x))} rows={3} className={textareaCls} placeholder={isKu ? "• کاریگەرییەکەت لەسەر تیم و نەرمەکاڵا..." : "• Increased conversion by 32%\n• Led a team of 5 engineers"} />
+                          </div>
+                        </RepeaterCard>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Projects repeater */}
+                <div>
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2">
+                      <FolderKanban className="w-4 h-4 text-slate-500" />
+                      <Label className="text-sm font-semibold text-slate-800">
+                        {isKu ? "پڕۆژەکان" : "Projects"}
+                      </Label>
+                    </div>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      onClick={() => setProjList((l) => [...l, { id: uid(), name: "", role: "", tech: [], description: "" }])}
+                      className="rounded-lg gap-1 h-8 text-xs"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                      {isKu ? "زیادکردن" : "Add"}
+                    </Button>
+                  </div>
+                  {projList.length === 0 ? (
+                    <button
+                      type="button"
+                      onClick={() => setProjList([{ id: uid(), name: "", role: "", tech: [], description: "" }])}
+                      className="w-full py-5 rounded-xl border-2 border-dashed border-slate-200 hover:border-blue-400 hover:bg-blue-50/40 text-sm text-slate-500 hover:text-blue-600 transition-all"
+                    >
+                      + {isKu ? "پڕۆژەیەک زیاد بکە (بەڵێن نییە)" : "Add a project (optional)"}
+                    </button>
+                  ) : (
+                    <div className="space-y-3">
+                      {projList.map((item, idx) => (
+                        <RepeaterCard key={item.id} index={idx + 1} onRemove={() => setProjList((l) => l.filter((x) => x.id !== item.id))} isKu={isKu}>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div className="space-y-1">
+                              <Label className="text-xs text-slate-600">{isKu ? "ناوی پڕۆژە" : "Project name"}</Label>
+                              <Input dir={dir} value={item.name} onChange={(e) => setProjList((l) => l.map((x) => x.id === item.id ? { ...x, name: e.target.value } : x))} className={inputCls} placeholder={isKu ? "ناوی پڕۆژە" : "e.g. Portfolio Website"} />
+                            </div>
+                            <div className="space-y-1">
+                              <Label className="text-xs text-slate-600">{isKu ? "ڕۆڵی تۆ" : "Your role"}</Label>
+                              <Input dir={dir} value={item.role} onChange={(e) => setProjList((l) => l.map((x) => x.id === item.id ? { ...x, role: e.target.value } : x))} className={inputCls} placeholder={isKu ? "بۆ نموونە: پێشکەوتووی سەرەکی" : "e.g. Lead Developer"} />
+                            </div>
+                          </div>
+                          <div className="space-y-1 mt-3">
+                            <Label className="text-xs text-slate-600">{isKu ? "تەکنەلۆژیا" : "Tech stack"}</Label>
+                            <ChipInput
+                              chips={item.tech}
+                              onChange={(next) => setProjList((l) => l.map((x) => x.id === item.id ? { ...x, tech: next } : x))}
+                              placeholder={isKu ? "React, Node، ..." : "React, Node.js, ..."}
+                              suggestions={["React","Next.js","TypeScript","Node.js","Python","Tailwind","Figma","PostgreSQL"]}
+                            />
+                          </div>
+                          <div className="space-y-1 mt-3">
+                            <Label className="text-xs text-slate-600">{isKu ? "کورتەیەک" : "Description"}</Label>
+                            <Textarea dir={dir} value={item.description} onChange={(e) => setProjList((l) => l.map((x) => x.id === item.id ? { ...x, description: e.target.value } : x))} rows={2} className={textareaCls} placeholder={isKu ? "ئامانج و ئەنجام" : "Goal, impact, outcome"} />
+                          </div>
+                        </RepeaterCard>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {step === 3 && (
+              <div>
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    <GraduationCap className="w-4 h-4 text-slate-500" />
+                    <Label className="text-sm font-semibold text-slate-800">
+                      {isKu ? "خوێندن" : "Education"}
+                    </Label>
+                  </div>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    onClick={() => setEduList((l) => [...l, { id: uid(), degree: "", field: "", institution: "", start: "", end: "", present: false, grade: "" }])}
+                    className="rounded-lg gap-1 h-8 text-xs"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    {isKu ? "زیادکردن" : "Add"}
+                  </Button>
+                </div>
+                {eduList.length === 0 ? (
+                  <button
+                    type="button"
+                    onClick={() => setEduList([{ id: uid(), degree: "", field: "", institution: "", start: "", end: "", present: false, grade: "" }])}
+                    className="w-full py-6 rounded-xl border-2 border-dashed border-slate-200 hover:border-blue-400 hover:bg-blue-50/40 text-sm text-slate-500 hover:text-blue-600 transition-all"
+                  >
+                    + {isKu ? "خوێندنێک زیاد بکە" : "Add an education entry"}
+                  </button>
+                ) : (
+                  <div className="space-y-3">
+                    {eduList.map((item, idx) => (
+                      <RepeaterCard key={item.id} index={idx + 1} onRemove={() => setEduList((l) => l.filter((x) => x.id !== item.id))} isKu={isKu}>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                          <div className="space-y-1">
+                            <Label className="text-xs text-slate-600">{isKu ? "بڕوانامە" : "Degree"}</Label>
+                            <Select value={item.degree} onValueChange={(v) => setEduList((l) => l.map((x) => x.id === item.id ? { ...x, degree: v } : x))}>
+                              <SelectTrigger className="rounded-xl bg-slate-50 border-slate-200 h-11">
+                                <SelectValue placeholder={isKu ? "هەڵبژێرە" : "Select..."} />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {["High School","Diploma","Bachelor","Master","PhD","Other"].map((d) => (
+                                  <SelectItem key={d} value={d}>{d}</SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-1">
+                            <Label className="text-xs text-slate-600">{isKu ? "بواری خوێندن" : "Field of study"}</Label>
+                            <Input dir={dir} value={item.field} onChange={(e) => setEduList((l) => l.map((x) => x.id === item.id ? { ...x, field: e.target.value } : x))} className={inputCls} placeholder={isKu ? "بۆ نموونە: زانستی کۆمپیوتەر" : "e.g. Computer Science"} />
+                          </div>
+                        </div>
+                        <div className="space-y-1 mt-3">
+                          <Label className="text-xs text-slate-600">{isKu ? "زانکۆ / پەیمانگا" : "Institution"}</Label>
+                          <Input dir={dir} value={item.institution} onChange={(e) => setEduList((l) => l.map((x) => x.id === item.id ? { ...x, institution: e.target.value } : x))} className={inputCls} placeholder={isKu ? "ناوی زانکۆ" : "University / School"} />
+                        </div>
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-3 items-end">
+                          <div className="space-y-1">
+                            <Label className="text-xs text-slate-600">{isKu ? "لە" : "Start"}</Label>
+                            <YearSelect value={item.start} onChange={(v) => setEduList((l) => l.map((x) => x.id === item.id ? { ...x, start: v } : x))} isKu={isKu} />
+                          </div>
+                          <div className="space-y-1">
+                            <Label className="text-xs text-slate-600">{isKu ? "بۆ" : "End"}</Label>
+                            <YearSelect value={item.end} onChange={(v) => setEduList((l) => l.map((x) => x.id === item.id ? { ...x, end: v } : x))} disabled={item.present} isKu={isKu} />
+                          </div>
+                          <label className="col-span-2 sm:col-span-2 flex items-center gap-2 h-9 text-sm text-slate-700 cursor-pointer select-none">
+                            <input
+                              type="checkbox"
+                              checked={item.present}
+                              onChange={(e) => setEduList((l) => l.map((x) => x.id === item.id ? { ...x, present: e.target.checked, end: e.target.checked ? "" : x.end } : x))}
+                              className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                            />
+                            {isKu ? "ئێستا لێرەم دەخوێنم" : "Currently studying"}
+                          </label>
+                        </div>
+                        <div className="space-y-1 mt-3">
+                          <Label className="text-xs text-slate-600">{isKu ? "نمرە / GPA (بەڵێن نییە)" : "Grade / GPA (optional)"}</Label>
+                          <Input dir={dir} value={item.grade} onChange={(e) => setEduList((l) => l.map((x) => x.id === item.id ? { ...x, grade: e.target.value } : x))} className={inputCls} placeholder="3.8 / 4.0" />
+                        </div>
+                      </RepeaterCard>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {step === 4 && (
+              <div className="space-y-6">
+                {/* Skills chips */}
+                <div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <Wrench className="w-4 h-4 text-slate-500" />
+                    <Label className="text-sm font-semibold text-slate-800">
+                      {isKu ? "کارامەییەکان" : "Skills"}
+                    </Label>
+                  </div>
+                  <ChipInput
+                    chips={skillChips}
+                    onChange={setSkillChips}
+                    placeholder={isKu ? "کارامەیی بنووسە و Enter بکە" : "Type a skill and press Enter"}
+                    dir={dir}
+                    suggestions={["JavaScript","TypeScript","React","Node.js","Python","SQL","AWS","Docker","Figma","Excel","Communication","Leadership","Project Management","Teamwork","Problem Solving"]}
+                    suggestionsLabel={isKu ? "پێشنیارەکان" : "Suggestions"}
+                  />
+                </div>
+
+                {/* Languages repeater */}
+                <div>
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2">
+                      <LanguagesIcon className="w-4 h-4 text-slate-500" />
+                      <Label className="text-sm font-semibold text-slate-800">
+                        {isKu ? "زمانەکان" : "Languages"}
+                      </Label>
+                    </div>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      onClick={() => setLangList((l) => [...l, { id: uid(), language: "", level: "" }])}
+                      className="rounded-lg gap-1 h-8 text-xs"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                      {isKu ? "زیادکردن" : "Add"}
+                    </Button>
+                  </div>
+                  {langList.length === 0 ? (
+                    <button
+                      type="button"
+                      onClick={() => setLangList([{ id: uid(), language: "", level: "" }])}
+                      className="w-full py-5 rounded-xl border-2 border-dashed border-slate-200 hover:border-blue-400 hover:bg-blue-50/40 text-sm text-slate-500 hover:text-blue-600 transition-all"
+                    >
+                      + {isKu ? "زمانێک زیاد بکە" : "Add a language"}
+                    </button>
+                  ) : (
+                    <div className="space-y-2">
+                      {langList.map((item) => (
+                        <div key={item.id} className="grid grid-cols-[1fr_1fr_auto] gap-2 items-center">
+                          <Select value={item.language} onValueChange={(v) => setLangList((l) => l.map((x) => x.id === item.id ? { ...x, language: v } : x))}>
+                            <SelectTrigger className="rounded-xl bg-slate-50 border-slate-200 h-11">
+                              <SelectValue placeholder={isKu ? "زمان" : "Language"} />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {["English","Kurdish","Arabic","Turkish","Persian","French","German","Spanish","Italian","Chinese","Other"].map((lang) => (
+                                <SelectItem key={lang} value={lang}>{lang}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <Select value={item.level} onValueChange={(v) => setLangList((l) => l.map((x) => x.id === item.id ? { ...x, level: v } : x))}>
+                            <SelectTrigger className="rounded-xl bg-slate-50 border-slate-200 h-11">
+                              <SelectValue placeholder={isKu ? "ئاست" : "Level"} />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {[
+                                { v: "Native", ku: "زمانی دایک" },
+                                { v: "Fluent", ku: "زۆر باش" },
+                                { v: "Professional", ku: "پیشەیی" },
+                                { v: "Intermediate", ku: "مامناوەند" },
+                                { v: "Basic", ku: "سەرەتایی" },
+                              ].map((lvl) => (
+                                <SelectItem key={lvl.v} value={lvl.v}>{isKu ? lvl.ku : lvl.v}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => setLangList((l) => l.filter((x) => x.id !== item.id))}
+                            className="h-11 w-11 text-slate-400 hover:text-red-600"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Certifications repeater */}
+                <div>
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2">
+                      <Award className="w-4 h-4 text-slate-500" />
+                      <Label className="text-sm font-semibold text-slate-800">
+                        {isKu ? "بڕوانامەکان" : "Certifications"}
+                      </Label>
+                    </div>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      onClick={() => setCertList((l) => [...l, { id: uid(), name: "", issuer: "", year: "" }])}
+                      className="rounded-lg gap-1 h-8 text-xs"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                      {isKu ? "زیادکردن" : "Add"}
+                    </Button>
+                  </div>
+                  {certList.length === 0 ? (
+                    <button
+                      type="button"
+                      onClick={() => setCertList([{ id: uid(), name: "", issuer: "", year: "" }])}
+                      className="w-full py-5 rounded-xl border-2 border-dashed border-slate-200 hover:border-blue-400 hover:bg-blue-50/40 text-sm text-slate-500 hover:text-blue-600 transition-all"
+                    >
+                      + {isKu ? "بڕوانامەیەک زیاد بکە (بەڵێن نییە)" : "Add a certification (optional)"}
+                    </button>
+                  ) : (
+                    <div className="space-y-2">
+                      {certList.map((item) => (
+                        <div key={item.id} className="grid grid-cols-1 sm:grid-cols-[2fr_2fr_1fr_auto] gap-2 items-center">
+                          <Input dir={dir} value={item.name} onChange={(e) => setCertList((l) => l.map((x) => x.id === item.id ? { ...x, name: e.target.value } : x))} className={inputCls} placeholder={isKu ? "ناوی بڕوانامە" : "Name"} />
+                          <Input dir={dir} value={item.issuer} onChange={(e) => setCertList((l) => l.map((x) => x.id === item.id ? { ...x, issuer: e.target.value } : x))} className={inputCls} placeholder={isKu ? "دەرکەر" : "Issuer"} />
+                          <Input dir="ltr" value={item.year} onChange={(e) => setCertList((l) => l.map((x) => x.id === item.id ? { ...x, year: e.target.value } : x))} className={inputCls} placeholder="Year" />
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => setCertList((l) => l.filter((x) => x.id !== item.id))}
+                            className="h-11 w-11 text-slate-400 hover:text-red-600 justify-self-end"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Interests chips */}
+                <div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <Heart className="w-4 h-4 text-slate-500" />
+                    <Label className="text-sm font-semibold text-slate-800">
+                      {isKu ? "بایەخەکان" : "Interests"}
+                    </Label>
+                  </div>
+                  <ChipInput
+                    chips={interestChips}
+                    onChange={setInterestChips}
+                    placeholder={isKu ? "بایەخێک بنووسە و Enter بکە" : "Type an interest and press Enter"}
+                    dir={dir}
+                    suggestions={["Chess","Open-source","Reading","Football","Photography","Volunteering","Mentoring","Traveling","Music","Gaming","Fitness","Cooking"]}
+                    suggestionsLabel={isKu ? "پێشنیارەکان" : "Suggestions"}
+                  />
+                </div>
+              </div>
+            )}
+          </motion.div>
+        </AnimatePresence>
+
+        <div className="pt-4 border-t border-slate-100 flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-3 sticky bottom-0 bg-white py-2">
+          <Button
             type="button"
-            onClick={onBack}
-            className="px-6 py-2.5 rounded-xl font-medium text-slate-600 bg-white border border-slate-200 hover:bg-slate-50 transition-colors"
+            variant="outline"
+            onClick={goPrev}
+            className="rounded-xl gap-2 w-full sm:w-auto justify-center"
           >
-            {isKu ? "پاشگەزبوونەوە" : "Cancel"}
-          </button>
-          <button
-            type="submit"
-            disabled={!formData.name && !formData.jobTitle && !formData.experience && !formData.education}
-            className="px-6 py-2.5 rounded-xl font-medium text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-          >
-            {isKu ? "پەسەندکردن" : "Submit"}
-          </button>
+            <PrevIcon className="w-4 h-4 shrink-0" />
+            <span className="truncate">
+              {step === 0
+                ? isKu ? "پاشگەزبوونەوە" : "Cancel"
+                : isKu ? "پێشوو" : "Back"}
+            </span>
+          </Button>
+
+          <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
+            {!isLast && (
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={() => { setStep(total - 1); }}
+                className="text-sm text-slate-500 hover:text-slate-700 flex-1 sm:flex-none"
+              >
+                <span className="truncate">{isKu ? "بازدان" : "Skip to end"}</span>
+              </Button>
+            )}
+            {isLast ? (
+              <Button
+                type="submit"
+                disabled={!canSubmit}
+                className="rounded-xl bg-blue-600 hover:bg-blue-700 text-white flex-1 sm:flex-none justify-center"
+              >
+                {isKu ? "پەسەندکردن" : "Submit"}
+              </Button>
+            ) : (
+              <Button
+                type="button"
+                onClick={goNext}
+                className="rounded-xl bg-blue-600 hover:bg-blue-700 text-white gap-2 flex-1 sm:flex-none justify-center"
+              >
+                <span className="truncate">{isKu ? "دواتر" : "Next"}</span>
+                <NextIcon className="w-4 h-4 shrink-0" />
+              </Button>
+            )}
+          </div>
         </div>
       </form>
     </motion.div>
   );
 }
+
+// ============================================================================
+// Helper components for the structured intake form
+// ============================================================================
+
+function RepeaterCard({
+  index,
+  onRemove,
+  isKu,
+  children,
+}: {
+  index: number;
+  onRemove: () => void;
+  isKu: boolean;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="relative rounded-2xl border border-slate-200 bg-white p-4 sm:p-5 group hover:border-slate-300 transition-colors">
+      <div className="flex items-center justify-between mb-3">
+        <span className="text-[11px] font-mono text-slate-400 tracking-widest">
+          #{String(index).padStart(2, "0")}
+        </span>
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={onRemove}
+          className="h-7 text-xs text-slate-400 hover:text-red-600 gap-1"
+        >
+          <Trash2 className="w-3.5 h-3.5" />
+          {isKu ? "لابردن" : "Remove"}
+        </Button>
+      </div>
+      {children}
+    </div>
+  );
+}
+
+function ChipInput({
+  chips,
+  onChange,
+  placeholder,
+  suggestions = [],
+  suggestionsLabel,
+  dir = "ltr",
+}: {
+  chips: string[];
+  onChange: (next: string[]) => void;
+  placeholder?: string;
+  suggestions?: string[];
+  suggestionsLabel?: string;
+  dir?: "ltr" | "rtl";
+}) {
+  const [value, setValue] = useState("");
+  const commit = (raw: string) => {
+    const parts = raw
+      .split(/[,\n]/)
+      .map((s) => s.trim())
+      .filter(Boolean);
+    if (!parts.length) return;
+    const next = [...chips];
+    for (const p of parts) {
+      if (!next.some((c) => c.toLowerCase() === p.toLowerCase())) next.push(p);
+    }
+    onChange(next);
+    setValue("");
+  };
+  const remove = (chip: string) => onChange(chips.filter((c) => c !== chip));
+  const available = suggestions.filter(
+    (s) => !chips.some((c) => c.toLowerCase() === s.toLowerCase())
+  );
+  return (
+    <div className="space-y-2">
+      <div className="min-h-[44px] rounded-xl bg-slate-50 border border-slate-200 focus-within:bg-white focus-within:border-slate-300 px-2 py-1.5 flex flex-wrap items-center gap-1.5">
+        {chips.map((chip) => (
+          <span
+            key={chip}
+            className="inline-flex items-center gap-1 rounded-full bg-blue-50 text-blue-700 border border-blue-100 px-2.5 py-1 text-xs font-medium"
+          >
+            {chip}
+            <button
+              type="button"
+              onClick={() => remove(chip)}
+              className="text-blue-500 hover:text-blue-800"
+              aria-label="Remove"
+            >
+              <X className="w-3 h-3" />
+            </button>
+          </span>
+        ))}
+        <input
+          dir={dir}
+          value={value}
+          onChange={(e) => setValue(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === ",") {
+              e.preventDefault();
+              commit(value);
+            } else if (e.key === "Backspace" && !value && chips.length) {
+              onChange(chips.slice(0, -1));
+            }
+          }}
+          onBlur={() => value && commit(value)}
+          placeholder={chips.length === 0 ? placeholder : ""}
+          className="flex-1 min-w-[140px] bg-transparent outline-none text-sm py-1 px-1"
+        />
+      </div>
+      {available.length > 0 && (
+        <div className="flex flex-wrap items-center gap-1.5">
+          {suggestionsLabel && (
+            <span className="text-[11px] text-slate-400 mr-1">{suggestionsLabel}:</span>
+          )}
+          {available.slice(0, 12).map((s) => (
+            <button
+              key={s}
+              type="button"
+              onClick={() => commit(s)}
+              className="rounded-full bg-white border border-slate-200 text-slate-600 hover:border-blue-400 hover:text-blue-600 hover:bg-blue-50/50 px-2.5 py-1 text-xs transition-colors"
+            >
+              + {s}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function YearSelect({
+  value,
+  onChange,
+  disabled,
+  isKu,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  disabled?: boolean;
+  isKu: boolean;
+}) {
+  const now = new Date().getFullYear();
+  const years = Array.from({ length: 45 }, (_, i) => String(now - i));
+  return (
+    <Select value={value} onValueChange={onChange} disabled={disabled}>
+      <SelectTrigger className="rounded-xl bg-slate-50 border-slate-200 h-9">
+        <SelectValue placeholder={isKu ? "ساڵ" : "Year"} />
+      </SelectTrigger>
+      <SelectContent>
+        {years.map((y) => (
+          <SelectItem key={y} value={y}>{y}</SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
+  );
+}
+
+function MonthYearSelect({
+  value,
+  onChange,
+  disabled,
+  isKu,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  disabled?: boolean;
+  isKu: boolean;
+}) {
+  const months = [
+    { v: "Jan", ku: "کانوونی دووەم" },
+    { v: "Feb", ku: "شوبات" },
+    { v: "Mar", ku: "ئازار" },
+    { v: "Apr", ku: "نیسان" },
+    { v: "May", ku: "ئایار" },
+    { v: "Jun", ku: "حوزەیران" },
+    { v: "Jul", ku: "تەمووز" },
+    { v: "Aug", ku: "ئاب" },
+    { v: "Sep", ku: "ئەیلوول" },
+    { v: "Oct", ku: "تشرینی یەکەم" },
+    { v: "Nov", ku: "تشرینی دووەم" },
+    { v: "Dec", ku: "کانوونی یەکەم" },
+  ];
+  const now = new Date().getFullYear();
+  const years = Array.from({ length: 45 }, (_, i) => String(now - i));
+  const [m = "", y = ""] = value ? value.split(" ") : ["", ""];
+  const setPart = (nextM: string, nextY: string) => {
+    if (!nextM && !nextY) onChange("");
+    else onChange(`${nextM}${nextM && nextY ? " " : ""}${nextY}`.trim());
+  };
+  return (
+    <div className="grid grid-cols-2 gap-1.5">
+      <Select value={m} onValueChange={(v) => setPart(v, y)} disabled={disabled}>
+        <SelectTrigger className="rounded-xl bg-slate-50 border-slate-200 h-9 text-xs">
+          <SelectValue placeholder={isKu ? "مانگ" : "Mon"} />
+        </SelectTrigger>
+        <SelectContent>
+          {months.map((mo) => (
+            <SelectItem key={mo.v} value={mo.v}>{isKu ? mo.ku : mo.v}</SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+      <Select value={y} onValueChange={(v) => setPart(m, v)} disabled={disabled}>
+        <SelectTrigger className="rounded-xl bg-slate-50 border-slate-200 h-9 text-xs">
+          <SelectValue placeholder={isKu ? "ساڵ" : "Year"} />
+        </SelectTrigger>
+        <SelectContent>
+          {years.map((yy) => (
+            <SelectItem key={yy} value={yy}>{yy}</SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </div>
+  );
+}
+

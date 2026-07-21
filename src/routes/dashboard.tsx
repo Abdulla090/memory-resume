@@ -16,9 +16,13 @@ import {
   Heart,
   Sparkles,
   Bot,
+  Moon,
+  Sun,
 } from "lucide-react";
 import { useState } from "react";
 import { useAppStore } from "@/lib/store";
+import { useDarkMode } from "@/hooks/use-dark-mode";
+
 
 export const Route = createFileRoute("/dashboard")({
   component: DashboardLayout,
@@ -36,6 +40,8 @@ function DashboardLayout() {
   const [isOpen, setIsOpen] = useState(false);
   const language = useAppStore((state) => state.language);
   const isKu = language === "ku";
+  const { isDark, toggle: toggleDark } = useDarkMode();
+
 
   const navItems: NavItem[] = [
     { name: isKu ? "سەرەتا" : "Home", icon: Home, path: "/dashboard", group: "create" },
@@ -62,9 +68,10 @@ function DashboardLayout() {
 
   return (
     <div
-      className="flex h-screen overflow-hidden font-sans bg-slate-50/60"
+      className="app-shell flex h-screen overflow-hidden font-sans bg-slate-50/60"
       dir={isKu ? "rtl" : "ltr"}
     >
+
       {/* Mobile dim overlay */}
       <div
         onClick={() => setIsOpen(false)}
@@ -249,16 +256,27 @@ function DashboardLayout() {
 
       {/* Main content */}
       <main className="perf-scroll relative min-w-0 flex-1 h-full overflow-y-auto bg-background p-4 text-foreground sm:p-6 lg:p-10">
-        {/* Mobile hamburger */}
-        <button
-          className="mb-6 flex h-10 w-10 items-center justify-center rounded-xl border border-border bg-card text-foreground shadow-sm transition-colors hover:bg-muted lg:hidden"
-          onClick={() => setIsOpen(true)}
-          aria-label={isKu ? "کردنەوەی لیست" : "Open menu"}
-        >
-          <Menu className="h-5 w-5" />
-        </button>
+        {/* Top bar: mobile hamburger + dark toggle */}
+        <div className="mb-6 flex items-center justify-between">
+          <button
+            className="flex h-10 w-10 items-center justify-center rounded-xl border border-border bg-card text-foreground shadow-sm transition-colors hover:bg-muted lg:hidden"
+            onClick={() => setIsOpen(true)}
+            aria-label={isKu ? "کردنەوەی لیست" : "Open menu"}
+          >
+            <Menu className="h-5 w-5" />
+          </button>
+          <button
+            onClick={toggleDark}
+            aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
+            title={isDark ? (isKu ? "دۆخی ڕووناک" : "Light mode") : (isKu ? "دۆخی تاریک" : "Dark mode")}
+            className="ms-auto flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 shadow-sm transition-all hover:bg-slate-50 hover:text-slate-900"
+          >
+            {isDark ? <Sun className="h-[18px] w-[18px]" /> : <Moon className="h-[18px] w-[18px]" />}
+          </button>
+        </div>
         <Outlet />
       </main>
+
     </div>
   );
 }
