@@ -33,6 +33,7 @@ import { Route as DashboardCoverLettersRouteImport } from './routes/dashboard.co
 import { Route as DashboardAnalyticsRouteImport } from './routes/dashboard.analytics'
 import { Route as DashboardAiWriterRouteImport } from './routes/dashboard.ai-writer'
 import { Route as DashboardAiOptimizeRouteImport } from './routes/dashboard.ai-optimize'
+import { Route as ApiHeartbeatRouteImport } from './routes/api.heartbeat'
 
 const VerifyEmailRoute = VerifyEmailRouteImport.update({
   id: '/verify-email',
@@ -154,6 +155,11 @@ const DashboardAiOptimizeRoute = DashboardAiOptimizeRouteImport.update({
   path: '/ai-optimize',
   getParentRoute: () => DashboardRoute,
 } as any)
+const ApiHeartbeatRoute = ApiHeartbeatRouteImport.update({
+  id: '/api/heartbeat',
+  path: '/api/heartbeat',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -167,6 +173,7 @@ export interface FileRoutesByFullPath {
   '/templates': typeof TemplatesRoute
   '/terms': typeof TermsRoute
   '/verify-email': typeof VerifyEmailRoute
+  '/api/heartbeat': typeof ApiHeartbeatRoute
   '/dashboard/ai-optimize': typeof DashboardAiOptimizeRoute
   '/dashboard/ai-writer': typeof DashboardAiWriterRoute
   '/dashboard/analytics': typeof DashboardAnalyticsRoute
@@ -192,6 +199,7 @@ export interface FileRoutesByTo {
   '/templates': typeof TemplatesRoute
   '/terms': typeof TermsRoute
   '/verify-email': typeof VerifyEmailRoute
+  '/api/heartbeat': typeof ApiHeartbeatRoute
   '/dashboard/ai-optimize': typeof DashboardAiOptimizeRoute
   '/dashboard/ai-writer': typeof DashboardAiWriterRoute
   '/dashboard/analytics': typeof DashboardAnalyticsRoute
@@ -219,6 +227,7 @@ export interface FileRoutesById {
   '/templates': typeof TemplatesRoute
   '/terms': typeof TermsRoute
   '/verify-email': typeof VerifyEmailRoute
+  '/api/heartbeat': typeof ApiHeartbeatRoute
   '/dashboard/ai-optimize': typeof DashboardAiOptimizeRoute
   '/dashboard/ai-writer': typeof DashboardAiWriterRoute
   '/dashboard/analytics': typeof DashboardAnalyticsRoute
@@ -247,6 +256,7 @@ export interface FileRouteTypes {
     | '/templates'
     | '/terms'
     | '/verify-email'
+    | '/api/heartbeat'
     | '/dashboard/ai-optimize'
     | '/dashboard/ai-writer'
     | '/dashboard/analytics'
@@ -272,6 +282,7 @@ export interface FileRouteTypes {
     | '/templates'
     | '/terms'
     | '/verify-email'
+    | '/api/heartbeat'
     | '/dashboard/ai-optimize'
     | '/dashboard/ai-writer'
     | '/dashboard/analytics'
@@ -298,6 +309,7 @@ export interface FileRouteTypes {
     | '/templates'
     | '/terms'
     | '/verify-email'
+    | '/api/heartbeat'
     | '/dashboard/ai-optimize'
     | '/dashboard/ai-writer'
     | '/dashboard/analytics'
@@ -325,6 +337,7 @@ export interface RootRouteChildren {
   TemplatesRoute: typeof TemplatesRoute
   TermsRoute: typeof TermsRoute
   VerifyEmailRoute: typeof VerifyEmailRoute
+  ApiHeartbeatRoute: typeof ApiHeartbeatRoute
   EditorIdRoute: typeof EditorIdRoute
 }
 
@@ -498,6 +511,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardAiOptimizeRouteImport
       parentRoute: typeof DashboardRoute
     }
+    '/api/heartbeat': {
+      id: '/api/heartbeat'
+      path: '/api/heartbeat'
+      fullPath: '/api/heartbeat'
+      preLoaderRoute: typeof ApiHeartbeatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -564,6 +584,7 @@ const rootRouteChildren: RootRouteChildren = {
   TemplatesRoute: TemplatesRoute,
   TermsRoute: TermsRoute,
   VerifyEmailRoute: VerifyEmailRoute,
+  ApiHeartbeatRoute: ApiHeartbeatRoute,
   EditorIdRoute: EditorIdRoute,
 }
 export const routeTree = rootRouteImport
