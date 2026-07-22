@@ -24,7 +24,7 @@ export function LeroyTemplate({ data }: { data: ResumeData }) {
 
   const CreamPanel = ({ title, children, className = "" }: { title: ReactNode; children: ReactNode; className?: string }) => (
     <section className={`bg-[#f8f7f4] px-[38px] py-[28px] text-[#050b14] ${className}`}>
-      <h2 className="mb-3 font-serif text-[34px] font-bold rtl:font-normal uppercase leading-none tracking-[0.02em] text-[#142033] rtl:tracking-normal">{title}</h2>
+      <h2 className="mb-3 font-serif text-[34px] font-bold uppercase leading-none tracking-[0.02em] text-[#142033] rtl:tracking-normal">{title}</h2>
       {children}
     </section>
   );
@@ -33,19 +33,19 @@ export function LeroyTemplate({ data }: { data: ResumeData }) {
     <div dir={rtl ? "rtl" : "ltr"} className="relative overflow-hidden bg-white font-sans text-[#050b14]" style={{ height: "1122px", minHeight: "1122px", width: "794px", maxWidth: "100%" }}>
       <div className="absolute left-0 top-[76px] h-[112px] w-full bg-[#6f7e84]" />
 
-      <div className="absolute left-[46px] top-0 z-20 h-[609px] w-[292px] bg-[#202a3a]">
+      <div className="absolute left-[46px] top-0 z-20 h-[609px] w-[292px] bg-[#202a3a] rtl:left-auto rtl:right-[46px]">
         <Editable
           path="name"
           value={c.name}
           as="div"
-          className="pt-[86px] text-center font-serif text-[34px] font-bold rtl:font-normal uppercase leading-[0.98] tracking-[0.02em] text-white rtl:tracking-normal"
+          className="pt-[86px] text-center font-serif text-[34px] font-bold uppercase leading-[0.98] tracking-[0.02em] text-white rtl:tracking-normal"
         />
 
         <div className="mx-auto mt-[28px]">
           <PhotoBlock data={c} shape={photoBlockShape} />
         </div>
 
-        <div className="mt-[38px] px-[43px] text-[14px] font-black rtl:font-normal leading-[1.2] text-white">
+        <div className="mt-[38px] px-[43px] text-[14px] font-black leading-[1.2] text-white">
           <div className="mt-3 space-y-3">
             {c.phone && (
               <div className="flex min-w-0 items-center gap-3">
@@ -69,13 +69,14 @@ export function LeroyTemplate({ data }: { data: ResumeData }) {
         </div>
       </div>
 
-      <header className="absolute left-[338px] right-0 top-[76px] z-10 flex h-[112px] items-center px-[76px] font-serif text-[38px] font-bold rtl:font-normal uppercase leading-[1.02] tracking-[0.03em] text-white rtl:tracking-normal">
+      <header className="absolute left-[338px] right-0 top-[76px] z-10 flex h-[112px] items-center px-[76px] font-serif text-[38px] font-bold uppercase leading-[1.02] tracking-[0.03em] text-white rtl:left-0 rtl:right-[338px] rtl:tracking-normal">
         <Editable path="title" value={c.title} as="div" className="max-w-[440px]" />
       </header>
 
-      <div className="absolute left-[46px] top-[628px] z-10 w-[292px]">
+      <div className="absolute left-[46px] top-[628px] z-10 w-[292px] rtl:left-auto rtl:right-[46px]">
+
         <CreamPanel title={l.education} className="min-h-[355px] px-[34px] py-[26px]">
-          <ul className="list-disc space-y-[22px] pl-5 text-[15px] font-semibold rtl:font-normal leading-[1.16] rtl:pl-0 rtl:pr-5">
+          <ul className="list-disc space-y-[22px] pl-5 text-[15px] font-semibold leading-[1.16] rtl:pl-0 rtl:pr-5">
             {c.education.slice(0, 3).map((item, index) => (
               <li key={`${item.institution}-${index}`} className="flex flex-wrap gap-1">
                 <Editable path={`education.${index}.year`} value={item.year} as="span" />
@@ -89,42 +90,19 @@ export function LeroyTemplate({ data }: { data: ResumeData }) {
         </CreamPanel>
       </div>
 
-      <main className="absolute left-[378px] right-[42px] top-[228px] z-10 space-y-[18px]">
-        {showSkillBars && (c.skillItems?.length ? c.skillItems.length > 0 : c.skills.length > 0) && (
+      <main className="absolute left-[378px] right-[42px] top-[228px] z-10 space-y-[18px] rtl:left-[42px] rtl:right-[378px]">
+        {showSkillBars && (
           <CreamPanel title={l.skills} className="min-h-[280px]">
-            <div className="space-y-[6px]">
-              {c.skillItems && c.skillItems.length > 0 ? (
-                c.skillItems.slice(0, 6).map((s, index) => (
-                  <div key={s.name} className="flex justify-between items-center gap-2">
-                    <Editable path={`skillItems.${index}.name`} value={s.name} as="span" className="text-[15px] font-semibold rtl:font-normal leading-[1.05]" />
-                    <div className="flex shrink-0 gap-1.5 rtl:flex-row-reverse">
-                      {Array.from({ length: 5 }).map((_, dot) => (
-                        <span key={dot} className={`h-2 w-2 rounded-full bg-[#202a3a] ${dot < s.level ? "" : "opacity-30"}`} />
-                      ))}
-                    </div>
-                  </div>
-                ))
-              ) : (
-                c.skills.slice(0, 6).map((skill, index) => {
-                  const rating = skillRating(c, skill, index);
-                  return (
-                    <div key={skill} className="flex justify-between items-center gap-2">
-                      <Editable path={`skills.${index}`} value={skill} as="span" className="text-[15px] font-semibold rtl:font-normal leading-[1.05]" />
-                      <div className="flex shrink-0 gap-1.5 rtl:flex-row-reverse">
-                        {Array.from({ length: 5 }).map((_, dot) => (
-                          <span key={dot} className={`h-2 w-2 rounded-full bg-[#202a3a] ${dot < rating ? "" : "opacity-30"}`} />
-                        ))}
-                      </div>
-                    </div>
-                  );
-                })
-              )}
-            </div>
+            <ul className="list-disc space-y-[3px] pl-5 text-[15px] font-semibold leading-[1.05] rtl:pl-0 rtl:pr-5">
+              {competenceItems.map((skill, idx) => (
+                <Editable key={skill} path={`skills.${idx}`} value={skill} as="li" />
+              ))}
+            </ul>
           </CreamPanel>
         )}
 
         <CreamPanel title={l.experience} className="min-h-[276px]">
-          <ul className="list-disc space-y-[22px] pl-5 text-[15px] font-semibold rtl:font-normal leading-[1.14] rtl:pl-0 rtl:pr-5">
+          <ul className="list-disc space-y-[22px] pl-5 text-[15px] font-semibold leading-[1.14] rtl:pl-0 rtl:pr-5">
             {c.experience.slice(0, 3).map((item, index) => (
               <li key={`${item.company}-${index}`} className="flex flex-wrap gap-1">
                 <Editable path={`experience.${index}.duration`} value={item.duration} as="span" />
@@ -137,8 +115,8 @@ export function LeroyTemplate({ data }: { data: ResumeData }) {
           </ul>
         </CreamPanel>
 
-        <CreamPanel title={l.certifications} className="min-h-[166px] py-[25px]">
-          <ul className="list-disc space-y-[3px] pl-5 text-[15px] font-semibold rtl:font-normal leading-[1.05] rtl:pl-0 rtl:pr-5">
+        <CreamPanel title={rtl ? "زمانەکان" : "Languages"} className="min-h-[166px] py-[25px]">
+          <ul className="list-disc space-y-[3px] pl-5 text-[15px] font-semibold leading-[1.05] rtl:pl-0 rtl:pr-5">
             {languageItems.map((item) => {
               const certIdx = c.certifications.indexOf(item);
               const path = certIdx >= 0 ? `certifications.${certIdx}` : `skills.${c.skills.indexOf(item)}`;
@@ -149,8 +127,8 @@ export function LeroyTemplate({ data }: { data: ResumeData }) {
       </main>
 
       <footer className="absolute bottom-0 left-0 right-0 flex h-[65px] items-center bg-[#6f7e84] px-[88px] text-white">
-        <div className="font-serif text-[31px] font-bold rtl:font-normal uppercase leading-none">{l.projects}</div>
-        <div className="ml-[58px] rtl:ml-0 rtl:mr-[58px] min-w-0 truncate text-[15px] font-black rtl:font-normal">{leisureText}</div>
+        <div className="font-serif text-[31px] font-bold uppercase leading-none">{l.projects}</div>
+        <div className="ml-[58px] min-w-0 truncate text-[15px] font-black rtl:ml-0 rtl:mr-[58px]">{leisureText}</div>
       </footer>
     </div>
   );

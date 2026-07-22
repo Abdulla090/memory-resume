@@ -18,7 +18,10 @@ import {
   Sliders,
   Moon,
   Sun,
+  Undo2,
+  Redo2,
 } from "lucide-react";
+
 
 import {
   improveBullet,
@@ -27,7 +30,7 @@ import {
   fixResumeErrors,
   generateCoverLetter,
 } from "@/lib/ai.functions";
-import { useAppStore } from "@/lib/store";
+import { useAppStore, selectCanUndo, selectCanRedo } from "@/lib/store";
 import { getAiErrorMessage } from "@/lib/ai-errors";
 import { useMobileOptimized } from "@/lib/performance";
 import type { ExperienceItem, ResumeData, TemplateId, DesignSettings, FieldStyleOverride } from "@/lib/types";
@@ -89,11 +92,17 @@ function ResumeEditor() {
   const navigate = useNavigate();
   const resume = useAppStore((s) => s.resumes.find((r) => r.id === id));
   const resumes = useAppStore((s) => s.resumes);
-  const updateResume = useAppStore((s) => s.updateResume);
+  // updateResume kept out — all writes go through history-aware editResume
+  const editResume = useAppStore((s) => s.editResume);
+  const undoResume = useAppStore((s) => s.undoResume);
+  const redoResume = useAppStore((s) => s.redoResume);
+  const canUndo = useAppStore(selectCanUndo(id));
+  const canRedo = useAppStore(selectCanRedo(id));
   const apiKey = useAppStore((s) => s.apiKey);
   const isKu = useAppStore((s) => s.language) === "ku";
   const mobileOptimized = useMobileOptimized();
   const { isDark, toggle: toggleDark } = useDarkMode();
+
 
 
   const tailorFn = useServerFn(tailorToJob);
@@ -175,6 +184,39 @@ function ResumeEditor() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  // ── Undo / Redo keyboard shortcuts ───────────────────────────────────────────
+  useEffect(() => {
+    const isEditableTarget = (el: EventTarget | null) => {
+      const node = el as HTMLElement | null;
+      if (!node) return false;
+      const tag = node.tagName;
+      return (
+        tag === "INPUT" ||
+        tag === "TEXTAREA" ||
+        node.isContentEditable === true
+      );
+    };
+    const onKey = (e: KeyboardEvent) => {
+      const mod = e.metaKey || e.ctrlKey;
+      if (!mod) return;
+      const key = e.key.toLowerCase();
+      // Let native undo win inside inputs/contentEditable so keystroke-level
+      // undo still works while typing; our history takes over between fields.
+      if (key === "z" && !e.shiftKey) {
+        if (isEditableTarget(e.target)) return;
+        e.preventDefault();
+        if (undoResume(id)) toast.message(isKu ? "گەڕایەوە" : "Undone");
+      } else if ((key === "z" && e.shiftKey) || key === "y") {
+        if (isEditableTarget(e.target)) return;
+        e.preventDefault();
+        if (redoResume(id)) toast.message(isKu ? "دووبارە کرا" : "Redone");
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [id, isKu, redoResume, undoResume]);
+
+
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (resumeMenuRef.current && !resumeMenuRef.current.contains(event.target as Node)) {
@@ -233,17 +275,20 @@ function ResumeEditor() {
         cur = cur[k];
       }
       cur[keys[keys.length - 1]] = value;
-      updateResume(id, { data: newData });
+      // Inline typing: coalesce consecutive keystrokes into one history entry.
+      editResume(id, { data: newData }, { coalesce: true });
     } else {
-      updateResume(id, { data: { ...data, ...patchOrPath } });
+      // Bulk data swap (AI tailor, chat edit, revert): each is its own step.
+      editResume(id, { data: { ...data, ...patchOrPath } }, { coalesce: false });
     }
   };
 
   const setTemplate = (t: TemplateId) =>
-    updateResume(id, { template: t, design: getTemplateDefaults(t) });
+    editResume(id, { template: t, design: getTemplateDefaults(t) }, { coalesce: false });
 
   const updateDesign = (patch: Partial<DesignSettings>) =>
-    updateResume(id, { design: { ...design, ...patch } });
+    editResume(id, { design: { ...design, ...patch } }, { coalesce: true });
+
 
   const updateFieldOverride = (fieldPath: string, fieldOverride: FieldStyleOverride) => {
     const existingOverrides = design.fieldOverrides ?? {};
@@ -520,8 +565,35 @@ function ResumeEditor() {
           {/* Center: title or empty space */}
           <div className="hidden md:flex flex-1" />
 
-          {/* Right: theme toggle + View resume toggle */}
+          {/* Right: undo/redo + theme toggle + View resume toggle */}
           <div className="flex items-center gap-2">
+            <div className="hidden sm:flex items-center rounded-full bg-white shadow-[0_2px_8px_rgba(0,0,0,0.1),0_1px_0_rgba(255,255,255,0.9)_inset] border border-white/60 overflow-hidden">
+              <button
+                type="button"
+                onClick={() => {
+                  if (undoResume(id)) toast.message(isKu ? "گەڕایەوە" : "Undone");
+                }}
+                disabled={!canUndo}
+                aria-label={isKu ? "پاشگەز بوونەوە" : "Undo"}
+                title={`${isKu ? "پاشگەز" : "Undo"} (⌘Z)`}
+                className="flex h-9 w-9 items-center justify-center text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-colors disabled:opacity-30 disabled:pointer-events-none"
+              >
+                <Undo2 className="size-4" />
+              </button>
+              <div className="h-4 w-px bg-slate-200" />
+              <button
+                type="button"
+                onClick={() => {
+                  if (redoResume(id)) toast.message(isKu ? "دووبارە کرا" : "Redone");
+                }}
+                disabled={!canRedo}
+                aria-label={isKu ? "دووبارە" : "Redo"}
+                title={`${isKu ? "دووبارە" : "Redo"} (⌘⇧Z)`}
+                className="flex h-9 w-9 items-center justify-center text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-colors disabled:opacity-30 disabled:pointer-events-none"
+              >
+                <Redo2 className="size-4" />
+              </button>
+            </div>
             <button
               onClick={toggleDark}
               aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
@@ -530,6 +602,7 @@ function ResumeEditor() {
             >
               {isDark ? <Sun className="size-4" /> : <Moon className="size-4" />}
             </button>
+
             <button
               onClick={() => setShowResume((v) => !v)}
               className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-[13px] font-bold transition-all duration-200 ${
@@ -639,23 +712,18 @@ function ResumeEditor() {
                     design={design}
                     updateData={updateData}
                     onSectionClick={(s, path, e) => {
-                      if (path) {
-                        // If on Design tab, show the contextual toolbar
-                        if (sidebarTab === "design" && e) {
-                          setTextToolbar({
-                            section: s,
-                            path,
-                            value: String(getValueAtPath(data, path) || ""),
-                            position: { x: e.clientX, y: e.clientY },
-                          });
-                        } else {
-                          setInlineEdit({
-                            section: s,
-                            path,
-                            value: String(getValueAtPath(data, path) || ""),
-                          });
-                        }
+                      setSelectedSection(s as SectionId);
+                      if (!path) return;
+                      // Design tab: show contextual style toolbar at click point
+                      if (sidebarTab === "design" && e) {
+                        setTextToolbar({
+                          section: s,
+                          path,
+                          value: String(getValueAtPath(data, path) || ""),
+                          position: { x: e.clientX, y: e.clientY },
+                        });
                       }
+                      // Chat tab: do nothing — Editable's contentEditable handles inline typing directly
                     }}
                     previewRef={previewRef}
                     isDesignMode={sidebarTab === "design"}
@@ -667,7 +735,7 @@ function ResumeEditor() {
         </main>
 
         {/* ── Preview overlay ── */}
-        {showResume && (
+        {showResume && mobileOptimized && (
           <div className="lg:hidden">
             <Suspense
               fallback={
@@ -689,21 +757,15 @@ function ResumeEditor() {
                 design={design}
                 updateData={updateData}
                 onSectionClick={(s, path, e) => {
-                  if (path) {
-                    if (sidebarTab === "design" && e) {
-                      setTextToolbar({
-                        section: s,
-                        path,
-                        value: String(getValueAtPath(data, path) || ""),
-                        position: { x: e.clientX, y: e.clientY },
-                      });
-                    } else {
-                      setInlineEdit({
-                        section: s,
-                        path,
-                        value: String(getValueAtPath(data, path) || ""),
-                      });
-                    }
+                  setSelectedSection(s as SectionId);
+                  if (!path) return;
+                  if (sidebarTab === "design" && e) {
+                    setTextToolbar({
+                      section: s,
+                      path,
+                      value: String(getValueAtPath(data, path) || ""),
+                      position: { x: e.clientX, y: e.clientY },
+                    });
                   }
                 }}
                 previewRef={previewRef}

@@ -8,7 +8,7 @@ import { UpdateDataContext, type UpdateDataFn, DesignModeContext } from "@/compo
 import { Download, FileText, ChevronDown } from "lucide-react";
 import { useLayoutEffect, useRef, useState, useEffect } from "react";
 import { toast } from "sonner";
-import { buildFieldOverrideCss } from "@/lib/sanitize";
+import { buildFieldOverrideCss, sanitizeResumeText } from "@/lib/sanitize";
 
 /** Returns a high-contrast text color (white or near-black) for the given hex background. */
 function contrastTextFor(hex: string, darkText = "#1a1a1a", lightText = "#ffffff"): string {
@@ -52,6 +52,7 @@ export function normalizeText(value: string) {
 }
 
 export function inferSectionFromPath(path: string): SectionId {
+  if (path.startsWith("sectionTitles")) return "global";
   if (path.startsWith("experience")) return "experience";
   if (path.startsWith("education")) return "education";
   if (path.startsWith("projects")) return "projects";
@@ -69,6 +70,42 @@ export function inferSectionFromPath(path: string): SectionId {
     return "header";
   return "summary";
 }
+
+/** Human-readable label derived from a data path. Powers the floating chip on
+ *  the design-mode selection overlay. */
+export function labelForPath(path: string): string {
+  const parts = path.split(".");
+  const head = parts[0];
+  const idxOf = (n: number) => Number(parts[n]) + 1;
+  const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
+  switch (head) {
+    case "name": return "Full name";
+    case "title": return "Job title";
+    case "summary": return "Summary";
+    case "email": return "Email";
+    case "phone": return "Phone";
+    case "location": return "Location";
+    case "photoUrl": return "Photo";
+    case "sectionTitles": return `Section: ${cap(parts[1] || "")}`;
+    case "skills": return `Skill ${idxOf(1)}`;
+    case "skillItems": return `Skill ${idxOf(1)} · ${cap(parts[2] || "name")}`;
+    case "certifications": return `Certification ${idxOf(1)}`;
+    case "languages": return `Language ${idxOf(1)}`;
+    case "experience": {
+      const field = parts[2];
+      if (field === "achievements") return `Experience ${idxOf(1)} · Achievement ${idxOf(3)}`;
+      return `Experience ${idxOf(1)} · ${cap(field || "")}`;
+    }
+    case "projects": {
+      const field = parts[2];
+      if (field === "tech") return `Project ${idxOf(1)} · Tech ${idxOf(3)}`;
+      return `Project ${idxOf(1)} · ${cap(field || "")}`;
+    }
+    case "education": return `Education ${idxOf(1)} · ${cap(parts[2] || "")}`;
+    default: return cap(head);
+  }
+}
+
 
 export function isMultilinePath(path: string) {
   return /summary|description|achievements|impact/i.test(path);
@@ -146,65 +183,173 @@ function buildAllFieldPaths(data: ResumeData): Array<{ path: string; value: stri
 function FieldPathAnnotator({
   previewRef,
   data,
+  updateData,
+  template,
 }: {
   previewRef: RefObject<HTMLDivElement | null>;
   data: ResumeData;
+  updateData?: UpdateDataFn;
+  template: TemplateId;
 }) {
+  const updateDataRef = useRef(updateData);
+
+  useEffect(() => {
+    updateDataRef.current = updateData;
+  }, [updateData]);
+
   useEffect(() => {
     const root = previewRef.current;
     if (!root) return;
 
-    // Clear old annotations (skip elements already tagged via <Editable>'s data-path)
+    const doc = root.ownerDocument;
+    const listeners: Array<() => void> = [];
+    let timeoutId = 0;
+
+    const annotate = () => {
+
+    // Remove wrappers created by the previous run before rebuilding from React's text.
+    root.querySelectorAll("[data-auto-field='true']").forEach((el) => {
+      el.replaceWith(doc.createTextNode(el.textContent || ""));
+    });
+    root.normalize();
+
+    // Clear old passive annotations, but never touch explicit <Editable data-path> nodes.
     root.querySelectorAll("[data-field-path]").forEach((el) => {
-      el.removeAttribute("data-field-path");
+      if (!el.hasAttribute("data-path")) {
+        el.removeAttribute("data-field-path");
+        el.removeAttribute("contenteditable");
+        el.removeAttribute("spellcheck");
+      }
     });
 
-    const entries = buildAllFieldPaths(data);
-    if (entries.length === 0) return;
+      const entries = buildAllFieldPaths(data);
+      if (entries.length === 0) return;
 
     // Sort by value length descending so longer/more-specific strings tag first
     // (prevents short prefixes from claiming the same element as longer text).
     entries.sort((a, b) => b.value.length - a.value.length);
 
-    const walker = document.createTreeWalker(root, NodeFilter.SHOW_ELEMENT, {
+    const shouldSkipParent = (parent: HTMLElement | null) => {
+      if (!parent) return true;
+      if (parent.closest("[data-editable='true'],[data-auto-field='true'],svg,style,script,textarea,input,button")) {
+        return true;
+      }
+      return false;
+    };
+
+    const findRanges = (text: string) => {
+      const ranges: Array<{ start: number; end: number; path: string; value: string }> = [];
+      for (const entry of entries) {
+        const value = entry.value.trim();
+        if (value.length < 2) continue;
+        let fromIndex = 0;
+        while (fromIndex < text.length) {
+          const start = text.indexOf(value, fromIndex);
+          if (start === -1) break;
+          const end = start + value.length;
+          const overlaps = ranges.some((range) => start < range.end && end > range.start);
+          if (!overlaps) ranges.push({ start, end, path: entry.path, value });
+          fromIndex = end;
+        }
+      }
+      return ranges.sort((a, b) => a.start - b.start || b.end - a.end);
+    };
+
+    const textWalker = doc.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
       acceptNode: (node) => {
-        const el = node as HTMLElement;
-        if (["STYLE", "SCRIPT", "SVG"].includes(el.tagName)) return NodeFilter.FILTER_REJECT;
-        // Skip elements already explicitly tagged via <Editable>
-        if (el.getAttribute("data-editable") === "true") return NodeFilter.FILTER_SKIP;
-        const hasTextChild = Array.from(el.childNodes).some(
-          (n) => n.nodeType === Node.TEXT_NODE && n.textContent?.trim(),
-        );
-        return hasTextChild ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_SKIP;
+        const parent = node.parentElement;
+        if (shouldSkipParent(parent)) return NodeFilter.FILTER_REJECT;
+        const text = node.textContent || "";
+        return text.trim().length >= 2 ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
       },
     });
 
-    const tagged = new Set<string>();
-    let current = walker.nextNode();
-    while (current) {
-      const el = current as HTMLElement;
-      // Skip elements that already have <Editable>'s data-path
-      if (el.hasAttribute("data-path")) {
-        current = walker.nextNode();
-        continue;
-      }
-      const text = el.textContent?.trim() || "";
-      if (text.length > 0) {
-        for (const { value, path } of entries) {
-          if (tagged.has(path)) continue;
-          // Only consider a match if the value is a non-trivial chunk of the element text.
-          if (text === value || (value.length >= 3 && (text.includes(value) || value.includes(text)))) {
-            if (!el.querySelector(`[data-field-path="${path}"]`)) {
-              el.setAttribute("data-field-path", path);
-              tagged.add(path);
-            }
-            break;
-          }
-        }
-      }
-      current = walker.nextNode();
+    const textNodes: Text[] = [];
+    let textNode = textWalker.nextNode();
+    while (textNode) {
+      textNodes.push(textNode as Text);
+      textNode = textWalker.nextNode();
     }
-  }, [previewRef, data]);
+
+      textNodes.forEach((node) => {
+      const text = node.textContent || "";
+      const ranges = findRanges(text);
+      if (ranges.length === 0) return;
+
+      const fragment = doc.createDocumentFragment();
+      let cursor = 0;
+      ranges.forEach((range) => {
+        if (range.start > cursor) {
+          fragment.appendChild(doc.createTextNode(text.slice(cursor, range.start)));
+        }
+        const span = doc.createElement("span");
+        span.textContent = text.slice(range.start, range.end);
+        span.setAttribute("data-auto-field", "true");
+        span.setAttribute("data-field-path", range.path);
+        span.setAttribute("data-field-label", labelForPath(range.path));
+        span.setAttribute("contenteditable", updateDataRef.current ? "true" : "false");
+        span.setAttribute("spellcheck", "true");
+
+        fragment.appendChild(span);
+        cursor = range.end;
+      });
+      if (cursor < text.length) {
+        fragment.appendChild(doc.createTextNode(text.slice(cursor)));
+      }
+      node.replaceWith(fragment);
+    });
+
+      root.querySelectorAll<HTMLElement>("[data-auto-field='true']").forEach((el) => {
+      if (el.getAttribute("data-editable") === "true") return;
+      const path = el.dataset.fieldPath;
+      if (!path) return;
+      el.setAttribute("contenteditable", updateDataRef.current ? "true" : "false");
+      el.setAttribute("spellcheck", "true");
+      el.setAttribute("tabindex", "0");
+
+      const handleFocus = () => {
+        el.dataset.originalValue = el.innerText;
+      };
+      const handleBlur = () => {
+        const next = sanitizeResumeText(el.innerText.trim());
+        const previous = sanitizeResumeText(el.dataset.originalValue || "").trim();
+        if (next && next !== previous) {
+          updateDataRef.current?.(path, next);
+        } else if (!next && previous) {
+          el.innerText = previous;
+        }
+        delete el.dataset.originalValue;
+      };
+      const handleKeyDown = (event: KeyboardEvent) => {
+        if (event.key === "Enter" && !isMultilinePath(path)) {
+          event.preventDefault();
+          el.blur();
+        }
+        if (event.key === "Escape") {
+          event.preventDefault();
+          if (el.dataset.originalValue !== undefined) el.innerText = el.dataset.originalValue;
+          el.blur();
+        }
+      };
+
+      el.addEventListener("focus", handleFocus);
+      el.addEventListener("blur", handleBlur);
+      el.addEventListener("keydown", handleKeyDown);
+      listeners.push(() => {
+        el.removeEventListener("focus", handleFocus);
+        el.removeEventListener("blur", handleBlur);
+        el.removeEventListener("keydown", handleKeyDown);
+      });
+      });
+    };
+
+    timeoutId = window.setTimeout(annotate, 120);
+
+    return () => {
+      if (timeoutId) window.clearTimeout(timeoutId);
+      listeners.forEach((cleanup) => cleanup());
+    };
+    }, [previewRef, data, template]);
 
   return null; // Zero-render component
 }
@@ -746,26 +891,16 @@ ${(() => {
 
   const handlePreviewClick = (e: React.MouseEvent) => {
     if (!onSectionClick) return;
-    const selectors =
-      "[data-editable='true'],h1,h2,h3,h4,h5,h6,p,span,li,div,small,strong,em,a,button,time,label";
     let node = e.target as HTMLElement | null;
     while (node && node !== e.currentTarget) {
-      const editable = node.closest("[data-editable='true']") as HTMLElement | null;
-      if (editable?.dataset.path) {
+      const directPath = node.dataset.path || node.dataset.fieldPath;
+      if (directPath) {
         onSectionClick(
-          inferSectionFromPath(editable.dataset.path) as SectionId,
-          editable.dataset.path,
+          inferSectionFromPath(directPath) as SectionId,
+          directPath,
           e,
         );
         return;
-      }
-      if (node.matches(selectors)) {
-        const matched = findFieldMatch(data, node.textContent || "");
-        if (matched) {
-          node.setAttribute("data-field-path", matched.path);
-          onSectionClick(inferSectionFromPath(matched.path), matched.path, e);
-          return;
-        }
       }
       node = node.parentElement;
     }
@@ -822,17 +957,65 @@ ${(() => {
           >
           {isDesignMode && (
             <style dangerouslySetInnerHTML={{ __html: `
-              .ds-live.design-mode [data-field-path]:hover,
-              .ds-live.design-mode [data-path]:hover {
-                outline: 2px dashed #3b82f6 !important;
-                outline-offset: 4px !important;
-                cursor: pointer !important;
-                background-color: rgba(59, 130, 246, 0.1) !important;
-                border-radius: 4px !important;
-                transition: all 0.2s ease-in-out;
+              .ds-live.design-mode [data-editable='true'],
+              .ds-live.design-mode [data-field-path] {
+                cursor: text;
+                position: relative;
+                transition: outline 120ms ease, box-shadow 120ms ease, background-color 120ms ease;
+              }
+              /* Hover: subtle, non-shifting dashed ring so text stays put. */
+              .ds-live.design-mode [data-editable='true']:hover,
+              .ds-live.design-mode [data-field-path]:hover {
+                outline: 1px dashed rgba(37,99,235,0.55);
+                outline-offset: 2px;
+                background-color: rgba(37,99,235,0.045);
+                border-radius: 3px;
+              }
+              /* Focus: solid ring + soft halo — the "selected" state. */
+              .ds-live.design-mode [data-editable='true']:focus,
+              .ds-live.design-mode [data-editable='true']:focus-within,
+              .ds-live.design-mode [data-field-path]:focus,
+              .ds-live.design-mode [data-field-path]:focus-within {
+                outline: 1.5px solid #2563eb !important;
+                outline-offset: 2px;
+                background-color: rgba(37,99,235,0.08);
+                box-shadow: 0 0 0 4px rgba(37,99,235,0.14);
+                border-radius: 3px;
+                z-index: 2;
+              }
+              /* Floating field-label chip: shows the selected field's name. */
+              .ds-live.design-mode [data-field-label]:focus::after,
+              .ds-live.design-mode [data-field-label]:focus-within::after {
+                content: attr(data-field-label);
+                position: absolute;
+                top: -22px;
+                left: -2px;
+                z-index: 60;
+                pointer-events: none;
+                background: #2563eb;
+                color: #ffffff;
+                font: 600 10px/1 ui-sans-serif, system-ui, -apple-system, sans-serif;
+                letter-spacing: 0.02em;
+                padding: 4px 8px;
+                border-radius: 999px;
+                box-shadow: 0 4px 12px -4px rgba(37,99,235,0.55), 0 0 0 1px rgba(255,255,255,0.9);
+                white-space: nowrap;
+                transform: translateY(0);
+                animation: dsFieldChipIn 140ms cubic-bezier(.2,.9,.3,1.2) both;
+              }
+              @keyframes dsFieldChipIn {
+                from { opacity: 0; transform: translateY(2px) scale(0.92); }
+                to   { opacity: 1; transform: translateY(0) scale(1); }
+              }
+              /* Empty field placeholder in design mode. */
+              .ds-live.design-mode [data-field-path]:empty::before {
+                content: attr(data-field-label);
+                color: rgba(15,23,42,0.35);
+                font-style: italic;
               }
             `}} />
           )}
+
           {d?.showCanvasDecorations && d.canvasDecorationStyle !== "none" && (
             <>
               {d.canvasDecorationStyle === "blobs" && <div className="canvas-decoration blob-a" />}
@@ -857,7 +1040,7 @@ ${(() => {
               }}
             />
           )}
-          <FieldPathAnnotator previewRef={previewRef} data={data} />
+          <FieldPathAnnotator previewRef={previewRef} data={data} updateData={updateData} template={template} />
           <DesignModeContext.Provider value={!!isDesignMode}>
           <UpdateDataContext.Provider value={updateData}>
             <ResumePreview

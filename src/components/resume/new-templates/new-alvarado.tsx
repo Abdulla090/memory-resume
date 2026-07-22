@@ -5,7 +5,7 @@ import { Editable } from "../Editable";
 import { useLayoutRtl, labels, pickLanguages, skillRating } from "../template-helpers";
 import type { ResumeData } from "@/lib/types";
 import { optimizeResumeForOnePage } from "@/lib/resume-utils";
-import { Phone, Mail, MapPin, Globe } from "lucide-react";
+import { Phone, Mail, MapPin } from "lucide-react";
 
 function SectionTitle({ title, className = "" }: { title: ReactNode; className?: string }) {
   return (
@@ -141,29 +141,23 @@ export function NewAlvaradoTemplate({ data }: { data: ResumeData }) {
                 <div className="grid h-6 w-6 shrink-0 place-items-center bg-[#2b2b2f] text-white">
                   <Phone className="h-3.5 w-3.5" strokeWidth={2.5} />
                 </div>
-                <Editable path="phone" value={c.phone} as="span" className="text-[9.5px] font-semibold text-[#4a4a4e]" />
+                <Editable path="phone" value={c.phone} as="span" className="text-[9.5px] font-semibold text-[#4a4a4e] truncate" />
               </div>
             )}
-            <div className="flex items-center gap-2">
-              <div className="grid h-6 w-6 shrink-0 place-items-center bg-[#2b2b2f] text-white">
-                <Globe className="h-3.5 w-3.5" strokeWidth={2.5} />
-              </div>
-              <span className="text-[9.5px] font-semibold text-[#4a4a4e]">www.reallygreatsite.com</span>
-            </div>
             {c.email && (
               <div className="flex items-center gap-2">
                 <div className="grid h-6 w-6 shrink-0 place-items-center bg-[#2b2b2f] text-white">
                   <Mail className="h-3.5 w-3.5" strokeWidth={2.5} />
                 </div>
-                <Editable path="email" value={c.email} as="span" className="text-[9.5px] font-semibold text-[#4a4a4e]" />
+                <Editable path="email" value={c.email} as="span" className="text-[9.5px] font-semibold text-[#4a4a4e] truncate" />
               </div>
             )}
             {c.location && (
-              <div className="flex items-start gap-2">
+              <div className="flex items-center gap-2">
                 <div className="grid h-6 w-6 shrink-0 place-items-center bg-[#2b2b2f] text-white">
                   <MapPin className="h-3.5 w-3.5" strokeWidth={2.5} />
                 </div>
-                <Editable path="location" value={c.location} as="span" className="text-[9.5px] font-semibold leading-tight text-[#4a4a4e] mt-1" />
+                <Editable path="location" value={c.location} as="span" className="text-[9.5px] font-semibold text-[#4a4a4e] truncate" />
               </div>
             )}
           </div>

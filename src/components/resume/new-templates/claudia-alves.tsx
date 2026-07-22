@@ -54,23 +54,14 @@ function EducationBlock({ data, index }: { data: ResumeData; index: number }) {
           as="h3"
           className="text-[14px] font-black rtl:font-normal uppercase leading-[1.15] text-[#666260]"
         />
-        <Editable path={`education.${index}.year`} value={item.year} as="span" className="text-right text-[13px] leading-[1.2] text-[#6a6664]" />
+        <Editable path={`education.${index}.year`} value={item.year} as="span" className="text-right text-[13px] leading-[1.2] text-[#6a6664] rtl:text-left" />
       </div>
       <Editable
         path={`education.${index}.degree`}
         value={item.degree}
         as="p"
-        className="mt-[10px] text-[13px] font-normal uppercase leading-[1.15] tracking-[0.13em] text-[#6a6664] rtl:tracking-normal"
+        className="mt-[10px] text-[13px] font-normal uppercase leading-[1.3] tracking-[0.13em] text-[#6a6664] rtl:tracking-normal"
       />
-      <p className="mt-[24px] text-[12px] font-normal leading-[1.42] text-[#6a6664]">
-        <Editable
-          path={`education.${index}.degree`}
-          value={item.degree}
-          as="span"
-        />{" "}
-        at{" "}
-        <Editable path={`education.${index}.institution`} value={item.institution} as="span" />.
-      </p>
     </article>
   );
 }
@@ -78,6 +69,7 @@ function EducationBlock({ data, index }: { data: ResumeData; index: number }) {
 function ExperienceBlock({ data, index }: { data: ResumeData; index: number }) {
   const item = data.experience[index];
   if (!item) return null;
+  const bullets = (item.achievements.length ? item.achievements : [item.description]).filter(Boolean).slice(0, 3);
 
   return (
     <article className="min-w-0">
@@ -88,24 +80,24 @@ function ExperienceBlock({ data, index }: { data: ResumeData; index: number }) {
           as="h3"
           className="text-[13px] font-black rtl:font-normal uppercase leading-[1.15] text-[#666260]"
         />
-        <Editable path={`experience.${index}.duration`} value={item.duration} as="span" className="text-right text-[12px] leading-[1.2] text-[#6a6664]" />
+        <Editable path={`experience.${index}.duration`} value={item.duration} as="span" className="text-right text-[12px] leading-[1.2] text-[#6a6664] rtl:text-left" />
       </div>
       <Editable
         path={`experience.${index}.company`}
         value={item.company}
         as="p"
-        className="mt-[12px] text-[13px] font-normal uppercase leading-[1.15] tracking-[0.08em] text-[#6a6664] rtl:tracking-normal"
+        className="mt-[10px] text-[13px] font-normal uppercase leading-[1.2] tracking-[0.08em] text-[#6a6664] rtl:tracking-normal"
       />
-      <p className="mt-[24px] text-[12px] font-normal leading-[1.42] text-[#6a6664]">
-        {[item.description, ...item.achievements.slice(0, 2)].filter(Boolean).map((value, itemIndex) => (
-          <Editable
-            key={itemIndex}
-            path={itemIndex === 0 && item.description ? `experience.${index}.description` : `experience.${index}.achievements.${item.description ? itemIndex - 1 : itemIndex}`}
-            value={value}
-            as="span"
-          />
-        )).reduce<React.ReactNode[]>((parts, node, partIndex) => (partIndex === 0 ? [node] : [...parts, " ", node]), [])}
-      </p>
+      {bullets.length > 0 && (
+        <ul className="mt-[16px] list-disc space-y-1 pl-5 text-[12px] font-normal leading-[1.42] text-[#6a6664] rtl:pl-0 rtl:pr-5">
+          {bullets.map((value, i) => {
+            const path = item.achievements.length
+              ? `experience.${index}.achievements.${i}`
+              : `experience.${index}.description`;
+            return <Editable key={i} path={path} value={value as string} as="li" />;
+          })}
+        </ul>
+      )}
     </article>
   );
 }

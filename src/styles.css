@@ -211,10 +211,11 @@
     letter-spacing: 0 !important;
   }
 
-  /* ── Override for Landing Page to keep Doran ── */
+  /* ── Override for Landing Page to keep Doran (always Bold) ── */
   .font-doran[dir="rtl"],
   .font-doran[dir="rtl"] * {
     font-family: 'Doran', 'Segoe UI', Tahoma, sans-serif !important;
+    font-weight: 700 !important;
   }
 }
 

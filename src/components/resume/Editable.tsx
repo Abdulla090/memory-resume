@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState, useContext } from "react";
 import { UpdateDataContext, FieldFocusContext, DesignModeContext } from "./DesignContext";
 import { sanitizeResumeText } from "@/lib/sanitize";
+import { labelForPath } from "./editor-helpers";
 
 export function Editable({
   value,
@@ -47,24 +48,22 @@ export function Editable({
     }
   };
 
-  const sharedProps = {
-    ref: elementRef,
-    className: isDesignMode
-      ? `cursor-pointer hover:outline hover:outline-2 hover:outline-blue-400/40 hover:outline-offset-2 rounded px-0.5 -mx-0.5 transition-all ${className}`
-      : `focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:bg-blue-50/10 focus:rounded px-0.5 -mx-0.5 transition-colors cursor-text ${
-          !safeValue ? "empty:before:content-[attr(placeholder)] empty:before:text-slate-300" : ""
-        } ${className}`,
-    "data-editable": "true" as const,
-    "data-path": path,
-  };
-
-  if (isDesignMode) {
-    return <Component {...sharedProps} />;
-  }
+  // Design mode gets a stronger, always-visible selection affordance
+  // but still allows direct text editing (like MyPerfectResume).
+  const modeClass = isDesignMode
+    ? `cursor-text hover:outline hover:outline-[1.5px] hover:outline-blue-500/70 hover:outline-offset-[2px] focus:outline focus:outline-2 focus:outline-blue-600 focus:outline-offset-[2px] focus:bg-blue-50/40 rounded-[3px] transition-[outline,background] duration-100 ${className}`
+    : `focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:bg-blue-50/10 focus:rounded px-0.5 -mx-0.5 transition-colors cursor-text ${
+        !safeValue ? "empty:before:content-[attr(placeholder)] empty:before:text-slate-300" : ""
+      } ${className}`;
 
   return (
     <Component
-      {...sharedProps}
+      ref={elementRef}
+      className={modeClass}
+      data-editable="true"
+      data-path={path}
+      data-field-path={path}
+      data-field-label={labelForPath(path)}
       contentEditable
       suppressContentEditableWarning
       onFocus={() => {
@@ -78,3 +77,4 @@ export function Editable({
     />
   );
 }
+

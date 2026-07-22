@@ -1824,12 +1824,6 @@ const BentoHeroCard = ({ language }: { language: Language }) => {
             <div className="relative z-10 w-[70%] rounded-lg shadow-[0_30px_50px_-24px_rgba(15,23,42,0.28)] ring-1 ring-slate-200/70">
               <CenterCardSVG />
             </div>
-
-
-            <div className="absolute bottom-3 right-3 flex items-center gap-2 rounded-full bg-white/90 px-3 py-1 text-[10px] font-medium tracking-wide text-slate-500 ring-1 ring-slate-200/60 backdrop-blur">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-              {isRtl ? "ئامادە بۆ ناردن" : "Recruiter-ready"}
-            </div>
           </div>
         </div>
       </div>

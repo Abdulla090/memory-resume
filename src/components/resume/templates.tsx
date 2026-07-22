@@ -3,33 +3,53 @@ import type { ResumeData, TemplateId, DesignSettings } from "@/lib/types";
 import { DesignContext, FieldFocusContext } from "./DesignContext";
 import { useLayoutRtl } from "./template-helpers";
 import { ResumeLayoutContext } from "./DesignContext";
+import { Editable } from "./Editable";
 
-function labels(rtl: boolean, data?: ResumeData) {
-  return rtl
+function labels(data: ResumeData, rtl: boolean) {
+  const fallback = rtl
     ? {
-        summary: data?.sectionTitles?.profile || "پوختە",
-        profile: data?.sectionTitles?.profile || "پڕۆفایل",
-        experience: data?.sectionTitles?.experience || "ئەزموون",
-        projects: data?.sectionTitles?.projects || "پرۆژەکان",
+        summary: "پوختە",
+        profile: "پڕۆفایل",
+        experience: "ئەزموون",
+        projects: "پرۆژەکان",
         selectedProjects: "پرۆژە دیاریکراوەکان",
-        skills: data?.sectionTitles?.skills || "لێهاتووییەکان",
-        expertise: data?.sectionTitles?.skills || "پسپۆڕی",
-        education: data?.sectionTitles?.education || "خوێندن",
-        certifications: data?.sectionTitles?.certifications || "بڕوانامەکان",
+        skills: "لێهاتووییەکان",
+        expertise: "پسپۆڕی",
+        education: "خوێندن",
+        certifications: "بڕوانامەکان",
         impact: "کاریگەری",
       }
     : {
-        summary: data?.sectionTitles?.profile || "Summary",
-        profile: data?.sectionTitles?.profile || "Profile",
-        experience: data?.sectionTitles?.experience || "Experience",
-        projects: data?.sectionTitles?.projects || "Projects",
+        summary: "Summary",
+        profile: "Profile",
+        experience: "Experience",
+        projects: "Projects",
         selectedProjects: "Selected Projects",
-        skills: data?.sectionTitles?.skills || "Skills",
-        expertise: data?.sectionTitles?.skills || "Expertise",
-        education: data?.sectionTitles?.education || "Education",
-        certifications: data?.sectionTitles?.certifications || "Certifications",
+        skills: "Skills",
+        expertise: "Expertise",
+        education: "Education",
+        certifications: "Certifications",
         impact: "Impact",
       };
+  const get = (key: keyof typeof fallback) => (
+    <Editable
+      path={`sectionTitles.${key}`}
+      value={data.sectionTitles?.[key] || fallback[key]}
+      as="span"
+    />
+  );
+  return {
+    summary: get("summary"),
+    profile: get("profile"),
+    experience: get("experience"),
+    projects: get("projects"),
+    selectedProjects: get("selectedProjects"),
+    skills: get("skills"),
+    expertise: get("expertise"),
+    education: get("education"),
+    certifications: get("certifications"),
+    impact: get("impact"),
+  };
 }
 
 export function StarRating({ level, max = 5 }: { level: number, max?: number }) {
@@ -55,19 +75,23 @@ export function BarRating({ level, max = 5 }: { level: number, max?: number }) {
 
 export function MinimalTemplate({ data }: { data: ResumeData }) {
   const rtl = useLayoutRtl(data);
-  const l = labels(rtl, data);
+  const l = labels(data, rtl);
   return (
     <div dir={rtl ? "rtl" : "ltr"} className="bg-white p-12 text-[#111] font-sans" style={{ minHeight: "1122px", width: "100%" }}>
       <header className="border-b border-neutral-300 pb-4">
-        <h1 className="text-3xl font-semibold tracking-tight rtl:tracking-normal">{data.name}</h1>
-        <p className="mt-1 text-base text-neutral-700">{data.title}</p>
+        <Editable path="name" value={data.name} as="h1" className="text-3xl font-semibold tracking-tight rtl:tracking-normal" />
+        <Editable path="title" value={data.title} as="p" className="mt-1 text-base text-neutral-700" />
         <p className="mt-2 text-xs text-neutral-500">
-          {[data.location, data.email, data.phone].filter(Boolean).join(" · ")}
+          {data.location && <Editable path="location" value={data.location} as="span" />}
+          {data.location && (data.email || data.phone) && " · "}
+          {data.email && <Editable path="email" value={data.email} as="span" />}
+          {data.email && data.phone && " · "}
+          {data.phone && <Editable path="phone" value={data.phone} as="span" />}
         </p>
       </header>
 
       <Section title={l.summary}>
-        <p className="text-sm leading-relaxed">{data.summary}</p>
+        <Editable path="summary" value={data.summary} as="p" className="text-sm leading-relaxed" />
       </Section>
 
       {data.experience.length > 0 && (
@@ -77,16 +101,16 @@ export function MinimalTemplate({ data }: { data: ResumeData }) {
               <div key={i}>
                 <div className="flex items-baseline justify-between">
                   <div className="font-semibold">
-                    {e.title} · <span className="font-normal">{e.company}</span>
+                    <Editable path={`experience.${i}.title`} value={e.title} as="span" /> · <Editable path={`experience.${i}.company`} value={e.company} as="span" className="font-normal" />
                   </div>
-                  <div className="text-xs text-neutral-500">{e.duration}</div>
+                  <Editable path={`experience.${i}.duration`} value={e.duration} as="div" className="text-xs text-neutral-500" />
                 </div>
                 {e.description && (
-                  <p className="mt-1 text-sm text-neutral-700">{e.description}</p>
+                  <Editable path={`experience.${i}.description`} value={e.description} as="p" className="mt-1 text-sm text-neutral-700" />
                 )}
                 <ul className="mt-1.5 list-disc space-y-1 pl-5 text-sm rtl:pl-0 rtl:pr-5">
                   {e.achievements.map((a, j) => (
-                    <li key={j}>{a}</li>
+                    <li key={j}><Editable path={`experience.${i}.achievements.${j}`} value={a} as="span" /></li>
                   ))}
                 </ul>
               </div>
@@ -100,10 +124,17 @@ export function MinimalTemplate({ data }: { data: ResumeData }) {
           <div className="space-y-3">
             {data.projects.map((p, i) => (
               <div key={i}>
-                <div className="font-semibold">{p.name}</div>
-                <p className="text-sm text-neutral-700">{p.description}</p>
+                <Editable path={`projects.${i}.name`} value={p.name} as="div" className="font-semibold" />
+                <Editable path={`projects.${i}.description`} value={p.description} as="p" className="text-sm text-neutral-700" />
                 {p.tech.length > 0 && (
-                  <p className="mt-0.5 text-xs text-neutral-500">{p.tech.join(" · ")}</p>
+                  <p className="mt-0.5 text-xs text-neutral-500">
+                    {p.tech.map((tech, techIndex) => (
+                      <React.Fragment key={`${tech}-${techIndex}`}>
+                        {techIndex > 0 && " · "}
+                        <Editable path={`projects.${i}.tech.${techIndex}`} value={tech} as="span" />
+                      </React.Fragment>
+                    ))}
+                  </p>
                 )}
               </div>
             ))}
@@ -117,13 +148,20 @@ export function MinimalTemplate({ data }: { data: ResumeData }) {
             <div className="grid grid-cols-2 gap-y-3 gap-x-8">
               {data.skillItems.map((s, i) => (
                 <div key={i} className="flex flex-col">
-                  <span className="text-sm font-medium text-neutral-800">{s.name}</span>
+                  <Editable path={`skillItems.${i}.name`} value={s.name} as="span" className="text-sm font-medium text-neutral-800" />
                   <StarRating level={s.level} />
                 </div>
               ))}
             </div>
           ) : (
-            <p className="text-sm">{data.skills.join(" · ")}</p>
+            <p className="text-sm">
+              {data.skills.map((skill, skillIndex) => (
+                <React.Fragment key={`${skill}-${skillIndex}`}>
+                  {skillIndex > 0 && " · "}
+                  <Editable path={`skills.${skillIndex}`} value={skill} as="span" />
+                </React.Fragment>
+              ))}
+            </p>
           )}
         </Section>
       )}
@@ -134,9 +172,9 @@ export function MinimalTemplate({ data }: { data: ResumeData }) {
             {data.education.map((e, i) => (
               <div key={i} className="flex items-baseline justify-between text-sm">
                 <span>
-                  <span className="font-semibold">{e.degree}</span> · {e.institution}
+                  <Editable path={`education.${i}.degree`} value={e.degree} as="span" className="font-semibold" /> · <Editable path={`education.${i}.institution`} value={e.institution} as="span" />
                 </span>
-                <span className="text-xs text-neutral-500">{e.year}</span>
+                <Editable path={`education.${i}.year`} value={e.year} as="span" className="text-xs text-neutral-500" />
               </div>
             ))}
           </div>
@@ -146,7 +184,7 @@ export function MinimalTemplate({ data }: { data: ResumeData }) {
   );
 }
 
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
+function Section({ title, children }: { title: React.ReactNode; children: React.ReactNode }) {
   return (
     <section className="mt-6">
       <h2 className="mb-2 text-xs font-semibold uppercase tracking-[0.2em] rtl:tracking-normal text-neutral-500">
@@ -159,7 +197,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 
 export function ExecutiveTemplate({ data }: { data: ResumeData }) {
   const rtl = useLayoutRtl(data);
-  const l = labels(rtl, data);
+  const l = labels(data, rtl);
   return (
     <div
       dir={rtl ? "rtl" : "ltr"}
@@ -169,12 +207,12 @@ export function ExecutiveTemplate({ data }: { data: ResumeData }) {
       <div className="grid grid-cols-3 rtl:[direction:rtl]" style={{ flex: 1, minHeight: "1122px" }}>
         <aside className="col-span-1 bg-neutral-900 p-8 text-neutral-100">
           <div>
-            <h1 className="text-2xl font-bold leading-tight">{data.name}</h1>
-            <p className="mt-1 text-sm italic text-neutral-300">{data.title}</p>
+            <Editable path="name" value={data.name} as="h1" className="text-2xl font-bold leading-tight" />
+            <Editable path="title" value={data.title} as="p" className="mt-1 text-sm italic text-neutral-300" />
             <div className="mt-6 space-y-1 text-xs text-neutral-300">
-              {data.location && <div>{data.location}</div>}
-              {data.email && <div>{data.email}</div>}
-              {data.phone && <div>{data.phone}</div>}
+              {data.location && <Editable path="location" value={data.location} as="div" />}
+              {data.email && <Editable path="email" value={data.email} as="div" />}
+              {data.phone && <Editable path="phone" value={data.phone} as="div" />}
             </div>
           </div>
 
@@ -187,7 +225,7 @@ export function ExecutiveTemplate({ data }: { data: ResumeData }) {
                 <div className="space-y-4">
                   {data.skillItems.map((s, i) => (
                     <div key={i} className="flex flex-col">
-                      <span className="text-sm font-medium">{s.name}</span>
+                      <Editable path={`skillItems.${i}.name`} value={s.name} as="span" className="text-sm font-medium" />
                       <BarRating level={s.level} />
                     </div>
                   ))}
@@ -195,7 +233,7 @@ export function ExecutiveTemplate({ data }: { data: ResumeData }) {
               ) : (
                 <ul className="space-y-1 text-sm">
                   {data.skills.map((s, i) => (
-                    <li key={i}>{s}</li>
+                    <li key={i}><Editable path={`skills.${i}`} value={s} as="span" /></li>
                   ))}
                 </ul>
               )}
@@ -209,10 +247,8 @@ export function ExecutiveTemplate({ data }: { data: ResumeData }) {
               </h3>
               {data.education.map((e, i) => (
                 <div key={i} className="mb-2 text-xs">
-                  <div className="font-semibold">{e.degree}</div>
-                  <div className="text-neutral-400">
-                    {[e.institution, e.year].filter(Boolean).join(", ")}
-                  </div>
+                  <Editable path={`education.${i}.degree`} value={e.degree} as="div" className="font-semibold" />
+                  <div className="text-neutral-400"><Editable path={`education.${i}.institution`} value={e.institution} as="span" />, <Editable path={`education.${i}.year`} value={e.year} as="span" /></div>
                 </div>
               ))}
             </div>
@@ -225,7 +261,7 @@ export function ExecutiveTemplate({ data }: { data: ResumeData }) {
               </h3>
               <ul className="space-y-1 text-xs">
                 {data.certifications.map((c, i) => (
-                  <li key={i}>{c}</li>
+                  <li key={i}><Editable path={`certifications.${i}`} value={c} as="span" /></li>
                 ))}
               </ul>
             </div>
@@ -237,7 +273,7 @@ export function ExecutiveTemplate({ data }: { data: ResumeData }) {
             <h2 className="mb-2 border-b border-neutral-300 pb-1 text-xs font-bold uppercase tracking-[0.2em] rtl:tracking-normal text-neutral-700">
               {l.profile}
             </h2>
-            <p className="text-sm leading-relaxed">{data.summary}</p>
+            <Editable path="summary" value={data.summary} as="p" className="text-sm leading-relaxed" />
           </section>
 
           {data.experience.length > 0 && (
@@ -248,16 +284,16 @@ export function ExecutiveTemplate({ data }: { data: ResumeData }) {
               <div className="space-y-4">
                 {data.experience.map((e, i) => (
                   <div key={i}>
-                    <div className="text-base font-bold">{e.title}</div>
+                    <Editable path={`experience.${i}.title`} value={e.title} as="div" className="text-base font-bold" />
                     <div className="text-sm italic text-neutral-600">
-                      {e.company} · {e.duration}
+                      <Editable path={`experience.${i}.company`} value={e.company} as="span" /> · <Editable path={`experience.${i}.duration`} value={e.duration} as="span" />
                     </div>
                     {e.description && (
-                      <p className="mt-1 text-sm text-neutral-800">{e.description}</p>
+                      <Editable path={`experience.${i}.description`} value={e.description} as="p" className="mt-1 text-sm text-neutral-800" />
                     )}
                     <ul className="mt-1.5 list-disc space-y-1 pl-5 text-sm rtl:pl-0 rtl:pr-5">
                       {e.achievements.map((a, j) => (
-                        <li key={j}>{a}</li>
+                        <li key={j}><Editable path={`experience.${i}.achievements.${j}`} value={a} as="span" /></li>
                       ))}
                     </ul>
                   </div>
@@ -274,10 +310,10 @@ export function ExecutiveTemplate({ data }: { data: ResumeData }) {
               <div className="space-y-2.5">
                 {data.projects.map((p, i) => (
                   <div key={i}>
-                    <div className="font-bold">{p.name}</div>
-                    <p className="text-sm">{p.description}</p>
+                    <Editable path={`projects.${i}.name`} value={p.name} as="div" className="font-bold" />
+                    <Editable path={`projects.${i}.description`} value={p.description} as="p" className="text-sm" />
                     {p.impact && (
-                      <p className="text-xs italic text-neutral-600">{l.impact}: {p.impact}</p>
+                      <p className="text-xs italic text-neutral-600">{l.impact}: <Editable path={`projects.${i}.impact`} value={p.impact} as="span" /></p>
                     )}
                   </div>
                 ))}

@@ -35,8 +35,6 @@ export function NewSleekTemplate({ data }: { data: ResumeData }) {
   const l = labels(c, rtl);
   const design = useContext(DesignContext);
 
-  const showSkillBars = design?.showSkillBars !== false;
-
   const colLayout = design?.columnLayout || "sidebar-right";
   const layoutClass =
     colLayout === "single"
@@ -56,7 +54,7 @@ export function NewSleekTemplate({ data }: { data: ResumeData }) {
   const skillsColumns = design?.skillsColumns || 1;
   const skillsLocation = design?.skillsLocation || "sidebar";
 
-  const renderSkills = showSkillBars &&
+  const renderSkills = design?.showSkillBars !== false &&
     (c.skillItems?.length ? c.skillItems.length > 0 : c.skills.length > 0) && (
       <Section title={l.skills}>
         <InteractiveSkills
@@ -91,13 +89,13 @@ export function NewSleekTemplate({ data }: { data: ResumeData }) {
             path="name"
             value={c.name}
             as="h1"
-            className="max-w-[12ch] text-5xl font-black rtl:font-normal leading-[0.94] tracking-tight rtl:tracking-normal text-[var(--color-heading)]"
+            className="text-5xl font-black leading-[0.94] tracking-tight rtl:tracking-normal text-[var(--color-heading)] break-words"
           />
           <Editable
             path="title"
             value={c.title}
             as="p"
-            className="mt-4 text-sm font-black rtl:font-normal uppercase tracking-[0.28em] rtl:tracking-normal text-[var(--color-text)] opacity-80"
+            className="mt-4 text-sm font-black uppercase tracking-[0.28em] rtl:tracking-normal text-[var(--color-text)] opacity-80"
           />
         </div>
         <div className="flex flex-col items-end gap-5 rtl:items-start">
@@ -131,7 +129,7 @@ export function NewSleekTemplate({ data }: { data: ResumeData }) {
                       path={`projects.${index}.name`}
                       value={project.name}
                       as="h3"
-                      className="text-[13px] font-extrabold rtl:font-normal text-[var(--color-heading)]"
+                      className="text-[13px] font-extrabold text-[var(--color-heading)]"
                     />
                     <Editable
                       path={`projects.${index}.description`}
@@ -144,7 +142,7 @@ export function NewSleekTemplate({ data }: { data: ResumeData }) {
                         path={`projects.${index}.tech`}
                         value={project.tech.join(" / ")}
                         as="p"
-                        className="mt-1 text-[10px] font-black rtl:font-normal uppercase tracking-[0.16em] rtl:tracking-normal text-[var(--color-text)] opacity-60"
+                        className="mt-1 text-[10px] font-black uppercase tracking-[0.16em] rtl:tracking-normal text-[var(--color-text)] opacity-60"
                       />
                     )}
                   </article>
@@ -173,19 +171,19 @@ export function NewSleekTemplate({ data }: { data: ResumeData }) {
                       path={`education.${index}.degree`}
                       value={item.degree}
                       as="div"
-                      className="text-[12px] font-extrabold rtl:font-normal leading-5 text-[var(--color-heading)]"
+                      className="text-[12px] font-extrabold leading-5 text-[var(--color-heading)]"
                     />
                     <Editable
                       path={`education.${index}.institution`}
                       value={item.institution}
                       as="div"
-                      className="mt-1 text-[11px] font-semibold rtl:font-normal text-[var(--color-text)] opacity-80"
+                      className="mt-1 text-[11px] font-semibold text-[var(--color-text)] opacity-80"
                     />
                     <Editable
                       path={`education.${index}.year`}
                       value={item.year}
                       as="div"
-                      className="mt-1 text-[10px] font-black rtl:font-normal text-[var(--color-text)] opacity-60"
+                      className="mt-1 text-[10px] font-black text-[var(--color-text)] opacity-60"
                     />
                   </div>
                 ))}
@@ -194,7 +192,7 @@ export function NewSleekTemplate({ data }: { data: ResumeData }) {
           )}
           {c.certifications.length > 0 && (
             <Section title={l.certifications}>
-              <div className="space-y-2 text-[11px] font-semibold rtl:font-normal leading-5 text-[var(--color-text)]">
+              <div className="space-y-2 text-[11px] font-semibold leading-5 text-[var(--color-text)]">
                 {c.certifications.map((item, index) => (
                   <Editable key={item} path={`certifications.${index}`} value={item} as="div" />
                 ))}

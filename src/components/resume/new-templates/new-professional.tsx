@@ -232,7 +232,7 @@ export function NewProfessionalTemplate({ data }: { data: ResumeData }) {
                           value={item.institution}
                           as="span"
                         />
-                        <span>┬╖</span>
+                        <span>·</span>
                         <Editable path={`education.${index}.year`} value={item.year} as="span" />
                       </div>
                     </div>

@@ -21,17 +21,17 @@ export function DuboisTemplate({ data }: { data: ResumeData }) {
 
   const l = labels(c, rtl);
   const SidebarTitle = ({ children }: { children: ReactNode }) => (
-    <h2 className="mb-5 text-[17px] font-black rtl:font-normal leading-none text-[#153f68]">{children}</h2>
+    <h2 className="mb-5 text-[17px] font-black leading-none text-[#153f68]">{children}</h2>
   );
 
   return (
     <div dir={rtl ? "rtl" : "ltr"} className="relative overflow-hidden bg-white font-sans text-[#153f68]" style={{ minHeight: "1122px", width: "100%", maxWidth: "100%" }}>
-      <aside className="absolute left-0 rtl:left-auto rtl:right-0 top-0 h-full w-[260px] bg-[#dcdfe5] px-[41px] pt-[26px]">
+      <aside className="absolute left-0 top-0 h-full w-[260px] bg-[#dcdfe5] px-[41px] pt-[26px] rtl:left-auto rtl:right-0">
         <PhotoBlock data={c} shape={photoBlockShape} />
 
         <section className="mt-[45px]">
           <SidebarTitle>{l.contact}</SidebarTitle>
-          <div className="space-y-[22px] text-[12px] font-bold rtl:font-normal">
+          <div className="space-y-[22px] text-[12px] font-bold">
             {c.phone && (
               <div className="flex items-center gap-4">
                 <Phone size={24} fill="currentColor" strokeWidth={3} />
@@ -55,7 +55,7 @@ export function DuboisTemplate({ data }: { data: ResumeData }) {
 
         <section className="mt-[48px]">
           <SidebarTitle>{rtl ? "زمانەکان" : "Languages"}</SidebarTitle>
-          <div className="space-y-3 text-[13px] font-bold rtl:font-normal">
+          <div className="space-y-3 text-[13px] font-bold">
             {languages.map((item, index) => {
               const isCert = c.certifications.includes(item);
               const path = isCert
@@ -76,43 +76,25 @@ export function DuboisTemplate({ data }: { data: ResumeData }) {
           </div>
         </section>
 
-        {showSkillBars && (c.skillItems?.length ? c.skillItems.length > 0 : c.skills.length > 0) && (
+        {showSkillBars && (
           <section className="mt-[54px]">
             <SidebarTitle>{l.skills}</SidebarTitle>
-            <div className="space-y-2 text-[13px] font-bold rtl:font-normal leading-[1.35]">
-              {c.skillItems && c.skillItems.length > 0 ? (
-                c.skillItems.slice(0, 6).map((s, index) => (
-                  <div key={s.name} className="flex justify-between items-center gap-2">
-                    <Editable path={`skillItems.${index}.name`} value={s.name} as="p" className="text-[13px] font-bold rtl:font-normal" />
-                    <div className="flex shrink-0 gap-1.5 rtl:flex-row-reverse">
-                      {Array.from({ length: 5 }).map((_, dot) => (
-                        <span key={dot} className={`h-2 w-2 rounded-full bg-[#153f68] ${dot < s.level ? "" : "opacity-30"}`} />
-                      ))}
-                    </div>
-                  </div>
-                ))
-              ) : (
-                c.skills.slice(0, 6).map((skill, index) => {
-                  const rating = skillRating(c, skill, index);
-                  return (
-                    <div key={skill} className="flex justify-between items-center gap-2">
-                      <Editable path={`skills.${index}`} value={skill} as="p" className="text-[13px] font-bold rtl:font-normal" />
-                      <div className="flex shrink-0 gap-1.5 rtl:flex-row-reverse">
-                        {Array.from({ length: 5 }).map((_, dot) => (
-                          <span key={dot} className={`h-2 w-2 rounded-full bg-[#153f68] ${dot < rating ? "" : "opacity-30"}`} />
-                        ))}
-                      </div>
-                    </div>
-                  );
-                })
-              )}
+            <div className="space-y-2 text-[13px] font-bold leading-[1.35]">
+              {skills.map((skill) => (
+                <Editable
+                  key={skill}
+                  path={`skills.${c.skills.indexOf(skill)}`}
+                  value={skill}
+                  as="p"
+                />
+              ))}
             </div>
           </section>
         )}
 
         <section className="mt-[58px]">
-          <SidebarTitle>{rtl ? "ئارەزووەکان" : "Interests"}</SidebarTitle>
-          <div className="space-y-2 text-[13px] font-bold rtl:font-normal leading-[1.35]">
+          <SidebarTitle>{rtl ? "بەرژەوەندییەکان" : "Interests"}</SidebarTitle>
+          <div className="space-y-2 text-[13px] font-bold leading-[1.35]">
             {interests.map((item, idx) => {
               const projectIdx = c.projects.findIndex((p) => p.name === item);
               const skillIdx = c.skills.indexOf(item);
@@ -128,41 +110,43 @@ export function DuboisTemplate({ data }: { data: ResumeData }) {
         </section>
       </aside>
 
-      <header className="absolute left-[210px] rtl:left-[11px] right-[11px] rtl:right-[210px] top-[52px] h-[145px] bg-[#153f68] px-[65px] py-[38px] text-white">
-        <Editable path="name" value={c.name} as="h1" className="text-[39px] font-black rtl:font-normal leading-none tracking-tight rtl:tracking-normal text-white" />
-        <Editable path="title" value={c.title} as="p" className="mt-4 text-[25px] font-semibold rtl:font-normal italic leading-none text-white" />
+      <header className="absolute left-[210px] right-[11px] top-[52px] h-[145px] bg-[#153f68] px-[65px] py-[38px] text-white rtl:left-[11px] rtl:right-[210px]">
+        <Editable path="name" value={c.name} as="h1" className="text-[39px] font-black leading-none tracking-tight text-white" />
+        <Editable path="title" value={c.title} as="p" className="mt-4 text-[25px] font-semibold italic leading-none text-white" />
       </header>
 
-      <main className="absolute left-[306px] rtl:left-[39px] right-[39px] rtl:right-[306px] top-[255px]">
+      <main className="absolute left-[306px] right-[39px] top-[255px] rtl:left-[39px] rtl:right-[306px]">
+
         <section>
-          <h2 className="mb-6 text-[21px] font-black rtl:font-normal leading-none">{l.education}</h2>
+          <h2 className="mb-6 text-[21px] font-black leading-none">{l.education}</h2>
           <div className="space-y-6">
             {c.education.slice(0, 2).map((item, index) => (
               <div key={`${item.institution}-${index}`} className="grid grid-cols-[1fr_92px] gap-6">
                 <div>
-                  <Editable path={`education.${index}.degree`} value={item.degree} as="h3" className="text-[16px] font-black rtl:font-normal leading-tight" />
-                  <Editable path={`education.${index}.institution`} value={item.institution} as="p" className="text-[16px] font-semibold rtl:font-normal italic leading-tight text-[#2b6398]" />
+                  <Editable path={`education.${index}.degree`} value={item.degree} as="h3" className="text-[16px] font-black leading-tight" />
+                  <Editable path={`education.${index}.institution`} value={item.institution} as="p" className="text-[16px] font-semibold italic leading-tight text-[#2b6398]" />
                 </div>
-                <Editable path={`education.${index}.year`} value={item.year} as="p" className="pt-1 text-right rtl:text-left text-[11px] font-semibold rtl:font-normal italic text-[#2b6398]" />
+                <Editable path={`education.${index}.year`} value={item.year} as="p" className="pt-1 text-right text-[11px] font-semibold italic text-[#2b6398] rtl:text-left" />
               </div>
             ))}
           </div>
         </section>
 
         <section className="mt-[64px]">
-          <h2 className="mb-7 text-[23px] font-black rtl:font-normal leading-none">{l.experience}</h2>
-          <div className="relative border-l-[3px] rtl:border-l-0 rtl:border-r-[3px] border-[#245b90] pl-[22px] rtl:pl-0 rtl:pr-[22px]">
+          <h2 className="mb-7 text-[23px] font-black leading-none">{l.experience}</h2>
+          <div className="relative border-l-[3px] border-[#245b90] pl-[22px] rtl:border-l-0 rtl:border-r-[3px] rtl:pl-0 rtl:pr-[22px]">
             {c.experience.slice(0, 3).map((item, index) => (
               <article key={`${item.company}-${index}`} className="relative mb-[36px]">
-                <span className="absolute -left-[29px] rtl:left-auto rtl:-right-[29px] top-1.5 h-[10px] w-[10px] rounded-full bg-[#153f68]" />
+                <span className="absolute -left-[29px] top-1.5 h-[10px] w-[10px] rounded-full bg-[#153f68] rtl:-left-auto rtl:-right-[29px]" />
                 <div className="grid grid-cols-[1fr_98px] gap-5">
                   <div>
-                    <Editable path={`experience.${index}.title`} value={item.title} as="h3" className="text-[17px] font-black rtl:font-normal leading-tight" />
-                    <Editable path={`experience.${index}.company`} value={item.company} as="p" className="text-[16px] font-semibold rtl:font-normal italic leading-tight text-[#2b6398]" />
+                    <Editable path={`experience.${index}.title`} value={item.title} as="h3" className="text-[17px] font-black leading-tight" />
+                    <Editable path={`experience.${index}.company`} value={item.company} as="p" className="text-[16px] font-semibold italic leading-tight text-[#2b6398]" />
                   </div>
-                  <Editable path={`experience.${index}.duration`} value={item.duration} as="p" className="pt-1 text-right rtl:text-left text-[11px] font-semibold rtl:font-normal italic leading-tight text-[#2b6398]" />
+                  <Editable path={`experience.${index}.duration`} value={item.duration} as="p" className="pt-1 text-right text-[11px] font-semibold italic leading-tight text-[#2b6398] rtl:text-left" />
                 </div>
-                <ul className="mt-5 list-disc space-y-1 pl-6 rtl:pl-0 rtl:pr-6 text-[14px] font-semibold rtl:font-normal leading-[1.2]">
+                <ul className="mt-5 list-disc space-y-1 pl-6 text-[14px] font-semibold leading-[1.2] rtl:pl-0 rtl:pr-6">
+
                   {(item.achievements.length ? item.achievements : [item.description]).slice(0, 3).map((achievement, achievementIndex) => {
                     const path = item.achievements.length
                       ? `experience.${index}.achievements.${achievementIndex}`
