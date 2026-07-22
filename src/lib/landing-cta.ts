@@ -8,7 +8,7 @@ export function landingCtaPath(opts: {
   mode: LandingCtaMode;
 }): string {
   if (opts.isSignedIn || opts.mode === "dashboard") {
-    return "/dashboard";
+    return "/jobs";
   }
   if (opts.mode === "login" && opts.clerkEnabled) {
     return "/login";
@@ -16,5 +16,5 @@ export function landingCtaPath(opts: {
   if (opts.clerkEnabled) {
     return "/signup";
   }
-  return opts.onboardingDone ? "/dashboard" : "/onboarding";
+  return "/jobs";
 }

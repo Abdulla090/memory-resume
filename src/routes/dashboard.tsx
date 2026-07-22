@@ -22,6 +22,7 @@ import {
 import { useState } from "react";
 import { useAppStore } from "@/lib/store";
 import { useDarkMode } from "@/hooks/use-dark-mode";
+import { MobileTabBar } from "@/components/app-shell/MobileTabBar";
 
 
 export const Route = createFileRoute("/dashboard")({
@@ -262,7 +263,7 @@ function DashboardLayout() {
       </aside>
 
       {/* Main content */}
-      <main className="perf-scroll relative min-w-0 flex-1 h-full overflow-y-auto bg-background p-4 text-foreground sm:p-6 lg:p-10">
+      <main className="perf-scroll relative min-w-0 flex-1 h-full overflow-y-auto bg-background p-4 pb-24 text-foreground sm:p-6 md:pb-10 lg:p-10">
         {/* Top bar: mobile hamburger + dark toggle */}
         <div className="mb-6 flex items-center justify-between">
           <button
@@ -283,6 +284,8 @@ function DashboardLayout() {
         </div>
         <Outlet />
       </main>
+
+      <MobileTabBar />
 
     </div>
   );

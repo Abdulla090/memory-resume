@@ -945,7 +945,37 @@ ${(() => {
           <div
             ref={previewRef}
             onClick={handlePreviewClick}
-            onMouseDown={(e) => { lastMouseDown.current = { clientX: e.clientX, clientY: e.clientY }; }}
+            onMouseDown={(e) => {
+              lastMouseDown.current = { clientX: e.clientX, clientY: e.clientY };
+              if (!isDesignMode) return;
+              // Alt/Option + drag on any editable field nudges it (clamped ±8px)
+              if (!e.altKey) return;
+              const target = (e.target as HTMLElement).closest("[data-field-path],[data-path]") as HTMLElement | null;
+              const path = target?.dataset.fieldPath || target?.dataset.path;
+              if (!target || !path) return;
+              e.preventDefault();
+              e.stopPropagation();
+              const startX = e.clientX;
+              const startY = e.clientY;
+              const style = getComputedStyle(target);
+              const match = /translate\((-?\d+(?:\.\d+)?)px,\s*(-?\d+(?:\.\d+)?)px\)/.exec(style.transform || "");
+              const baseX = match ? parseFloat(match[1]) : 0;
+              const baseY = match ? parseFloat(match[2]) : 0;
+              const clamp = (n: number) => Math.max(-8, Math.min(8, Math.round(n)));
+              const onMove = (ev: MouseEvent) => {
+                const nx = clamp(baseX + (ev.clientX - startX) / scale);
+                const ny = clamp(baseY + (ev.clientY - startY) / scale);
+                window.dispatchEvent(new CustomEvent("ds-nudge", { detail: { path, nudgeX: nx, nudgeY: ny } }));
+              };
+              const onUp = () => {
+                window.removeEventListener("mousemove", onMove);
+                window.removeEventListener("mouseup", onUp);
+                document.body.style.cursor = "";
+              };
+              document.body.style.cursor = "move";
+              window.addEventListener("mousemove", onMove);
+              window.addEventListener("mouseup", onUp);
+            }}
             className={`ds-live perf-contain absolute left-0 top-0 z-10 overflow-hidden rounded-[28px] border border-slate-200/70 shadow-[0_20px_50px_-24px_rgba(15,23,42,0.45)] transition-shadow duration-200 ease-out hover:ring-2 hover:ring-blue-400/50 ${isDesignMode ? "design-mode" : ""}`}
             style={{
               width: "794px",

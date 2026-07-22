@@ -2531,7 +2531,19 @@ function SiteFooter({ language }: { language: Language }) {
 function Landing() {
   const language = useAppStore((s) => s.language);
   const setLanguage = useAppStore((s) => s.setLanguage);
+  const onboardingDone = useAppStore((s) => s.onboardingDone);
+  const { isSignedIn } = useAuth();
+  const navigate = useNavigate();
   const t = copy[language];
+
+  // Landing shows only for logged-out / brand-new users. Returning users
+  // (finished onboarding or signed in) go straight to the app.
+  useEffect(() => {
+    if (isSignedIn || onboardingDone) {
+      navigate({ to: "/jobs", replace: true });
+    }
+  }, [isSignedIn, onboardingDone, navigate]);
+
 
   return (
     <LandingScrollMotion>

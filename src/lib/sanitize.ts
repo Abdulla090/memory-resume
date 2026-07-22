@@ -41,6 +41,8 @@ type FieldOverride = {
   fontFamily?: string;
   letterSpacing?: number;
   textTransform?: string;
+  nudgeX?: number;
+  nudgeY?: number;
 };
 
 /** Build safe CSS for per-field design overrides. */
@@ -64,6 +66,13 @@ export function buildFieldOverrideCss(fieldOverrides: Record<string, FieldOverri
       const allowedTransform = ["none", "uppercase", "lowercase", "capitalize"];
       if (ov.textTransform && allowedTransform.includes(ov.textTransform)) {
         rules.push(`text-transform: ${ov.textTransform} !important`);
+      }
+      const clamp = (n: number) => Math.max(-8, Math.min(8, n));
+      const nx = typeof ov.nudgeX === "number" ? clamp(ov.nudgeX) : 0;
+      const ny = typeof ov.nudgeY === "number" ? clamp(ov.nudgeY) : 0;
+      if (nx !== 0 || ny !== 0) {
+        rules.push(`transform: translate(${nx}px, ${ny}px) !important`);
+        rules.push(`will-change: transform`);
       }
       if (rules.length === 0) return "";
       const safePath = escapeCssAttrValue(path);

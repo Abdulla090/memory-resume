@@ -124,6 +124,8 @@ export interface FieldStyleOverride {
   fontFamily?: string;   // font name
   letterSpacing?: number; // em
   textTransform?: "none" | "uppercase" | "lowercase" | "capitalize";
+  nudgeX?: number;       // px, clamped -8..8 (design-mode alt-drag)
+  nudgeY?: number;       // px, clamped -8..8
 }
 
 export type TemplateId =

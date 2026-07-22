@@ -13,9 +13,11 @@ import { Route as VerifyEmailRouteImport } from './routes/verify-email'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as TemplatesRouteImport } from './routes/templates'
 import { Route as SignupRouteImport } from './routes/signup'
+import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as JobsRouteImport } from './routes/jobs'
 import { Route as InterviewRouteImport } from './routes/interview'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as DashboardRouteImport } from './routes/dashboard'
@@ -55,6 +57,11 @@ const SignupRoute = SignupRouteImport.update({
   path: '/signup',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ProfileRoute = ProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PrivacyRoute = PrivacyRouteImport.update({
   id: '/privacy',
   path: '/privacy',
@@ -68,6 +75,11 @@ const OnboardingRoute = OnboardingRouteImport.update({
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const JobsRoute = JobsRouteImport.update({
+  id: '/jobs',
+  path: '/jobs',
   getParentRoute: () => rootRouteImport,
 } as any)
 const InterviewRoute = InterviewRouteImport.update({
@@ -166,9 +178,11 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof DashboardRouteWithChildren
   '/forgot-password': typeof ForgotPasswordRoute
   '/interview': typeof InterviewRoute
+  '/jobs': typeof JobsRoute
   '/login': typeof LoginRouteWithChildren
   '/onboarding': typeof OnboardingRoute
   '/privacy': typeof PrivacyRoute
+  '/profile': typeof ProfileRoute
   '/signup': typeof SignupRouteWithChildren
   '/templates': typeof TemplatesRoute
   '/terms': typeof TermsRoute
@@ -192,9 +206,11 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/interview': typeof InterviewRoute
+  '/jobs': typeof JobsRoute
   '/login': typeof LoginRouteWithChildren
   '/onboarding': typeof OnboardingRoute
   '/privacy': typeof PrivacyRoute
+  '/profile': typeof ProfileRoute
   '/signup': typeof SignupRouteWithChildren
   '/templates': typeof TemplatesRoute
   '/terms': typeof TermsRoute
@@ -220,9 +236,11 @@ export interface FileRoutesById {
   '/dashboard': typeof DashboardRouteWithChildren
   '/forgot-password': typeof ForgotPasswordRoute
   '/interview': typeof InterviewRoute
+  '/jobs': typeof JobsRoute
   '/login': typeof LoginRouteWithChildren
   '/onboarding': typeof OnboardingRoute
   '/privacy': typeof PrivacyRoute
+  '/profile': typeof ProfileRoute
   '/signup': typeof SignupRouteWithChildren
   '/templates': typeof TemplatesRoute
   '/terms': typeof TermsRoute
@@ -249,9 +267,11 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/forgot-password'
     | '/interview'
+    | '/jobs'
     | '/login'
     | '/onboarding'
     | '/privacy'
+    | '/profile'
     | '/signup'
     | '/templates'
     | '/terms'
@@ -275,9 +295,11 @@ export interface FileRouteTypes {
     | '/'
     | '/forgot-password'
     | '/interview'
+    | '/jobs'
     | '/login'
     | '/onboarding'
     | '/privacy'
+    | '/profile'
     | '/signup'
     | '/templates'
     | '/terms'
@@ -302,9 +324,11 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/forgot-password'
     | '/interview'
+    | '/jobs'
     | '/login'
     | '/onboarding'
     | '/privacy'
+    | '/profile'
     | '/signup'
     | '/templates'
     | '/terms'
@@ -330,9 +354,11 @@ export interface RootRouteChildren {
   DashboardRoute: typeof DashboardRouteWithChildren
   ForgotPasswordRoute: typeof ForgotPasswordRoute
   InterviewRoute: typeof InterviewRoute
+  JobsRoute: typeof JobsRoute
   LoginRoute: typeof LoginRouteWithChildren
   OnboardingRoute: typeof OnboardingRoute
   PrivacyRoute: typeof PrivacyRoute
+  ProfileRoute: typeof ProfileRoute
   SignupRoute: typeof SignupRouteWithChildren
   TemplatesRoute: typeof TemplatesRoute
   TermsRoute: typeof TermsRoute
@@ -371,6 +397,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SignupRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/profile': {
+      id: '/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof ProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/privacy': {
       id: '/privacy'
       path: '/privacy'
@@ -390,6 +423,13 @@ declare module '@tanstack/react-router' {
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/jobs': {
+      id: '/jobs'
+      path: '/jobs'
+      fullPath: '/jobs'
+      preLoaderRoute: typeof JobsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/interview': {
@@ -577,9 +617,11 @@ const rootRouteChildren: RootRouteChildren = {
   DashboardRoute: DashboardRouteWithChildren,
   ForgotPasswordRoute: ForgotPasswordRoute,
   InterviewRoute: InterviewRoute,
+  JobsRoute: JobsRoute,
   LoginRoute: LoginRouteWithChildren,
   OnboardingRoute: OnboardingRoute,
   PrivacyRoute: PrivacyRoute,
+  ProfileRoute: ProfileRoute,
   SignupRoute: SignupRouteWithChildren,
   TemplatesRoute: TemplatesRoute,
   TermsRoute: TermsRoute,

@@ -233,13 +233,8 @@ function ResumeEditor() {
     .sort((a, b) => b.createdAt - a.createdAt)
     .slice(0, 6);
 
-  // ── Debounced preview (must be before early return — Rules of Hooks) ──────────
-  const [debouncedData, setDebouncedData] = useState<ResumeData | undefined>(resume?.data);
-  useEffect(() => {
-    if (!resume?.data) return;
-    const t = setTimeout(() => setDebouncedData(resume.data), 400);
-    return () => clearTimeout(t);
-  }, [resume?.data]);
+  // Preview reads live store data — design changes (skill levels, nudges, colors)
+  // must reflect instantly. Editable is uncontrolled so re-renders don't disrupt typing.
 
   // ── Early return ─────────────────────────────────────────────────────────────
   if (!resume) {
@@ -305,8 +300,19 @@ function ResumeEditor() {
     updateDesign({ fieldOverrides: newOverrides });
   };
 
-  // ── Debounced preview (layout direction via previewLayoutRtl, not content swap) ──
-  const previewData = debouncedData ?? data;
+  // Alt+drag nudge from the preview surface — patch only nudge fields, keep other overrides.
+  useEffect(() => {
+    const handler = (ev: Event) => {
+      const detail = (ev as CustomEvent<{ path: string; nudgeX: number; nudgeY: number }>).detail;
+      if (!detail?.path) return;
+      const existing = design.fieldOverrides?.[detail.path] ?? {};
+      updateFieldOverride(detail.path, { ...existing, nudgeX: detail.nudgeX, nudgeY: detail.nudgeY });
+    };
+    window.addEventListener("ds-nudge", handler);
+    return () => window.removeEventListener("ds-nudge", handler);
+  }, [design.fieldOverrides]);
+
+  const previewData = data;
   const categories: Category[] = ["All", "Minimal", "Professional", "Academic", "Creative"];
 
   // ── Handlers ──────────────────────────────────────────────────────────────────
@@ -489,44 +495,33 @@ function ResumeEditor() {
   // ─── Render ──────────────────────────────────────────────────────────────────
   return (
     <DesignContext.Provider value={design}>
-      <div className="app-shell h-[100dvh] w-full bg-[#f0f2f7] text-slate-900 font-sans selection:bg-blue-100 selection:text-blue-900 relative overflow-hidden flex flex-col">
-        {/* Ambient background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-slate-100 via-blue-50/30 to-slate-100 pointer-events-none" />
-
-        {/* ── Top Bar ── */}
-        <header
-          className="relative z-50 shrink-0 flex items-center justify-between px-4 py-3 border-b border-white/60"
-          style={{ background: "rgba(255,255,255,0.82)", backdropFilter: "blur(20px)" }}
-        >
-          {/* Left */}
-          <div className="flex items-center gap-3">
-            <Link to="/" className="flex items-center gap-2 group cursor-pointer">
-              <div className="size-8 rounded-xl bg-white shadow-[0_2px_8px_rgba(0,0,0,0.12),0_1px_0_rgba(255,255,255,0.8)_inset] flex items-center justify-center">
-                <img
-                  src="/logo/MemoryCV Logo Icon Only.png"
-                  alt="MemoryCV"
-                  className="size-5 object-contain"
-                />
-              </div>
+      <div className="app-shell h-[100dvh] w-full bg-[#fafafa] text-slate-900 font-sans selection:bg-slate-900 selection:text-white relative overflow-hidden flex flex-col">
+        {/* ── Top Bar — flat editorial ── */}
+        <header className="relative z-50 shrink-0 flex items-center justify-between h-12 px-3 sm:px-4 border-b border-slate-200 bg-white">
+          {/* Left cluster */}
+          <div className="flex items-center gap-2 min-w-0">
+            <Link to="/" className="flex items-center justify-center size-7 rounded-md hover:bg-slate-100 transition-colors shrink-0" aria-label="Home">
+              <img src="/logo/MemoryCV Logo Icon Only.png" alt="MemoryCV" className="size-4 object-contain" />
             </Link>
-            <div className="relative" ref={resumeMenuRef}>
+            <div className="h-4 w-px bg-slate-200 shrink-0" />
+            <div className="relative min-w-0" ref={resumeMenuRef}>
               <button
                 type="button"
                 onClick={() => setShowResumeMenu((v) => !v)}
-                className="flex items-center gap-1.5 rounded-full px-3 py-1 bg-white shadow-[0_2px_8px_rgba(0,0,0,0.08),0_1px_0_rgba(255,255,255,0.9)_inset] border border-white/60 hover:bg-slate-50 transition-colors"
+                className="flex items-center gap-1.5 h-7 px-2 rounded-md hover:bg-slate-100 transition-colors max-w-full"
               >
-                <FileUser className="size-3.5 text-slate-500" />
-                <span className="text-[13px] font-semibold text-slate-700 max-w-[160px] truncate">
-                  {data.name || "My Resume"}
+                <FileUser className="size-3.5 text-slate-500 shrink-0" />
+                <span className="text-[13px] font-medium text-slate-800 max-w-[140px] sm:max-w-[220px] truncate">
+                  {data.name || (isKu ? "سیڤی من" : "My Resume")}
                 </span>
                 <ChevronDown
-                  className={`size-3 text-slate-400 transition-transform ${showResumeMenu ? "rotate-180" : ""}`}
+                  className={`size-3 text-slate-400 transition-transform shrink-0 ${showResumeMenu ? "rotate-180" : ""}`}
                 />
               </button>
               {showResumeMenu && recentResumes.length > 0 && (
-                <div className="absolute left-0 top-full z-50 mt-2 w-[min(92vw,18rem)] overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_18px_40px_-18px_rgba(15,23,42,0.35)]">
-                  <div className="px-3 py-2 text-[11px] font-bold uppercase tracking-[0.2em] text-slate-400 border-b border-slate-100">
-                    {isKu ? "سیڤییە تازەکان" : "Recent CVs"}
+                <div className="absolute left-0 top-full z-50 mt-1.5 w-[min(92vw,20rem)] overflow-hidden rounded-lg border border-slate-200 bg-white shadow-lg">
+                  <div className="px-3 py-1.5 text-[10px] font-medium uppercase tracking-[0.14em] text-slate-500 border-b border-slate-100">
+                    {isKu ? "سیڤییە تازەکان" : "Recent"}
                   </div>
                   <div className="max-h-72 overflow-y-auto py-1">
                     {recentResumes.map((item) => (
@@ -537,13 +532,11 @@ function ResumeEditor() {
                           setShowResumeMenu(false);
                           navigate({ to: "/editor/$id", params: { id: item.id } });
                         }}
-                        className="flex w-full items-start gap-2 px-3 py-2 text-left hover:bg-slate-50 transition-colors"
+                        className="flex w-full items-center gap-2 px-3 py-2 text-left hover:bg-slate-50 transition-colors"
                       >
-                        <div className="mt-0.5 rounded-lg bg-blue-50 p-1.5 text-blue-600">
-                          <FileText className="size-3.5" />
-                        </div>
+                        <FileText className="size-3.5 text-slate-400 shrink-0" />
                         <div className="min-w-0 flex-1">
-                          <div className="truncate text-[13px] font-semibold text-slate-800">
+                          <div className="truncate text-[13px] font-medium text-slate-800">
                             {item.title || item.data.name || "My Resume"}
                           </div>
                           <div className="truncate text-[11px] text-slate-500">
@@ -562,77 +555,67 @@ function ResumeEditor() {
             </div>
           </div>
 
-          {/* Center: title or empty space */}
-          <div className="hidden md:flex flex-1" />
-
-          {/* Right: undo/redo + theme toggle + View resume toggle */}
-          <div className="flex items-center gap-2">
-            <div className="hidden sm:flex items-center rounded-full bg-white shadow-[0_2px_8px_rgba(0,0,0,0.1),0_1px_0_rgba(255,255,255,0.9)_inset] border border-white/60 overflow-hidden">
+          {/* Right cluster */}
+          <div className="flex items-center gap-1">
+            <div className="hidden sm:flex items-center h-7 rounded-md border border-slate-200 bg-slate-50 p-0.5">
               <button
                 type="button"
-                onClick={() => {
-                  if (undoResume(id)) toast.message(isKu ? "گەڕایەوە" : "Undone");
-                }}
+                onClick={() => { if (undoResume(id)) toast.message(isKu ? "گەڕایەوە" : "Undone"); }}
                 disabled={!canUndo}
-                aria-label={isKu ? "پاشگەز بوونەوە" : "Undo"}
+                aria-label={isKu ? "پاشگەز" : "Undo"}
                 title={`${isKu ? "پاشگەز" : "Undo"} (⌘Z)`}
-                className="flex h-9 w-9 items-center justify-center text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-colors disabled:opacity-30 disabled:pointer-events-none"
+                className="flex items-center justify-center size-6 rounded-[5px] text-slate-600 hover:text-slate-900 hover:bg-white transition-colors disabled:opacity-30 disabled:pointer-events-none"
               >
-                <Undo2 className="size-4" />
+                <Undo2 className="size-3.5" />
               </button>
-              <div className="h-4 w-px bg-slate-200" />
               <button
                 type="button"
-                onClick={() => {
-                  if (redoResume(id)) toast.message(isKu ? "دووبارە کرا" : "Redone");
-                }}
+                onClick={() => { if (redoResume(id)) toast.message(isKu ? "دووبارە" : "Redone"); }}
                 disabled={!canRedo}
                 aria-label={isKu ? "دووبارە" : "Redo"}
                 title={`${isKu ? "دووبارە" : "Redo"} (⌘⇧Z)`}
-                className="flex h-9 w-9 items-center justify-center text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-colors disabled:opacity-30 disabled:pointer-events-none"
+                className="flex items-center justify-center size-6 rounded-[5px] text-slate-600 hover:text-slate-900 hover:bg-white transition-colors disabled:opacity-30 disabled:pointer-events-none"
               >
-                <Redo2 className="size-4" />
+                <Redo2 className="size-3.5" />
               </button>
             </div>
+
             <button
               onClick={toggleDark}
               aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
-              title={isDark ? (isKu ? "دۆخی ڕووناک" : "Light mode") : (isKu ? "دۆخی تاریک" : "Dark mode")}
-              className="flex h-9 w-9 items-center justify-center rounded-full bg-white text-slate-600 shadow-[0_2px_8px_rgba(0,0,0,0.1),0_1px_0_rgba(255,255,255,0.9)_inset] border border-white/60 hover:text-slate-900 transition-all active:scale-[0.97]"
+              title={isDark ? (isKu ? "دۆخی ڕووناک" : "Light") : (isKu ? "دۆخی تاریک" : "Dark")}
+              className="flex items-center justify-center size-7 rounded-md text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors"
             >
-              {isDark ? <Sun className="size-4" /> : <Moon className="size-4" />}
+              {isDark ? <Sun className="size-3.5" /> : <Moon className="size-3.5" />}
             </button>
+
+            <div className="w-px h-5 bg-slate-200 mx-0.5" />
 
             <button
               onClick={() => setShowResume((v) => !v)}
-              className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-[13px] font-bold transition-all duration-200 ${
+              className={`flex items-center gap-1.5 h-7 px-3 rounded-md text-[12px] font-medium transition-colors ${
                 showResume
-                  ? "bg-slate-900 text-white shadow-[0_4px_12px_rgba(15,23,42,0.25),0_1px_0_rgba(255,255,255,0.1)_inset]"
-                  : "bg-white text-slate-800 shadow-[0_2px_8px_rgba(0,0,0,0.1),0_1px_0_rgba(255,255,255,0.9)_inset] border border-white/60 hover:shadow-[0_4px_12px_rgba(0,0,0,0.14)]"
-              } active:scale-[0.97]`}
+                  ? "bg-slate-100 text-slate-700 hover:bg-slate-200"
+                  : "bg-slate-900 text-white hover:bg-slate-800"
+              }`}
             >
-              {showResume ? <EyeOff className="size-4" /> : <Play className="size-4" />}
-              <span>{isKu ? "سیڤی" : showResume ? "Hide Resume" : "View Resume"}</span>
+              {showResume ? <EyeOff className="size-3.5" /> : <Play className="size-3.5" />}
+              <span className="hidden sm:inline">{showResume ? (isKu ? "شاردنەوە" : "Hide") : (isKu ? "پێشبینین" : "Preview")}</span>
             </button>
           </div>
         </header>
 
-
         {/* ── Editor workspace ── */}
         <main className="relative z-10 flex-1 min-h-0 overflow-hidden">
-          <div className="flex h-full min-h-0 flex-col gap-4 p-3 md:p-4 lg:grid lg:grid-cols-[360px_minmax(0,1.35fr)] lg:gap-4">
+          <div className="flex h-full min-h-0 flex-col gap-3 p-3 lg:grid lg:grid-cols-[340px_minmax(0,1fr)] lg:gap-3">
             <aside className="relative flex min-h-0 flex-1 flex-col lg:max-w-none max-lg:min-h-0 max-lg:overflow-hidden">
-              {/* ── Chat / Design tab switcher ── */}
-              <div
-                className="shrink-0 flex items-center gap-1 rounded-2xl p-1 mb-2"
-                style={{ background: "rgba(255,255,255,0.72)", boxShadow: "0 2px 8px rgba(15,23,42,0.08), 0 0 0 1px rgba(255,255,255,0.8)", backdropFilter: "blur(12px)" }}
-              >
+              <div className="shrink-0 flex items-center h-9 rounded-lg border border-slate-200 bg-slate-50 p-0.5 mb-2">
                 <button
                   onClick={() => setSidebarTab("chat")}
-                  className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-[13px] font-semibold transition-all duration-150 ${
+                  className={`flex-1 flex items-center justify-center gap-1.5 h-8 rounded-[7px] text-[12.5px] font-medium transition-colors ${
                     sidebarTab === "chat"
-                      ? "bg-slate-900 text-white shadow-[0_2px_8px_rgba(15,23,42,0.22)]"
-                      : "text-slate-500 hover:text-slate-800 hover:bg-white/60"
+                      ? "bg-white text-slate-900 shadow-sm"
+                      : "text-slate-500 hover:text-slate-800"
                   }`}
                 >
                   <Bot className="size-3.5" />
@@ -640,10 +623,10 @@ function ResumeEditor() {
                 </button>
                 <button
                   onClick={() => setSidebarTab("design")}
-                  className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-[13px] font-semibold transition-all duration-150 ${
+                  className={`flex-1 flex items-center justify-center gap-1.5 h-8 rounded-[7px] text-[12.5px] font-medium transition-colors ${
                     sidebarTab === "design"
-                      ? "bg-slate-900 text-white shadow-[0_2px_8px_rgba(15,23,42,0.22)]"
-                      : "text-slate-500 hover:text-slate-800 hover:bg-white/60"
+                      ? "bg-white text-slate-900 shadow-sm"
+                      : "text-slate-500 hover:text-slate-800"
                   }`}
                 >
                   <Sliders className="size-3.5" />
@@ -651,7 +634,7 @@ function ResumeEditor() {
                 </button>
               </div>
 
-              <div className="relative flex min-h-0 flex-1 flex-col max-lg:min-h-0 max-lg:overflow-hidden overflow-hidden rounded-3xl">
+              <div className="relative flex min-h-0 flex-1 flex-col max-lg:min-h-0 max-lg:overflow-hidden overflow-hidden rounded-xl bg-white ring-1 ring-slate-200">
                 {sidebarTab === "chat" && (
                   <EditorChatPane
                     isKu={isKu}
@@ -693,7 +676,7 @@ function ResumeEditor() {
               <section className="hidden min-h-0 lg:flex lg:min-w-0">
                 <Suspense
                   fallback={
-                    <div className="flex h-full w-full items-center justify-center rounded-3xl bg-white text-sm font-semibold text-slate-500">
+                    <div className="flex h-full w-full items-center justify-center rounded-xl bg-white ring-1 ring-slate-200 text-sm text-slate-500">
                       {isKu ? "پێشبینین ئامادە دەکرێت..." : "Loading preview..."}
                     </div>
                   }
@@ -714,7 +697,6 @@ function ResumeEditor() {
                     onSectionClick={(s, path, e) => {
                       setSelectedSection(s as SectionId);
                       if (!path) return;
-                      // Design tab: show contextual style toolbar at click point
                       if (sidebarTab === "design" && e) {
                         setTextToolbar({
                           section: s,
@@ -723,7 +705,6 @@ function ResumeEditor() {
                           position: { x: e.clientX, y: e.clientY },
                         });
                       }
-                      // Chat tab: do nothing — Editable's contentEditable handles inline typing directly
                     }}
                     previewRef={previewRef}
                     isDesignMode={sidebarTab === "design"}
@@ -733,6 +714,7 @@ function ResumeEditor() {
             )}
           </div>
         </main>
+
 
         {/* ── Preview overlay ── */}
         {showResume && mobileOptimized && (
